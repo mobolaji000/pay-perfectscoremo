@@ -1,0 +1,28 @@
+version: 0.2
+
+
+env:
+  secrets-manager:
+    DOCKER_USERNAME: "docker_cred:username"
+    DOCKER_PASSWORD: "docker_cred:password"
+
+phases:
+  pre_build:
+      commands:
+        - echo Logging in to Docker Hub...
+        - docker login --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $IMAGE_REPO_NAME:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $IMAGE_REPO_NAME:$IMAGE_TAG
+      - printf '[{"name":"crypto-tech","imageUri":"mobolaji00/crypto-tech"}]' > imagedefinitions.json
+artifacts:
+  files:
+    - '**/*'

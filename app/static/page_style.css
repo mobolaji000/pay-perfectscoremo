@@ -1,0 +1,32 @@
+
+/* Chrome, Safari, Edge, Opera */
+#tp_total::-webkit-outer-spin-button,
+#tp_total::-webkit-inner-spin-button,
+ #college_apps_total::-webkit-outer-spin-button,
+#college_apps_total::-webkit-inner-spin-button,
+#adjust_total::-webkit-outer-spin-button,
+#adjust_total::-webkit-inner-spin-button,
+#invoice_code::-webkit-outer-spin-button,
+#invoice_code::-webkit-inner-spin-button,
+#diag_units::-webkit-outer-spin-button,
+#diag_units::-webkit-inner-spin-button
+{
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+#tp_total,#college_apps_total,#adjust_total,#invoice_code,#diag_units {
+  -moz-appearance: textfield;
+}
+
+
+#full-payment-div, #installment-payment-div {
+display: none !important;
+}
+
+
+
+
+
+

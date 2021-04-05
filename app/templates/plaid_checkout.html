@@ -1,0 +1,123 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>ACH Checkout</title>
+
+    <!-- Bootstrap core CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link href="static/page_style.css" rel="stylesheet" >
+
+    <!-- Custom styles for this template -->
+  </head>
+
+            <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js">
+  <script>$.noConflict();</script>
+
+    <body id="plaid_checkout" class="text-center">
+
+<div class="container">
+
+    <div class="row">
+    <div class="col">
+   <img class="mb-4" src="/static/logo.png" alt="" width="330" height="255">
+    </div>
+  </div>
+
+      <div class="row">
+    <div class="col">
+<button id="link-button" class="btn btn-primary btn-lg btn-block">Pay With ACH</button>
+    </div>
+  </div>
+
+    <br>
+
+       <div class="row">
+    <div  id="spinner" hidden class="col">
+                    <div class="spinner-border text-warning"></div>
+    </div>
+  </div>
+
+   <input id="stripe_info" hidden  type="stripe_info"  data-stripe_info="{{ stripe_info }}">
+
+</div>
+
+    <script>
+     var startSpinner = function(){
+  $('#link-button').attr('style', 'display: none !important');
+    $('#spinner').attr('style', 'display: inline !important');
+            };
+    </script>
+
+
+<script type="text/javascript">
+(async function() {
+
+
+  var stripe_info = $("#stripe_info").attr("data-stripe_info");
+
+      $.ajax({
+    url: '/get_link_token',
+    type: "POST",
+    data: {
+        stripe_info: stripe_info,
+    },
+    dataType: "json",
+    async: false,
+    success: function (data) {
+    link_token = data.link_token;
+    },
+    error: function (error) {
+        console.log(error);
+    }
+});
+
+  const configs = {
+    token: link_token,
+    onLoad: function() {
+    },
+    onSuccess: function(public_token, metadata) {
+       $.ajax({
+    url: '/exchange_plaid_for_stripe',
+    type: "POST",
+    data: {
+        stripe_info: stripe_info,
+        public_token: public_token,
+        account_id: metadata.accounts[0].id
+    },
+    dataType: "json",
+    async: false,
+    success: function (data) {
+    window.location.href ="/success";
+    },
+    error: function (error) {
+    window.location.href ="/failure";
+    }
+});
+    },
+    onExit: async function(err, metadata) {
+      // The user exited the Link flow.
+      if (err != null) {
+          // The user encountered a Plaid API error
+          // prior to exiting.
+      }
+    },
+  };
+
+  var linkHandler = Plaid.create(configs);
+
+  document.getElementById('link-button').onclick = function() {
+    startSpinner();
+    linkHandler.open();
+
+  };
+})();
+</script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>
