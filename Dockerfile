@@ -23,7 +23,7 @@ ENV PYTHONUNBUFFERED=empty
 ENV FLASK_ENV=development
 ENV FLASK_APP=run.py
 
-#test smaller instance
+#test again
 
 
 #RUN python3 -m flask db init
