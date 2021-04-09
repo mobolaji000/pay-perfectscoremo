@@ -22,7 +22,7 @@ phases:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
       - docker push $IMAGE_REPO_NAME:$IMAGE_TAG
-      - printf '[{"name":"crypto-tech","imageUri":"mobolaji00/crypto-tech"}]' > imagedefinitions.json
+      - printf '[{"name":"pay-perfectscoremo","imageUri":"mobolaji00/pay-perfectscoremo"}]' > imagedefinitions.json
 artifacts:
   files:
     - '**/*'
