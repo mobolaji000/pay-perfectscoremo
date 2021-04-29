@@ -27,7 +27,11 @@ class Client(db.Model):
     adjustment_explanation = db.Column(db.String(90), index=True, nullable=False, default='')
     invoice_total = db.Column(db.Integer, index=True,nullable=False, default=-1)
     date_created = db.Column(db.DateTime(timezone=True), index=True, server_default=db.func.now())
-
+    payment_started = db.Column(db.Boolean, unique=False,nullable=False, default=False)
 
     def __repr__(self):
         return '<Client {}>'.format(self.invoice_code)
+
+db.create_all()
+db.session.commit()
+

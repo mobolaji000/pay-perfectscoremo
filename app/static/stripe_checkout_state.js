@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-var stripe = Stripe('pk_live_51Hlgy6DbpRMio7qjB3uZkis2sPMKb6HmXUI8k5PNKvYgOK1jv2XfzqG5fNaRbEO68wJ7VaXXvISCKIF7Yj2rT01t00GFzi1FkX');
+var stripe = Stripe('pk_test_51Hlgy6DbpRMio7qjWV9YNuBPiQIgD6PrBwO7oek37OEafhZiRjkfs42owvLto0eO8c6CCaiSAOUrXn0uPEJdai6Z00DUYXi551');
 var elements = stripe.elements();
 var stripe_info = $("#stripe_info").attr("data-stripe_info");
 var chosen_mode_of_payment = $("#chosen_mode_of_payment").attr("data-chosen_mode_of_payment");
@@ -80,7 +80,7 @@ var cardElement = document.getElementById('card-element');
       var payment_id = result.setupIntent.payment_method;
 
         $.ajax({
-    url: '/setup_subscription',
+    url: '/execute_card_payment',
     type: "POST",
     data: {
         chosen_mode_of_payment: chosen_mode_of_payment,

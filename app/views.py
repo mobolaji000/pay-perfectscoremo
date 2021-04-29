@@ -10,8 +10,13 @@ from flask_login import login_user,login_required,current_user,logout_user
 import logging
 import ast
 import time
+import json
+import os
 from app.service import StripeInstance
 from app.service import PlaidInstance
+from app.service import TwilioInstance
+import traceback
+from app.config import stripe
 
 
 
@@ -98,7 +103,71 @@ def create_invoice():
     customer = stripeInstance.createCustomer(client_setup_data)
     client_setup_data.update({"stripe_customer_id":customer["id"]})
     invoice_code = AppDBUtil.createClient(client_setup_data)
+
+    if True: #change to check if send message now checkbox is checked, make send message dafualt to false for disgnostic and default to true for everything else
+        try:
+            TwilioInstance.sendEmail(to_address=client_setup_data['email'])
+            TwilioInstance.sendSMS(to_number=client_setup_data['phone_number'])
+            flash('Invoice created and email/sms sent to client.')
+        except Exception as e:
+            traceback.print_exc()
+            flash('An error occured while sending an email/sms to the client after creating the invoice.')
+
     return render_template('generate_invoice_code.html',invoice_code=invoice_code)
+
+@server.route('/search_invoice',methods=['POST'])
+@login_required
+def search_invoice():
+    search_query = str(request.form['search_query'])
+
+    try:
+        search_results = AppDBUtil.searchInvoices(search_query)
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        flash('An error has occured during the search.')
+        return redirect(url_for('client_setup'))
+
+    if not search_results:
+        flash('No invoice has the detail you searched for.')
+        return redirect(url_for('client_setup'))
+
+    #print(search_results)
+    return render_template('client_setup.html',search_results=search_results)
+
+@server.route('/modify_invoice',methods=['POST'])
+@login_required
+def modify_invoice():
+    try:
+        data_to_modify = ast.literal_eval(request.form['data_to_modify'])
+        print(data_to_modify)
+        AppDBUtil.modifyInvoiceDetails(data_to_modify)
+        flash('Invoice sucessfully modified.')
+        return redirect(url_for('client_setup'))
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        flash('An error occured while modifying the invoice.')
+        return redirect(url_for('client_setup'))
+
+    return render_template('client_setup.html')
+
+@server.route('/delete_invoice',methods=['POST'])
+@login_required
+def delete_invoice():
+    try:
+        invoice_code_to_delete = str(request.form['invoice_code_to_delete'])
+        print(invoice_code_to_delete)
+        AppDBUtil.deleteInvoice(invoice_code_to_delete)
+        flash('Invoice sucessfully deleted.')
+        return redirect(url_for('client_setup'))
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        flash('An error occured while deleting the invoice.')
+        return redirect(url_for('client_setup'))
+
+    return render_template('client_setup.html')
 
 @server.route('/input_invoice_code',methods=['GET'])
 def input_invoice_code():
@@ -140,10 +209,7 @@ def logout():
 @server.route('/checkout',methods=['POST'])
 def checkout():
     payment_data = request.form.to_dict()
-    chosen_mode_of_payment = payment_data.get('installment-payment', '') if payment_data.get('installment-payment',
-                                                                                             '') != '' \
-        else payment_data.get('full-payment', '') if payment_data.get('full-payment', '') != '' \
-        else payment_data.get('payment-options', '') if payment_data.get('payment-options', '') != '' else ''
+    chosen_mode_of_payment = payment_data.get('installment-payment', '') if payment_data.get('installment-payment','') != '' else payment_data.get('full-payment', '') if payment_data.get('full-payment', '') != '' else payment_data.get('payment-options', '') if payment_data.get('payment-options', '') != '' else ''
     stripe_info = ast.literal_eval(payment_data['stripe_info'])
     if chosen_mode_of_payment.__contains__('ach'):
         return render_template('plaid_checkout.html',stripe_info=stripe_info)
@@ -159,6 +225,7 @@ def parseDataForStripe(client_info):
     stripe_info['stripe_customer_id'] = client_info['stripe_customer_id']
     stripe_info['invoice_total'] = client_info['invoice_total']
     stripe_info['deposit'] = client_info.get('deposit','')
+    stripe_info['invoice_code'] = client_info.get('invoice_code', '')
 
     if client_info.get('installments','') != '':
         for index,installment in enumerate(client_info.get('installments','')):
@@ -173,16 +240,20 @@ def setup_payment_intent():
     client_secret = stripeInstance.setUpIntent(stripe_info)
     return jsonify({'client_secret': client_secret})
 
-@server.route('/setup_subscription',methods=['POST'])
-def setup_subscription():
+@server.route('/execute_card_payment',methods=['POST'])
+def execute_card_payment():
     chosen_mode_of_payment = request.form['chosen_mode_of_payment']
-    stripe_info = request.form['stripe_info']
+    stripe_info = ast.literal_eval(request.form['stripe_info'])
     payment_id = request.form['payment_id']
-    result = stripeInstance.chargeCustomerViaCreditCard(stripe_info, chosen_mode_of_payment, payment_id)
+    result = stripeInstance.chargeCustomerViaCard(stripe_info, chosen_mode_of_payment, payment_id)
     print(result)
     if result['status'] == 'failure':
-        print("failed")
+        print("Failed because customer did not enter a credit card number to pay via installments.")
         flash('Enter a credit card number to pay via installments.')
+    else:
+        print(stripe_info)
+        AppDBUtil.updateInvoicePaymentStarted(stripe_info['invoice_code'])
+
     return jsonify(result)
 
 @server.route("/get_link_token", methods=['POST'])
@@ -201,7 +272,35 @@ def exchange_plaid_for_stripe():
     account_id = request.form['account_id']
     bank_account_token = plaidInstance.exchange_plaid_for_stripe(public_token,account_id)
     stripeInstance.chargeCustomerViaACH(stripe_info,bank_account_token)
+
+    if result['status'] != 'success':
+        print("Attempt to pay via ACH failed")
+    else:
+        print(stripe_info)
+        AppDBUtil.updateInvoicePaymentStarted(stripe_info['invoice_code'])
+
     return jsonify({'status': 200})
 
 
 
+@server.route("/stripe_webhook", methods=['POST'])
+def stripe_webhook():
+    payload = str(request.json)
+    event = None
+
+    try:
+        event = stripe.Event.construct_from(
+            json.loads(payload), stripe.api_key
+        )
+        print(event)
+    except ValueError as e:
+        # Invalid payload
+        return jsonify({'status': 400})
+
+    # Handle the event
+    if event.type == 'invoice.paid':
+        paid_invoice = event.data.object
+    else:
+        print('Unhandled event type {}'.format(event.type))
+
+    return jsonify({'status': 200})

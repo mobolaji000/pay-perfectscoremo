@@ -2,11 +2,20 @@ from app.config import stripe
 from app.aws import AWSInstance
 from app.config import Config
 from flask_login import UserMixin
-from app.models import Client
+from app.models import Client as DBClient
 import time
 import datetime
 import ast
 import math
+
+
+from twilio.rest import Client as TwilioClient
+import sendgrid
+import os
+from sendgrid.helpers.mail import Mail, Email, To, Content
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 
 class ValidateLogin():
     def __init__(self, username, password):
@@ -46,9 +55,9 @@ class StripeInstance():
 
     def createCustomer(self, clientSetupData):
 
-        existing_customer = Client.query.filter_by(email=clientSetupData['email']).order_by(Client.date_created.desc()).first() or Client.query.filter_by(phone_number=clientSetupData['phoneNumber']).order_by(Client.date_created.desc()).first()
+        existing_customer = DBClient.query.filter_by(email=clientSetupData['email']).order_by(DBClient.date_created.desc()).first() or DBClient.query.filter_by(phone_number=clientSetupData['phone_number']).order_by(DBClient.date_created.desc()).first()
         print("existing customer is ",existing_customer)
-        customer = stripe.Customer.retrieve(existing_customer.stripe_customer_id) if existing_customer else stripe.Customer.create(email=clientSetupData['email'],name=clientSetupData['firstName'] + " " + clientSetupData['lastName'],phone=clientSetupData['phoneNumber'])
+        customer = stripe.Customer.retrieve(existing_customer.stripe_customer_id) if existing_customer else stripe.Customer.create(email=clientSetupData['email'],name=clientSetupData['first_name'] + " " + clientSetupData['last_name'],phone=clientSetupData['phone_number'])
         print("new customer is ",customer)
         return customer
 
@@ -65,15 +74,18 @@ class StripeInstance():
         stripe.InvoiceItem.create(
             customer=stripe_info['stripe_customer_id'],
             quantity=invoice_total,
-            price="price_1I3joBDbpRMio7qj78mNjIDr",
+            price=os.environ['stripe_price'],
         )
         invoice = stripe.Invoice.create(
             customer=stripe_info['stripe_customer_id'],
+            metadata={'invoice_code': stripe_info['invoice_code']},
         )
         stripe.Invoice.pay(invoice.id)
 
-    def chargeCustomerViaCreditCard(self, stripe_info, chosen_mode_of_payment, payment_id):
-        stripe_info = ast.literal_eval(stripe_info)
+        return {'status': 'success'}
+
+    def chargeCustomerViaCard(self, stripe_info, chosen_mode_of_payment, payment_id):
+        #stripe_info = ast.literal_eval(stripe_info)
 
         stripe.Customer.modify(
             stripe_info['stripe_customer_id'],
@@ -134,16 +146,18 @@ class StripeInstance():
                 start_date='now',
                 end_behavior='cancel',
                 phases=[x for x in phases if x is not None],
+                metadata={'invoice_code': stripe_info['invoice_code']},
             )
         else:
             invoice_total = int(math.ceil(stripe_info['invoice_total']*1.03))
             stripe.InvoiceItem.create(
                 customer=stripe_info['stripe_customer_id'],
                 quantity=invoice_total,
-                price="price_1I3joBDbpRMio7qj78mNjIDr",
+                price=os.environ['stripe_price'],
             )
             invoice = stripe.Invoice.create(
                 customer=stripe_info['stripe_customer_id'],
+                metadata={'invoice_code': stripe_info['invoice_code']},
             )
             stripe.Invoice.pay(invoice.id)
 
@@ -158,7 +172,7 @@ class StripeInstance():
                 {
                     'price_data': {
                         'currency': 'usd',
-                        'product': 'prod_If3w0tfPuQpn52',
+                        'product': os.environ['stripe_product'],
                         'recurring': {
                             'interval': interval,
                             'interval_count': interval_count
@@ -206,3 +220,43 @@ class PlaidInstance():
         bank_account_token = stripe_response['stripe_bank_account_token']
 
         return bank_account_token
+
+
+class TwilioInstance():
+    def __init__(self):
+        pass
+
+    @classmethod
+    def sendEmail(cls, to_address='mo@perfectscoremo.com',message='perfectscoremo',subject='perfectscoremo'):
+        sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
+        from_email = Email("mo@perfectscoremo.com")  # Change to your verified sender
+        to_email = To(to_address)  # Change to your recipient
+        subject = subject
+        content = Content("text/plain",message)
+        mail = Mail(from_email, to_email, subject, content)
+
+        # Get a JSON-ready representation of the Mail object
+        mail_json = mail.get()
+
+        # Send an HTTP POST request to /mail/send
+        response = sg.client.mail.send.post(request_body=mail_json)
+        print(response.status_code)
+        print(response.headers)
+
+    @classmethod
+    def sendSMS(cls,message='testing',from_number='+19564771274',to_number='9725847364'):
+
+        # Your Account Sid and Auth Token from twilio.com/console
+        # and set the environment variables. See http://twil.io/secure
+        account_sid = os.environ['TWILIO_ACCOUNT_SID']
+        auth_token = os.environ['TWILIO_AUTH_TOKEN']
+        client = TwilioClient(account_sid, auth_token)
+
+        message = client.messages .create(
+            body=message,
+            from_=from_number,
+            to='+1'+to_number
+        )
+
+        print(message.sid)
+

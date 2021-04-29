@@ -62,12 +62,12 @@
 			<form id="invoice" class="needs-validation" data-toggle="validator" action="{{ url_for('checkout') }}" method="post">
 				<div class="row">
 					<div class="col-md-6 mb-3">
-						<label for="firstName" class="font-weight-bold">First name</label>
-						<p class="mb-1" id="firstName">{{client_info.first_name}}</p>
+						<label for="first_name" class="font-weight-bold">First name</label>
+						<p class="mb-1" id="first_name">{{client_info.first_name}}</p>
 					</div>
 					<div class="col-md-6 mb-3">
-						<label for="lastName" class="font-weight-bold">Last name</label>
-						<p class="mb-1" id="lastName">{{client_info.last_name}}</p>
+						<label for="last_name" class="font-weight-bold">Last name</label>
+						<p class="mb-1" id="last_name">{{client_info.last_name}}</p>
 					</div>
 				</div>
 
@@ -77,8 +77,8 @@
 				</div>
 
 				<div class="mb-3">
-					<label for="phoneNumber" class="font-weight-bold">Phone number</label>
-						<p class="mb-1" id="phoneNumber">{{client_info.phone_number}}</p>
+					<label for="phone_number" class="font-weight-bold">Phone number</label>
+						<p class="mb-1" id="phone_number">{{client_info.phone_number}}</p>
 				</div>
 
         <br>
@@ -142,6 +142,10 @@
 
 
 				<br>
+
+				{% if client_info.payment_started %}
+				<div><span class="badge badge-danger">You previously started a payment for this invoice code. Contact Mo for a different invoice code.</span></div>
+				{% else %}
 
 
 
@@ -344,6 +348,10 @@
 
 
 				<input class="btn btn-primary btn-lg btn-block" type="submit" value="Proceed to Payment" onclick="turnOffRequired();">
+{% endif %}
+
+
+
 
 
 </form>

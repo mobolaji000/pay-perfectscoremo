@@ -1,19 +1,22 @@
-from app.models import Client
+from app.models import Client as DBClient
 from app import db
 from datetime import datetime
 import math
 import uuid
+from dateutil.parser import parse
+
+
 class AppDBUtil():
     def __init__(self):
         pass
 
     @classmethod
-    def createClient(cls,clientData={}):
-        invoice_code = str(uuid.uuid4().int>>64)[:4]
+    def createClient(cls,clientData={},invoice_code=str(uuid.uuid4().int>>64)[:5]):
+        invoice_code = invoice_code
         stripe_customer_id = clientData.get('stripe_customer_id','')
-        first_name = clientData.get('firstName','')
-        last_name = clientData.get('lastName','')
-        phone_number = clientData.get('phoneNumber','999')
+        first_name = clientData.get('first_name','')
+        last_name = clientData.get('last_name','')
+        phone_number = clientData.get('phone_number','999')
         email = clientData.get('email','')
         was_diagnostic_purchased = clientData.get('was_diagnostic_purchased', '')
         diag_units = clientData.get('diag_units', 0)
@@ -24,7 +27,8 @@ class AppDBUtil():
         tp_total = 0 if clientData.get('tp_total','') == '' else clientData.get('tp_total','')
         was_college_apps_purchased = clientData.get('was_college_apps_purchased', '')
         college_apps_product = clientData.get('college_apps_product','')
-        college_apps_units = clientData.get('college_apps_units',0)
+        #comeback to make sure no bug here from change
+        college_apps_units = 0 if clientData.get('college_apps_units','') == '' else clientData.get('college_apps_units','')
         college_apps_total = 0 if clientData.get('college_apps_total','') == '' else clientData.get('college_apps_total','')
         print("client data is  ",clientData)
         turn_on_installments = False if clientData.get('turn_on_installments','') == '' else True
@@ -35,24 +39,107 @@ class AppDBUtil():
         adjustment_explanation = clientData.get('adjustment_explanation','')
         invoice_total = 0 if clientData.get('invoice_total','') == '' else clientData.get('invoice_total','')
 
-        c = Client(invoice_code=invoice_code, stripe_customer_id=stripe_customer_id, first_name=first_name, last_name=last_name,
-                   phone_number=phone_number, email=email, was_diagnostic_purchased=was_diagnostic_purchased, diag_units=diag_units,
-                   diag_total=diag_total, was_test_prep_purchased=was_test_prep_purchased, tp_product=tp_product, tp_units=tp_units,
-                   tp_total=tp_total, was_college_apps_purchased=was_college_apps_purchased, college_apps_product=college_apps_product,
-                   college_apps_units=college_apps_units, college_apps_total=college_apps_total, turn_on_installments=turn_on_installments,
-                   installment_date_1=installment_date_1, installment_date_2=installment_date_2, installment_date_3=installment_date_3,
-                   adjust_total=adjust_total, adjustment_explanation=adjustment_explanation, invoice_total=invoice_total)
+        c = DBClient(invoice_code=invoice_code, stripe_customer_id=stripe_customer_id, first_name=first_name, last_name=last_name,
+                    phone_number=phone_number, email=email, was_diagnostic_purchased=was_diagnostic_purchased, diag_units=diag_units,
+                    diag_total=diag_total, was_test_prep_purchased=was_test_prep_purchased, tp_product=tp_product, tp_units=tp_units,
+                    tp_total=tp_total, was_college_apps_purchased=was_college_apps_purchased, college_apps_product=college_apps_product,
+                    college_apps_units=college_apps_units, college_apps_total=college_apps_total, turn_on_installments=turn_on_installments,
+                    installment_date_1=installment_date_1, installment_date_2=installment_date_2, installment_date_3=installment_date_3,
+                    adjust_total=adjust_total, adjustment_explanation=adjustment_explanation, invoice_total=invoice_total)
 
         db.session.add(c)
         db.session.commit()
         return invoice_code
 
+    @classmethod
+    def is_date(cls,string_date, fuzzy=False):
+        """
+        Return whether the string can be interpreted as a date.
+
+        :param string: str, string to check for date
+        :param fuzzy: bool, ignore unknown tokens in string if True
+        """
+        try:
+            parse(string_date, fuzzy=fuzzy)
+            return True
+
+        # except Exception as e:
+        #     return False
+        except ValueError:
+            return False
+
+    @classmethod
+    def deleteInvoice(cls, codeOfInvoiceToDelete):
+        invoice = DBClient.query.filter_by(invoice_code=codeOfInvoiceToDelete).first()
+        db.session.delete(invoice)
+        db.session.commit()
+
+    @classmethod
+    def modifyInvoiceDetails(cls, data_to_modify):
+        print(data_to_modify)
+        DBClient.query.filter_by(invoice_code=data_to_modify['invoice_code']).delete()
+        cls.createClient(clientData=data_to_modify,invoice_code=data_to_modify['invoice_code'])
+
+
+    @classmethod
+    def searchInvoices(cls, search_query):
+        if search_query.isdigit():
+            if len(search_query) == 4:
+                invoice_details = DBClient.query.filter_by(invoice_code=search_query).order_by(DBClient.date_created.desc()).all()
+            else:
+                invoice_details = DBClient.query.filter_by(phone_number=search_query).order_by(DBClient.date_created.desc()).all()
+        elif "@" in search_query:
+            invoice_details = DBClient.query.filter_by(email=search_query).order_by(DBClient.date_created.desc()).all()
+        elif cls.is_date(search_query):
+            #do something to get the date in the right format first
+            invoice_details = DBClient.query.filter_by(date_created=search_query).order_by(DBClient.date_created.desc()).all()
+        else:
+            invoice_details = DBClient.query.filter((DBClient.first_name == search_query.capitalize()) | (DBClient.last_name == search_query.capitalize())).order_by(DBClient.date_created.desc()).all()
+
+        search_results = []
+        for invoice in invoice_details:
+            client = {}
+            client['first_name'] = invoice.first_name
+            client['last_name'] = invoice.last_name
+            client['phone_number'] = invoice.phone_number
+            client['email'] = invoice.email
+            client['stripe_customer_id'] = invoice.stripe_customer_id
+            client['adjust_total'] = invoice.adjust_total
+            client['adjustment_explanation'] = invoice.adjustment_explanation
+            client['invoice_total'] = invoice.invoice_total
+            client['date_created'] = invoice.date_created.strftime("%m/%d/%Y")
+            client['invoice_code'] = invoice.invoice_code
+            client['was_diagnostic_purchased'] = invoice.was_diagnostic_purchased
+            client['diag_units'] = invoice.diag_units
+            client['diag_total'] = invoice.diag_total
+            client['was_test_prep_purchased'] = invoice.was_test_prep_purchased
+            client['tp_units'] = invoice.tp_units
+            client['tp_total'] = invoice.tp_total
+            client['was_college_apps_purchased'] = invoice.was_college_apps_purchased
+            client['college_apps_units'] = invoice.college_apps_units
+            client['college_apps_total'] = invoice.college_apps_total
+            client['turn_on_installments'] = str(invoice.turn_on_installments)
+            client['installment_date_1'] = invoice.installment_date_1.strftime("%m/%d/%Y")
+            client['installment_date_2'] = invoice.installment_date_2.strftime("%m/%d/%Y")
+            client['installment_date_3'] = invoice.installment_date_3.strftime("%m/%d/%Y")
+            client['adjust_total'] = invoice.adjust_total
+            client['adjustment_explanation'] = invoice.adjustment_explanation
+            client['invoice_total'] = invoice.invoice_total
+
+            search_results.append(client)
+
+        return search_results
 
     @classmethod
     def getInvoiceDetails(cls,invoice_code):
-        admin_invoice_details = Client.query.filter_by(invoice_code=invoice_code).order_by(Client.date_created.desc()).first()
-        #print (admin_invoice_details)
+        admin_invoice_details = DBClient.query.filter_by(invoice_code=invoice_code).order_by(DBClient.date_created.desc()).first()
         return cls.computeClientInvoiceDetails(admin_invoice_details)
+
+    @classmethod
+    def updateInvoicePaymentStarted(cls, invoice_code):
+        invoice = DBClient.query.filter_by(invoice_code=invoice_code).order_by(DBClient.date_created.desc()).first()
+        invoice.payment_started = True
+        db.session.commit()
 
     @classmethod
     def computeClientInvoiceDetails(cls,admin_invoice_details):
@@ -68,6 +155,8 @@ class AppDBUtil():
             client_info['adjust_total'] = admin_invoice_details.adjust_total
             client_info['adjustment_explanation'] = admin_invoice_details.adjustment_explanation
             client_info['invoice_total'] = admin_invoice_details.invoice_total
+            client_info['invoice_code'] = admin_invoice_details.invoice_code
+            client_info['payment_started'] = admin_invoice_details.payment_started
 
             if admin_invoice_details.was_diagnostic_purchased:
                 next_product = {}
