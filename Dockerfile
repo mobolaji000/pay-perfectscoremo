@@ -43,7 +43,7 @@ CMD  flask db init && flask db stamp head && flask db migrate -m "Initial migrat
 CMD python3 -m flask run --host=0.0.0.0
 
 #run version that allows for automatic reload in combination with .flaskenv
-#docker build -t mobolaji00/crypto-tech . && docker run --rm --name=crypto-tech -p 5000:5000 -v $(pwd):/code mobolaji00/crypto-tech
+#docker build -t mobolaji00/pay-perfectscoremo . && docker run --rm --name=pay-perfectscoremo -p 5000:5000 -v $(pwd):/code --env-file DockerEnv mobolaji00/pay-perfectscoremo
 
 
 #docker login mobolaji00

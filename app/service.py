@@ -9,8 +9,8 @@ import ast
 import math
 
 
-from twilio.rest import Client as TwilioClient
-import sendgrid
+#from twilio.rest import Client as TwilioClient
+from app.config import sg,twilioClient#import sendgrid
 import os
 from sendgrid.helpers.mail import Mail, Email, To, Content
 import ssl
@@ -74,7 +74,7 @@ class StripeInstance():
         stripe.InvoiceItem.create(
             customer=stripe_info['stripe_customer_id'],
             quantity=invoice_total,
-            price=os.environ['stripe_price'],
+            price='price_1HzYGlDbpRMio7qjdXEC0PuN',
         )
         invoice = stripe.Invoice.create(
             customer=stripe_info['stripe_customer_id'],
@@ -153,7 +153,7 @@ class StripeInstance():
             stripe.InvoiceItem.create(
                 customer=stripe_info['stripe_customer_id'],
                 quantity=invoice_total,
-                price=os.environ['stripe_price'],
+                price='price_1HzYGlDbpRMio7qjdXEC0PuN',
             )
             invoice = stripe.Invoice.create(
                 customer=stripe_info['stripe_customer_id'],
@@ -172,7 +172,7 @@ class StripeInstance():
                 {
                     'price_data': {
                         'currency': 'usd',
-                        'product': os.environ['stripe_product'],
+                        'product': 'prod_IajkYlqC6yKVZL',
                         'recurring': {
                             'interval': interval,
                             'interval_count': interval_count
@@ -228,7 +228,6 @@ class TwilioInstance():
 
     @classmethod
     def sendEmail(cls, to_address='mo@perfectscoremo.com',message='perfectscoremo',subject='perfectscoremo'):
-        sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
         from_email = Email("mo@perfectscoremo.com")  # Change to your verified sender
         to_email = To(to_address)  # Change to your recipient
         subject = subject
@@ -248,11 +247,8 @@ class TwilioInstance():
 
         # Your Account Sid and Auth Token from twilio.com/console
         # and set the environment variables. See http://twil.io/secure
-        account_sid = os.environ['TWILIO_ACCOUNT_SID']
-        auth_token = os.environ['TWILIO_AUTH_TOKEN']
-        client = TwilioClient(account_sid, auth_token)
 
-        message = client.messages .create(
+        message = twilioClient.messages .create(
             body=message,
             from_=from_number,
             to='+1'+to_number
