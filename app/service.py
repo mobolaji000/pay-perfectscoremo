@@ -9,8 +9,8 @@ import ast
 import math
 
 
-#from twilio.rest import Client as TwilioClient
-from app.config import sg,twilioClient#import sendgrid
+import sendgrid
+from twilio.rest import Client as TwilioClient
 import os
 from sendgrid.helpers.mail import Mail, Email, To, Content
 import ssl
@@ -228,6 +228,8 @@ class TwilioInstance():
 
     @classmethod
     def sendEmail(cls, to_address='mo@perfectscoremo.com',message='perfectscoremo',subject='perfectscoremo'):
+        sendgrid.api_key = awsInstance.get_secret("sendgrid_cred", "SENDGRID_API_KEY") or os.environ.get('SENDGRID_API_KEY')
+        sg = sendgrid.SendGridAPIClient(api_key=sendgrid.api_key)
         from_email = Email("mo@perfectscoremo.com")  # Change to your verified sender
         to_email = To(to_address)  # Change to your recipient
         subject = subject
@@ -247,6 +249,10 @@ class TwilioInstance():
 
         # Your Account Sid and Auth Token from twilio.com/console
         # and set the environment variables. See http://twil.io/secure
+
+        account_sid = awsInstance.get_secret("twilio_cred", "TWILIO_ACCOUNT_SID") or os.environ['TWILIO_ACCOUNT_SID']
+        auth_token = awsInstance.get_secret("twilio_cred", "TWILIO_AUTH_TOKEN") or os.environ['TWILIO_AUTH_TOKEN']
+        twilioClient = TwilioClient(account_sid, auth_token)
 
         message = twilioClient.messages .create(
             body=message,
