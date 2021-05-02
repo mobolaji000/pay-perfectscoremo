@@ -295,6 +295,8 @@ def stripe_webhook():
         print(event)
     except ValueError as e:
         # Invalid payload
+        print(e)
+        traceback.print_exc()
         return jsonify({'status': 400})
 
     # Handle the event
