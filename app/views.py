@@ -285,8 +285,9 @@ def exchange_plaid_for_stripe():
 
 @server.route("/stripe_webhook", methods=['POST'])
 def stripe_webhook():
-    payload = str(request.json)
-    print(payload)
+    payload = json.dumps(request.json)
+    stripe.api_key = awsInstance.get_secret("stripe_cred", "stripe_api_key_test") or os.environ.get('stripe_api_key_test')
+    print("api key is ",stripe.api_key)
     event = None
 
     try:
