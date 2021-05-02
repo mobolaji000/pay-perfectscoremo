@@ -286,6 +286,7 @@ def exchange_plaid_for_stripe():
 @server.route("/stripe_webhook", methods=['POST'])
 def stripe_webhook():
     payload = str(request.json)
+    print(payload)
     event = None
 
     try:
