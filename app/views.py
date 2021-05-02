@@ -304,11 +304,16 @@ def stripe_webhook():
     # Handle the event
     if event.type == 'invoice.paid':
         paid_invoice = event.data.object
+        invoice_code = paid_invoice.metadata['invoice_code']
+        print("paid invoice is ",paid_invoice)
+        print("invoice code is ", invoice_code)
 
     if event.type == 'customer.subscription.created':
         created_subscription = event.data.object
-        subscription_schedule = created_subscription['schedule']
-        print("subscription schedule is ",subscription_schedule)
+        subscription_schedule = stripe.SubscriptionSchedule.retrieve(created_subscription['schedule'],)
+        invoice_code = subscription_schedule.metadata['invoice_code']
+        print("subscription schedule is ", subscription_schedule)
+        print("invoice code is ", invoice_code)
 
     else:
         print('Unhandled event type {}'.format(event.type))
