@@ -287,7 +287,7 @@ def exchange_plaid_for_stripe():
 def stripe_webhook():
     payload = json.dumps(request.json)
     #stripe.api_key = awsInstance.get_secret("stripe_cred", "stripe_api_key_test") or os.environ.get('stripe_api_key_test')
-    print("api key is ",stripe.api_key)
+    #print("api key is ",stripe.api_key)
     event = None
 
     try:
@@ -304,13 +304,14 @@ def stripe_webhook():
     # Handle the event
     if event.type == 'invoice.paid':
         paid_invoice = event.data.object
-        invoice_code = paid_invoice.metadata['invoice_code']
+
 
         stripe.Invoice.modify(
             paid_invoice['id'],
             metadata={"invoice_code":"111111"},
         )
 
+        invoice_code = paid_invoice.metadata['invoice_code']
         print("paid invoice is ",paid_invoice)
         print("invoice code is ", invoice_code)
 
