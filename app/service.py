@@ -223,6 +223,8 @@ class PlaidInstance():
 
 
 class TwilioInstance():
+    #static variable
+    awsInstance = AWSInstance()
     def __init__(self):
         pass
 
