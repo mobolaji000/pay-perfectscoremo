@@ -306,13 +306,12 @@ def stripe_webhook():
     # handle updating the DB when invoices are paid; these invoices should have invoice codes attahced already
     if event.type == 'invoice.paid':
         paid_invoice = event.data.object
-
-        # stripe.Invoice.modify(
-        #     paid_invoice['id'],
-        #     metadata={"invoice_code":"111111"},
-        # )
-
         invoice_code = paid_invoice.metadata['invoice_code']
+        amount_paid = paid_invoice.total/100
+
+        AppDBUtil.updateAmountPaidAgainstInvoice(invoice_code,amount_paid)
+
+
         print("paid invoice is ", paid_invoice)
         print("invoice code is ", invoice_code)
 
@@ -329,21 +328,6 @@ def stripe_webhook():
 
             print("created invoice is ",created_invoice)
             print("invoice code is ", invoice_code)
-
-    #
-    # if event.type == 'subscription_schedule.created':
-    #     subscription_schedule = event.data.object
-    #     subscription = subscription_schedule['subscription']
-    #     stripe.Subscription.modify(subscription,metadata={"invoice_code": subscription_schedule.metadata['invoice_code']},)
-    #
-    #     # stripe.SubscriptionSchedule.modify(
-    #     #     created_subscription['schedule'],
-    #     #     metadata={"invoice_code":"111111"},
-    #     # )
-    #
-    #     invoice_code = subscription_schedule.metadata['invoice_code']
-    #     print("subscription schedule is ", subscription_schedule)
-    #     print("invoice code is ", invoice_code)
 
     else:
         print('Unhandled event type {}'.format(event.type))

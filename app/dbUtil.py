@@ -1,4 +1,4 @@
-from app.models import Client as DBClient
+from app.models import PerfectScoreMoClient as DBClient
 from app import db
 from datetime import datetime
 import math
@@ -80,6 +80,11 @@ class AppDBUtil():
         DBClient.query.filter_by(invoice_code=data_to_modify['invoice_code']).delete()
         cls.createClient(clientData=data_to_modify,invoice_code=data_to_modify['invoice_code'])
 
+    @classmethod
+    def updateAmountPaidAgainstInvoice(cls,invoice_code,amount_paid):
+        invoice = DBClient.query.filter_by(invoice_code=invoice_code).first()
+        invoice.amount_from_invoice_paid_so_far = invoice.amount_from_invoice_paid_so_far + amount_paid
+        db.session.commit()
 
     @classmethod
     def searchInvoices(cls, search_query):

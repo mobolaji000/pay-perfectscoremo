@@ -1,6 +1,6 @@
 from app import db
 
-class Client(db.Model):
+class PerfectScoreMoClient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     invoice_code = db.Column(db.String(8),index=True,nullable=False, default='')
     stripe_customer_id = db.Column(db.String(48),index=True,nullable=False, default='')
@@ -28,6 +28,7 @@ class Client(db.Model):
     invoice_total = db.Column(db.Integer, index=True,nullable=False, default=-1)
     date_created = db.Column(db.DateTime(timezone=True), index=True, server_default=db.func.now())
     payment_started = db.Column(db.Boolean, unique=False,nullable=False, default=False)
+    amount_from_invoice_paid_so_far = db.Column(db.Integer, index=True, nullable=False, default=0)
 
     def __repr__(self):
         return '<Client {}>'.format(self.invoice_code)

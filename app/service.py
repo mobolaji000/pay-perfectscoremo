@@ -2,7 +2,7 @@ from app.config import stripe
 from app.aws import AWSInstance
 from app.config import Config
 from flask_login import UserMixin
-from app.models import Client as DBClient
+from app.models import PerfectScoreMoClient as DBClient
 import time
 import datetime
 import ast
