@@ -11,8 +11,8 @@ class AppDBUtil():
         pass
 
     @classmethod
-    def createClient(cls,clientData={},invoice_code=str(uuid.uuid4().int>>64)[:6]):
-        invoice_code = invoice_code
+    def createClient(cls,clientData={},invoice_code=None):
+        invoice_code = invoice_code if invoice_code else str(uuid.uuid4().int>>64)[:6]
         stripe_customer_id = clientData.get('stripe_customer_id','')
         first_name = clientData.get('first_name','')
         last_name = clientData.get('last_name','')
