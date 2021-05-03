@@ -74,7 +74,7 @@ class StripeInstance():
         stripe.InvoiceItem.create(
             customer=stripe_info['stripe_customer_id'],
             quantity=invoice_total,
-            price='price_1HzYGlDbpRMio7qjdXEC0PuN',
+            price='price_1In0fFDbpRMio7qjp9PPAHAU',
         )
         invoice = stripe.Invoice.create(
             customer=stripe_info['stripe_customer_id'],
@@ -153,7 +153,7 @@ class StripeInstance():
             stripe.InvoiceItem.create(
                 customer=stripe_info['stripe_customer_id'],
                 quantity=invoice_total,
-                price='price_1HzYGlDbpRMio7qjdXEC0PuN',
+                price='price_1In0fFDbpRMio7qjp9PPAHAU',
             )
             invoice = stripe.Invoice.create(
                 customer=stripe_info['stripe_customer_id'],
@@ -172,7 +172,7 @@ class StripeInstance():
                 {
                     'price_data': {
                         'currency': 'usd',
-                        'product': 'prod_IajkYlqC6yKVZL',
+                        'product': 'prod_JPqL5Spn9SjaHm',
                         'recurring': {
                             'interval': interval,
                             'interval_count': interval_count
