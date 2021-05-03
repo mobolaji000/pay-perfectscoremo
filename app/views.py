@@ -302,9 +302,10 @@ def stripe_webhook():
         return jsonify({'status': 400})
 
     # Handle the event
+
+    # handle updating the DB when invoices are paid; these invoices should have invoice codes attahced already
     if event.type == 'invoice.paid':
         paid_invoice = event.data.object
-
 
         # stripe.Invoice.modify(
         #     paid_invoice['id'],
@@ -312,21 +313,37 @@ def stripe_webhook():
         # )
 
         invoice_code = paid_invoice.metadata['invoice_code']
-        print("paid invoice is ",paid_invoice)
+        print("paid invoice is ", paid_invoice)
         print("invoice code is ", invoice_code)
 
-    if event.type == 'customer.subscription.created':
-        created_subscription = event.data.object
-        subscription_schedule = stripe.SubscriptionSchedule.retrieve(created_subscription['schedule'],)
+    # attach invoice code to invoices generated from subscriptions
+    elif event.type == 'invoice.created':
+        created_invoice = event.data.object
+        subscription = created_invoice.get('subscription',None)
+        if subscription:
+            subscription_schedule = stripe.Subscription.retrieve(subscription)['schedule']
+            subscription_schedule_metadata = stripe.SubscriptionSchedule.retrieve(subscription_schedule,).metadata
+            invoice_code = subscription_schedule_metadata['invoice_code']
+            stripe.Invoice.modify(created_invoice['id'],metadata={"invoice_code":invoice_code},)
 
-        # stripe.SubscriptionSchedule.modify(
-        #     created_subscription['schedule'],
-        #     metadata={"invoice_code":"111111"},
-        # )
 
-        invoice_code = subscription_schedule.metadata['invoice_code']
-        print("subscription schedule is ", subscription_schedule)
-        print("invoice code is ", invoice_code)
+            print("created invoice is ",created_invoice)
+            print("invoice code is ", invoice_code)
+
+    #
+    # if event.type == 'subscription_schedule.created':
+    #     subscription_schedule = event.data.object
+    #     subscription = subscription_schedule['subscription']
+    #     stripe.Subscription.modify(subscription,metadata={"invoice_code": subscription_schedule.metadata['invoice_code']},)
+    #
+    #     # stripe.SubscriptionSchedule.modify(
+    #     #     created_subscription['schedule'],
+    #     #     metadata={"invoice_code":"111111"},
+    #     # )
+    #
+    #     invoice_code = subscription_schedule.metadata['invoice_code']
+    #     print("subscription schedule is ", subscription_schedule)
+    #     print("invoice code is ", invoice_code)
 
     else:
         print('Unhandled event type {}'.format(event.type))
