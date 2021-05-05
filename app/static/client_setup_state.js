@@ -246,6 +246,11 @@ $(document).ready(function() {
         //default_installment_date = (default_tp_date > default_college_apps_date) ? default_tp_date : default_college_apps_date
         if ($(this).val() == "") {
             setDefaultInstallmentDate();
+            //alert("1");
+            $('input[name="mark_as_paid"]').prop('checked', false);
+            //alert("2");
+            $('input[name="mark_as_paid"]').val("");
+
             //$('input[name="installment_date_1"]').val(default_installment_date);
 
             $('input[name="installment_date_1"]').attr('disabled', false);
@@ -264,6 +269,40 @@ $(document).ready(function() {
             $(this).val("");
         }
     });
+
+
+    $('input[name="mark_as_paid"]').on('click', function() {
+
+
+        if ($(this).val() == "") {
+
+            $('input[name="turn_on_installments"]').prop('checked', false);
+            $('input[name="turn_on_installments"]').val("");
+
+            $('input[name="installment_date_1"]').val("");
+            $('input[name="installment_date_2"]').val("");
+            $('input[name="installment_date_3"]').val("");
+
+            $('input[name="installment_date_1"]').attr('disabled', true);
+            $('input[name="installment_date_2"]').attr('disabled', true);
+            $('input[name="installment_date_3"]').attr('disabled', true);
+
+            $(this).val("yes");
+        } else {
+
+            setDefaultInstallmentDate();
+
+            $('input[name="installment_date_1"]').attr('disabled', false);
+            $('input[name="installment_date_2"]').attr('disabled', false);
+            $('input[name="installment_date_3"]').attr('disabled', false);
+
+            $(this).val("");
+        }
+    });
+
+    //var mp = $('input[name="mark_as_paid"]:checked').attr("id");
+    //alert(mp);
+    //$('input[name="mark_as_paid"]').val(mp);
 
 
 

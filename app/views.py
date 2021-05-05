@@ -104,6 +104,13 @@ def create_invoice():
     client_setup_data.update({"stripe_customer_id":customer["id"]})
     invoice_code = AppDBUtil.createClient(client_setup_data)
 
+    if client_setup_data['mark_as_paid'] is 'yes':
+        client_info, products_info = AppDBUtil.getInvoiceDetails(invoice_code)
+        stripe_info = parseDataForStripe(client_info)
+        markCustomerAsChargedOutsideofStripe(stripe_info)
+        AppDBUtil.updateInvoicePaymentStarted(invoice_code)
+        print("marked invoice as paid")
+
     if True: #change to check if send message now checkbox is checked, make send message dafualt to false for disgnostic and default to true for everything else
         try:
             TwilioInstance.sendEmail(to_address=client_setup_data['email'])
@@ -140,7 +147,7 @@ def search_invoice():
 def modify_invoice():
     try:
         data_to_modify = ast.literal_eval(request.form['data_to_modify'])
-        print(data_to_modify)
+        #print(data_to_modify)
         AppDBUtil.modifyInvoiceDetails(data_to_modify)
         flash('Invoice sucessfully modified.')
         return redirect(url_for('client_setup'))
@@ -246,12 +253,10 @@ def execute_card_payment():
     stripe_info = ast.literal_eval(request.form['stripe_info'])
     payment_id = request.form['payment_id']
     result = stripeInstance.chargeCustomerViaCard(stripe_info, chosen_mode_of_payment, payment_id)
-    print(result)
     if result['status'] == 'failure':
         print("Failed because customer did not enter a credit card number to pay via installments.")
         flash('Enter a credit card number to pay via installments.')
     else:
-        print(stripe_info)
         AppDBUtil.updateInvoicePaymentStarted(stripe_info['invoice_code'])
 
     return jsonify(result)
@@ -276,7 +281,6 @@ def exchange_plaid_for_stripe():
     if result['status'] != 'success':
         print("Attempt to pay via ACH failed")
     else:
-        print(stripe_info)
         AppDBUtil.updateInvoicePaymentStarted(stripe_info['invoice_code'])
 
     return jsonify({'status': 200})

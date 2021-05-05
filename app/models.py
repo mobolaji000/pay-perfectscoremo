@@ -1,6 +1,6 @@
 from app import db
 
-class PerfectScoreMoClient(db.Model):
+class Invoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     invoice_code = db.Column(db.String(8),index=True,nullable=False, default='')
     stripe_customer_id = db.Column(db.String(48),index=True,nullable=False, default='')

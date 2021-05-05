@@ -1,4 +1,4 @@
-from app.models import PerfectScoreMoClient as DBClient
+from app.models import Invoice
 from app import db
 from datetime import datetime
 import math
@@ -30,7 +30,7 @@ class AppDBUtil():
         #comeback to make sure no bug here from change
         college_apps_units = 0 if clientData.get('college_apps_units','') == '' else clientData.get('college_apps_units','')
         college_apps_total = 0 if clientData.get('college_apps_total','') == '' else clientData.get('college_apps_total','')
-        print("client data is  ",clientData)
+        #print("client data is  ",clientData)
         turn_on_installments = False if clientData.get('turn_on_installments','') == '' else True
         installment_date_1 = datetime(1,1,1) if clientData.get('installment_date_1','') == '' else datetime.strptime(clientData['installment_date_1'],'%Y-%m-%d')
         installment_date_2 = datetime(1,1,1) if clientData.get('installment_date_2','') == '' else datetime.strptime(clientData['installment_date_2'],'%Y-%m-%d')
@@ -39,7 +39,7 @@ class AppDBUtil():
         adjustment_explanation = clientData.get('adjustment_explanation','')
         invoice_total = 0 if clientData.get('invoice_total','') == '' else clientData.get('invoice_total','')
 
-        c = DBClient(invoice_code=invoice_code, stripe_customer_id=stripe_customer_id, first_name=first_name, last_name=last_name,
+        c = Invoice(invoice_code=invoice_code, stripe_customer_id=stripe_customer_id, first_name=first_name, last_name=last_name,
                     phone_number=phone_number, email=email, was_diagnostic_purchased=was_diagnostic_purchased, diag_units=diag_units,
                     diag_total=diag_total, was_test_prep_purchased=was_test_prep_purchased, tp_product=tp_product, tp_units=tp_units,
                     tp_total=tp_total, was_college_apps_purchased=was_college_apps_purchased, college_apps_product=college_apps_product,
@@ -70,19 +70,19 @@ class AppDBUtil():
 
     @classmethod
     def deleteInvoice(cls, codeOfInvoiceToDelete):
-        invoice = DBClient.query.filter_by(invoice_code=codeOfInvoiceToDelete).first()
+        invoice = Invoice.query.filter_by(invoice_code=codeOfInvoiceToDelete).first()
         db.session.delete(invoice)
         db.session.commit()
 
     @classmethod
     def modifyInvoiceDetails(cls, data_to_modify):
-        print(data_to_modify)
-        DBClient.query.filter_by(invoice_code=data_to_modify['invoice_code']).delete()
+        #print(data_to_modify)
+        Invoice.query.filter_by(invoice_code=data_to_modify['invoice_code']).delete()
         cls.createClient(clientData=data_to_modify,invoice_code=data_to_modify['invoice_code'])
 
     @classmethod
     def updateAmountPaidAgainstInvoice(cls,invoice_code,amount_paid):
-        invoice = DBClient.query.filter_by(invoice_code=invoice_code).first()
+        invoice = Invoice.query.filter_by(invoice_code=invoice_code).first()
         invoice.amount_from_invoice_paid_so_far = invoice.amount_from_invoice_paid_so_far + amount_paid
         db.session.commit()
 
@@ -90,16 +90,16 @@ class AppDBUtil():
     def searchInvoices(cls, search_query):
         if search_query.isdigit():
             if len(search_query) == 4:
-                invoice_details = DBClient.query.filter_by(invoice_code=search_query).order_by(DBClient.date_created.desc()).all()
+                invoice_details = Invoice.query.filter_by(invoice_code=search_query).order_by(Invoice.date_created.desc()).all()
             else:
-                invoice_details = DBClient.query.filter_by(phone_number=search_query).order_by(DBClient.date_created.desc()).all()
+                invoice_details = Invoice.query.filter_by(phone_number=search_query).order_by(Invoice.date_created.desc()).all()
         elif "@" in search_query:
-            invoice_details = DBClient.query.filter_by(email=search_query).order_by(DBClient.date_created.desc()).all()
+            invoice_details = Invoice.query.filter_by(email=search_query).order_by(Invoice.date_created.desc()).all()
         elif cls.is_date(search_query):
             #do something to get the date in the right format first
-            invoice_details = DBClient.query.filter_by(date_created=search_query).order_by(DBClient.date_created.desc()).all()
+            invoice_details = Invoice.query.filter_by(date_created=search_query).order_by(Invoice.date_created.desc()).all()
         else:
-            invoice_details = DBClient.query.filter((DBClient.first_name == search_query.capitalize()) | (DBClient.last_name == search_query.capitalize())).order_by(DBClient.date_created.desc()).all()
+            invoice_details = Invoice.query.filter((Invoice.first_name == search_query.capitalize()) | (Invoice.last_name == search_query.capitalize())).order_by(Invoice.date_created.desc()).all()
 
         search_results = []
         for invoice in invoice_details:
@@ -137,12 +137,12 @@ class AppDBUtil():
 
     @classmethod
     def getInvoiceDetails(cls,invoice_code):
-        admin_invoice_details = DBClient.query.filter_by(invoice_code=invoice_code).order_by(DBClient.date_created.desc()).first()
+        admin_invoice_details = Invoice.query.filter_by(invoice_code=invoice_code).order_by(Invoice.date_created.desc()).first()
         return cls.computeClientInvoiceDetails(admin_invoice_details)
 
     @classmethod
     def updateInvoicePaymentStarted(cls, invoice_code):
-        invoice = DBClient.query.filter_by(invoice_code=invoice_code).order_by(DBClient.date_created.desc()).first()
+        invoice = Invoice.query.filter_by(invoice_code=invoice_code).order_by(Invoice.date_created.desc()).first()
         invoice.payment_started = True
         db.session.commit()
 
@@ -221,7 +221,6 @@ class AppDBUtil():
                 index = 0
                 for installment_date in [admin_invoice_details.installment_date_1,admin_invoice_details.installment_date_2,admin_invoice_details.installment_date_3]:
                     next_installment = {}
-                    print(installment_date)
                     if (installment_date-datetime(1,1,1).date()).days != 0:
                         next_installment['installment_date'] = installment_date
                         if index == 0:

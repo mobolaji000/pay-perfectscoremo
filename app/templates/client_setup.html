@@ -41,6 +41,7 @@
     var ca = $('input[name="college_apps_product"]:checked').attr("id");
     $('input[name="was_college_apps_purchased"]').val(ca);
 
+
     if ($('input[name="turn_on_installments"]').val() != "" && $('input[name="installment_date_1"]').val() == "" && $('input[name="installment_date_2"]').val() == "" && $('input[name="installment_date_3"]').val() == "")
     {
     $('input[name="installment_date_1"]').prop('required', true);
@@ -777,7 +778,7 @@
 						<div class="checkbox mb-3">
 							<label>
 								<input type="checkbox" id="mark_as_paid"
-									   name="mark_as_paid"> Mark as paid
+									   name="mark_as_paid" value=""> Mark as paid
 							</label>
 						</div>
 

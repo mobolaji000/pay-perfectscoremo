@@ -2,7 +2,7 @@ from app.config import stripe
 from app.aws import AWSInstance
 from app.config import Config
 from flask_login import UserMixin
-from app.models import PerfectScoreMoClient as DBClient
+from app.models import Invoice
 import time
 import datetime
 import ast
@@ -55,7 +55,7 @@ class StripeInstance():
 
     def createCustomer(self, clientSetupData):
         #reverse to chcek for existing customer after testing
-        existing_customer = None# DBClient.query.filter_by(email=clientSetupData['email']).order_by(DBClient.date_created.desc()).first() or DBClient.query.filter_by(phone_number=clientSetupData['phone_number']).order_by(DBClient.date_created.desc()).first()
+        existing_customer = None# Invoice.query.filter_by(email=clientSetupData['email']).order_by(Invoice.date_created.desc()).first() or Invoice.query.filter_by(phone_number=clientSetupData['phone_number']).order_by(Invoice.date_created.desc()).first()
         print("existing customer is ",existing_customer)
         customer = stripe.Customer.retrieve(existing_customer.stripe_customer_id) if existing_customer else stripe.Customer.create(email=clientSetupData['email'],name=clientSetupData['first_name'] + " " + clientSetupData['last_name'],phone=clientSetupData['phone_number'])
         print("new customer is ",customer)
@@ -64,6 +64,25 @@ class StripeInstance():
     def setUpIntent(self, stripe_info):
         intent = stripe.SetupIntent.create(customer=stripe_info['stripe_customer_id'])
         return intent.client_secret
+
+    def markCustomerAsChargedOutsideofStripe(self, stripe_info):
+        invoice_total = int(stripe_info['invoice_total'])
+        # stripe.Customer.modify(
+        #     stripe_info['stripe_customer_id'],
+        #     source=bank_account_token,
+        # )
+        stripe.InvoiceItem.create(
+            customer=stripe_info['stripe_customer_id'],
+            quantity=invoice_total,
+            price='price_1In0fFDbpRMio7qjp9PPAHAU',
+        )
+        invoice = stripe.Invoice.create(
+            customer=stripe_info['stripe_customer_id'],
+            metadata={'invoice_code': stripe_info['invoice_code']},
+        )
+        stripe.Invoice.pay(invoice.id,paid_out_of_band=True)
+
+        return {'status': 'success'}
 
     def chargeCustomerViaACH(self, stripe_info, bank_account_token):
         invoice_total = int(stripe_info['invoice_total'])
@@ -184,7 +203,6 @@ class StripeInstance():
             'end_date': installment_end_date,
             'proration_behavior': 'none',
         }
-        print(phase)
         return phase
 
 
@@ -243,8 +261,8 @@ class TwilioInstance():
 
         # Send an HTTP POST request to /mail/send
         response = sg.client.mail.send.post(request_body=mail_json)
-        print(response.status_code)
-        print(response.headers)
+        #print(response.status_code)
+        #print(response.headers)
 
     @classmethod
     def sendSMS(cls,message='testing',from_number='+19564771274',to_number='9725847364'):
