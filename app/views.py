@@ -104,7 +104,7 @@ def create_invoice():
     client_setup_data.update({"stripe_customer_id":customer["id"]})
     invoice_code = AppDBUtil.createClient(client_setup_data)
 
-    if client_setup_data['mark_as_paid'] is 'yes':
+    if client_setup_data['mark_as_paid'] == 'yes':
         client_info, products_info = AppDBUtil.getInvoiceDetails(invoice_code)
         stripe_info = parseDataForStripe(client_info)
         markCustomerAsChargedOutsideofStripe(stripe_info)
