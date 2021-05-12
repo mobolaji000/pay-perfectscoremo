@@ -76,9 +76,9 @@ class AWSInstance():
     def send_email(self, to_address='mo@vensti.com',message='perfectscoremo',subject='perfectscoremo',type=''):
 
         if type == 'create':
-            created_or_modified_span = "<span>.Your invoice has just been <strong>created</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
+            created_or_modified_span = "<span>Your invoice has just been <strong>created</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
         elif type == 'modify':
-            created_or_modified_span = "<span>.Your invoice has just been <strong>modified</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
+            created_or_modified_span = "<span>Your invoice has just been <strong>modified</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
 
 
         # Replace sender@example.com with your "From" address.
