@@ -247,8 +247,9 @@ class SendMessagesToClients():
         pass
 
     @classmethod
-    def sendEmail(cls, to_address='mo@vensti.com',message='perfectscoremo',subject='Payment Instructions/Options'):
-        SendMessagesToClients.awsInstance.send_email(to_address=to_address,message=message,subject=subject)
+    def sendEmail(cls, to_address='mo@vensti.com',message='perfectscoremo',subject='Payment Instructions/Options',type=''):
+
+        SendMessagesToClients.awsInstance.send_email(to_address=to_address,message=message,subject=subject,type=type)
 
         # sendgrid.api_key = SendMessagesToClients.awsInstance.get_secret("sendgrid_cred", "SENDGRID_API_KEY") or os.environ.get('SENDGRID_API_KEY')
         # sg = sendgrid.SendGridAPIClient(api_key=sendgrid.api_key)
@@ -267,12 +268,17 @@ class SendMessagesToClients():
         # #print(response.headers)
 
     @classmethod
-    def sendSMS(cls,message='perfectscoremo',from_number='+19564771274',to_number='9725847364'):
+    def sendSMS(cls,message='perfectscoremo',from_number='+19564771274',to_number='9725847364',type=''):
 
         # Your Account Sid and Auth Token from twilio.com/console
         # and set the environment variables. See http://twil.io/secure
 
-        text_message = """\nDear parent, here are the payment instructions/options (also sent to your email address):\n\n""" \
+        if type == 'create':
+            created_or_modified_span = "Your invoice has just been created. Here are the payment instructions/options (also sent to your email address):"
+        elif type == 'modify':
+            created_or_modified_span = "Your invoice has just been modified. Here are the payment instructions/options (also sent to your email address):"
+
+        text_message = """\n"""+created_or_modified_span+""""\n\n""" \
                     + """1. Go to perfectscoremo.com\n\n""" \
                     + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
                     + """3. Enter your code: """ + message +"\n\n" \

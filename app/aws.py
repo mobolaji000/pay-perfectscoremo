@@ -73,7 +73,13 @@ class AWSInstance():
         # Your code goes here.
 
 
-    def send_email(self, to_address='mo@vensti.com',message='perfectscoremo',subject='perfectscoremo'):
+    def send_email(self, to_address='mo@vensti.com',message='perfectscoremo',subject='perfectscoremo',type=''):
+
+        if type == 'create':
+            created_or_modified_span = "<span>.Your invoice has just been <strong>created</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
+        elif type == 'modify':
+            created_or_modified_span = "<span>.Your invoice has just been <strong>modified</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
+
 
         # Replace sender@example.com with your "From" address.
         # This address must be verified with Amazon SES.
@@ -101,22 +107,24 @@ class AWSInstance():
                      )
 
         # The HTML body of the email.
+
         BODY_HTML = """<html>
-        <head></head>
-        <body>
-          <span>Dear parent, </span><br><br>"""\
-        +"""<span>Here are the payment instructions/options (also sent to your phone number):</span><br><br>"""\
-        + """<span>1. Go to perfectscoremo.com</span><br>""" \
+                <head></head>
+                <body>
+                  <span>Dear parent, </span><br><br>""" \
+                    + created_or_modified_span \
+                    + """<span>1. Go to perfectscoremo.com</span><br>""" \
                     + """<span>2. Choose ‘Make A Payment’ from the menu</span><br>""" \
-                    + """<span>3. Enter your code: </span>""" +"<strong>"+message+"</strong><br>"\
+                    + """<span>3. Enter your code: </span>""" + "<strong>" + message + "</strong><br>" \
                     + """<span>4. Read the instructions and invoice and choose a method of payment</span><br>""" \
                     + """<span>5. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free</span><br>""" \
                     + """<span>6. For installment payments, this is accepted: Credit Cards</span><br>""" \
                     + """<span>7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH</span><br>""" \
-                    +"""
-        </body>
-        </html>
-                    """
+                    + """
+                </body>
+                </html>
+                            """
+
 
         # The character encoding for the email.
         CHARSET = "UTF-8"

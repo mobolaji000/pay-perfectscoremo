@@ -111,11 +111,11 @@ def create_invoice():
         AppDBUtil.updateInvoicePaymentStarted(invoice_code)
         print("marked invoice as paid")
 
-    if True: #change to check if send message now checkbox is checked, make send message dafualt to false for disgnostic and default to true for everything else
+    if client_setup_data.get('send_text_and_email','') == 'yes':
         try:
-            SendMessagesToClients.sendEmail(to_address='mo@vensti.com',message=invoice_code)
+            SendMessagesToClients.sendEmail(to_address='mo@vensti.com',message=invoice_code,type='create')
             #awsInstance.send_email(to_address=client_setup_data['email'])
-            SendMessagesToClients.sendSMS(to_number=client_setup_data['phone_number'],message=invoice_code)
+            SendMessagesToClients.sendSMS(to_number=client_setup_data['phone_number'],message=invoice_code,type='create')
             flash('Invoice created and email/sms sent to client.')
         except Exception as e:
             traceback.print_exc()
@@ -150,6 +150,20 @@ def modify_invoice():
         data_to_modify = ast.literal_eval(request.form['data_to_modify'])
         #print(data_to_modify)
         AppDBUtil.modifyInvoiceDetails(data_to_modify)
+
+        if client_setup_data.get('send_text_and_email','') == 'yes':
+            try:
+                SendMessagesToClients.sendEmail(to_address='mo@vensti.com', message=invoice_code,type='modify')
+                # awsInstance.send_email(to_address=client_setup_data['email'])
+                SendMessagesToClients.sendSMS(to_number=client_setup_data['phone_number'], message=invoice_code,type='modify')
+                flash('Invoice created and email/sms sent to client.')
+            except Exception as e:
+                traceback.print_exc()
+                flash('An error occured while sending an email/sms to the client after modifying the invoice.')
+
+
+
+
         flash('Invoice sucessfully modified.')
         return redirect(url_for('client_setup'))
     except Exception as e:

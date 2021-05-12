@@ -304,6 +304,14 @@ $(document).ready(function() {
     //alert(mp);
     //$('input[name="mark_as_paid"]').val(mp);
 
+    $('input[name="send_text_and_email"]').on('click', function() {
+        if ($(this).val() == "") {
+            $(this).val("yes");
+        } else {
+            $(this).val("");
+        }
+    });
+
 
 
 
