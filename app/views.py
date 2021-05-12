@@ -14,7 +14,7 @@ import json
 import os
 from app.service import StripeInstance
 from app.service import PlaidInstance
-from app.service import TwilioInstance
+from app.service import SendMessagesToClients
 import traceback
 from app.config import stripe
 
@@ -104,7 +104,7 @@ def create_invoice():
     client_setup_data.update({"stripe_customer_id":customer["id"]})
     invoice_code = AppDBUtil.createClient(client_setup_data)
 
-    if client_setup_data['mark_as_paid'] == 'yes':
+    if client_setup_data.get('mark_as_paid','') == 'yes':
         client_info, products_info = AppDBUtil.getInvoiceDetails(invoice_code)
         stripe_info = parseDataForStripe(client_info)
         stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info)
@@ -113,8 +113,9 @@ def create_invoice():
 
     if True: #change to check if send message now checkbox is checked, make send message dafualt to false for disgnostic and default to true for everything else
         try:
-            TwilioInstance.sendEmail(to_address=client_setup_data['email'])
-            TwilioInstance.sendSMS(to_number=client_setup_data['phone_number'])
+            SendMessagesToClients.sendEmail(to_address='mo@vensti.com',message=invoice_code)
+            #awsInstance.send_email(to_address=client_setup_data['email'])
+            SendMessagesToClients.sendSMS(to_number=client_setup_data['phone_number'],message=invoice_code)
             flash('Invoice created and email/sms sent to client.')
         except Exception as e:
             traceback.print_exc()

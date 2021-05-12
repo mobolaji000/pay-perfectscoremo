@@ -6,7 +6,7 @@ from botocore.exceptions import ClientError
 class AWSInstance():
     def __init__(self):
         #self.client = None
-        self.aws_access_key_id=os.environ.get('aws_access_key_id',)
+        #self.aws_access_key_id=os.environ.get('aws_access_key_id',)
 
         pass
 
@@ -71,4 +71,94 @@ class AWSInstance():
 
         return secret
         # Your code goes here.
+
+
+    def send_email(self, to_address='mo@vensti.com',message='perfectscoremo',subject='perfectscoremo'):
+
+        # Replace sender@example.com with your "From" address.
+        # This address must be verified with Amazon SES.
+        SENDER = "Perfect Score Mo <mo@vensti.com>"
+
+        # Replace recipient@example.com with a "To" address. If your account
+        # is still in the sandbox, this address must be verified.
+        RECIPIENT = to_address
+
+        # Specify a configuration set. If you do not want to use a configuration
+        # set, comment the following variable, and the
+        # ConfigurationSetName=CONFIGURATION_SET argument below.
+        #CONFIGURATION_SET = "ConfigSet"
+
+        # If necessary, replace us-west-2 with the AWS Region you're using for Amazon SES.
+        #AWS_REGION = "us-east-2"
+
+        # The subject line for the email.
+        SUBJECT = subject
+
+        # The email body for recipients with non-HTML email clients.
+        BODY_TEXT = ("Amazon SES Test (Python)\r\n"
+                     "This email was sent with Amazon SES using the "
+                     "AWS SDK for Python (Boto). "+message
+                     )
+
+        # The HTML body of the email.
+        BODY_HTML = """<html>
+        <head></head>
+        <body>
+          <span>Dear parent, </span><br><br>"""\
+        +"""<span>Here are the payment instructions/options (also sent to your phone number):</span><br><br>"""\
+        + """<span>1. Go to perfectscoremo.com</span><br>""" \
+                    + """<span>2. Choose ‘Make A Payment’ from the menu</span><br>""" \
+                    + """<span>3. Enter your code: </span>""" +"<strong>"+message+"</strong><br>"\
+                    + """<span>4. Read the instructions and invoice and choose a method of payment</span><br>""" \
+                    + """<span>5. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free</span><br>""" \
+                    + """<span>6. For installment payments, this is accepted: Credit Cards</span><br>""" \
+                    + """<span>7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH</span><br>""" \
+                    +"""
+        </body>
+        </html>
+                    """
+
+        # The character encoding for the email.
+        CHARSET = "UTF-8"
+
+        # Create a new SES resource and specify a region.
+        #client = boto3.client('ses', region_name=AWS_REGION)
+        client = self.getInstance('ses')
+
+        # Try to send the email.
+        try:
+            # Provide the contents of the email.
+            response = client.send_email(
+                Destination={
+                    'ToAddresses': [
+                        RECIPIENT,
+                    ],
+                },
+                Message={
+                    'Body': {
+                        'Html': {
+                            'Charset': CHARSET,
+                            'Data': BODY_HTML,
+                        },
+                        'Text': {
+                            'Charset': CHARSET,
+                            'Data': BODY_TEXT,
+                        },
+                    },
+                    'Subject': {
+                        'Charset': CHARSET,
+                        'Data': SUBJECT,
+                    },
+                },
+                Source=SENDER,
+                # If you are not using a configuration set, comment or delete the
+                # following line
+                #ConfigurationSetName=CONFIGURATION_SET,
+            )
+        # Display an error if something goes wrong.
+        except ClientError as e:
+            print(e.response['Error']['Message'])
+        else:
+            print("Email sent! Message ID:"),
+            print(response['MessageId'])
 

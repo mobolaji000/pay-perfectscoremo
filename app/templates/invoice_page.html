@@ -41,6 +41,17 @@
 
     }
 
+    	 function showPayButton()
+    {
+
+    if (document.getElementById('terms_and_conditions').checked) {
+            $('input[name="proceed_to_payment"]').prop('hidden', false);
+        } else {
+            $('input[name="proceed_to_payment"]').prop('hidden', true);
+        }
+
+    }
+
 	</script>
 
 </head>
@@ -341,14 +352,21 @@
 	</div>
 
 				<input id="stripe_info" type="hidden"  data-stripe_info="{{ stripe_info }}">
-<!--				<script>$(document).ready(function() {alert({{stripe_info.phone_number}});});</script>-->
-<!--				<script>alert(a);</script>-->
-<!--				<input id="client_info" type="hidden"  data-client_info="{{ client_info }}">-->
 
 
+	<div class="checkbox mb-3" style="text-align:center;">
+												<div><span class="badge badge-danger"></span></div>
 
-				<input class="btn btn-primary btn-lg btn-block" type="submit" value="Proceed to Payment" onclick="turnOffRequired();">
+
+							<input id="terms_and_conditions" name="terms_and_conditions" value="" type="checkbox" onclick="showPayButton();"
+								   class="custom-control-input">
+							<label class="custom-control-label" for="terms_and_conditions">You must accept terms and conditions to proceed. By clicking above, you agree to the terms and conditions.</label>
+							<br><br><br>
+						</div>
+
+				<input id="proceed_to_payment" name="proceed_to_payment" class="btn btn-primary btn-lg btn-block" type="submit" hidden value="Proceed to Payment" onclick="turnOffRequired();">
 {% endif %}
+
 
 
 

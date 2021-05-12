@@ -240,45 +240,59 @@ class PlaidInstance():
         return bank_account_token
 
 
-class TwilioInstance():
+class SendMessagesToClients():
     #static variable
     awsInstance = AWSInstance()
     def __init__(self):
         pass
 
     @classmethod
-    def sendEmail(cls, to_address='mo@perfectscoremo.com',message='perfectscoremo',subject='perfectscoremo'):
-        sendgrid.api_key = TwilioInstance.awsInstance.get_secret("sendgrid_cred", "SENDGRID_API_KEY") or os.environ.get('SENDGRID_API_KEY')
-        sg = sendgrid.SendGridAPIClient(api_key=sendgrid.api_key)
-        from_email = Email("mo@perfectscoremo.com")  # Change to your verified sender
-        to_email = To(to_address)  # Change to your recipient
-        subject = subject
-        content = Content("text/plain",message)
-        mail = Mail(from_email, to_email, subject, content)
+    def sendEmail(cls, to_address='mo@vensti.com',message='perfectscoremo',subject='Payment Instructions/Options'):
+        SendMessagesToClients.awsInstance.send_email(to_address=to_address,message=message,subject=subject)
 
-        # Get a JSON-ready representation of the Mail object
-        mail_json = mail.get()
-
-        # Send an HTTP POST request to /mail/send
-        response = sg.client.mail.send.post(request_body=mail_json)
-        #print(response.status_code)
-        #print(response.headers)
+        # sendgrid.api_key = SendMessagesToClients.awsInstance.get_secret("sendgrid_cred", "SENDGRID_API_KEY") or os.environ.get('SENDGRID_API_KEY')
+        # sg = sendgrid.SendGridAPIClient(api_key=sendgrid.api_key)
+        # from_email = Email("mo@perfectscoremo.com")  # Change to your verified sender
+        # to_email = To(to_address)  # Change to your recipient
+        # subject = subject
+        # content = Content("text/plain",message)
+        # mail = Mail(from_email, to_email, subject, content)
+        #
+        # # Get a JSON-ready representation of the Mail object
+        # mail_json = mail.get()
+        #
+        # # Send an HTTP POST request to /mail/send
+        # response = sg.client.mail.send.post(request_body=mail_json)
+        # #print(response.status_code)
+        # #print(response.headers)
 
     @classmethod
-    def sendSMS(cls,message='testing',from_number='+19564771274',to_number='9725847364'):
+    def sendSMS(cls,message='perfectscoremo',from_number='+19564771274',to_number='9725847364'):
 
         # Your Account Sid and Auth Token from twilio.com/console
         # and set the environment variables. See http://twil.io/secure
 
-        account_sid = TwilioInstance.awsInstance.get_secret("twilio_cred", "TWILIO_ACCOUNT_SID") or os.environ['TWILIO_ACCOUNT_SID']
-        auth_token = TwilioInstance.awsInstance.get_secret("twilio_cred", "TWILIO_AUTH_TOKEN") or os.environ['TWILIO_AUTH_TOKEN']
+        text_message = """\nDear parent, here are the payment instructions/options (also sent to your email address):\n\n""" \
+                    + """1. Go to perfectscoremo.com\n\n""" \
+                    + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
+                    + """3. Enter your code: """ + message +"\n\n" \
+                    + """4. Read the instructions and invoice and choose a method of payment\n\n""" \
+                    + """5. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free\n\n""" \
+                    + """6. For installment payments, this is accepted: Credit Cards\n\n""" \
+                    + """7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH\n\n""" \
+
+        
+
+        account_sid = SendMessagesToClients.awsInstance.get_secret("twilio_cred", "TWILIO_ACCOUNT_SID") or os.environ['TWILIO_ACCOUNT_SID']
+        auth_token = SendMessagesToClients.awsInstance.get_secret("twilio_cred", "TWILIO_AUTH_TOKEN") or os.environ['TWILIO_AUTH_TOKEN']
         twilioClient = TwilioClient(account_sid, auth_token)
 
         message = twilioClient.messages .create(
-            body=message,
+            body=text_message,
             from_=from_number,
             to='+1'+to_number
         )
 
+        print("text sent!")
         print(message.sid)
 
