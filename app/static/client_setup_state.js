@@ -279,6 +279,9 @@ $(document).ready(function() {
             $('input[name="turn_on_installments"]').prop('checked', false);
             $('input[name="turn_on_installments"]').val("");
 
+            $('input[name="send_text_and_email"]').prop('checked', false);
+            $('input[name="send_text_and_email"]').val("");
+
             $('input[name="installment_date_1"]').val("");
             $('input[name="installment_date_2"]').val("");
             $('input[name="installment_date_3"]').val("");
@@ -306,6 +309,10 @@ $(document).ready(function() {
 
     $('input[name="send_text_and_email"]').on('click', function() {
         if ($(this).val() == "") {
+
+        $('input[name="mark_as_paid"]').prop('checked', false);
+            $('input[name="mark_as_paid"]').val("");
+
             $(this).val("yes");
         } else {
             $(this).val("");
