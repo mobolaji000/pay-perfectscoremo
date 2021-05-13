@@ -157,15 +157,12 @@ def modify_invoice():
                 SendMessagesToClients.sendEmail(to_address='mo@vensti.com', message=invoice_code,type='modify')
                 # awsInstance.send_email(to_address=client_setup_data['email'])
                 SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=invoice_code,type='modify')
-                flash('Invoice created and email/sms sent to client.')
+                flash('Invoice modified and email/sms sent to client.')
             except Exception as e:
                 traceback.print_exc()
                 flash('An error occured while sending an email/sms to the client after modifying the invoice.')
-
-
-
-
-        flash('Invoice sucessfully modified.')
+        else:
+            flash('Invoice sucessfully modified.')
         return redirect(url_for('client_setup'))
     except Exception as e:
         print(e)

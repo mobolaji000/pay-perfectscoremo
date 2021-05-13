@@ -274,11 +274,11 @@ class SendMessagesToClients():
         # and set the environment variables. See http://twil.io/secure
 
         if type == 'create':
-            created_or_modified_span = "Your invoice has just been created. Here are the payment instructions/options (also sent to your email address):"
+            created_or_modified_span = "Dear parent,\n\nYour invoice has just been created. Here are the payment instructions/options (also sent to your email address):"
         elif type == 'modify':
-            created_or_modified_span = "Your invoice has just been modified. Here are the payment instructions/options (also sent to your email address):"
+            created_or_modified_span = "Dear parent,\n\nYour invoice has just been modified. Here are the payment instructions/options (also sent to your email address):"
 
-        text_message = """\n"""+created_or_modified_span+""""\n\n""" \
+        text_message = "\n"+created_or_modified_span+"\n\n" \
                     + """1. Go to perfectscoremo.com\n\n""" \
                     + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
                     + """3. Enter your code: """ + message +"\n\n" \

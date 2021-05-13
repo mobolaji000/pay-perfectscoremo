@@ -77,8 +77,21 @@ class AppDBUtil():
     @classmethod
     def modifyInvoiceDetails(cls, data_to_modify):
         #print(data_to_modify)
-        Invoice.query.filter_by(invoice_code=data_to_modify['invoice_code']).delete()
-        cls.createClient(clientData=data_to_modify,invoice_code=data_to_modify['invoice_code'])
+
+        invoice = Invoice.query.filter_by(invoice_code=data_to_modify['invoice_code']).first()
+
+        from sqlalchemy import inspect
+        inst = inspect(model)
+        attr_names = [c_attr.key for c_attr in inst.mapper.column_attrs]
+
+        for data in data_to_modify.keys():
+            if data in attr_names:
+                invoice[data] = data_to_modify[data]
+
+        db.session.commit()
+
+        # Invoice.query.filter_by(invoice_code=data_to_modify['invoice_code']).delete()
+        #cls.createClient(clientData=data_to_modify,invoice_code=data_to_modify['invoice_code'])
 
     @classmethod
     def updateAmountPaidAgainstInvoice(cls,invoice_code,amount_paid):
