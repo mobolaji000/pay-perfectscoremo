@@ -83,7 +83,8 @@ class AWSInstance():
 
         # Replace sender@example.com with your "From" address.
         # This address must be verified with Amazon SES.
-        SENDER = "Perfect Score Mo <mo@vensti.com>" #change to "Perfect Score Mo <mo@info.perfectscoremo.com>"
+        #SENDER = "Perfect Score Mo <mo@vensti.com>"
+        SENDER = "Perfect Score Mo <mo@info.perfectscoremo.com>"
 
         # Replace recipient@example.com with a "To" address. If your account
         # is still in the sandbox, this address must be verified.
