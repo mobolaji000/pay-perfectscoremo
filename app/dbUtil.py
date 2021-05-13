@@ -89,7 +89,7 @@ class AppDBUtil():
     @classmethod
     def searchInvoices(cls, search_query):
         if search_query.isdigit():
-            if len(search_query) == 4:
+            if len(search_query) == 6:
                 invoice_details = Invoice.query.filter_by(invoice_code=search_query).order_by(Invoice.date_created.desc()).all()
             else:
                 invoice_details = Invoice.query.filter_by(phone_number=search_query).order_by(Invoice.date_created.desc()).all()
