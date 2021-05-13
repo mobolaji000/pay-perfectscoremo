@@ -148,14 +148,15 @@ def search_invoice():
 def modify_invoice():
     try:
         data_to_modify = ast.literal_eval(request.form['data_to_modify'])
-        #print(data_to_modify)
+        print(data_to_modify)
+        invoice_code = data_to_modify['invoice_code']
         AppDBUtil.modifyInvoiceDetails(data_to_modify)
 
-        if client_setup_data.get('send_text_and_email','') == 'yes':
+        if data_to_modify.get('send_text_and_email','') == 'yes':
             try:
                 SendMessagesToClients.sendEmail(to_address='mo@vensti.com', message=invoice_code,type='modify')
                 # awsInstance.send_email(to_address=client_setup_data['email'])
-                SendMessagesToClients.sendSMS(to_number=client_setup_data['phone_number'], message=invoice_code,type='modify')
+                SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=invoice_code,type='modify')
                 flash('Invoice created and email/sms sent to client.')
             except Exception as e:
                 traceback.print_exc()
