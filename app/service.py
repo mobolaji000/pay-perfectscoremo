@@ -67,10 +67,7 @@ class StripeInstance():
 
     def markCustomerAsChargedOutsideofStripe(self, stripe_info):
         invoice_total = int(stripe_info['invoice_total'])
-        # stripe.Customer.modify(
-        #     stripe_info['stripe_customer_id'],
-        #     source=bank_account_token,
-        # )
+
         stripe.InvoiceItem.create(
             customer=stripe_info['stripe_customer_id'],
             quantity=invoice_total,
@@ -248,24 +245,7 @@ class SendMessagesToClients():
 
     @classmethod
     def sendEmail(cls, to_address='mo@vensti.com',message='perfectscoremo',subject='Payment Instructions/Options',type=''):
-
         SendMessagesToClients.awsInstance.send_email(to_address=to_address,message=message,subject=subject,type=type)
-
-        # sendgrid.api_key = SendMessagesToClients.awsInstance.get_secret("sendgrid_cred", "SENDGRID_API_KEY") or os.environ.get('SENDGRID_API_KEY')
-        # sg = sendgrid.SendGridAPIClient(api_key=sendgrid.api_key)
-        # from_email = Email("mo@perfectscoremo.com")  # Change to your verified sender
-        # to_email = To(to_address)  # Change to your recipient
-        # subject = subject
-        # content = Content("text/plain",message)
-        # mail = Mail(from_email, to_email, subject, content)
-        #
-        # # Get a JSON-ready representation of the Mail object
-        # mail_json = mail.get()
-        #
-        # # Send an HTTP POST request to /mail/send
-        # response = sg.client.mail.send.post(request_body=mail_json)
-        # #print(response.status_code)
-        # #print(response.headers)
 
     @classmethod
     def sendSMS(cls,message='perfectscoremo',from_number='+19564771274',to_number='9725847364',type=''):

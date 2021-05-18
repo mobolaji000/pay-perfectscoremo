@@ -88,6 +88,11 @@
      if (result.was_diagnostic_purchased == "yes")
      {
      	$('input[name="was_diagnostic_purchased"]').prop('checked', true);
+     	 $('input[name="was_diagnostic_purchased"]').val("yes");
+
+     	$('input[name="diag_units"]').attr('disabled', false);
+        $('input[name="diag_total"]').attr('disabled', false);
+
      	$('input[name="diag_units"]').val(result.diag_units);
      	$('input[name="diag_total"]').val(result.diag_total);
      }
@@ -202,6 +207,8 @@
         var yy = someDate.getFullYear();
         var someFormattedDate = yy + '-' + mm + '-' + dd;
 
+        //alert(someFormattedDate);
+
       $('input[name="installment_date_1"]').val(someFormattedDate);
      }
 
@@ -246,6 +253,28 @@
      $('input[name="adjustment_explanation"]').val(result.adjustment_explanation);
      $('input[name="invoice_total"]').val(result.invoice_total);
 
+     //
+
+
+	//idea is it should not be easy to modify or delete a payment that has started
+	//this is consistent with Stripe where an invoice that is paid cant be deleted
+	//if push comes to shove, make the necessary changes in stripe and after that go manually delete in the DB
+     if (result.payment_started == "True")
+     {
+
+$('div[id="cant_modify_or_delete_message"]').prop('hidden', false);
+        $('input[id="modify_button"]').attr('disabled', true);
+        $('input[id="delete_button"]').attr('disabled', true);
+
+    // document.getElementById("cant_modify_or_delete_message").hidden=false;
+          }
+          else
+          {
+$('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
+          $('input[id="modify_button"]').attr('disabled', false);
+          $('input[id="delete_button"]').attr('disabled', false);
+          //document.getElementById("cant_modify_or_delete_message").hidden=true;
+          }
 
      }
 
@@ -262,8 +291,8 @@
       	dataToModify['adjustment_explanation'] = $('input[name="adjustment_explanation"]').val();
       	dataToModify['invoice_total'] = $('input[name="invoice_total"]').val();
       	dataToModify['was_diagnostic_purchased'] = $('input[name="was_diagnostic_purchased"]').val();
-      	dataToModify['was_diagnostic_purchased'] = $('input[name="was_diagnostic_purchased"]').val();
-      	dataToModify['diag_total'] = $('input[name="diag_total]').val();
+      	dataToModify['diag_units'] = $('input[name="diag_units"]').val();
+      	dataToModify['diag_total'] = $('input[name="diag_total"]').val();
       	dataToModify['was_test_prep_purchased'] = $('input[name="was_test_prep_purchased"]').val();
       	dataToModify['tp_units'] = $('input[name="tp_units"]').val();
       	dataToModify['tp_total'] = $('input[name="tp_total"]').val();
@@ -340,14 +369,14 @@
 
 							 <div style="margin-left:50px"><form action="{{ url_for('modify_invoice') }}" method="post">
 
-								 <input class="btn btn-primary btn-lg btn-block" type="submit" value="Modify" onclick="finalCheckBeforeModify();">
+								 <input id="modify_button" name="modify_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Modify" onclick="finalCheckBeforeModify();">
 									 <input id="data_to_modify" name="data_to_modify" hidden>
 
 								 </form></div>
 
 
 							 <div style="margin-left:50px"><form action="{{ url_for('delete_invoice') }}" method="post">
-								 <input class="btn btn-primary btn-lg btn-block" type="submit" value="Delete" onclick="finalCheckBeforeDelete();">
+								 <input id="delete_button" name="delete_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Delete" onclick="finalCheckBeforeDelete();">
 								 <input id="invoice_code_to_delete" name="invoice_code_to_delete" hidden>
 							  </form></div>
 
@@ -358,6 +387,14 @@
 							 </div>
 
 							 </div>
+
+						 <br><br>
+
+						  <div class="col-sm" id="cant_modify_or_delete_message" name="cant_modify_or_delete_message" hidden>
+<span class="badge badge-danger">You can't modify or delete a payment that has started.</span>
+
+    </div>
+
 						 {% endif %}
 
 

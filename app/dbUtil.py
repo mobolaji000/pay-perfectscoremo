@@ -11,7 +11,7 @@ class AppDBUtil():
         pass
 
     @classmethod
-    def createClient(cls,clientData={},invoice_code=None):
+    def createOrModifyClient(cls, clientData={}, invoice_code=None, action=''):
         invoice_code = invoice_code if invoice_code else str(uuid.uuid4().int>>64)[:6]
         stripe_customer_id = clientData.get('stripe_customer_id','')
         first_name = clientData.get('first_name','')
@@ -19,11 +19,11 @@ class AppDBUtil():
         phone_number = clientData.get('phone_number','999')
         email = clientData.get('email','')
         was_diagnostic_purchased = clientData.get('was_diagnostic_purchased', '')
-        diag_units = clientData.get('diag_units', 0)
-        diag_total = clientData.get('diag_total', 0)
+        diag_units = 0 if clientData.get('diag_units','') == '' else clientData.get('diag_units','')
+        diag_total = 0 if clientData.get('diag_total','') == '' else clientData.get('diag_total','')
         was_test_prep_purchased = clientData.get('was_test_prep_purchased','')
         tp_product = clientData.get('tp_product','')
-        tp_units = clientData.get('tp_units',0)
+        tp_units = 0 if clientData.get('tp_units','') == '' else clientData.get('tp_units','')
         tp_total = 0 if clientData.get('tp_total','') == '' else clientData.get('tp_total','')
         was_college_apps_purchased = clientData.get('was_college_apps_purchased', '')
         college_apps_product = clientData.get('college_apps_product','')
@@ -39,17 +39,37 @@ class AppDBUtil():
         adjustment_explanation = clientData.get('adjustment_explanation','')
         invoice_total = 0 if clientData.get('invoice_total','') == '' else clientData.get('invoice_total','')
 
-        c = Invoice(invoice_code=invoice_code, stripe_customer_id=stripe_customer_id, first_name=first_name, last_name=last_name,
-                    phone_number=phone_number, email=email, was_diagnostic_purchased=was_diagnostic_purchased, diag_units=diag_units,
-                    diag_total=diag_total, was_test_prep_purchased=was_test_prep_purchased, tp_product=tp_product, tp_units=tp_units,
-                    tp_total=tp_total, was_college_apps_purchased=was_college_apps_purchased, college_apps_product=college_apps_product,
-                    college_apps_units=college_apps_units, college_apps_total=college_apps_total, turn_on_installments=turn_on_installments,
-                    installment_date_1=installment_date_1, installment_date_2=installment_date_2, installment_date_3=installment_date_3,
-                    adjust_total=adjust_total, adjustment_explanation=adjustment_explanation, invoice_total=invoice_total)
+        number_of_rows_modified = None
+        if action=='create':
 
-        db.session.add(c)
+            invoice = Invoice(invoice_code=invoice_code, stripe_customer_id=stripe_customer_id, first_name=first_name, last_name=last_name,
+                        phone_number=phone_number, email=email, was_diagnostic_purchased=was_diagnostic_purchased, diag_units=diag_units,
+                        diag_total=diag_total, was_test_prep_purchased=was_test_prep_purchased, tp_product=tp_product, tp_units=tp_units,
+                        tp_total=tp_total, was_college_apps_purchased=was_college_apps_purchased, college_apps_product=college_apps_product,
+                        college_apps_units=college_apps_units, college_apps_total=college_apps_total, turn_on_installments=turn_on_installments,
+                        installment_date_1=installment_date_1, installment_date_2=installment_date_2, installment_date_3=installment_date_3,
+                        adjust_total=adjust_total, adjustment_explanation=adjustment_explanation, invoice_total=invoice_total)
+
+            db.session.add(invoice)
+
+        elif action=='modify':
+
+            #invoice = Invoice.query.filter_by(invoice_code=invoice_code).first()
+
+            #what happens in the unlikely event that 2 rows have the same invoice code?
+            number_of_rows_modified = db.session.query(Invoice).filter_by(invoice_code=invoice_code).update\
+                ({"stripe_customer_id": stripe_customer_id,"first_name": first_name,"last_name": last_name,"phone_number": phone_number,
+                        "email": email,"was_diagnostic_purchased": was_diagnostic_purchased,"diag_units": diag_units,"diag_total": diag_total,
+                        "was_test_prep_purchased": was_test_prep_purchased,"tp_product": tp_product,"tp_units": tp_units,"tp_total": tp_total,
+                        "was_college_apps_purchased": was_college_apps_purchased,"college_apps_product": college_apps_product,"college_apps_units": college_apps_units,
+                        "college_apps_total": college_apps_total,"turn_on_installments": turn_on_installments,"installment_date_1": installment_date_1,
+                        "installment_date_2": installment_date_2,"installment_date_3": installment_date_3,"adjust_total": adjust_total,
+                        "adjustment_explanation": adjustment_explanation,"invoice_total": invoice_total})
+
+            print("number of rows modified is: ",number_of_rows_modified) #printing of rows modified to logs to help with auditing
+
         db.session.commit()
-        return invoice_code
+        return invoice_code,number_of_rows_modified
 
     @classmethod
     def is_date(cls,string_date, fuzzy=False):
@@ -76,22 +96,8 @@ class AppDBUtil():
 
     @classmethod
     def modifyInvoiceDetails(cls, data_to_modify):
-        #print(data_to_modify)
+        return cls.createOrModifyClient(clientData=data_to_modify, invoice_code=data_to_modify['invoice_code'],action='modify')
 
-        invoice = Invoice.query.filter_by(invoice_code=data_to_modify['invoice_code']).first()
-
-        from sqlalchemy import inspect
-        inst = inspect(model)
-        attr_names = [c_attr.key for c_attr in inst.mapper.column_attrs]
-
-        for data in data_to_modify.keys():
-            if data in attr_names:
-                invoice[data] = data_to_modify[data]
-
-        db.session.commit()
-
-        # Invoice.query.filter_by(invoice_code=data_to_modify['invoice_code']).delete()
-        #cls.createClient(clientData=data_to_modify,invoice_code=data_to_modify['invoice_code'])
 
     @classmethod
     def updateAmountPaidAgainstInvoice(cls,invoice_code,amount_paid):
@@ -112,7 +118,10 @@ class AppDBUtil():
             #do something to get the date in the right format first
             invoice_details = Invoice.query.filter_by(date_created=search_query).order_by(Invoice.date_created.desc()).all()
         else:
-            invoice_details = Invoice.query.filter((Invoice.first_name == search_query.capitalize()) | (Invoice.last_name == search_query.capitalize())).order_by(Invoice.date_created.desc()).all()
+            invoice_details = Invoice.query.filter((Invoice.first_name == search_query.capitalize()) | (Invoice.last_name == search_query.capitalize())
+                                                   | (Invoice.first_name == search_query.lower()) | (Invoice.last_name == search_query.lower())
+                                                   | (Invoice.first_name == search_query) | (Invoice.last_name == search_query))\
+                .order_by(Invoice.date_created.desc()).all()
 
         search_results = []
         for invoice in invoice_details:
@@ -143,6 +152,7 @@ class AppDBUtil():
             client['adjust_total'] = invoice.adjust_total
             client['adjustment_explanation'] = invoice.adjustment_explanation
             client['invoice_total'] = invoice.invoice_total
+            client['payment_started'] = str(invoice.payment_started)
 
             search_results.append(client)
 

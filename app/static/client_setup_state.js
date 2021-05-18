@@ -69,6 +69,7 @@ $(document).ready(function() {
 
     $('input[name="was_diagnostic_purchased"]').on('click', function() {
 
+
         if ($(this).val() == "") {
             $('input[name="diag_units"]').attr('disabled', false);
             $('input[name="diag_total"]').attr('disabled', false);
@@ -94,6 +95,9 @@ $(document).ready(function() {
             $('input[name="diag_total"]').val("");
             $(this).val("");
         }
+
+         $('input[name="diag_total"]').val(calculateDiagnosticTotal());
+        $('input[name="invoice_total"]').val(invoiceTotal());
 
     });
 
@@ -128,6 +132,9 @@ $(document).ready(function() {
             $('input[name="tp_total"]').val("");
             $(this).val("");
         }
+
+        $('input[name="tp_total"]').val(calculateTestPrepTotal());
+        $('input[name="invoice_total"]').val(invoiceTotal());
     });
 
     $('input[name="tp_product"]').change(function() {
@@ -176,6 +183,9 @@ $(document).ready(function() {
             $('input[name="college_apps_total"]').val("");
             $(this).val("");
         }
+
+         $('input[name="college_apps_total"]').val(collegeAppsTotal());
+        $('input[name="invoice_total"]').val(invoiceTotal());
     });
 
     $('input[name="college_consultation"]').change(function() {

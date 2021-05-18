@@ -102,7 +102,7 @@ def create_invoice():
     client_setup_data = request.form.to_dict()
     customer = stripeInstance.createCustomer(client_setup_data)
     client_setup_data.update({"stripe_customer_id":customer["id"]})
-    invoice_code = AppDBUtil.createClient(client_setup_data)
+    invoice_code,number_of_rows_modified = AppDBUtil.createOrModifyClient(client_setup_data, action='create')
 
     if client_setup_data.get('mark_as_paid','') == 'yes':
         client_info, products_info = AppDBUtil.getInvoiceDetails(invoice_code)
@@ -113,7 +113,7 @@ def create_invoice():
 
     if client_setup_data.get('send_text_and_email','') == 'yes':
         try:
-            SendMessagesToClients.sendEmail(to_address='mo@vensti.com',message=invoice_code,type='create')
+            SendMessagesToClients.sendEmail(to_address=client_setup_data['email'],message=invoice_code,type='create')
             #awsInstance.send_email(to_address=client_setup_data['email'])
             SendMessagesToClients.sendSMS(to_number=client_setup_data['phone_number'],message=invoice_code,type='create')
             flash('Invoice created and email/sms sent to client.')
@@ -130,6 +130,7 @@ def search_invoice():
 
     try:
         search_results = AppDBUtil.searchInvoices(search_query)
+        #print(search_results)
     except Exception as e:
         print(e)
         traceback.print_exc()
@@ -150,11 +151,23 @@ def modify_invoice():
         data_to_modify = ast.literal_eval(request.form['data_to_modify'])
         print(data_to_modify)
         invoice_code = data_to_modify['invoice_code']
-        AppDBUtil.modifyInvoiceDetails(data_to_modify)
+        invoice_code_again,number_of_rows_modified=AppDBUtil.modifyInvoiceDetails(data_to_modify)
+
+        if number_of_rows_modified > 1:
+            print("Somehow ended up with and modified duplicate invoice codes")
+            flash('Somehow ended up with and modified duplicate invoice codes')
+            return redirect(url_for('client_setup'))
+
+        if data_to_modify.get('mark_as_paid', '') == 'yes':
+            client_info, products_info = AppDBUtil.getInvoiceDetails(invoice_code)
+            stripe_info = parseDataForStripe(client_info)
+            stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info)
+            AppDBUtil.updateInvoicePaymentStarted(invoice_code)
+            print("marked invoice as paid")
 
         if data_to_modify.get('send_text_and_email','') == 'yes':
             try:
-                SendMessagesToClients.sendEmail(to_address='mo@vensti.com', message=invoice_code,type='modify')
+                SendMessagesToClients.sendEmail(to_address=data_to_modify['email'], message=invoice_code,type='modify')
                 # awsInstance.send_email(to_address=client_setup_data['email'])
                 SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=invoice_code,type='modify')
                 flash('Invoice modified and email/sms sent to client.')
