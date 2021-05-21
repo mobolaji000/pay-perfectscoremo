@@ -24,7 +24,7 @@ ENV PYTHONUNBUFFERED=empty
 ENV FLASK_ENV=development
 ENV FLASK_APP=run.py
 
-#trigger
+#trigger2
 
 
 #RUN python3 -m flask db init
