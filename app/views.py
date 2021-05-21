@@ -341,10 +341,8 @@ def stripe_webhook():
         amount_paid = paid_invoice.total/100
 
         payment_intent = stripe.PaymentIntent.retrieve(paid_invoice.payment_intent,)
-        temp = payment_intent['payment_method']
-        print(temp)
-        payment_type = temp['type']
-        print(payment_type)
+        payment_method = stripe.PaymentMethod.retrieve(payment_intent['payment_method'],)
+        payment_type = payment_method['type']
 
         if payment_type == 'card':
             amount_paid = int(math.floor(paid_invoice.total/103))
