@@ -6,6 +6,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 awsInstance = AWSInstance()
 class Config(object):
     try:
+        os.environ["price"] = "price_1I3joBDbpRMio7qj78mNjIDr"
+        os.environ["product"] = "prod_If3w0tfPuQpn52"
         flask_secret_key = awsInstance.get_secret("vensti_admin","flask_secret_key") or os.environ.get('flask_secret_key')
         SECRET_KEY = awsInstance.get_secret("vensti_admin","flask_secret_key") or os.environ.get('flask_secret_key')
         dbUserName = awsInstance.get_secret("do_db_cred", "username") or os.environ.get('dbUserName')
