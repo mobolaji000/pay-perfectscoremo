@@ -12,6 +12,7 @@ import ast
 import time
 import json
 import os
+import math
 from app.service import StripeInstance
 from app.service import PlaidInstance
 from app.service import SendMessagesToClients
@@ -338,6 +339,14 @@ def stripe_webhook():
         paid_invoice = event.data.object
         invoice_code = paid_invoice.metadata['invoice_code']
         amount_paid = paid_invoice.total/100
+
+        payment_intent = stripe.PaymentIntent.retrieve(paid_invoice.payment_intent,)
+        payment_type = payment_intent['payment_method']['type']
+
+        if payment_type == 'card':
+            amount_paid = int(math.floor(paid_invoice.total/103))
+        else:
+            amount_paid = paid_invoice.total / 100
 
         AppDBUtil.updateAmountPaidAgainstInvoice(invoice_code,amount_paid)
 
