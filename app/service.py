@@ -259,7 +259,7 @@ class SendMessagesToClients():
             created_or_modified_span = "Dear parent,\n\nYour invoice has just been modified. Here are the payment instructions/options (also sent to your email address):"
 
         text_message = "\n"+created_or_modified_span+"\n\n" \
-                    + """1. Go to perfectscoremo.com\n\n""" \
+                    + """1. Go to pay.perfectscoremo.com/input_invoice_code\n\n""" \
                     + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
                     + """3. Enter your code: """ + message +"\n\n" \
                     + """4. Read the instructions and invoice and choose a method of payment\n\n""" \
