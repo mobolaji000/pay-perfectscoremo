@@ -326,14 +326,16 @@ def exchange_plaid_for_stripe():
     public_token = request.form['public_token']
     account_id = request.form['account_id']
     bank_account_token = plaidInstance.exchange_plaid_for_stripe(public_token,account_id)
-    stripeInstance.chargeCustomerViaACH(stripe_info,bank_account_token)
+    result = stripeInstance.chargeCustomerViaACH(stripe_info,bank_account_token)
 
     if result['status'] != 'success':
         print("Attempt to pay via ACH failed")
+        result = {'status': 400}
     else:
         AppDBUtil.updateInvoicePaymentStarted(stripe_info['invoice_code'])
+        result = {'status': 200}
 
-    return jsonify({'status': 200})
+    return jsonify(result)
 
 
 
