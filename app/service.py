@@ -55,7 +55,7 @@ class StripeInstance():
 
     def createCustomer(self, clientSetupData):
         #reverse to chcek for existing customer after testing
-        existing_customer = None# Invoice.query.filter_by(email=clientSetupData['email']).order_by(Invoice.date_created.desc()).first() or Invoice.query.filter_by(phone_number=clientSetupData['phone_number']).order_by(Invoice.date_created.desc()).first()
+        existing_customer = Invoice.query.filter_by(email=clientSetupData['email']).order_by(Invoice.date_created.desc()).first() or Invoice.query.filter_by(phone_number=clientSetupData['phone_number']).order_by(Invoice.date_created.desc()).first()
         print("existing customer is ",existing_customer)
         customer = stripe.Customer.retrieve(existing_customer.stripe_customer_id) if existing_customer else stripe.Customer.create(email=clientSetupData['email'],name=clientSetupData['first_name'] + " " + clientSetupData['last_name'],phone=clientSetupData['phone_number'])
         print("new customer is ",customer)
