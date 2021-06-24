@@ -94,7 +94,7 @@ class StripeInstance():
         )
         invoice = stripe.Invoice.create(
             customer=stripe_info['stripe_customer_id'],
-            payment_settings=[{"payment_method_types": 'ach_debit'}],
+            payment_settings={"payment_method_types": 'ach_debit',},
             metadata={'invoice_code': stripe_info['invoice_code']},
         )
         stripe.Invoice.pay(invoice.id)
@@ -163,7 +163,7 @@ class StripeInstance():
                 start_date='now',
                 end_behavior='cancel',
                 phases=[x for x in phases if x is not None],
-                default_settings=[{"default_payment_method": 'card'}],
+                default_settings={"default_payment_method": 'card',},
                 metadata={'invoice_code': stripe_info['invoice_code']},
             )
         else:
@@ -175,7 +175,7 @@ class StripeInstance():
             )
             invoice = stripe.Invoice.create(
                 customer=stripe_info['stripe_customer_id'],
-                payment_settings=[{"payment_method_types": payment_id}],
+                payment_settings={"payment_method_types": payment_id,},
                 metadata={'invoice_code': stripe_info['invoice_code']},
             )
             stripe.Invoice.pay(invoice.id)
