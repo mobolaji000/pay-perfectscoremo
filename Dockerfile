@@ -19,10 +19,13 @@ COPY app/ /app
 
 EXPOSE 5000
 ENV LISTEN_PORT 5000
-ENV PYTHONUNBUFFERED=empty
+ENV PYTHONUNBUFFERED=1
 
 ENV FLASK_ENV=development
-ENV FLASK_APP=run.py
+ENV FLASK_APP=run
+
+#ENV DEPLOY_REGION=test
+ENV DEPLOY_REGION=prod
 
 #trigger2
 
@@ -40,7 +43,11 @@ ENV FLASK_APP=run.py
 #CMD flask db migrate -m "Initial migration." && python3 -m flask db upgrade && python3 -m flask run --host=0.0.0.0
 #CMD flask db init && flask db stamp head && flask db migrate -m "Initial migration." && python3 -m flask db upgrade && python3 -m flask run --host=0.0.0.0
 #CMD  flask db init && flask db stamp head && flask db migrate -m "Initial migration." && python3 -m flask db upgrade && python3 -m flask run --host=0.0.0.0
+
+
 CMD python3 -m flask run --host=0.0.0.0
+
+#CMD python3 run.py
 
 #run version that allows for automatic reload in combination with .flaskenv
 #docker build -t mobolaji00/pay-perfectscoremo . && docker run --rm --name=pay-perfectscoremo -p 5000:5000 -v $(pwd):/code --env-file DockerEnv mobolaji00/pay-perfectscoremo

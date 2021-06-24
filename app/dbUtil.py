@@ -106,6 +106,22 @@ class AppDBUtil():
         db.session.commit()
 
     @classmethod
+    def findClientsToReceiveReminders(cls):
+        invoice_details = Invoice.query.filter_by(payment_started=False).all()
+        search_results = []
+        for invoice in invoice_details:
+            client = {}
+            client['first_name'] = invoice.first_name
+            client['last_name'] = invoice.last_name
+            client['phone_number'] = invoice.phone_number
+            client['email'] = invoice.email
+            client['invoice_code'] = invoice.invoice_code
+            client['payment_started'] = str(invoice.payment_started)
+            search_results.append(client)
+
+        return search_results
+
+    @classmethod
     def searchInvoices(cls, search_query):
         if search_query.isdigit():
             if len(search_query) == 6:

@@ -94,6 +94,7 @@ class StripeInstance():
         )
         invoice = stripe.Invoice.create(
             customer=stripe_info['stripe_customer_id'],
+            payment_settings={"payment_method_types": 'ach_debit'},
             metadata={'invoice_code': stripe_info['invoice_code']},
         )
         stripe.Invoice.pay(invoice.id)
@@ -115,11 +116,11 @@ class StripeInstance():
             )
             print("payment_method is ",payment_method['card']['funding'])
 
-            if payment_method['card']['funding'] != 'credit':
-                stripe.PaymentMethod.detach(
-                    payment_id,
-                )
-                return {'status': 'failure'}
+            # if payment_method['card']['funding'] != 'credit':
+            #     stripe.PaymentMethod.detach(
+            #         payment_id,
+            #     )
+            #     return {'status': 'failure'}
 
             deposit = int(stripe_info.get('deposit', 0) * 103)
             today = int(time.mktime((datetime.datetime.today() + datetime.timedelta(seconds=1)).timetuple()))
@@ -162,6 +163,7 @@ class StripeInstance():
                 start_date='now',
                 end_behavior='cancel',
                 phases=[x for x in phases if x is not None],
+                default_settings={"default_payment_method": 'card'},
                 metadata={'invoice_code': stripe_info['invoice_code']},
             )
         else:
@@ -173,6 +175,7 @@ class StripeInstance():
             )
             invoice = stripe.Invoice.create(
                 customer=stripe_info['stripe_customer_id'],
+                payment_settings={"payment_method_types": payment_id},
                 metadata={'invoice_code': stripe_info['invoice_code']},
             )
             stripe.Invoice.pay(invoice.id)
@@ -257,9 +260,13 @@ class SendMessagesToClients():
             created_or_modified_span = "Dear parent,\n\nYour invoice has just been created. Here are the payment instructions/options (also sent to your email address):"
         elif type == 'modify':
             created_or_modified_span = "Dear parent,\n\nYour invoice has just been modified. Here are the payment instructions/options (also sent to your email address):"
+        elif type == 'reminder':
+            created_or_modified_span = "Dear parent,\n\nThis is an automated reminder that your invoice is overdue. Here are the payment instructions/options (also sent to your email address):"
+
+        # + """1. Go to pay.perfectscoremo.com/input_invoice_code\n\n""" \
 
         text_message = "\n"+created_or_modified_span+"\n\n" \
-                    + """1. Go to pay.perfectscoremo.com/input_invoice_code\n\n""" \
+                    + """1. Go to perfectscoremo.com\n\n""" \
                     + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
                     + """3. Enter your code: """ + message +"\n\n" \
                     + """4. Read the instructions and invoice and choose a method of payment\n\n""" \

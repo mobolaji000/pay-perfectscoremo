@@ -79,6 +79,8 @@ class AWSInstance():
             created_or_modified_span = "<span>Your invoice has just been <strong>created</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
         elif type == 'modify':
             created_or_modified_span = "<span>Your invoice has just been <strong>modified</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
+        elif type == 'reminder':
+            created_or_modified_span = "<span>This is an automated reminder that your invoice <strong>is due</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
 
 
         # Replace sender@example.com with your "From" address.
@@ -108,13 +110,14 @@ class AWSInstance():
                      )
 
         # The HTML body of the email.
+        #+ """<span>1. Go to pay.perfectscoremo.com/input_invoice_code</span><br>""" \
 
         BODY_HTML = """<html>
                 <head></head>
                 <body>
                   <span>Dear parent, </span><br><br>""" \
                     + created_or_modified_span \
-                    + """<span>1. Go to pay.perfectscoremo.com/input_invoice_code</span><br>""" \
+                    + """<span>1. Go to perfectscoremo.com</span><br>""" \
                     + """<span>2. Choose ‘Make A Payment’ from the menu</span><br>""" \
                     + """<span>3. Enter your code: </span>""" + "<strong>" + message + "</strong><br>" \
                     + """<span>4. Read the instructions and invoice and choose a method of payment</span><br>""" \

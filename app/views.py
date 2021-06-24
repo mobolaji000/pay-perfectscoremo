@@ -18,6 +18,8 @@ from app.service import PlaidInstance
 from app.service import SendMessagesToClients
 import traceback
 from app.config import stripe
+import threading
+from apscheduler.schedulers.background import BackgroundScheduler
 
 
 
@@ -82,6 +84,27 @@ def placeholder():
         flash('Your information is being processed')
         return redirect(url_for('success'))
     return render_template('admin.html', form=form)
+
+
+@server.before_first_request
+def send_reminders_on_server_start():
+    def reminders_background_job():
+        try:
+            print("Reminders background job started")
+            clientsToReceiveReminders = AppDBUtil.findClientsToReceiveReminders()
+            for client in clientsToReceiveReminders:
+                SendMessagesToClients.sendEmail(to_address=client['email'], message=client['invoice_code'], type='reminder')
+                SendMessagesToClients.sendSMS(to_number=client['phone_number'], message=client['invoice_code'],type='reminder')
+
+        except Exception as e:
+            print("Error in sending reminders")
+            print(e)
+            traceback.print_exc()
+
+    scheduler = BackgroundScheduler()
+    #scheduler.add_job(reminders_background_job,'cron',second='30')
+    scheduler.add_job(reminders_background_job, 'cron', day_of_week='5',hour='17',minute='30')
+    scheduler.start()
 
 
 @server.route('/success')
