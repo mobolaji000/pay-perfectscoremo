@@ -84,12 +84,12 @@ class StripeInstance():
     def chargeCustomerViaACH(self, stripe_info, bank_account_token):
         invoice_total = int(stripe_info['invoice_total'])
 
-        # source = stripe.Source.create(
-        #     type='ach_debit',
-        #     token=bank_account_token,
-        # )
+        source = stripe.Source.create(
+            type='ach_debit',
+            token=bank_account_token,
+        )
 
-        #bank_account_token_id = stripe.Token.retrieve(bank_account_token,)['bank_account']['id']
+        bank_account_token_id = stripe.Token.retrieve(bank_account_token,)['bank_account']['id']
 
 
         stripe.Customer.modify(
@@ -108,7 +108,7 @@ class StripeInstance():
         invoice = stripe.Invoice.create(
             customer=stripe_info['stripe_customer_id'],
             #payment_settings={"payment_method_types": ['ach_debit',]},
-            default_source=bank_account_token,
+            default_source=bank_account_token_id,
             metadata={'invoice_code': stripe_info['invoice_code']},
         )
         stripe.Invoice.pay(invoice.id)
