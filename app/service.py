@@ -93,7 +93,7 @@ class StripeInstance():
         stripe.Customer.modify(
             stripe_info['stripe_customer_id'],
             #source=bank_account_token,
-            defualt_source=source['id'],
+            default_source=source['id'],
             #invoice_settings={'default_payment_method': None},
         )
         stripe.InvoiceItem.create(
