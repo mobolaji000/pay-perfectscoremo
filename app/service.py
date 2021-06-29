@@ -102,7 +102,7 @@ class StripeInstance():
             price=os.environ.get('price'),
         )
 
-
+        #
         invoice = stripe.Invoice.create(
             customer=stripe_info['stripe_customer_id'],
             #payment_settings={"payment_method_types": ['ach_debit',]},
