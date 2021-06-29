@@ -117,10 +117,10 @@ class StripeInstance():
             invoice_settings={'default_payment_method':payment_id},
         )
 
-        stripe.PaymentMethod.modify(
-            payment_id,
-           type="card",
-        )
+        # stripe.PaymentMethod.modify(
+        #     payment_id,
+        #    type="card",
+        # )
 
         if chosen_mode_of_payment == 'installment-payment-credit-card':
 
