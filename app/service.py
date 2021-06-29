@@ -95,7 +95,8 @@ class StripeInstance():
         )
         invoice = stripe.Invoice.create(
             customer=stripe_info['stripe_customer_id'],
-            payment_settings={"payment_method_types": ['ach_debit',]},
+            #payment_settings={"payment_method_types": ['ach_debit',]},
+            default_source=bank_account_token,
             metadata={'invoice_code': stripe_info['invoice_code']},
         )
         stripe.Invoice.pay(invoice.id)
@@ -105,10 +106,20 @@ class StripeInstance():
     def chargeCustomerViaCard(self, stripe_info, chosen_mode_of_payment, payment_id):
         #stripe_info = ast.literal_eval(stripe_info)
 
+        stripe.PaymentMethod.attach(
+            payment_id,
+            customer=stripe_info['stripe_customer_id'],
+        )
+
         stripe.Customer.modify(
             stripe_info['stripe_customer_id'],
             #default_source=None,
             invoice_settings={'default_payment_method':payment_id},
+        )
+
+        stripe.PaymentMethod.modify(
+            payment_id,
+           type="card",
         )
 
         if chosen_mode_of_payment == 'installment-payment-credit-card':
@@ -177,7 +188,8 @@ class StripeInstance():
             )
             invoice = stripe.Invoice.create(
                 customer=stripe_info['stripe_customer_id'],
-                payment_settings={"payment_method_types": ['card',]},
+                default_payment_method=payment_id,
+                #payment_settings={"payment_method_types": ['card',]},
                 metadata={'invoice_code': stripe_info['invoice_code']},
             )
             stripe.Invoice.pay(invoice.id)
