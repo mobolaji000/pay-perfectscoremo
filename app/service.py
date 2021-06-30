@@ -136,6 +136,7 @@ class StripeInstance():
         #     payment_id,
         #    type="card",
         # )
+        #
 
         if chosen_mode_of_payment == 'installment-payment-credit-card':
 
