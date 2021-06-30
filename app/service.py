@@ -98,6 +98,9 @@ class StripeInstance():
             #default_source=bank_account_token,
             #invoice_settings={'default_payment_method': None},
         )
+
+        customer_default_source = stripe.Customer.retrieve(stripe_info['stripe_customer_id'])['default_source']
+
         stripe.InvoiceItem.create(
             customer=stripe_info['stripe_customer_id'],
             quantity=invoice_total,
@@ -108,7 +111,7 @@ class StripeInstance():
         invoice = stripe.Invoice.create(
             customer=stripe_info['stripe_customer_id'],
             #payment_settings={"payment_method_types": ['ach_debit',]},
-            #default_source=bank_account_token_id,
+            default_source=customer_default_source,
             metadata={'invoice_code': stripe_info['invoice_code']},
         )
         stripe.Invoice.pay(invoice.id)
