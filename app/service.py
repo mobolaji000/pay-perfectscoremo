@@ -303,8 +303,7 @@ class SendMessagesToClients():
                     + """5. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free\n\n""" \
                     + """6. For installment payments, this is accepted: Credit Cards\n\n""" \
                     + """7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH\n\n""" \
-
-        
+                    + """### We don't receive messages on this number. If you have any questions, reach out on 972-584-7364 ###\n\n""" \
 
         account_sid = SendMessagesToClients.awsInstance.get_secret("twilio_cred", "TWILIO_ACCOUNT_SID") or os.environ['TWILIO_ACCOUNT_SID']
         auth_token = SendMessagesToClients.awsInstance.get_secret("twilio_cred", "TWILIO_AUTH_TOKEN") or os.environ['TWILIO_AUTH_TOKEN']
