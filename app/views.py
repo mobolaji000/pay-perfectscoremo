@@ -125,29 +125,35 @@ def client_setup():
 @server.route('/create_invoice',methods=['POST'])
 @login_required
 def create_invoice():
-    client_setup_data = request.form.to_dict()
-    customer = stripeInstance.createCustomer(client_setup_data)
-    client_setup_data.update({"stripe_customer_id":customer["id"]})
-    invoice_code,number_of_rows_modified = AppDBUtil.createOrModifyClient(client_setup_data, action='create')
+    try:
+        client_setup_data = request.form.to_dict()
+        customer = stripeInstance.createCustomer(client_setup_data)
+        client_setup_data.update({"stripe_customer_id":customer["id"]})
+        invoice_code,number_of_rows_modified = AppDBUtil.createOrModifyClient(client_setup_data, action='create')
 
-    if client_setup_data.get('mark_as_paid','') == 'yes':
-        client_info, products_info = AppDBUtil.getInvoiceDetails(invoice_code)
-        stripe_info = parseDataForStripe(client_info)
-        stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info)
-        AppDBUtil.updateInvoicePaymentStarted(invoice_code)
-        print("marked invoice as paid")
+        if client_setup_data.get('mark_as_paid','') == 'yes':
+            client_info, products_info = AppDBUtil.getInvoiceDetails(invoice_code)
+            stripe_info = parseDataForStripe(client_info)
+            stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info)
+            AppDBUtil.updateInvoicePaymentStarted(invoice_code)
+            print("marked invoice as paid")
 
-    if client_setup_data.get('send_text_and_email','') == 'yes':
-        try:
-            SendMessagesToClients.sendEmail(to_address=client_setup_data['email'],message=invoice_code,type='create')
-            #awsInstance.send_email(to_address=client_setup_data['email'])
-            SendMessagesToClients.sendSMS(to_number=client_setup_data['phone_number'],message=invoice_code,type='create')
-            flash('Invoice created and email/sms sent to client.')
-        except Exception as e:
-            traceback.print_exc()
-            flash('An error occured while sending an email/sms to the client after creating the invoice.')
+        if client_setup_data.get('send_text_and_email','') == 'yes':
+            try:
+                SendMessagesToClients.sendEmail(to_address=client_setup_data['email'],message=invoice_code,type='create')
+                #awsInstance.send_email(to_address=client_setup_data['email'])
+                SendMessagesToClients.sendSMS(to_number=client_setup_data['phone_number'],message=invoice_code,type='create')
+                flash('Invoice created and email/sms sent to client.')
+            except Exception as e:
+                traceback.print_exc()
+                flash('An error occured while sending an email/sms to the client after creating the invoice.')
 
-    return render_template('generate_invoice_code.html',invoice_code=invoice_code)
+        return render_template('generate_invoice_code.html',invoice_code=invoice_code)
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        flash('An error occured while creating the invoice.')
+        return redirect(url_for('client_setup'))
 
 @server.route('/search_invoice',methods=['POST'])
 @login_required
