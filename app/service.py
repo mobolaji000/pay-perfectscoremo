@@ -291,19 +291,21 @@ class SendMessagesToClients():
         elif type == 'modify':
             created_or_modified_span = "Dear parent,\n\nYour invoice has just been modified. Here are the payment instructions/options (also sent to your email address):"
         elif type == 'reminder':
-            created_or_modified_span = "Dear parent,\n\nThis is an automated reminder that your invoice is overdue. Here are the payment instructions/options (also sent to your email address):"
+            created_or_modified_span = "These are the parents to whom reminder was sent:\n\n"+message
 
         # + """1. Go to pay.perfectscoremo.com/input_invoice_code\n\n""" \
-
-        text_message = "\n"+created_or_modified_span+"\n\n" \
-                    + """1. Go to perfectscoremo.com\n\n""" \
-                    + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
-                    + """3. Enter your code: """ + message +"\n\n" \
-                    + """4. Read the instructions and invoice and choose a method of payment\n\n""" \
-                    + """5. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free\n\n""" \
-                    + """6. For installment payments, this is accepted: Credit Cards\n\n""" \
-                    + """7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH\n\n""" \
-                    + """### We don't receive messages on this number. If you have any questions, reach out on 972-584-7364 ###\n\n""" \
+        if type != 'reminder':
+            text_message = "\n"+created_or_modified_span+"\n\n" \
+                        + """1. Go to perfectscoremo.com\n\n""" \
+                        + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
+                        + """3. Enter your code: """ + message +"\n\n" \
+                        + """4. Read the instructions and invoice and choose a method of payment\n\n""" \
+                        + """5. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free\n\n""" \
+                        + """6. For installment payments, this is accepted: Credit Cards\n\n""" \
+                        + """7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH\n\n""" \
+                        + """### We don't receive messages on this number. If you have any questions, reach out on 972-584-7364 ###\n\n"""
+        else:
+            text_message = created_or_modified_span
 
         account_sid = SendMessagesToClients.awsInstance.get_secret("twilio_cred", "TWILIO_ACCOUNT_SID") or os.environ['TWILIO_ACCOUNT_SID']
         auth_token = SendMessagesToClients.awsInstance.get_secret("twilio_cred", "TWILIO_AUTH_TOKEN") or os.environ['TWILIO_AUTH_TOKEN']

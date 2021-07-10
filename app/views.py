@@ -91,11 +91,13 @@ def send_reminders_on_server_start():
     def reminders_background_job():
         try:
             print("Reminders background job started")
+            reminder_last_names = ''
             clientsToReceiveReminders = AppDBUtil.findClientsToReceiveReminders()
             for client in clientsToReceiveReminders:
                 SendMessagesToClients.sendEmail(to_address=client['email'], message=client['invoice_code'], type='reminder')
                 SendMessagesToClients.sendSMS(to_number=client['phone_number'], message=client['invoice_code'],type='reminder')
-                SendMessagesToClients.sendSMS(to_number='9725847364', message=client['last_name'], type='reminder')
+                reminder_last_names = reminder_last_names+client['last_name']+", "
+            SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='reminder')
 
         except Exception as e:
             print("Error in sending reminders")
