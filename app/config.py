@@ -26,7 +26,7 @@ class Config(object):
 
             os.environ["price"] = "price_1I3joBDbpRMio7qj78mNjIDr"
             os.environ["product"] = "prod_If3w0tfPuQpn52"
-            os.environ["url_to_start_reminder"] = "https://pay.perfectscoremo.com/"
+            os.environ["url_to_start_reminder"] = "https://pay.perfectscoremo.com/health"
             flask_secret_key = awsInstance.get_secret("vensti_admin", "flask_secret_key")
             SECRET_KEY = awsInstance.get_secret("vensti_admin", "flask_secret_key")
             dbUserName = awsInstance.get_secret("do_db_cred", "username")

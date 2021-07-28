@@ -9,6 +9,7 @@ def start_runner():
         not_started = True
         while not_started:
             print('In start loop')
+            time.sleep(10)
             try:
                 url_to_start_reminder = os.environ.get("url_to_start_reminder")
                 r = requests.get(url_to_start_reminder)
