@@ -106,6 +106,7 @@ def send_reminders_on_server_start():
 
     scheduler = BackgroundScheduler()
     #scheduler.add_job(reminders_background_job,'cron',second='30')
+    #trigger
     scheduler.add_job(reminders_background_job, 'cron', day_of_week='5',hour='17',minute='30')
     print("Reminders background job added")
     scheduler.start()
