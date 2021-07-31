@@ -291,10 +291,12 @@ class SendMessagesToClients():
         elif type == 'modify':
             created_or_modified_span = "Dear parent,\n\nYour invoice has just been modified. Here are the payment instructions/options (also sent to your email address):"
         elif type == 'reminder':
-            created_or_modified_span = "These are the parents to whom reminder was sent:\n\n"+message
+            #created_or_modified_span = "These are the parents to whom reminder was sent:\n\n"+message
+            created_or_modified_span = "Dear parent,\n\nThis is an automated reminder that your invoice is due. Here are the payment instructions/options (also sent to your email address):"
+
 
         # + """1. Go to pay.perfectscoremo.com/input_invoice_code\n\n""" \
-        if type != 'reminder':
+        if type != 'to_mo':
             text_message = "\n"+created_or_modified_span+"\n\n" \
                         + """1. Go to perfectscoremo.com\n\n""" \
                         + """2. Choose ‘Make A Payment’ from the menu\n\n""" \

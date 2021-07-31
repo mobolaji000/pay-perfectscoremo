@@ -97,7 +97,7 @@ def send_reminders_on_server_start():
                 SendMessagesToClients.sendEmail(to_address=client['email'], message=client['invoice_code'], type='reminder')
                 SendMessagesToClients.sendSMS(to_number=client['phone_number'], message=client['invoice_code'],type='reminder')
                 reminder_last_names = reminder_last_names+client['last_name']+", "
-            SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='reminder')
+            SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')
 
         except Exception as e:
             print("Error in sending reminders")
