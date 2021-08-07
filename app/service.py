@@ -307,7 +307,7 @@ class SendMessagesToClients():
                         + """7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH\n\n""" \
                         + """### We don't receive messages on this number. If you have any questions, reach out on 972-584-7364 ###\n\n"""
         else:
-            text_message = created_or_modified_span
+            text_message = message
 
         account_sid = SendMessagesToClients.awsInstance.get_secret("twilio_cred", "TWILIO_ACCOUNT_SID") or os.environ['TWILIO_ACCOUNT_SID']
         auth_token = SendMessagesToClients.awsInstance.get_secret("twilio_cred", "TWILIO_AUTH_TOKEN") or os.environ['TWILIO_AUTH_TOKEN']
