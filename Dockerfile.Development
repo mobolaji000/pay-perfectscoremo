@@ -15,7 +15,7 @@ RUN pip3 install -r requirements.txt
 # copy the content of the local app directory to the working directory
 COPY app/ /app
 
-#WORKDIR
+#Wtrigger
 
 EXPOSE 5000
 ENV LISTEN_PORT 5000
