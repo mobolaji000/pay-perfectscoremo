@@ -9,7 +9,7 @@ def start_runner():
         not_started = True
         while not_started:
             print('In start loop')
-            time.sleep(10)
+            time.sleep(30)
             try:
                 url_to_start_reminder = os.environ.get("url_to_start_reminder")
                 r = requests.get(url_to_start_reminder)
@@ -17,9 +17,9 @@ def start_runner():
                     print('Server started, quiting start_loop')
                     not_started = False
                 print(r.status_code)
-            except:
-                print(e)
-                traceback.print_exc()
+            except Exception as e:
+                #print(e)
+                #traceback.print_exc()
                 print('Server not yet started')
             time.sleep(2)
 
@@ -27,6 +27,8 @@ def start_runner():
     thread = threading.Thread(target=start_loop)
     thread.start()
 
+# running the flask db option breaks this multithreading code to ping url_to_start_reminder
 start_runner()
 from app import server
+
 

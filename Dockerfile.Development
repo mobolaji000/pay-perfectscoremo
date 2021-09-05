@@ -24,6 +24,6 @@ ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=development
 ENV FLASK_APP=run
 
-ENV DEPLOY_REGION=prod
+ENV DEPLOY_REGION=dev
 
 CMD python3 -m flask run --host=0.0.0.0
