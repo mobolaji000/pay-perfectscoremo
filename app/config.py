@@ -6,11 +6,27 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 awsInstance = AWSInstance()
 class Config(object):
     try:
-        if os.environ['DEPLOY_REGION'] == 'test':
+        if os.environ['DEPLOY_REGION'] == 'local':
 
             os.environ["price"] = "price_1J5rWJDbpRMio7qjrkWJfnk3"
             os.environ["product"] = "prod_JjKA9beb14xw0F"
             os.environ["url_to_start_reminder"] = "http://127.0.0.1:5000/"
+            flask_secret_key = os.environ.get('flask_secret_key')
+            SECRET_KEY = os.environ.get('flask_secret_key')
+            dbUserName = os.environ.get('dbUserNameLocal')
+            dbPassword = os.environ.get('dbPasswordLocal')
+            SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://'+str(dbUserName)+':'+str(dbPassword)+'@host/mobolajioo'
+            SQLALCHEMY_TRACK_MODIFICATIONS = False
+            stripe.api_key = os.environ.get('stripe_api_key_test')
+            plaid_client_id = os.environ.get('plaid_client_id')
+            plaid_secret = os.environ.get('plaid_secret')
+            plaidClient = plaid.Client(client_id=plaid_client_id, secret=plaid_secret, environment='sandbox')
+
+        elif os.environ['DEPLOY_REGION'] == 'dev':
+
+            os.environ["price"] = "price_1J5rWJDbpRMio7qjrkWJfnk3"
+            os.environ["product"] = "prod_JjKA9beb14xw0F"
+            os.environ["url_to_start_reminder"] = "https://dev.pay.perfectscoremo.com/health"
             flask_secret_key = os.environ.get('flask_secret_key')
             SECRET_KEY = os.environ.get('flask_secret_key')
             dbUserName = os.environ.get('dbUserName')
