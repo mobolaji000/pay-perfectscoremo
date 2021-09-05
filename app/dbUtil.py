@@ -74,10 +74,10 @@ class AppDBUtil():
             db.session.commit()
         except:
             # if any kind of exception occurs, rollback transaction
-            session.rollback()
+            db.session.rollback()
             raise
         finally:
-            session.close()
+            db.session.close()
 
         return invoice_code,number_of_rows_modified
 
@@ -106,10 +106,10 @@ class AppDBUtil():
             db.session.commit()
         except:
             # if any kind of exception occurs, rollback transaction
-            session.rollback()
+            db.session.rollback()
             raise
         finally:
-            session.close()
+            db.session.close()
 
     @classmethod
     def modifyInvoiceDetails(cls, data_to_modify):
@@ -124,10 +124,10 @@ class AppDBUtil():
             db.session.commit()
         except:
             # if any kind of exception occurs, rollback transaction
-            session.rollback()
+            db.session.rollback()
             raise
         finally:
-            session.close()
+            db.session.close()
 
     @classmethod
     def findClientsToReceiveReminders(cls):
@@ -211,10 +211,10 @@ class AppDBUtil():
             db.session.commit()
         except:
             # if any kind of exception occurs, rollback transaction
-            session.rollback()
+            db.session.rollback()
             raise
         finally:
-            session.close()
+            db.session.close()
 
     @classmethod
     def computeClientInvoiceDetails(cls,admin_invoice_details):
