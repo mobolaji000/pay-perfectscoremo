@@ -8,6 +8,7 @@ class Config(object):
     try:
         if os.environ['DEPLOY_REGION'] == 'local':
 
+            os.environ["stripe_pk"] = 'pk_test_51Hlgy6DbpRMio7qjWV9YNuBPiQIgD6PrBwO7oek37OEafhZiRjkfs42owvLto0eO8c6CCaiSAOUrXn0uPEJdai6Z00DUYXi551'
             os.environ["price"] = "price_1J5rWJDbpRMio7qjrkWJfnk3"
             os.environ["product"] = "prod_JjKA9beb14xw0F"
             os.environ["url_to_start_reminder"] = "http://127.0.0.1:5000/"
@@ -24,6 +25,7 @@ class Config(object):
 
         elif os.environ['DEPLOY_REGION'] == 'dev':
 
+            os.environ["stripe_pk"] = 'pk_test_51Hlgy6DbpRMio7qjWV9YNuBPiQIgD6PrBwO7oek37OEafhZiRjkfs42owvLto0eO8c6CCaiSAOUrXn0uPEJdai6Z00DUYXi551'
             os.environ["price"] = "price_1J5rWJDbpRMio7qjrkWJfnk3"
             os.environ["product"] = "prod_JjKA9beb14xw0F"
             os.environ["url_to_start_reminder"] = "https://https://dev-pay-perfectscoremo-7stpz.ondigitalocean.app/health"
@@ -40,6 +42,7 @@ class Config(object):
 
         elif os.environ['DEPLOY_REGION'] == 'prod':
 
+            os.environ["stripe_pk"] = 'pk_live_51Hlgy6DbpRMio7qjB3uZkis2sPMKb6HmXUI8k5PNKvYgOK1jv2XfzqG5fNaRbEO68wJ7VaXXvISCKIF7Yj2rT01t00GFzi1FkX'
             os.environ["price"] = "price_1I3joBDbpRMio7qj78mNjIDr"
             os.environ["product"] = "prod_If3w0tfPuQpn52"
             os.environ["url_to_start_reminder"] = "https://pay.perfectscoremo.com/health"

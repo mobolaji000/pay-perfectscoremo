@@ -11,8 +11,6 @@ from app import views, models
 migrate = Migrate(server, db)
 bootstrap = Bootstrap(server)
 
-#testing dev push2
-
 
 
 

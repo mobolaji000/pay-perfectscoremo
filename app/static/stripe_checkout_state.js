@@ -1,8 +1,7 @@
 $(document).ready(function() {
 
-//var stripe = Stripe('pk_test_51Hlgy6DbpRMio7qjWV9YNuBPiQIgD6PrBwO7oek37OEafhZiRjkfs42owvLto0eO8c6CCaiSAOUrXn0uPEJdai6Z00DUYXi551');
-var stripe = Stripe('pk_live_51Hlgy6DbpRMio7qjB3uZkis2sPMKb6HmXUI8k5PNKvYgOK1jv2XfzqG5fNaRbEO68wJ7VaXXvISCKIF7Yj2rT01t00GFzi1FkX');
-
+var stripe_pk = $("#stripe_pk").attr("data-stripe_pk");
+var stripe = Stripe(stripe_pk);
 var elements = stripe.elements();
 var stripe_info = $("#stripe_info").attr("data-stripe_info");
 var chosen_mode_of_payment = $("#chosen_mode_of_payment").attr("data-chosen_mode_of_payment");

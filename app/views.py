@@ -281,10 +281,11 @@ def checkout():
     payment_data = request.form.to_dict()
     chosen_mode_of_payment = payment_data.get('installment-payment', '') if payment_data.get('installment-payment','') != '' else payment_data.get('full-payment', '') if payment_data.get('full-payment', '') != '' else payment_data.get('payment-options', '') if payment_data.get('payment-options', '') != '' else ''
     stripe_info = ast.literal_eval(payment_data['stripe_info'])
+    stripe_pk = os.environ.get('stripe_pk')
     if chosen_mode_of_payment.__contains__('ach'):
         return render_template('plaid_checkout.html',stripe_info=stripe_info)
     else:
-        return render_template('stripe_checkout.html', stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment)
+        return render_template('stripe_checkout.html', stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment,stripe_pk=stripe_pk)
 
 
 def parseDataForStripe(client_info):

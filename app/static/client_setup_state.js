@@ -332,10 +332,11 @@ $(document).ready(function() {
 
 // add and delete rows
 
-
 var counter = 0;
 
     $("#addrow").on("click", function () {
+
+    //alert("trying to add new row");
         var newRow = $("<tr>");
         var cols = "";
 
@@ -357,14 +358,14 @@ var counter = 0;
     });
 
 
-});
+
 
 
 
 function calculateRow(row) {
     var price = +row.find('input[name^="price"]').val();
 
-}
+};
 
 function calculateGrandTotal() {
     var grandTotal = 0;
@@ -372,5 +373,9 @@ function calculateGrandTotal() {
         grandTotal += +$(this).val();
     });
     $("#grandtotal").text(grandTotal.toFixed(2));
+
+};
+
+
 
 });
