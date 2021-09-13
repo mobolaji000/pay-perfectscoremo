@@ -34,5 +34,12 @@ class Invoice(db.Model):
         return '<Client {}>'.format(self.invoice_code)
 
 db.create_all()
-db.session.commit()
+try:
+    db.session.commit()
+except:
+    # if any kind of exception occurs, rollback transaction
+    db.session.rollback()
+    raise
+finally:
+    db.session.close()
 

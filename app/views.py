@@ -108,6 +108,7 @@ def send_reminders_on_server_start():
     #scheduler.add_job(reminders_background_job,'cron',second='30')
     #test token
     scheduler.add_job(reminders_background_job, 'cron', day_of_week='sun',hour='21',minute='30')
+
     print("Reminders background job added")
     scheduler.start()
 
@@ -361,9 +362,11 @@ def stripe_webhook():
         event = stripe.Event.construct_from(
             json.loads(payload), stripe.api_key
         )
+        print("Event is: ")
         print(event)
     except ValueError as e:
         # Invalid payload
+        print("400 error from calling webhook. Check code and logs")
         print(e)
         traceback.print_exc()
         return jsonify({'status': 400})
@@ -371,41 +374,47 @@ def stripe_webhook():
     # Handle the event
 
     # handle updating the DB when invoices are paid; these invoices should have invoice codes attahced already
-    if event.type == 'invoice.paid':
-        paid_invoice = event.data.object
-        invoice_code = paid_invoice.metadata['invoice_code']
-        amount_paid = paid_invoice.total/100
+    try:
+        if event.type == 'invoice.paid':
+            paid_invoice = event.data.object
+            invoice_code = paid_invoice.metadata['invoice_code']
+            amount_paid = paid_invoice.total/100
 
-        payment_intent = stripe.PaymentIntent.retrieve(paid_invoice.payment_intent,)
-        payment_method = stripe.PaymentMethod.retrieve(payment_intent['payment_method'],)
-        payment_type = payment_method['type']
+            payment_intent = stripe.PaymentIntent.retrieve(paid_invoice.payment_intent,)
+            payment_method = stripe.PaymentMethod.retrieve(payment_intent['payment_method'],)
+            payment_type = payment_method['type']
 
-        if payment_type == 'card':
-            amount_paid = int(math.floor(paid_invoice.total/103))
-        else:
-            amount_paid = paid_invoice.total / 100
+            if payment_type == 'card':
+                amount_paid = int(math.floor(paid_invoice.total/103))
+            else:
+                amount_paid = paid_invoice.total / 100
 
-        AppDBUtil.updateAmountPaidAgainstInvoice(invoice_code,amount_paid)
-
-
-        print("paid invoice is ", paid_invoice)
-        print("invoice code is ", invoice_code)
-
-    # attach invoice code to invoices generated from subscriptions
-    elif event.type == 'invoice.created':
-        created_invoice = event.data.object
-        subscription = created_invoice.get('subscription',None)
-        if subscription:
-            subscription_schedule = stripe.Subscription.retrieve(subscription)['schedule']
-            subscription_schedule_metadata = stripe.SubscriptionSchedule.retrieve(subscription_schedule,).metadata
-            invoice_code = subscription_schedule_metadata['invoice_code']
-            stripe.Invoice.modify(created_invoice['id'],metadata={"invoice_code":invoice_code},)
+            AppDBUtil.updateAmountPaidAgainstInvoice(invoice_code,amount_paid)
 
 
-            print("created invoice is ",created_invoice)
+            print("paid invoice is ", paid_invoice)
             print("invoice code is ", invoice_code)
 
-    else:
-        print('Unhandled event type {}'.format(event.type))
+        # attach invoice code to invoices generated from subscriptions
+        elif event.type == 'invoice.created':
+            created_invoice = event.data.object
+            subscription = created_invoice.get('subscription',None)
+            if subscription:
+                subscription_schedule = stripe.Subscription.retrieve(subscription)['schedule']
+                subscription_schedule_metadata = stripe.SubscriptionSchedule.retrieve(subscription_schedule,).metadata
+                invoice_code = subscription_schedule_metadata['invoice_code']
+                stripe.Invoice.modify(created_invoice['id'],metadata={"invoice_code":invoice_code},)
+
+
+                print("created invoice is ",created_invoice)
+                print("invoice code is ", invoice_code)
+
+        else:
+            print('Unhandled event type {}'.format(event.type))
+    except Exception as e:
+        print("500 error from calling webhook. Check code and logs")
+        print(e)
+        traceback.print_exc()
+        return jsonify({'status': 500})
 
     return jsonify({'status': 200})

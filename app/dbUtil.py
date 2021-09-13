@@ -68,7 +68,17 @@ class AppDBUtil():
 
             print("number of rows modified is: ",number_of_rows_modified) #printing of rows modified to logs to help with auditing
 
-        db.session.commit()
+
+
+        try:
+            db.session.commit()
+        except:
+            # if any kind of exception occurs, rollback transaction
+            db.session.rollback()
+            raise
+        finally:
+            db.session.close()
+
         return invoice_code,number_of_rows_modified
 
     @classmethod
@@ -92,7 +102,14 @@ class AppDBUtil():
     def deleteInvoice(cls, codeOfInvoiceToDelete):
         invoice = Invoice.query.filter_by(invoice_code=codeOfInvoiceToDelete).first()
         db.session.delete(invoice)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            # if any kind of exception occurs, rollback transaction
+            db.session.rollback()
+            raise
+        finally:
+            db.session.close()
 
     @classmethod
     def modifyInvoiceDetails(cls, data_to_modify):
@@ -103,7 +120,14 @@ class AppDBUtil():
     def updateAmountPaidAgainstInvoice(cls,invoice_code,amount_paid):
         invoice = Invoice.query.filter_by(invoice_code=invoice_code).first()
         invoice.amount_from_invoice_paid_so_far = invoice.amount_from_invoice_paid_so_far + amount_paid
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            # if any kind of exception occurs, rollback transaction
+            db.session.rollback()
+            raise
+        finally:
+            db.session.close()
 
     @classmethod
     def findClientsToReceiveReminders(cls):
@@ -183,7 +207,14 @@ class AppDBUtil():
     def updateInvoicePaymentStarted(cls, invoice_code):
         invoice = Invoice.query.filter_by(invoice_code=invoice_code).order_by(Invoice.date_created.desc()).first()
         invoice.payment_started = True
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            # if any kind of exception occurs, rollback transaction
+            db.session.rollback()
+            raise
+        finally:
+            db.session.close()
 
     @classmethod
     def computeClientInvoiceDetails(cls,admin_invoice_details):
