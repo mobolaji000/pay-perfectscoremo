@@ -165,7 +165,7 @@ def search_invoice():
 
     try:
         search_results = AppDBUtil.searchInvoices(search_query)
-        #print(search_results)
+        print(search_results)
     except Exception as e:
         print(e)
         traceback.print_exc()

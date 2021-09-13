@@ -73,7 +73,29 @@
      function populateFieldsFromSearch(result)
      {
 
-     //alert('Hello');
+     //clear state of fields
+     $('input[name="was_diagnostic_purchased"]').prop('checked', false);
+     $('input[name="diag_units"]').val('');
+     $('input[name="diag_total"]').val('');
+     $('input[name="was_test_prep_purchased"]').prop('checked', false);
+     $('input[name="tp_product"]').prop('checked', false);
+     $('input[name="tp_units"]').val('');
+     $('input[name="tp_total"]').val('');
+     $('input[name="was_college_apps_purchased"]').prop('checked', false);
+     $('input[name="college_consultation"]').prop('checked', false);
+     $('input[name="college_apps_product"]').prop('checked', false);
+     $('input[name="college_apps_units"]').val('');
+     $('input[name="college_apps_total"]').val('');
+     $('input[name="turn_on_installments"]').prop('checked', false);
+     $('input[name="installment_date_1"]').val('');
+     $('input[name="installment_date_2"]').val('');
+     $('input[name="installment_date_3"]').val('');
+     $('input[name="adjust_total"]').val('');
+     $('input[name="adjustment_explanation"]').val('');
+     $('input[name="invoice_total"]').val('');
+
+
+	//fill fields based on search item selected
      $('input[name="first_name"]').val(result.first_name);
      $('input[name="last_name"]').val(result.last_name);
      $('input[name="email"]').val(result.email);
@@ -123,19 +145,19 @@
      $('input[id="tp-tech-01wk"]').prop('checked', true);
      }
 
-     if (result.was_test_prep_purchased == "tp-vensti-12wks")
+     if (result.was_test_prep_purchased == "tp-vensti-center-12wks")
      {
-     $('input[id="tp-vensti-12wks"]').prop('checked', true);
+     $('input[id="tp-vensti-center-12wks"]').prop('checked', true);
      }
 
-     if (result.was_test_prep_purchased == "tp-vensti-08wks")
+     if (result.was_test_prep_purchased == "tp-vensti-center-08wks")
      {
-     $('input[id="tp-vensti-08wks"]').prop('checked', true);
+     $('input[id="tp-vensti-center-08wks"]').prop('checked', true);
      }
 
-     if (result.was_test_prep_purchased == "tp-vensti-01wk")
+     if (result.was_test_prep_purchased == "tp-vensti-center-01wk")
      {
-     $('input[id="tp-vensti-01wk"]').prop('checked', true);
+     $('input[id="tp-vensti-center-01wk"]').prop('checked', true);
      }
 
      if (result.was_test_prep_purchased == "tp-home-12wks")
@@ -245,11 +267,18 @@
      //
 
 
-		$('input[name="adjust_total"]').prop('readonly', false);
-        $('input[name="adjustment_explanation"]').prop('readonly', false);
+	$('input[name="adjust_total"]').prop('readonly', false);
+    $('input[name="adjustment_explanation"]').prop('readonly', false);
 
-
+	if (result.adjust_total == 0)
+	{
+     $('input[name="adjust_total"]').val('');
+     }
+     else
+     {
      $('input[name="adjust_total"]').val(result.adjust_total);
+     }
+
      $('input[name="adjustment_explanation"]').val(result.adjustment_explanation);
      $('input[name="invoice_total"]').val(result.invoice_total);
 
@@ -761,6 +790,49 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 					</div>
 
 				</div>
+
+				<br>
+
+				<div class="container">
+    <table id="myTable" class=" table order-list">
+    <thead>
+        <tr>
+            <td>Name</td>
+            <td>Gmail</td>
+            <td>Phone</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="col-sm-4">
+                <input type="text" name="name" class="form-control" />
+            </td>
+            <td class="col-sm-4">
+                <input type="mail" name="mail"  class="form-control"/>
+            </td>
+            <td class="col-sm-3">
+                <input type="text" name="phone"  class="form-control"/>
+            </td>
+            <td class="col-sm-2"><a class="deleteRow"></a>
+
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="5" style="text-align: left;">
+                <input type="button" class="btn btn-lg btn-block " id="addrow" value="Add Row" />
+            </td>
+
+			<td colspan="5" style="text-align: left;">
+                <input type="button" class="btn btn-lg btn-block " id="deleterow" value="Delete Row" />
+            </td>
+        </tr>
+        <tr>
+        </tr>
+    </tfoot>
+</table>
+</div>
 
 				<br>
 
