@@ -6,7 +6,7 @@ from flask_bootstrap import Bootstrap
 
 server = Flask(__name__)
 server.config.from_object(Config)
-db = SQLAlchemy(server)
+db = SQLAlchemy(server,engine_options={"pool_pre_ping": True})
 from app import views, models
 migrate = Migrate(server, db)
 bootstrap = Bootstrap(server)
