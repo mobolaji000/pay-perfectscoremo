@@ -107,7 +107,9 @@ def send_reminders_on_server_start():
     scheduler = BackgroundScheduler()
     #scheduler.add_job(reminders_background_job,'cron',second='30')
     #test token
-    scheduler.add_job(reminders_background_job, 'cron', day_of_week='sun',hour='21',minute='45')
+
+    scheduler.add_job(reminders_background_job, 'cron', day_of_week='sat',hour='19',minute='45') #rememebr that this time is in UTC whenever you have to change it
+
     print("Reminders background job added")
     scheduler.start()
 
