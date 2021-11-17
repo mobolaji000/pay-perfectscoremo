@@ -6,7 +6,7 @@
     <title>ACH Checkout</title>
 
     <!-- Bootstrap core CSS -->
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href="static/page_style.css" rel="stylesheet" >
 
     <!-- Custom styles for this template -->
@@ -41,6 +41,7 @@
   </div>
 
    <input id="stripe_info" hidden  type="stripe_info"  data-stripe_info="{{ stripe_info }}">
+    <input id="chosen_mode_of_payment" type="hidden"  data-chosen_mode_of_payment="{{ chosen_mode_of_payment }}">
 
 </div>
 
@@ -57,6 +58,7 @@
 
 
   var stripe_info = $("#stripe_info").attr("data-stripe_info");
+  var chosen_mode_of_payment = $("#chosen_mode_of_payment").attr("data-chosen_mode_of_payment");
 
       $.ajax({
     url: '/get_link_token',
@@ -85,7 +87,9 @@
     data: {
         stripe_info: stripe_info,
         public_token: public_token,
-        account_id: metadata.accounts[0].id
+        account_id: metadata.accounts[0].id,
+        chosen_mode_of_payment: chosen_mode_of_payment
+
     },
     dataType: "json",
     async: false,

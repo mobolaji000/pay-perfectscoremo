@@ -7,6 +7,7 @@ from app.forms import PaymentForm
 from app.service import ValidateLogin
 from app.service import User
 from flask_login import login_user,login_required,current_user,logout_user
+import os
 import logging
 import ast
 import time
@@ -67,7 +68,7 @@ def validate_login():
         login_user(user)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('client_setup')
+            next_page = url_for('transaction_setup')
         return redirect(next_page)
     else:
         flash('login failed')
@@ -87,15 +88,15 @@ def placeholder():
 
 
 @server.before_first_request
-def send_reminders_on_server_start():
+def start_background_jobs_before_first_request():
     def reminders_background_job():
         try:
             print("Reminders background job started")
             reminder_last_names = ''
             clientsToReceiveReminders = AppDBUtil.findClientsToReceiveReminders()
             for client in clientsToReceiveReminders:
-                SendMessagesToClients.sendEmail(to_address=client['email'], message=client['invoice_code'], type='reminder')
-                SendMessagesToClients.sendSMS(to_number=client['phone_number'], message=client['invoice_code'],type='reminder')
+                SendMessagesToClients.sendEmail(to_address=client['email'], message=client['transaction_id'], type='reminder_to_make_payment')
+                SendMessagesToClients.sendSMS(to_number=client['phone_number'], message=client['transaction_id'],type='reminder_to_make_payment')
                 reminder_last_names = reminder_last_names+client['last_name']+", "
             SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')
 
@@ -104,15 +105,44 @@ def send_reminders_on_server_start():
             print(e)
             traceback.print_exc()
 
-    scheduler = BackgroundScheduler()
-    #scheduler.add_job(reminders_background_job,'cron',second='30')
-    #test token
+    def invoice_payment_background_job():
+        try:
+            print("Invoice payment background job started")
+            installment_name = ''
+            invoice_payment_failed = False
+            invoicesToPay = AppDBUtil.findInvoicesToPay()
+            for invoice in invoicesToPay:
+                stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
+                if stripe_invoice_object.paid:
+                    print("Invoice payment succeeded: ",invoice['last_name'])
+                    #might need to come back and handle this via webhook
+                    AppDBUtil.updateInvoiceAsPaid(stripe_invoice_id=invoice['stripe_invoice_id'])
+                else:
+                    print("Invoice payment failed: ",invoice['last_name'])
+                    invoice_payment_failed = True
+                    installment_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
 
-    scheduler.add_job(reminders_background_job, 'cron', day_of_week='sat',hour='19',minute='45') #rememebr that this time is in UTC whenever you have to change it
+            if invoice_payment_failed:
+                SendMessagesToClients.sendSMS(to_number='9725847364', message="Invoice payments failed for: "+invoice_name, type='to_mo')
+
+        except Exception as e:
+            print("Error in making installment payments")
+            print(e)
+            traceback.print_exc()
+
+    scheduler = BackgroundScheduler(timezone='US/Central')
+
+    if os.environ['DEPLOY_REGION'] == 'local':
+        #scheduler.add_job(invoice_payment_background_job, 'cron', second='30')
+        scheduler.add_job(reminders_background_job,'cron',minute='55')
+    else:
+        scheduler.add_job(reminders_background_job, 'cron', day_of_week='sat',hour='19',minute='45')
+        scheduler.add_job(invoice_payment_background_job, 'cron', hour='23',minute='45')
 
     print("Reminders background job added")
-    scheduler.start()
+    print("Invoice payment background job added")
 
+    scheduler.start()
 
 @server.route('/success')
 def success():
@@ -122,150 +152,178 @@ def success():
 def failure():
     return render_template('failure.html')
 
-@server.route('/client_setup')
+@server.route('/transaction_setup')
 @login_required
-def client_setup():
-    return render_template('client_setup.html')
+def transaction_setup():
+    return render_template('transaction_setup.html')
 
-@server.route('/create_invoice',methods=['POST'])
+@server.route('/client_info',defaults={'prospect_id': None}, methods=['GET','POST'])
+@server.route('/client_info/<prospect_id>', methods=['GET','POST'])
+def client_info(prospect_id):
+    if request.method == 'GET':
+        return render_template('client_info.html',prospect_id=prospect_id)
+    elif request.method == 'POST':
+        try:
+            student_data = request.form.to_dict()
+            print(student_data)
+            AppDBUtil.createStudentData(student_data)
+            flash('Student information submitted successfully.')
+        except Exception as e:
+            print(e)
+            flash('Error in submitting student information. Contact Mo.')
+            print(traceback.print_exc())
+
+        return render_template('client_info.html', prospect_id=prospect_id)
+
+
+
+@server.route('/create_transaction',methods=['POST'])
 @login_required
-def create_invoice():
+def create_transaction():
     try:
-        client_setup_data = request.form.to_dict()
-        customer = stripeInstance.createCustomer(client_setup_data)
-        client_setup_data.update({"stripe_customer_id":customer["id"]})
-        invoice_code,number_of_rows_modified = AppDBUtil.createOrModifyClient(client_setup_data, action='create')
 
-        if client_setup_data.get('mark_as_paid','') == 'yes':
-            client_info, products_info = AppDBUtil.getInvoiceDetails(invoice_code)
-            stripe_info = parseDataForStripe(client_info)
+        transaction_setup_data = request.form.to_dict()
+        prospect = AppDBUtil.createProspect(transaction_setup_data)
+        customer,does_customer_payment_info_exist = stripeInstance.createCustomer(transaction_setup_data)
+        transaction_setup_data.update({"stripe_customer_id":customer["id"],'prospect_id':prospect.prospect_id})
+        transaction_id,number_of_rows_modified = AppDBUtil.createOrModifyClientTransaction(transaction_setup_data, action='create')
+
+        client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
+        stripe_info = parseDataForStripe(client_info)
+        if transaction_setup_data.get('mark_as_paid','') == 'yes':
             stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info)
-            AppDBUtil.updateInvoicePaymentStarted(invoice_code)
-            print("marked invoice as paid")
+            AppDBUtil.updateTransactionPaymentStarted(transaction_id)
+            print("marked transaction as paid")
+        else:
+            message_type = ''
+            if does_customer_payment_info_exist:
+                message_type = 'create_transaction_existing_client'
+                stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
+            else:
+                message_type = 'create_transaction_new_client'
 
-        if client_setup_data.get('send_text_and_email','') == 'yes':
-            try:
-                SendMessagesToClients.sendEmail(to_address=client_setup_data['email'],message=invoice_code,type='create')
-                #awsInstance.send_email(to_address=client_setup_data['email'])
-                SendMessagesToClients.sendSMS(to_number=client_setup_data['phone_number'],message=invoice_code,type='create')
-                flash('Invoice created and email/sms sent to client.')
-            except Exception as e:
-                traceback.print_exc()
-                flash('An error occured while sending an email/sms to the client after creating the invoice.')
+            if transaction_setup_data.get('send_text_and_email', '') == 'yes':
+                try:
+                    SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'],message=transaction_id,type=message_type)
+                    SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'],message=transaction_id,type=message_type)
+                    flash('Transaction created and email/sms sent to client.')
+                except Exception as e:
+                    traceback.print_exc()
+                    flash('An error occured while sending an email/sms to the client after creating the transaction.')
 
-        return render_template('generate_invoice_code.html',invoice_code=invoice_code)
+        return render_template('generate_transaction_id.html',transaction_id=transaction_id)
     except Exception as e:
         print(e)
         traceback.print_exc()
-        flash('An error occured while creating the invoice.')
-        return redirect(url_for('client_setup'))
+        flash('An error occured while creating the transaction.')
+        return redirect(url_for('transaction_setup'))
 
-@server.route('/search_invoice',methods=['POST'])
+@server.route('/search_transaction',methods=['POST'])
 @login_required
-def search_invoice():
+def search_transaction():
     search_query = str(request.form['search_query'])
 
     try:
-        search_results = AppDBUtil.searchInvoices(search_query)
-        print(search_results)
+        search_results = AppDBUtil.searchTransactions(search_query)
+        #print(search_results)
     except Exception as e:
         print(e)
         traceback.print_exc()
         flash('An error has occured during the search.')
-        return redirect(url_for('client_setup'))
+        return redirect(url_for('transaction_setup'))
 
     if not search_results:
-        flash('No invoice has the detail you searched for.')
-        return redirect(url_for('client_setup'))
+        flash('No transaction has the detail you searched for.')
+        return redirect(url_for('transaction_setup'))
 
     #print(search_results)
-    return render_template('client_setup.html',search_results=search_results)
+    return render_template('transaction_setup.html',search_results=search_results)
 
-@server.route('/modify_invoice',methods=['POST'])
+@server.route('/modify_transaction',methods=['POST'])
 @login_required
-def modify_invoice():
+def modify_transaction():
     try:
         data_to_modify = ast.literal_eval(request.form['data_to_modify'])
         print(data_to_modify)
-        invoice_code = data_to_modify['invoice_code']
-        invoice_code_again,number_of_rows_modified=AppDBUtil.modifyInvoiceDetails(data_to_modify)
+        transaction_id = data_to_modify['transaction_id']
+        transaction_id_again,number_of_rows_modified=AppDBUtil.modifyTransactionDetails(data_to_modify)
 
         if number_of_rows_modified > 1:
-            print("Somehow ended up with and modified duplicate invoice codes")
-            flash('Somehow ended up with and modified duplicate invoice codes')
-            return redirect(url_for('client_setup'))
+            print("Somehow ended up with and modified duplicate transaction codes")
+            flash('Somehow ended up with and modified duplicate transaction codes')
+            return redirect(url_for('transaction_setup'))
 
         if data_to_modify.get('mark_as_paid', '') == 'yes':
-            client_info, products_info = AppDBUtil.getInvoiceDetails(invoice_code)
+            client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
             stripe_info = parseDataForStripe(client_info)
             stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info)
-            AppDBUtil.updateInvoicePaymentStarted(invoice_code)
-            print("marked invoice as paid")
+            AppDBUtil.updateTransactionPaymentStarted(transaction_id)
+            print("marked transaction as paid")
 
         if data_to_modify.get('send_text_and_email','') == 'yes':
             try:
-                SendMessagesToClients.sendEmail(to_address=data_to_modify['email'], message=invoice_code,type='modify')
-                # awsInstance.send_email(to_address=client_setup_data['email'])
-                SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=invoice_code,type='modify')
-                flash('Invoice modified and email/sms sent to client.')
+                SendMessagesToClients.sendEmail(to_address=data_to_modify['email'], message=transaction_id,type='modify')
+                # awsInstance.send_email(to_address=transaction_setup_data['email'])
+                SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=transaction_id,type='modify')
+                flash('Transaction modified and email/sms sent to client.')
             except Exception as e:
                 traceback.print_exc()
-                flash('An error occured while sending an email/sms to the client after modifying the invoice.')
+                flash('An error occured while sending an email/sms to the client after modifying the transaction.')
         else:
-            flash('Invoice sucessfully modified.')
-        return redirect(url_for('client_setup'))
+            flash('Transaction sucessfully modified.')
+        return redirect(url_for('transaction_setup'))
     except Exception as e:
         print(e)
         traceback.print_exc()
-        flash('An error occured while modifying the invoice.')
-        return redirect(url_for('client_setup'))
+        flash('An error occured while modifying the transaction.')
+        return redirect(url_for('transaction_setup'))
 
-    return render_template('client_setup.html')
+    return render_template('transaction_setup.html')
 
-@server.route('/delete_invoice',methods=['POST'])
+@server.route('/delete_transaction',methods=['POST'])
 @login_required
-def delete_invoice():
+def delete_transaction():
     try:
-        invoice_code_to_delete = str(request.form['invoice_code_to_delete'])
-        print(invoice_code_to_delete)
-        AppDBUtil.deleteInvoice(invoice_code_to_delete)
-        flash('Invoice sucessfully deleted.')
-        return redirect(url_for('client_setup'))
+        transaction_id_to_delete = str(request.form['transaction_id_to_delete'])
+        print(transaction_id_to_delete)
+        AppDBUtil.deleteTransaction(transaction_id_to_delete)
+        flash('Transaction sucessfully deleted.')
+        return redirect(url_for('transaction_setup'))
     except Exception as e:
         print(e)
         traceback.print_exc()
-        flash('An error occured while deleting the invoice.')
-        return redirect(url_for('client_setup'))
+        flash('An error occured while deleting the transaction.')
+        return redirect(url_for('transaction_setup'))
 
-    return render_template('client_setup.html')
+    return render_template('transaction_setup.html')
 
-@server.route('/input_invoice_code',methods=['GET'])
-def input_invoice_code():
-    return render_template('input_invoice_code.html')
+@server.route('/input_transaction_id',methods=['GET'])
+def input_transaction_id():
+    return render_template('input_transaction_id.html')
 
 
-@server.route('/invoice_page',methods=['POST'])
-def invoice_page():
+@server.route('/transaction_page',methods=['POST'])
+def transaction_page():
     try:
-        client_info,products_info = AppDBUtil.getInvoiceDetails(request.form.to_dict()['invoice_code'])
+        client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(request.form.to_dict()['transaction_id'])
     except Exception as e:
         print(e)
         flash('An error has occured. Contact Mo.')
-        return redirect(url_for('input_invoice_code'))
+        return redirect(url_for('input_transaction_id'))
 
     if not client_info and not products_info:
         flash('You might have put in the wrong code. Try again or contact Mo.')
-        return redirect(url_for('input_invoice_code'))
+        return redirect(url_for('input_transaction_id'))
 
     stripe_info = parseDataForStripe(client_info)
 
-    response = make_response(render_template('invoice_page.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info))
+    response = make_response(render_template('transaction_details.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride))
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"  # HTTP 1.1.
     response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
     response.headers["Expires"] = "0"  # Proxies.
 
     return response
-    #return render_template('invoice_page.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info)
+    #return render_template('transaction_details.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info)
 
 @login_manager.user_loader
 def load_user(password):
@@ -283,7 +341,7 @@ def checkout():
     stripe_info = ast.literal_eval(payment_data['stripe_info'])
     stripe_pk = os.environ.get('stripe_pk')
     if chosen_mode_of_payment.__contains__('ach'):
-        return render_template('plaid_checkout.html',stripe_info=stripe_info)
+        return render_template('plaid_checkout.html',stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment)
     else:
         return render_template('stripe_checkout.html', stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment,stripe_pk=stripe_pk)
 
@@ -294,14 +352,17 @@ def parseDataForStripe(client_info):
     stripe_info['phone_number'] = client_info['phone_number']
     stripe_info['email'] = client_info['email']
     stripe_info['stripe_customer_id'] = client_info['stripe_customer_id']
-    stripe_info['invoice_total'] = client_info['invoice_total']
+    stripe_info['transaction_total'] = client_info['transaction_total']
     stripe_info['deposit'] = client_info.get('deposit','')
-    stripe_info['invoice_code'] = client_info.get('invoice_code', '')
+    stripe_info['transaction_id'] = client_info.get('transaction_id', '')
+    stripe_info['installment_counter'] = client_info.get('installment_counter', '')
+    #stripe_info['ask_for_student_info'] = client_info.get('ask_for_student_info', '')
+    
 
     if client_info.get('installments','') != '':
         for index,installment in enumerate(client_info.get('installments','')):
-            stripe_info["installment_date"+"_"+str(index+1)] = int(time.mktime(installment["installment_date"].timetuple()))
-            stripe_info["installment_amount" + "_" + str(index+1)] = installment["installment_amount"]
+            stripe_info["date"+"_"+str(index+1)] = int(time.mktime(installment["date"].timetuple()))
+            stripe_info["amount" + "_" + str(index+1)] = installment["amount"]
 
     return stripe_info
 
@@ -321,7 +382,7 @@ def execute_card_payment():
         print("Failed because customer did not enter a credit card number to pay via installments.")
         flash('Enter a credit card number to pay via installments.')
     else:
-        AppDBUtil.updateInvoicePaymentStarted(stripe_info['invoice_code'])
+        AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
 
     return jsonify(result)
 
@@ -339,14 +400,15 @@ def exchange_plaid_for_stripe():
     stripe_info = ast.literal_eval(request.form['stripe_info'])
     public_token = request.form['public_token']
     account_id = request.form['account_id']
+    chosen_mode_of_payment = request.form['chosen_mode_of_payment']
     bank_account_token = plaidInstance.exchange_plaid_for_stripe(public_token,account_id)
-    result = stripeInstance.chargeCustomerViaACH(stripe_info,bank_account_token)
+    result = stripeInstance.chargeCustomerViaACH(stripe_info,bank_account_token,chosen_mode_of_payment)
 
     if result['status'] != 'success':
         print("Attempt to pay via ACH failed")
         result = {'status': 400}
     else:
-        AppDBUtil.updateInvoicePaymentStarted(stripe_info['invoice_code'])
+        AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
         result = {'status': 200}
 
     return jsonify(result)
@@ -356,8 +418,6 @@ def exchange_plaid_for_stripe():
 @server.route("/stripe_webhook", methods=['POST'])
 def stripe_webhook():
     payload = json.dumps(request.json)
-    #stripe.api_key = awsInstance.get_secret("stripe_cred", "stripe_api_key_test") or os.environ.get('stripe_api_key_test')
-    #print("api key is ",stripe.api_key)
     event = None
 
     try:
@@ -375,12 +435,11 @@ def stripe_webhook():
 
     # Handle the event
 
-    # handle updating the DB when invoices are paid; these invoices should have invoice codes attahced already
+    # handle updating the DB when transactions are paid; these transactions should have transaction codes attahced already
     try:
         if event.type == 'invoice.paid':
             paid_invoice = event.data.object
-            invoice_code = paid_invoice.metadata['invoice_code']
-            amount_paid = paid_invoice.total/100
+            transaction_id = paid_invoice.metadata['transaction_id']
 
             payment_intent = stripe.PaymentIntent.retrieve(paid_invoice.payment_intent,)
             payment_method = stripe.PaymentMethod.retrieve(payment_intent['payment_method'],)
@@ -391,26 +450,33 @@ def stripe_webhook():
             else:
                 amount_paid = paid_invoice.total / 100
 
-            AppDBUtil.updateAmountPaidAgainstInvoice(invoice_code,amount_paid)
+            transaction = AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id,amount_paid)
 
+            if transaction.ask_for_student_info == 'yes':
+                SendMessagesToClients.sendEmail(to_address=transaction.email, message=transaction.prospect_id, type='student_info')
+                SendMessagesToClients.sendSMS(to_number=transaction.phone_number, message=transaction.prospect_id, type='student_info')
 
-            print("paid invoice is ", paid_invoice)
-            print("invoice code is ", invoice_code)
+            print("paid transaction is ", paid_invoice)
+            print("transaction id is ", transaction_id)
 
-        # attach invoice code to invoices generated from subscriptions
+        # attach transaction code to invoices
         elif event.type == 'invoice.created':
             created_invoice = event.data.object
-            subscription = created_invoice.get('subscription',None)
-            if subscription:
-                subscription_schedule = stripe.Subscription.retrieve(subscription)['schedule']
-                subscription_schedule_metadata = stripe.SubscriptionSchedule.retrieve(subscription_schedule,).metadata
-                invoice_code = subscription_schedule_metadata['invoice_code']
-                stripe.Invoice.modify(created_invoice['id'],metadata={"invoice_code":invoice_code},)
+            stripe.Invoice.modify(created_invoice['id'], metadata={"transaction_id":transaction_id}, )
 
+            print("created transaction is ",created_invoice)
+            print("transaction code is ", transaction_id)
 
-                print("created invoice is ",created_invoice)
-                print("invoice code is ", invoice_code)
-
+        elif event.type == 'invoice.payment_failed':
+            failed_invoice = event.data.object
+            try:
+                message = "Invoice "+str(failed_invoice.id)+" for "+str(failed_invoice.customer_name)+" failed to pay."
+                SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com', message=message, type='to_mo')
+                SendMessagesToClients.sendSMS(to_number='9725847364', message=message, type='to_mo')
+                print(message)
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
         else:
             print('Unhandled event type {}'.format(event.type))
     except Exception as e:
