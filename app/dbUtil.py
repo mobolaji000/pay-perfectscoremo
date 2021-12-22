@@ -355,14 +355,12 @@ class AppDBUtil():
             )
 
             cls.executeDBQuery()
-            create_student_data_message = "Student information submitted successfully and group messages (email and text) for regular updates created."
 
         except Exception as e:
-            create_student_data_message = "Error in submitting student information or in creating group messages. Contact Mo. "
             print(e)
             print(traceback.print_exc())
-        finally:
-            return create_student_data_message
+            raise e
+
 
 
     @classmethod

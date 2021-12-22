@@ -108,13 +108,15 @@ def client_info(prospect_id):
     if request.method == 'GET':
         return render_template('client_info.html',prospect_id=prospect_id)
     elif request.method == 'POST':
-        student_data = request.form.to_dict()
-        create_student_data_message = AppDBUtil.createStudentData(student_data)
+        try:
+            student_data = request.form.to_dict()
+            create_student_data_message = AppDBUtil.createStudentData(student_data)
 
-        SendMessagesToClients.sendGroupSMS(to_numbers=[student_data['parent_1_phone_number'], student_data['parent_2_phone_number'], student_data['student_phone_number']], message=student_data['student_first_name'], type='create_group_chat')
-        SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
-
-        flash(create_student_data_message)
+            SendMessagesToClients.sendGroupSMS(to_numbers=[student_data['parent_1_phone_number'], student_data['parent_2_phone_number'], student_data['student_phone_number']], message=student_data['student_first_name'], type='create_group_chat')
+            SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+            flash("Student information submitted successfully and group messages (email and text) for regular updates created.")
+        except Exception as e:
+            flash("Error in submitting student information and creating group messages for regular updates created. Please contact Mo.")
         return render_template('client_info.html', prospect_id=prospect_id)
 
 @server.route('/lead_info', methods=['GET','POST'])
