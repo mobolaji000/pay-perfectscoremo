@@ -87,13 +87,14 @@ class AWSInstance():
                      )
 
         if type == 'student_info':
+            link_url = os.environ["url_to_start_reminder"]+"""client_info/"""+message
             BODY_HTML = """<html>
                 <head></head>
                 <body>
                   <span>Dear parent, </span><br><br>""" \
                     + """<span>Thank you for signing up with us! </span><br><br>""" \
                     + """<span>Regular communication between us, you, and your student is a big part of our process. </span><br>""" \
-                    + """<span>To help further that, please go to <strong>"""+os.environ["url_to_start_reminder"]+"""client_info\\"""+message+"""</strong> (also sent to your phone number) to input you and your student's information.</span><br>""" \
+                    + """<span>To help further that, please go to <strong><a href='"""+link_url+"""'>"""+link_url+"""</a></strong> (also sent to your phone number) to input you and your student's information.</span><br>""" \
                     + """<span>This will be used to setup text message and email updates on your student's regular progress.</span><br>""" \
                     + """
                 </body>

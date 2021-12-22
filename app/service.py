@@ -308,7 +308,8 @@ class SendMessagesToClients():
         elif type == 'create_transaction_existing_client':
             created_or_modified_span = "Dear parent,\n\nYour new transaction has been created and is set to be paid in full using using your method of payment on file. At any point in the next 72 hours, you can change your method of payment or change to installment payments. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
         elif type == 'student_info':
-            created_or_modified_span = "Dear parent,\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+os.environ["url_to_start_reminder"]+"client_info/"+message+" (also sent to your email address) to input you and your student's information. This will be used to setup text message and email updates on your student's regular progress."
+            link_url = os.environ["url_to_start_reminder"]+"client_info/"+message
+            created_or_modified_span = "Dear parent,\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. This will be used to setup text message and email updates on your student's regular progress."
 
 
         if type == 'to_mo':

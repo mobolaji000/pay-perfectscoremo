@@ -14,6 +14,7 @@ import time
 import json
 import os
 import math
+import uuid
 from app.service import StripeInstance
 from app.service import PlaidInstance
 from app.service import SendMessagesToClients
@@ -56,27 +57,25 @@ def health():
     print("healthy!")
     return render_template('health.html')
 
-
-@server.route('/validate_login', methods=['POST'])
-def validate_login():
-    username = request.form.to_dict()['username']
-    password = request.form.to_dict()['password']
-    validateLogin = ValidateLogin(username, password)
-    if validateLogin.validateUserName() and validateLogin.validatePassword():
-        flash('login successful')
-        user = User(password)
-        login_user(user)
-        next_page = request.args.get('next')
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('transaction_setup')
-        return redirect(next_page)
-    else:
-        flash('login failed')
-        return redirect('/admin-login')
-
 @server.route('/admin-login',methods=['GET','POST'])
 def admin_login():
-    return render_template('admin.html')
+    if request.method == 'GET':
+        return render_template('admin.html')
+    elif request.method == 'POST':
+        next_page = request.args.get('next')
+        username = request.form.to_dict()['username']
+        password = request.form.to_dict()['password']
+        validateLogin = ValidateLogin(username, password)
+        if validateLogin.validateUserName() and validateLogin.validatePassword():
+            flash('login successful')
+            user = User(password)
+            login_user(user)
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('transaction_setup')
+            return redirect(next_page)
+        else:
+            flash('login failed')
+            return redirect('/admin-login')
 
 @server.route('/placeholder',methods=['GET', 'POST'])
 def placeholder():
@@ -86,67 +85,13 @@ def placeholder():
         return redirect(url_for('success'))
     return render_template('admin.html', form=form)
 
-
-@server.before_first_request
-def start_background_jobs_before_first_request():
-    def reminders_background_job():
-        try:
-            print("Reminders background job started")
-            reminder_last_names = ''
-            clientsToReceiveReminders = AppDBUtil.findClientsToReceiveReminders()
-            for client in clientsToReceiveReminders:
-                SendMessagesToClients.sendEmail(to_address=client['email'], message=client['transaction_id'], type='reminder_to_make_payment')
-                SendMessagesToClients.sendSMS(to_number=client['phone_number'], message=client['transaction_id'],type='reminder_to_make_payment')
-                reminder_last_names = reminder_last_names+client['last_name']+", "
-            SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')
-
-        except Exception as e:
-            print("Error in sending reminders")
-            print(e)
-            traceback.print_exc()
-
-    def invoice_payment_background_job():
-        try:
-            print("Invoice payment background job started")
-            installment_name = ''
-            invoice_payment_failed = False
-            invoicesToPay = AppDBUtil.findInvoicesToPay()
-            for invoice in invoicesToPay:
-                stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
-                if stripe_invoice_object.paid:
-                    print("Invoice payment succeeded: ",invoice['last_name'])
-                    #might need to come back and handle this via webhook
-                    AppDBUtil.updateInvoiceAsPaid(stripe_invoice_id=invoice['stripe_invoice_id'])
-                else:
-                    print("Invoice payment failed: ",invoice['last_name'])
-                    invoice_payment_failed = True
-                    installment_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
-
-            if invoice_payment_failed:
-                SendMessagesToClients.sendSMS(to_number='9725847364', message="Invoice payments failed for: "+invoice_name, type='to_mo')
-
-        except Exception as e:
-            print("Error in making installment payments")
-            print(e)
-            traceback.print_exc()
-
-    scheduler = BackgroundScheduler(timezone='US/Central')
-
-    if os.environ['DEPLOY_REGION'] == 'local':
-        #scheduler.add_job(invoice_payment_background_job, 'cron', second='30')
-        scheduler.add_job(reminders_background_job,'cron',minute='55')
-    else:
-        scheduler.add_job(reminders_background_job, 'cron', day_of_week='sat',hour='19',minute='45')
-        scheduler.add_job(invoice_payment_background_job, 'cron', hour='23',minute='45')
-
-    print("Reminders background job added")
-    print("Invoice payment background job added")
-
-    scheduler.start()
-
 @server.route('/success')
 def success():
     return render_template('success.html')
+
+@server.route('/error')
+def error(error_message):
+    return render_template('error.html',error_message=error_message)
 
 @server.route('/failure')
 def failure():
@@ -163,17 +108,80 @@ def client_info(prospect_id):
     if request.method == 'GET':
         return render_template('client_info.html',prospect_id=prospect_id)
     elif request.method == 'POST':
-        try:
-            student_data = request.form.to_dict()
-            print(student_data)
-            AppDBUtil.createStudentData(student_data)
-            flash('Student information submitted successfully.')
-        except Exception as e:
-            print(e)
-            flash('Error in submitting student information. Contact Mo.')
-            print(traceback.print_exc())
+        student_data = request.form.to_dict()
+        create_student_data_message = AppDBUtil.createStudentData(student_data)
+
+        set_up_group_chat = SendMessagesToClients.sendGroupSMS(to_numbers=[student_data['parent_1_phone_number'], student_data['parent_2_phone_number'], student_data['student_phone_number']], message_as_text='Group chat created.')
+
+        print(set_up_group_chat)
+        flash(create_student_data_message + set_up_group_chat)
 
         return render_template('client_info.html', prospect_id=prospect_id)
+
+@server.route('/lead_info', methods=['GET','POST'])
+@login_required
+def lead_info():
+    if request.method == 'GET':
+        return render_template('lead_info.html')
+    elif request.method == 'POST':
+        lead_info_contents = request.form.to_dict()
+        print(lead_info_contents)
+        action = lead_info_contents['action']
+
+        if action == 'Create':
+            try:
+                leadInfo = {}
+                leadInfo.update({'lead_id': "l-" + str(uuid.uuid4().int >> 64)[:6], 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
+                                 'what_service_are_they_interested_in': lead_info_contents.get('what_service_are_they_interested_in', ''), 'what_next': lead_info_contents.get('what_next', ''),
+                                 'meeting_notes_to_keep_in_mind': lead_info_contents.get('meeting_notes_to_keep_in_mind', ''),
+                                 'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'how_did_they_hear_about_us_details': lead_info_contents.get('how_did_they_hear_about_us_details', '')})
+                AppDBUtil.createLead(leadInfo)
+                flash('The lead info was created successfully.')
+                return render_template('lead_info.html', action=action)
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
+                flash('An error has occured during the creation.')
+                return redirect(url_for('lead_info'))
+
+        if action == 'Modify':
+            try:
+                leadInfo = {}
+                leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''),
+                                 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
+                                 'what_service_are_they_interested_in': lead_info_contents.get('what_service_are_they_interested_in', ''), 'what_next': lead_info_contents.get('what_next', ''),
+                                 'meeting_notes_to_keep_in_mind': lead_info_contents.get('meeting_notes_to_keep_in_mind', ''),
+                                 'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'how_did_they_hear_about_us_details': lead_info_contents.get('how_did_they_hear_about_us_details', '')})
+
+                number_of_rows_modified = AppDBUtil.modifyLeadInfo(lead_info_contents.get('lead_id', ''),leadInfo)
+
+                if number_of_rows_modified > 1:
+                    print("Somehow ended up with and modified duplicate lead ids")
+                    flash('Somehow ended up with and modified duplicate lead ids')
+
+                flash('Lead sucessfully modified.')
+                return render_template('lead_info.html', action=action)
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
+                flash('An error occured while modifying the lead.')
+                return render_template('lead_info.html', action=action)
+
+        if action == 'Search':
+            try:
+                search_results = {}
+                search_results = AppDBUtil.getLeadInfo(lead_info_contents.get('search_query', None), lead_info_contents.get('start_date', None), lead_info_contents.get('end_date', None))
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
+                flash('An error has occured during the search.')
+                render_template('lead_info.html', action=action)
+
+            if not search_results:
+                flash('No lead info has the detail you searched for.')
+                render_template('lead_info.html', action=action)
+
+            return render_template('lead_info.html', search_results=search_results, action=action)
 
 
 
@@ -181,15 +189,20 @@ def client_info(prospect_id):
 @login_required
 def create_transaction():
     try:
-
         transaction_setup_data = request.form.to_dict()
         prospect = AppDBUtil.createProspect(transaction_setup_data)
+
         customer,does_customer_payment_info_exist = stripeInstance.createCustomer(transaction_setup_data)
         transaction_setup_data.update({"stripe_customer_id":customer["id"],'prospect_id':prospect.prospect_id})
         transaction_id,number_of_rows_modified = AppDBUtil.createOrModifyClientTransaction(transaction_setup_data, action='create')
 
         client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
         stripe_info = parseDataForStripe(client_info)
+
+        if transaction_setup_data.get('ask_for_student_info','') == 'yes':
+            SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_setup_data['prospect_id'], subject='New Student Information', type='student_info')
+            SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'], message=transaction_setup_data['prospect_id'], type='student_info')
+
         if transaction_setup_data.get('mark_as_paid','') == 'yes':
             stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info)
             AppDBUtil.updateTransactionPaymentStarted(transaction_id)
@@ -210,8 +223,7 @@ def create_transaction():
                 except Exception as e:
                     traceback.print_exc()
                     flash('An error occured while sending an email/sms to the client after creating the transaction.')
-
-        return render_template('generate_transaction_id.html',transaction_id=transaction_id)
+        return render_template('generate_transaction_id.html',transaction_id=transaction_idl)
     except Exception as e:
         print(e)
         traceback.print_exc()
@@ -222,10 +234,8 @@ def create_transaction():
 @login_required
 def search_transaction():
     search_query = str(request.form['search_query'])
-
     try:
         search_results = AppDBUtil.searchTransactions(search_query)
-        #print(search_results)
     except Exception as e:
         print(e)
         traceback.print_exc()
@@ -236,7 +246,6 @@ def search_transaction():
         flash('No transaction has the detail you searched for.')
         return redirect(url_for('transaction_setup'))
 
-    #print(search_results)
     return render_template('transaction_setup.html',search_results=search_results)
 
 @server.route('/modify_transaction',methods=['POST'])
@@ -263,7 +272,6 @@ def modify_transaction():
         if data_to_modify.get('send_text_and_email','') == 'yes':
             try:
                 SendMessagesToClients.sendEmail(to_address=data_to_modify['email'], message=transaction_id,type='modify')
-                # awsInstance.send_email(to_address=transaction_setup_data['email'])
                 SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=transaction_id,type='modify')
                 flash('Transaction modified and email/sms sent to client.')
             except Exception as e:
@@ -301,16 +309,14 @@ def delete_transaction():
 def input_transaction_id():
     return render_template('input_transaction_id.html')
 
-
 @server.route('/transaction_page',methods=['POST'])
-def transaction_page():
+def transaction_page(transaction_id):
     try:
         client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(request.form.to_dict()['transaction_id'])
     except Exception as e:
         print(e)
         flash('An error has occured. Contact Mo.')
         return redirect(url_for('input_transaction_id'))
-
     if not client_info and not products_info:
         flash('You might have put in the wrong code. Try again or contact Mo.')
         return redirect(url_for('input_transaction_id'))
@@ -323,7 +329,6 @@ def transaction_page():
     response.headers["Expires"] = "0"  # Proxies.
 
     return response
-    #return render_template('transaction_details.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info)
 
 @login_manager.user_loader
 def load_user(password):
@@ -356,8 +361,7 @@ def parseDataForStripe(client_info):
     stripe_info['deposit'] = client_info.get('deposit','')
     stripe_info['transaction_id'] = client_info.get('transaction_id', '')
     stripe_info['installment_counter'] = client_info.get('installment_counter', '')
-    #stripe_info['ask_for_student_info'] = client_info.get('ask_for_student_info', '')
-    
+    stripe_info['ask_for_student_info'] = client_info.get('ask_for_student_info', '')
 
     if client_info.get('installments','') != '':
         for index,installment in enumerate(client_info.get('installments','')):
@@ -452,10 +456,6 @@ def stripe_webhook():
 
             transaction = AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id,amount_paid)
 
-            if transaction.ask_for_student_info == 'yes':
-                SendMessagesToClients.sendEmail(to_address=transaction.email, message=transaction.prospect_id, type='student_info')
-                SendMessagesToClients.sendSMS(to_number=transaction.phone_number, message=transaction.prospect_id, type='student_info')
-
             print("paid transaction is ", paid_invoice)
             print("transaction id is ", transaction_id)
 
@@ -486,3 +486,63 @@ def stripe_webhook():
         return jsonify({'status': 500})
 
     return jsonify({'status': 200})
+
+
+@server.before_first_request
+def start_background_jobs_before_first_request():
+    def reminders_background_job():
+        try:
+            print("Reminders background job started")
+            reminder_last_names = ''
+            clientsToReceiveReminders = AppDBUtil.findClientsToReceiveReminders()
+            for client in clientsToReceiveReminders:
+                SendMessagesToClients.sendEmail(to_address=client['email'], message=client['transaction_id'], type='reminder_to_make_payment')
+                SendMessagesToClients.sendSMS(to_number=client['phone_number'], message=client['transaction_id'],type='reminder_to_make_payment')
+                reminder_last_names = reminder_last_names+client['last_name']+", "
+            SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')
+
+        except Exception as e:
+            print("Error in sending reminders")
+            print(e)
+            traceback.print_exc()
+
+    def invoice_payment_background_job():
+        try:
+            print("Invoice payment background job started")
+            installment_name = ''
+            invoice_payment_failed = False
+            invoicesToPay = AppDBUtil.findInvoicesToPay()
+            for invoice in invoicesToPay:
+                stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
+                if stripe_invoice_object.paid:
+                    print("Invoice payment succeeded: ",invoice['last_name'])
+                    #might need to come back and handle this via webhook
+                    AppDBUtil.updateInvoiceAsPaid(stripe_invoice_id=invoice['stripe_invoice_id'])
+                else:
+                    print("Invoice payment failed: ",invoice['last_name'])
+                    invoice_payment_failed = True
+                    installment_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
+
+            if invoice_payment_failed:
+                SendMessagesToClients.sendSMS(to_number='9725847364', message="Invoice payments failed for: "+invoice_name, type='to_mo')
+
+        except Exception as e:
+            print("Error in making installment payments")
+            print(e)
+            traceback.print_exc()
+
+    scheduler = BackgroundScheduler(timezone='US/Central')
+
+    if os.environ['DEPLOY_REGION'] == 'local':
+        #scheduler.add_job(invoice_payment_background_job, 'cron', second='30')
+        #scheduler.add_job(reminders_background_job,'cron',minute='55')
+        scheduler.add_job(lambda: print("dummy reminders job for local"), 'cron', minute='55')
+    else:
+        scheduler.add_job(reminders_background_job, 'cron', day_of_week='sat',hour='19',minute='45')
+        scheduler.add_job(invoice_payment_background_job, 'cron', hour='23',minute='45')
+
+    print("Reminders background job added")
+    print("Invoice payment background job added")
+
+    scheduler.start()
+
