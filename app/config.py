@@ -28,7 +28,7 @@ class Config(object):
             os.environ["stripe_pk"] = 'pk_test_51Hlgy6DbpRMio7qjWV9YNuBPiQIgD6PrBwO7oek37OEafhZiRjkfs42owvLto0eO8c6CCaiSAOUrXn0uPEJdai6Z00DUYXi551'
             os.environ["price"] = "price_1J5rWJDbpRMio7qjrkWJfnk3"
             os.environ["product"] = "prod_JjKA9beb14xw0F"
-            os.environ["url_to_start_reminder"] = "https://https://dev-pay-perfectscoremo-7stpz.ondigitalocean.app/"
+            os.environ["url_to_start_reminder"] = "https://dev-pay-perfectscoremo-7stpz.ondigitalocean.app/"
             flask_secret_key = awsInstance.get_secret("vensti_admin", "flask_secret_key")
             SECRET_KEY = awsInstance.get_secret("vensti_admin", "flask_secret_key")
             dbUserName = awsInstance.get_secret("do_db_cred", "dev_username")
