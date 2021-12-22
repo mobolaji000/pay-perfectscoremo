@@ -111,11 +111,10 @@ def client_info(prospect_id):
         student_data = request.form.to_dict()
         create_student_data_message = AppDBUtil.createStudentData(student_data)
 
-        set_up_group_chat = SendMessagesToClients.sendGroupSMS(to_numbers=[student_data['parent_1_phone_number'], student_data['parent_2_phone_number'], student_data['student_phone_number']], message_as_text='Group chat created.')
+        SendMessagesToClients.sendGroupSMS(to_numbers=[student_data['parent_1_phone_number'], student_data['parent_2_phone_number'], student_data['student_phone_number']], message=student_data['student_first_name'], type='create_group_chat')
+        SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
 
-        print(set_up_group_chat)
-        flash(create_student_data_message + set_up_group_chat)
-
+        flash(create_student_data_message)
         return render_template('client_info.html', prospect_id=prospect_id)
 
 @server.route('/lead_info', methods=['GET','POST'])
@@ -200,7 +199,7 @@ def create_transaction():
         stripe_info = parseDataForStripe(client_info)
 
         if transaction_setup_data.get('ask_for_student_info','') == 'yes':
-            SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_setup_data['prospect_id'], subject='New Student Information', type='student_info')
+            SendMessagesToClients.sendEmail(to_addresses=transaction_setup_data['email'], message=transaction_setup_data['prospect_id'], subject='New Student Information', type='student_info')
             SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'], message=transaction_setup_data['prospect_id'], type='student_info')
 
         if transaction_setup_data.get('mark_as_paid','') == 'yes':
@@ -217,7 +216,7 @@ def create_transaction():
 
             if transaction_setup_data.get('send_text_and_email', '') == 'yes':
                 try:
-                    SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'],message=transaction_id,type=message_type)
+                    SendMessagesToClients.sendEmail(to_addresses=transaction_setup_data['email'], message=transaction_id, type=message_type)
                     SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'],message=transaction_id,type=message_type)
                     flash('Transaction created and email/sms sent to client.')
                 except Exception as e:
@@ -271,7 +270,7 @@ def modify_transaction():
 
         if data_to_modify.get('send_text_and_email','') == 'yes':
             try:
-                SendMessagesToClients.sendEmail(to_address=data_to_modify['email'], message=transaction_id,type='modify')
+                SendMessagesToClients.sendEmail(to_addresses=data_to_modify['email'], message=transaction_id, type='modify')
                 SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=transaction_id,type='modify')
                 flash('Transaction modified and email/sms sent to client.')
             except Exception as e:
@@ -471,7 +470,7 @@ def stripe_webhook():
             failed_invoice = event.data.object
             try:
                 message = "Invoice "+str(failed_invoice.id)+" for "+str(failed_invoice.customer_name)+" failed to pay."
-                SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com', message=message, type='to_mo')
+                SendMessagesToClients.sendEmail(to_addresses='mo@prepwithmo.com', message=message, type='to_mo')
                 SendMessagesToClients.sendSMS(to_number='9725847364', message=message, type='to_mo')
                 print(message)
             except Exception as e:
@@ -496,7 +495,7 @@ def start_background_jobs_before_first_request():
             reminder_last_names = ''
             clientsToReceiveReminders = AppDBUtil.findClientsToReceiveReminders()
             for client in clientsToReceiveReminders:
-                SendMessagesToClients.sendEmail(to_address=client['email'], message=client['transaction_id'], type='reminder_to_make_payment')
+                SendMessagesToClients.sendEmail(to_addresses=client['email'], message=client['transaction_id'], type='reminder_to_make_payment')
                 SendMessagesToClients.sendSMS(to_number=client['phone_number'], message=client['transaction_id'],type='reminder_to_make_payment')
                 reminder_last_names = reminder_last_names+client['last_name']+", "
             SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')

@@ -65,7 +65,7 @@ class AWSInstance():
         return secret
 
 
-    def send_email(self, to_address='mo@vensti.com',message='perfectscoremo',subject='perfectscoremo',type=''):
+    def send_email(self, to_addresses='mo@vensti.com', message='perfectscoremo', subject='perfectscoremo', type=''):
 
         if type == 'create_transaction_new_client':
             created_or_modified_span = "<span>Your transaction has just been <strong>created</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
@@ -77,7 +77,7 @@ class AWSInstance():
             created_or_modified_span = "<span>Your new transaction has been created and <strong>is set to be paid in full using using your method of payment on file</strong>. At any point in the next <strong>72 hours</strong>, you can change your method of payment or change to installment payments. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
 
         SENDER = "Perfect Score Mo <mo@info.perfectscoremo.com>"
-        RECIPIENT = to_address
+        RECIPIENT = to_addresses
         SUBJECT = subject
 
         # The email body for recipients with non-HTML email clients.
@@ -96,6 +96,18 @@ class AWSInstance():
                     + """<span>Regular communication between us, you, and your student is a big part of our process. </span><br>""" \
                     + """<span>To help further that, please go to <strong><a href='"""+link_url+"""'>"""+link_url+"""</a></strong> (also sent to your phone number) to input you and your student's information.</span><br>""" \
                     + """<span>This will be used to setup text message and email updates on your student's regular progress.</span><br>""" \
+                    + """
+                </body>
+                </html>
+                            """
+        elif type == 'create_group_email':
+            BODY_HTML = """<html>
+                <head></head>
+                <body>
+                  <span>Welcome '"""+message+"""'!</span><br><br>""" \
+                    + """<span>Regular communication between us all is a big part of our process. </span><br>""" \
+                        + """<span>To help further that, you will receive regular updates on our progress via this group email.</span><br><br>""" \
+                    + """<span>You can also reach me at mo@perfectscoremo.com</span><br>""" \
                     + """
                 </body>
                 </html>

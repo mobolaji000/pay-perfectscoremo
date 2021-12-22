@@ -289,12 +289,16 @@ class PlaidInstance():
 
 class SendMessagesToClients():
     awsInstance = AWSInstance()
+    account_sid = SendMessagesToClients.awsInstance.get_secret("twilio_cred", "TWILIO_ACCOUNT_SID") or os.environ['TWILIO_ACCOUNT_SID']
+    auth_token = SendMessagesToClients.awsInstance.get_secret("twilio_cred", "TWILIO_AUTH_TOKEN") or os.environ['TWILIO_AUTH_TOKEN']
+    twilioClient = TwilioClient(account_sid, auth_token)
+
     def __init__(self):
         pass
 
     @classmethod
-    def sendEmail(cls, to_address='mo@vensti.com',message='perfectscoremo',subject='Payment Instructions/Options',type=''):
-        SendMessagesToClients.awsInstance.send_email(to_address=to_address,message=message,subject=subject,type=type)
+    def sendEmail(cls, to_addresses='mo@vensti.com', message='perfectscoremo', subject='Payment Instructions/Options', type=''):
+        cls.awsInstance.send_email(to_addresses=to_addresses, message=message, subject=subject, type=type)
 
     @classmethod
     def sendSMS(cls,message='perfectscoremo',from_number='+19564771274',to_number='9725847364',type=''):
@@ -327,11 +331,9 @@ class SendMessagesToClients():
                            + """7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH\n\n""" \
                            + """### We don't receive messages on this number. If you have any questions, reach out on 972-584-7364 ###\n\n"""
 
-        account_sid = SendMessagesToClients.awsInstance.get_secret("twilio_cred", "TWILIO_ACCOUNT_SID") or os.environ['TWILIO_ACCOUNT_SID']
-        auth_token = SendMessagesToClients.awsInstance.get_secret("twilio_cred", "TWILIO_AUTH_TOKEN") or os.environ['TWILIO_AUTH_TOKEN']
-        twilioClient = TwilioClient(account_sid, auth_token)
 
-        message = twilioClient.messages .create(
+
+        message = cls.twilioClient.messages .create(
             body=text_message,
             from_=from_number,
             to='+1'+to_number
@@ -339,4 +341,32 @@ class SendMessagesToClients():
 
         print("text sent!")
         print(message.sid)
+
+    @classmethod
+    def sendGroupEmail(cls, to_emails=[], type='', message='', subject='Group Email'):
+        cls.awsInstance.send_email(to_addresses=to_address, message=message, subject=subject, type=type)
+
+    @classmethod
+    def sendGroupSMS(cls, to_numbers=[], type='', message=''):
+        # cls.twilioClient.messaging.services('MGd37b2dce09791f42239043b6e949f96b').delete()
+        conversations = cls.twilioClient.conversations.conversations.list(limit=50)
+        for record in conversations:
+            print(record.sid)
+            cls.twilioClient.conversations.conversations(record.sid).delete()
+
+        conversation = cls.twilioClient.conversations.conversations.create(messaging_service_sid='MG0faa1995ce52477a642163564295650c', friendly_name='DailyReport')
+        print("conversation created!")
+        print(conversation.sid)
+
+        cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_projected_address='+19564771274')
+        cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+19725847364')
+
+        for to_number in to_numbers:
+            cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+1' + to_number)
+
+        if type == 'create_group_chat':
+            created_or_modified_span = "Welcome "+message+"!\n\n"+"This group chat is where you will receive regular updates on our progress. Don't be surprised if, on this group chat, you get a message from both 956-477-1274 and 972-584-7364. That said, if you need to speak with me, the number to call is 972-584-7364."
+
+        cls.twilioClient.conversations.conversations(conversation.sid).messages.create(body=created_or_modified_span, author='+19564771274')
+        print("group chat created!")
 
