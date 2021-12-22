@@ -27,13 +27,15 @@ class AppDBUtil():
         prospect_last_name = prospectData.get('last_name', '')
         prospect_phone_number = prospectData.get('phone_number', '999')
         prospect_email = prospectData.get('email', '')
-        how_did_you_hear_about_us = prospectData.get('how_did_you_hear_about_us', '')
+        how_did_they_hear_about_us = prospectData.get('how_did_they_hear_about_us', '')
+        how_did_they_hear_about_us_details = prospectData.get('how_did_they_hear_about_us_details', '')
 
         existing_prospect = db.session.query(Prospect).filter_by(prospect_email=prospect_email,prospect_phone_number=prospect_phone_number).first()
         if existing_prospect:
             prospect = existing_prospect
         else:
-            prospect = Prospect(prospect_id=prospect_id,prospect_first_name=prospect_first_name, prospect_last_name=prospect_last_name,prospect_phone_number=prospect_phone_number, prospect_email=prospect_email, how_did_you_hear_about_us=how_did_you_hear_about_us)
+            prospect = Prospect(prospect_id=prospect_id,prospect_first_name=prospect_first_name, prospect_last_name=prospect_last_name,prospect_phone_number=prospect_phone_number, prospect_email=prospect_email,
+                                how_did_they_hear_about_us=how_did_they_hear_about_us,how_did_they_hear_about_us_details=how_did_they_hear_about_us_details)
             db.session.add(prospect)
             cls.executeDBQuery()
         return prospect

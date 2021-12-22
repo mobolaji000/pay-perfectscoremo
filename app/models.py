@@ -98,7 +98,8 @@ class Prospect(db.Model):
     prospect_last_name = db.Column(db.String(64), index=True,nullable=False, default='')
     prospect_email = db.Column(db.String(64), index=True, primary_key=True, nullable=False, default='')
     prospect_phone_number = db.Column(db.String(22),index=True,nullable=False, default='')
-    how_did_you_hear_about_us = db.Column(db.String(164), index=True, nullable=False, default='')
+    how_did_they_hear_about_us = db.Column(db.String, index=True, nullable=False, default='')
+    how_did_they_hear_about_us_details = db.Column(db.String, index=True, nullable=False, default='')
 
 
     def __repr__(self):

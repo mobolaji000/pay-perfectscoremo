@@ -77,6 +77,8 @@
      $('input[name="adjustment_explanation"]').val('');
      $('input[name="transaction_total"]').val('');
 
+
+
      var counter = $('input[name="installment_counter"]').val();
 
      for (let k = 1; k < counter; k++) {
@@ -94,6 +96,9 @@
      $('input[name="transaction_id_to_show"]').attr('disabled', true);
      $('input[name="transaction_id_to_show"]').val(result.transaction_id);
      $('input[name="stripe_customer_id"]').val(result.stripe_customer_id);
+
+     $('select[name="how_did_they_hear_about_us"]').val(result.how_did_they_hear_about_us);
+	 $('textarea[name="how_did_they_hear_about_us_details"]').val(result.how_did_they_hear_about_us_details);
 
 	//
 
@@ -294,7 +299,8 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 		dataToModify['mark_as_paid'] = $('input[name="mark_as_paid"]').val();
 		dataToModify['installment_counter'] = $('input[name="installment_counter"]').val();
 		dataToModify['ask_for_student_info'] = $('input[name="ask_for_student_info"]').val();
-
+		dataToModify['how_did_they_hear_about_us'] = $('select[name="how_did_they_hear_about_us"]').val();
+		dataToModify['how_did_they_hear_about_us_details'] = $('textarea[name="how_did_they_hear_about_us_details"]').val();
 
 		 for (let k = 1; k < dataToModify['installment_counter']+1; k++) {
   				date = 'date_'.concat(k)
@@ -468,6 +474,22 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 						Please enter a valid phone number.
 					</div>
 				</div>
+
+				<div class="row" style="display:inline-block; width:100%; margin-left: 10%;">
+							<label for="how_did_they_hear_about_us">How did they hear about us?</label>
+							<select  id="how_did_they_hear_about_us"  name="how_did_they_hear_about_us" class="form-control">
+								<option value="" selected disabled hidden></option>
+								<option value='Southwest: Garland'>Southwest: Garland</option>
+								<option value='Southwest: Arlington'>Southwest: Arlington</option>
+								<option value='Referral'>Referral</option>
+								<option value='Other'>Other</option>
+							</select>
+						</div><br><br>
+
+						<div class="row" style="display:inline-block; width:100%; margin-left: 10%;">
+							<label for="how_did_they_hear_about_us_details">How did they hear about us (details)?</label>
+							<textarea  id="how_did_they_hear_about_us_details"  name="how_did_they_hear_about_us_details" class="form-control" rows="5"  placeholder="" ></textarea>
+						</div>
 
 				<br><br><br>
 
