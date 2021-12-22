@@ -223,7 +223,7 @@ def create_transaction():
                 except Exception as e:
                     traceback.print_exc()
                     flash('An error occured while sending an email/sms to the client after creating the transaction.')
-        return render_template('generate_transaction_id.html',transaction_id=transaction_idl)
+        return render_template('generate_transaction_id.html',transaction_id=transaction_id)
     except Exception as e:
         print(e)
         traceback.print_exc()
