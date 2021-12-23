@@ -105,7 +105,7 @@ class Prospect(db.Model):
     def __repr__(self):
         return '<Prospect {} created with prospect_id {}>'.format(self.last_name, self.prospect_id)
 
-class LeadInfo(db.Model):
+class Lead(db.Model):
     lead_id = db.Column(db.String(8), primary_key=True, unique=True, index=True, nullable=False, default='')
     lead_name = db.Column(db.String(64), index=True,nullable=False, default='')
     lead_email = db.Column(db.String(64), index=True, nullable=False, default='')

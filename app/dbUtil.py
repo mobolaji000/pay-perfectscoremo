@@ -1,4 +1,4 @@
-from app.models import Transaction,InstallmentPlan,InvoiceToBePaid,Prospect,Student,LeadInfo
+from app.models import Transaction,InstallmentPlan,InvoiceToBePaid,Prospect,Student,Lead
 from app import db
 from app.config import stripe
 from datetime import datetime
@@ -77,7 +77,7 @@ class AppDBUtil():
                                   diag_total=diag_total, was_test_prep_purchased=was_test_prep_purchased, tp_product=tp_product, tp_units=tp_units,
                                   tp_total=tp_total, was_college_apps_purchased=was_college_apps_purchased, college_apps_product=college_apps_product,
                                   college_apps_units=college_apps_units, college_apps_total=college_apps_total,
-                                  adjust_total=adjust_total, adjustment_explanation=adjustment_explanation, transaction_total=transaction_total, installment_counter=installment_counter)
+                                  adjust_total=adjust_total, adjustment_explanation=adjustment_explanation, transaction_total=transaction_total, installment_counter=installment_counter,ask_for_student_info=ask_for_student_info)
 
 
             db.session.add(transaction)
@@ -456,9 +456,9 @@ class AppDBUtil():
     @classmethod
     def createLead(cls, leadInfo):
         try:
-            lead_info = LeadInfo(lead_id=leadInfo['lead_id'],lead_name=leadInfo['lead_name'],lead_email=leadInfo['lead_email'],lead_phone_number=leadInfo['lead_phone_number'],
-                                 what_service_are_they_interested_in=leadInfo['what_service_are_they_interested_in'],what_next=leadInfo['what_next'],
-                                 meeting_notes_to_keep_in_mind=leadInfo['meeting_notes_to_keep_in_mind'],how_did_they_hear_about_us=leadInfo['how_did_they_hear_about_us'])
+            lead_info = Lead(lead_id=leadInfo['lead_id'], lead_name=leadInfo['lead_name'], lead_email=leadInfo['lead_email'], lead_phone_number=leadInfo['lead_phone_number'],
+                             what_service_are_they_interested_in=leadInfo['what_service_are_they_interested_in'], what_next=leadInfo['what_next'],
+                             meeting_notes_to_keep_in_mind=leadInfo['meeting_notes_to_keep_in_mind'], how_did_they_hear_about_us=leadInfo['how_did_they_hear_about_us'])
 
             db.session.add(lead_info)
             cls.executeDBQuery()
@@ -474,14 +474,14 @@ class AppDBUtil():
     @classmethod
     def getLeadInfo(cls, search_query,searchStartDate,searchEndDate):
         if search_query.isdigit():
-            lead_info = LeadInfo.query.filter_by(lead_phone_number=search_query).order_by(LeadInfo.date_created.desc()).all()
+            lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
         elif "@" in search_query:
-            lead_info = LeadInfo.query.filter_by(lead_email=search_query).order_by(LeadInfo.date_created.desc()).all()
+            lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
         elif searchStartDate and searchEndDate:
-            lead_info = LeadInfo.query.filter_by((LeadInfo.day.between(searchStartDate, searchEndDate))).order_by(LeadInfo.date_created.desc()).all()
+            lead_info = Lead.query.filter_by((Lead.day.between(searchStartDate, searchEndDate))).order_by(Lead.date_created.desc()).all()
         else:
             search = "%{}%".format(search_query)
-            lead_info = LeadInfo.query.filter(LeadInfo.lead_name.ilike(search)).order_by(LeadInfo.date_created.desc()).all()
+            lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
 
         search_results = []
         for info in lead_info:
@@ -504,7 +504,7 @@ class AppDBUtil():
     @classmethod
     def modifyLeadInfo(cls, lead_id, lead_info):
 
-        number_of_rows_modified = db.session.query(LeadInfo).filter_by(lead_id=lead_id).update(lead_info)
+        number_of_rows_modified = db.session.query(Lead).filter_by(lead_id=lead_id).update(lead_info)
         cls.executeDBQuery()
         print("number of lead rows modified is: ", number_of_rows_modified) # printing of rows modified to logs to help with auditing
         return number_of_rows_modified

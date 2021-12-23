@@ -110,7 +110,7 @@ def client_info(prospect_id):
     elif request.method == 'POST':
         try:
             student_data = request.form.to_dict()
-            create_student_data_message = AppDBUtil.createStudentData(student_data)
+            AppDBUtil.createStudentData(student_data)
 
             SendMessagesToClients.sendGroupSMS(to_numbers=[student_data['parent_1_phone_number'], student_data['parent_2_phone_number'], student_data['student_phone_number']], message=student_data['student_first_name'], type='create_group_chat')
             SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
