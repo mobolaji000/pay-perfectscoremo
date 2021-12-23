@@ -311,7 +311,7 @@ def input_transaction_id():
     return render_template('input_transaction_id.html')
 
 @server.route('/transaction_page',methods=['POST'])
-def transaction_page(transaction_id):
+def transaction_page():
     try:
         client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(request.form.to_dict()['transaction_id'])
     except Exception as e:
