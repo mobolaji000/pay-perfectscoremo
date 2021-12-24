@@ -116,6 +116,8 @@ def client_info(prospect_id):
             SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
             flash("Student information submitted successfully and group messages (email and text) for regular updates created.")
         except Exception as e:
+            print(e)
+            traceback.print_exc()
             flash("Error in submitting student information and creating group messages for regular updates created. Please contact Mo.")
         return render_template('client_info.html', prospect_id=prospect_id)
 
