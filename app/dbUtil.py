@@ -483,7 +483,7 @@ class AppDBUtil():
                 lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
 
         elif searchStartDate and searchEndDate:
-            lead_info = Lead.query.filter_by((Lead.day.between(searchStartDate, searchEndDate))).order_by(Lead.date_created.desc()).all()
+            lead_info = Lead.query.filter_by((Lead.date_created.between(searchStartDate, searchEndDate))).order_by(Lead.date_created.desc()).all()
 
 
         search_results = []
