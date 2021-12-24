@@ -455,7 +455,7 @@ def stripe_webhook():
             else:
                 amount_paid = paid_invoice.total / 100
 
-            transaction = AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id,amount_paid)
+            AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id,amount_paid)
 
             print("paid transaction is ", paid_invoice)
             print("transaction id is ", transaction_id)
