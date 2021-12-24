@@ -473,15 +473,18 @@ class AppDBUtil():
 
     @classmethod
     def getLeadInfo(cls, search_query,searchStartDate,searchEndDate):
-        if search_query.isdigit():
-            lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
-        elif "@" in search_query:
-            lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
+        if search_query:
+            if search_query.isdigit():
+                lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
+            elif "@" in search_query:
+                lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
+            else:
+                search = "%{}%".format(search_query)
+                lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
+
         elif searchStartDate and searchEndDate:
             lead_info = Lead.query.filter_by((Lead.day.between(searchStartDate, searchEndDate))).order_by(Lead.date_created.desc()).all()
-        else:
-            search = "%{}%".format(search_query)
-            lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
+
 
         search_results = []
         for info in lead_info:
