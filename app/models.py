@@ -77,7 +77,7 @@ class InstallmentPlan(db.Model):
 #invoices created for installments and for returning client autopay
 class InvoiceToBePaid(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    transaction_id = db.Column(db.String(8), db.ForeignKey('installment_plan.transaction_id'), nullable=False)
+    transaction_id = db.Column(db.String(8), db.ForeignKey('transaction.transaction_id'), nullable=False)
     stripe_customer_id = db.Column(db.String(48),index=True,nullable=False, default='')
     first_name = db.Column(db.String(64), index=True,nullable=False, default='')
     last_name = db.Column(db.String(64), index=True,nullable=False, default='')
@@ -90,7 +90,7 @@ class InvoiceToBePaid(db.Model):
     payment_made = db.Column(db.Boolean, unique=False, nullable=False, default=False)
 
     def __repr__(self):
-        return '<Invoice created for {}>'.format(self.last_name)
+        return '<InvoiceToBePaid created for {}>'.format(self.last_name)
 
 class Prospect(db.Model):
     prospect_id = db.Column(db.String(8), unique=True, index=True, nullable=False, default='')

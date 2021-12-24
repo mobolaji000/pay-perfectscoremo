@@ -104,7 +104,7 @@ class AWSInstance():
             BODY_HTML = """<html>
                 <head></head>
                 <body>
-                  <span>Welcome '"""+message+"""'!</span><br><br>""" \
+                  <span>Welcome """+message+"""!</span><br><br>""" \
                     + """<span>Regular communication between us all is a big part of our process. </span><br>""" \
                         + """<span>To help further that, you will receive regular updates on our progress via this group email.</span><br><br>""" \
                     + """<span>You can also reach me at mo@perfectscoremo.com</span><br>""" \

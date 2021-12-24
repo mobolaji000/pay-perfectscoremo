@@ -462,14 +462,6 @@ def stripe_webhook():
             print("paid transaction is ", paid_invoice)
             print("transaction id is ", transaction_id)
 
-        # attach transaction code to invoices
-        elif event.type == 'invoice.created':
-            created_invoice = event.data.object
-            stripe.Invoice.modify(created_invoice['id'], metadata={"transaction_id":transaction_id}, )
-
-            print("created transaction is ",created_invoice)
-            print("transaction code is ", transaction_id)
-
         elif event.type == 'invoice.payment_failed':
             failed_invoice = event.data.object
             try:
