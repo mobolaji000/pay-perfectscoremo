@@ -355,6 +355,7 @@ class AppDBUtil():
                 set_=updated_content
             )
 
+            db.session.execute(statement)
             cls.executeDBQuery()
 
         except Exception as e:
