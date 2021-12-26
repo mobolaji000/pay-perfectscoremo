@@ -113,8 +113,10 @@ def client_info(prospect_id):
             AppDBUtil.createStudentData(student_data)
 
             SendMessagesToClients.sendGroupSMS(to_numbers=[student_data['parent_1_phone_number'], student_data['parent_2_phone_number'], student_data['student_phone_number']], message=student_data['student_first_name'], type='create_group_chat')
-            SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
-            flash("Student information submitted successfully and group messages (email and text) for regular updates created.")
+            #hold off on sending group emails until you dedcide there is a value add
+            #SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+            #flash("Student information submitted successfully and group messages (email and text) for regular updates created.")
+            flash("Student information submitted successfully and text group message for regular updates created.")
         except Exception as e:
             print(e)
             traceback.print_exc()

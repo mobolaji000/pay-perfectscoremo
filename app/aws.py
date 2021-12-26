@@ -93,7 +93,7 @@ class AWSInstance():
                 <body>
                   <span>Dear Parent, </span><br><br>""" \
                     + """<span>Thank you for signing up with us! </span><br><br>""" \
-                    + """<span>Regular communication between us, you, and your student is a big part of our process. </span><br><br>""" \
+                    + """<span>Regular communication between us, you, and your student is a big part of our process. </span>""" \
                     + """<span>To help further that, please go to <strong><a href='"""+link_url+"""'>"""+link_url+"""</a></strong> (also sent to your phone number) to input you and your student's information.</span><br>""" \
                     + """<br><br><span>This will be used to setup text message and email updates on your student's regular progress.</span><br>""" \
                         + """<br><span>Regards,</span><br>""" \
@@ -107,7 +107,7 @@ class AWSInstance():
                 <head></head>
                 <body>
                   <span>Welcome """+message+"""!</span><br><br>""" \
-                    + """<span>Regular communication between us all is a big part of our process. </span><br>""" \
+                    + """<span>Regular communication between us all is a big part of our process. </span>""" \
                         + """<span>To help further that, you will receive regular updates on our progress via this group email.</span><br><br>""" \
                     + """<span>You can also reach me at mo@perfectscoremo.com</span><br>""" \
                         + """<br><span>Regards,</span><br>""" \
