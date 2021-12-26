@@ -65,6 +65,7 @@ class AppDBUtil():
         transaction_total = 0 if clientData.get('transaction_total','') == '' else clientData.get('transaction_total','')
         installment_counter = 0 if clientData.get('installment_counter','') == '' else int(clientData.get('installment_counter',''))#-1
         ask_for_student_info = clientData.get('ask_for_student_info','')
+        does_customer_payment_info_exist = 'yes' if clientData.get('does_customer_payment_info_exist',None) else 'no'
         # client-side counter is always one more; get the actual number here
 
 
@@ -76,8 +77,8 @@ class AppDBUtil():
                                   phone_number=phone_number, email=email, was_diagnostic_purchased=was_diagnostic_purchased, diag_units=diag_units,
                                   diag_total=diag_total, was_test_prep_purchased=was_test_prep_purchased, tp_product=tp_product, tp_units=tp_units,
                                   tp_total=tp_total, was_college_apps_purchased=was_college_apps_purchased, college_apps_product=college_apps_product,
-                                  college_apps_units=college_apps_units, college_apps_total=college_apps_total,
-                                  adjust_total=adjust_total, adjustment_explanation=adjustment_explanation, transaction_total=transaction_total, installment_counter=installment_counter,ask_for_student_info=ask_for_student_info)
+                                  college_apps_units=college_apps_units, college_apps_total=college_apps_total,adjust_total=adjust_total, adjustment_explanation=adjustment_explanation,
+                                transaction_total=transaction_total, installment_counter=installment_counter,ask_for_student_info=ask_for_student_info,does_customer_payment_info_exist=does_customer_payment_info_exist)
 
 
             db.session.add(transaction)
@@ -89,8 +90,8 @@ class AppDBUtil():
                         "email": email,"was_diagnostic_purchased": was_diagnostic_purchased,"diag_units": diag_units,"diag_total": diag_total,
                         "was_test_prep_purchased": was_test_prep_purchased,"tp_product": tp_product,"tp_units": tp_units,"tp_total": tp_total,
                         "was_college_apps_purchased": was_college_apps_purchased,"college_apps_product": college_apps_product,"college_apps_units": college_apps_units,
-                        "college_apps_total": college_apps_total,"adjust_total": adjust_total,
-                        "adjustment_explanation": adjustment_explanation,"transaction_total": transaction_total, "installment_counter":installment_counter})
+                        "college_apps_total": college_apps_total,"adjust_total": adjust_total,"adjustment_explanation": adjustment_explanation,
+                  "transaction_total": transaction_total, "installment_counter":installment_counter, "does_customer_payment_info_exist":does_customer_payment_info_exist})
 
             print("number of transaction rows modified is: ",number_of_rows_modified) #printing of rows modified to logs to help with auditing
 
@@ -382,6 +383,8 @@ class AppDBUtil():
             client_info['installment_counter'] = admin_transaction_details.installment_counter
             client_info['ask_for_student_info'] = admin_transaction_details.ask_for_student_info
             client_info['showACHOverride'] = str(showACHOverride)
+            client_info['does_customer_payment_info_exist'] = admin_transaction_details.does_customer_payment_info_exist
+
             print("client_info_installment_counter is "+str(admin_transaction_details.installment_counter))
 
             if admin_transaction_details.was_diagnostic_purchased:

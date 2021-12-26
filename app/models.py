@@ -27,6 +27,7 @@ class Transaction(db.Model):
     payment_started = db.Column(db.Boolean, unique=False,nullable=False, default=False)
     amount_from_transaction_paid_so_far = db.Column(db.Integer, index=True, nullable=False, default=0)
     ask_for_student_info = db.Column(db.String(4), index=True,nullable=False, default='')
+    does_customer_payment_info_exist = db.Column(db.String(30), index=True, nullable=False, default='')
     #installment_date = db.Column(db.PickleType,  index=True, nullable=True, default='')
     #installment_amount = db.Column(db.PickleType, index=True, nullable=True, default='')
     #what happens when you try to update pickle type? do you have to instantiate a new variable?

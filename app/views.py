@@ -196,7 +196,7 @@ def create_transaction():
         prospect = AppDBUtil.createProspect(transaction_setup_data)
 
         customer,does_customer_payment_info_exist = stripeInstance.createCustomer(transaction_setup_data)
-        transaction_setup_data.update({"stripe_customer_id":customer["id"],'prospect_id':prospect.prospect_id})
+        transaction_setup_data.update({"stripe_customer_id":customer["id"],'prospect_id':prospect.prospect_id,'does_customer_payment_info_exist':does_customer_payment_info_exist})
         transaction_id,number_of_rows_modified = AppDBUtil.createOrModifyClientTransaction(transaction_setup_data, action='create')
 
         client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
@@ -365,6 +365,7 @@ def parseDataForStripe(client_info):
     stripe_info['transaction_id'] = client_info.get('transaction_id', '')
     stripe_info['installment_counter'] = client_info.get('installment_counter', '')
     stripe_info['ask_for_student_info'] = client_info.get('ask_for_student_info', '')
+    stripe_info['does_customer_payment_info_exist'] = client_info.get('does_customer_payment_info_exist', '')
 
     if client_info.get('installments','') != '':
         for index,installment in enumerate(client_info.get('installments','')):
@@ -384,7 +385,8 @@ def execute_card_payment():
     chosen_mode_of_payment = request.form['chosen_mode_of_payment']
     stripe_info = ast.literal_eval(request.form['stripe_info'])
     payment_id = request.form['payment_id']
-    result = stripeInstance.chargeCustomerViaCard(stripe_info, chosen_mode_of_payment, payment_id)
+    does_customer_payment_info_exist = True if stripe_info.get('does_customer_payment_info_exist','') == 'yes' else False
+    result = stripeInstance.chargeCustomerViaCard(stripe_info=stripe_info, chosen_mode_of_payment=chosen_mode_of_payment, payment_id=payment_id,existing_customer=does_customer_payment_info_exist)
     if result['status'] == 'failure':
         print("Failed because customer did not enter a credit card number to pay via installments.")
         flash('Enter a credit card number to pay via installments.')
@@ -409,7 +411,8 @@ def exchange_plaid_for_stripe():
     account_id = request.form['account_id']
     chosen_mode_of_payment = request.form['chosen_mode_of_payment']
     bank_account_token = plaidInstance.exchange_plaid_for_stripe(public_token,account_id)
-    result = stripeInstance.chargeCustomerViaACH(stripe_info,bank_account_token,chosen_mode_of_payment)
+    does_customer_payment_info_exist = True if stripe_info.get('does_customer_payment_info_exist','') == 'yes' else False
+    result = stripeInstance.chargeCustomerViaACH(stripe_info=stripe_info,bank_account_token=bank_account_token,chosen_mode_of_payment=chosen_mode_of_payment,existing_customer=does_customer_payment_info_exist)
 
     if result['status'] != 'success':
         print("Attempt to pay via ACH failed")
