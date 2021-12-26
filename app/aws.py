@@ -129,6 +129,8 @@ class AWSInstance():
                         + """<span>5. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free</span><br>""" \
                         + """<span>6. For installment payments, these are accepted: Credit Cards, Debit Cards</span><br>""" \
                         + """<span>7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH</span><br>""" \
+                        + """<br><span>Regards,</span><br>""" \
+                        + """<span>Mo</span><br>""" \
                         + """
                             </body>
                             </html>

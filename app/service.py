@@ -391,11 +391,10 @@ class SendMessagesToClients():
                            + """5. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free\n\n""" \
                            + """6. For installment payments, these are accepted: Credit Cards, Debit Cards\n\n""" \
                            + """7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH\n\n""" \
-                           + """### We don't receive messages on this number. If you have any questions, reach out on 972-584-7364 ###\n\n"""
-
-
-
-        message = cls.twilioClient.messages .create(
+                           + """### We don't receive messages on this number. If you have any questions, reach out on 972-584-7364 ###\n\n"""\
+                            + """Regards,\n\n""" \
+                           + """Mo\n\n"""
+            message = cls.twilioClient.messages .create(
             body=text_message,
             from_=from_number,
             to='+1'+to_number

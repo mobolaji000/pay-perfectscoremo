@@ -47,8 +47,7 @@
 <div class="container">
 	<div class="py-5 text-center">
 		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
-		<h2>Enter Student & Parent Information</h2>
-		<p class="lead">_________________________</p>
+		<h2><u>Enter Student & Parent Information</u></h2>
 	</div>
 
 		<div class="col-md-8 order-md-1">
@@ -57,8 +56,7 @@
 			<form class="needs-validation" action="{{ url_for('client_info') }}" method="post"
 				  data-toggle="validator">
 
-					<h4 class="mb-3">Student Information</h4>
-				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+					<h4 class="mb-3"><u>Student Information</u></h4>
 				<div class="row">
 					<div class="col-md-6 mb-3">
 						<label for="student_first_name">First name</label>
@@ -98,8 +96,7 @@
 
 				<br><br><br>
 
-				<h4 class="mb-3">Parent 1 Information</h4>
-				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+				<h4 class="mb-3"><u>Parent 1 Information</u></h4>
 
 				<div class="row">
 
@@ -155,9 +152,7 @@
 
 				<br><br><br>
 
-				<h4 class="mb-3">Parent 2 Information</h4>
-				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-
+				<h4 class="mb-3"><u>Parent 2 Information</u></h4>
 				<div class="row">
 
 				<div class="col-md-4 mb-3">
@@ -215,8 +210,9 @@
 				<input id="prospect_id" name="prospect_id" hidden  data-prospect_id="{{ prospect_id }}">
 
 
-				<input id="submit_information" name="submit_information" class="btn btn-primary btn-lg btn-block" type="submit" value="Submit Information"
-					   onclick="finalCheckBeforeSubmit();"></input>
+				 <div class="row justify-content-center"><input id="submit_information" name="submit_information" class="btn btn-primary btn-lg btn-block w-25 p-3" type="submit" value="Submit Information"
+					   onclick="finalCheckBeforeSubmit();"></input></div>
+
 			</form>
 		</div>
 	</div>
