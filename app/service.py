@@ -366,16 +366,16 @@ class SendMessagesToClients():
     def sendSMS(cls,message='perfectscoremo',from_number='+19564771274',to_number='9725847364',type=''):
 
         if type == 'create_transaction_new_client':
-            created_or_modified_span = "Dear parent,\n\nYour transaction has just been created. Here are the payment instructions/options (also sent to your email address):"
+            created_or_modified_span = "Dear Parent,\n\nYour transaction has just been created. Here are the payment instructions/options (also sent to your email address):"
         elif type == 'modify_transaction':
-            created_or_modified_span = "Dear parent,\n\nYour transaction has just been modified. Here are the payment instructions/options (also sent to your email address):"
+            created_or_modified_span = "Dear Parent,\n\nYour transaction has just been modified. Here are the payment instructions/options (also sent to your email address):"
         elif type == 'reminder_to_make_payment':
-            created_or_modified_span = "Dear parent,\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):"
+            created_or_modified_span = "Dear Parent,\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):"
         elif type == 'create_transaction_existing_client':
-            created_or_modified_span = "Dear parent,\n\nYour new transaction has been created using your method of payment on file. At any point in the next 72 hours, you can change your method of payment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
+            created_or_modified_span = "Dear Parent,\n\nYour new transaction has been created using your method of payment on file. At any point in the next 72 hours, you can change your method of payment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
         elif type == 'student_info':
             link_url = os.environ["url_to_start_reminder"]+"client_info/"+message
-            created_or_modified_span = "Dear parent,\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. This will be used to setup text message and email updates on your student's regular progress."
+            created_or_modified_span = "Dear Parent,\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. \n\n This will be used to setup text message and email updates on your student's regular progress."
 
 
         if type == 'to_mo':
