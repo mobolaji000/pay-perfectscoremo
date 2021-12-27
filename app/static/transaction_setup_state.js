@@ -325,7 +325,7 @@ $(document).ready(function() {
         $('input[name="installment_counter"]').val(counter);
         //client-side counter is always one more; actual number has been set server-side
         }
-        else
+        if (Number(counter) == 13)
         {
         document.getElementById("addrow").hidden=true;
         document.getElementById("more_than_12_installments_message").hidden=false;
