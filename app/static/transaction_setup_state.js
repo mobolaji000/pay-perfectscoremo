@@ -303,6 +303,8 @@ $(document).ready(function() {
 
     var counter = $('input[name="installment_counter"]').val();
 
+    alert(counter);
+
     if (Number(counter) < 12)
 {
         document.getElementById("more_than_12_installments_message").hidden=true;
