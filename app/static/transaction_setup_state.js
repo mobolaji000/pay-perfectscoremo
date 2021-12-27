@@ -303,6 +303,10 @@ $(document).ready(function() {
 
     var counter = $('input[name="installment_counter"]').val();
 
+    if (Number(counter) < 12)
+{
+        document.getElementById("more_than_12_installments_message").hidden=true;
+
         var newRow = $("<tr>");
         var cols = "";
 
@@ -321,6 +325,13 @@ $(document).ready(function() {
         counter++;
         $('input[name="installment_counter"]').val(counter);
         //client-side counter is always one more; actual number has been set server-side
+        }
+        else
+        {
+
+        document.getElementById("more_than_12_installments_message").hidden=false;
+
+        }
 
     });
 
