@@ -426,7 +426,7 @@ class SendMessagesToClients():
             cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+1' + to_number)
 
         if type == 'create_group_chat':
-            created_or_modified_span = "Welcome "+message+"!\n\n"+"This group chat is where you will receive regular updates on our progress. Don't be surprised if, on this group chat, you get a message from both 956-477-1274 and 972-584-7364. That said, if you need to speak with me, the number to call is 972-584-7364."
+            created_or_modified_span = "Welcome "+message+"!\n\n"+"This group chat is where you will receive regular updates on our progress. Don't be surprised if, on this group chat, you get messages from both 956-477-1274 and 972-584-7364. That said, if you need to speak with me, the number to call is 972-584-7364."
 
         cls.twilioClient.conversations.conversations(conversation.sid).messages.create(body=created_or_modified_span, author='+19564771274')
         print("group chat created!")

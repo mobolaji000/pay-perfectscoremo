@@ -111,8 +111,8 @@ def client_info(prospect_id):
         try:
             student_data = request.form.to_dict()
             AppDBUtil.createStudentData(student_data)
-
-            SendMessagesToClients.sendGroupSMS(to_numbers=[student_data['parent_1_phone_number'], student_data['parent_2_phone_number'], student_data['student_phone_number']], message=student_data['student_first_name'], type='create_group_chat')
+            to_numbers = [number for number in [student_data.get('parent_1_phone_number', None), student_data.get('parent_1_phone_number', None), student_data.get('student_phone_number', None)] if number]
+            SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=student_data['student_first_name'], type='create_group_chat')
             #hold off on sending group emails until you dedcide there is a value add
             #SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
             #flash("Student information submitted successfully and group messages (email and text) for regular updates created.")
