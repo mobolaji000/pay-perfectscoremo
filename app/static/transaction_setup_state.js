@@ -303,17 +303,14 @@ $(document).ready(function() {
 
     var counter = $('input[name="installment_counter"]').val();
 
-    alert(counter);
+    //alert(counter);
 
-    if (Number(counter) < 12)
+    if (Number(counter) < 13)
 {
         document.getElementById("more_than_12_installments_message").hidden=true;
 
         var newRow = $("<tr>");
         var cols = "";
-
-
-
 
         cols += '<td><input type="date" class="form-control" name="date_' + counter + '" required/></td>';
         cols += '<td><input type="number" class="form-control installment_amounts" min="1" name="amount_' + counter + '" required/></td>';
@@ -330,17 +327,16 @@ $(document).ready(function() {
         }
         else
         {
-
+        document.getElementById("addrow").hidden=true;
         document.getElementById("more_than_12_installments_message").hidden=false;
 
         }
 
     });
 
-
-
     $("table.order-list").on("click", ".ibtnDel", function (event) {
     var counter = $('input[name="installment_counter"]').val();
+
         $(this).closest("tr").remove();
         counter--;
         $('input[name="installment_counter"]').val(counter);
@@ -350,6 +346,16 @@ $(document).ready(function() {
         document.getElementById("installment_not_equal_total_message_2").hidden=true;
             $('input[name="create_transaction_button"]').attr('disabled', false);
              $('input[name="modify_transaction_button"]').attr('disabled', false);
+        }
+
+    if (Number(counter) < 13)
+        {
+        document.getElementById("more_than_12_installments_message").hidden=true;
+        document.getElementById("addrow").hidden=false;
+        }
+    else
+        {
+        document.getElementById("more_than_12_installments_message").hidden=false;
         }
         //client-side counter is always one more; actual number has been set server-side
     });
