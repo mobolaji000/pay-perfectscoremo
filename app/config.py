@@ -9,8 +9,8 @@ class Config(object):
         if os.environ['DEPLOY_REGION'] == 'local':
 
             os.environ["stripe_pk"] = 'pk_test_51Hlgy6DbpRMio7qjWV9YNuBPiQIgD6PrBwO7oek37OEafhZiRjkfs42owvLto0eO8c6CCaiSAOUrXn0uPEJdai6Z00DUYXi551'
-            os.environ["price"] = "price_1J5rWJDbpRMio7qjrkWJfnk3"
-            os.environ["product"] = "prod_JjKA9beb14xw0F"
+            os.environ["price"] = "price_1KC6jCDbpRMio7qjcRMFyqLi"
+            os.environ["product"] = "prod_KrqQbyKt9WHy3g"
             os.environ["url_to_start_reminder"] = "http://127.0.0.1:5002/"
             flask_secret_key = os.environ.get('flask_secret_key')
             SECRET_KEY = os.environ.get('flask_secret_key')
@@ -26,8 +26,8 @@ class Config(object):
         elif os.environ['DEPLOY_REGION'] == 'dev':
 
             os.environ["stripe_pk"] = 'pk_test_51Hlgy6DbpRMio7qjWV9YNuBPiQIgD6PrBwO7oek37OEafhZiRjkfs42owvLto0eO8c6CCaiSAOUrXn0uPEJdai6Z00DUYXi551'
-            os.environ["price"] = "price_1KAE6hDbpRMio7qjFIGTiwag"
-            os.environ["product"] = "prod_KptuXBrn8NFdNq"
+            os.environ["price"] = "price_1KC6jCDbpRMio7qjcRMFyqLi"
+            os.environ["product"] = "prod_KrqQbyKt9WHy3g"
             os.environ["url_to_start_reminder"] = "https://dev-pay-perfectscoremo-7stpz.ondigitalocean.app/"
             flask_secret_key = awsInstance.get_secret("vensti_admin", "flask_secret_key")
             SECRET_KEY = awsInstance.get_secret("vensti_admin", "flask_secret_key")
