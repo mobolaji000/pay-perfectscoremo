@@ -12,7 +12,6 @@ termcolor==1.1.0
 plaid-python==7.2.0
 psycopg2-binary==2.8.6
 python-http-client==3.3.2
-sendgrid==6.7.0
 #starkbank-ecdsa==1.1.0
 PyJWT==1.7.1
 twilio==6.57.0
