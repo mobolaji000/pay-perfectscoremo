@@ -418,18 +418,18 @@ class SendMessagesToClients():
                            + """### We don't receive messages on this number. If you have any questions, reach out on 972-584-7364 ###\n\n"""\
                             + """Regards,\n\n""" \
                            + """Mo\n\n"""
-            message = cls.twilioClient.messages .create(
-            body=text_message,
-            from_=from_number,
-            to='+1'+to_number
+        sent_message = cls.twilioClient.messages .create(
+        body=text_message,
+        from_=from_number,
+        to='+1'+to_number
         )
 
         print("text sent!")
-        print(message.sid)
+        print(sent_message.sid)
 
     @classmethod
     def sendGroupEmail(cls, to_emails=[], type='', message='', subject='Group Email'):
-        cls.awsInstance.send_email(to_addresses=to_address, message=message, subject=subject, type=type)
+        cls.awsInstance.send_email(to_addresses=to_emails, message=message, subject=subject, type=type)
 
     @classmethod
     def sendGroupSMS(cls, to_numbers=[], type='', message=''):
