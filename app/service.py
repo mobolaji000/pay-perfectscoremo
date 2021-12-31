@@ -82,7 +82,7 @@ class StripeInstance():
         return intent.client_secret
 
     def markCustomerAsChargedOutsideofStripe(self, stripe_info):
-        logging.debug('Entering method to mark customer as charged outside of Stripe: '+str(stripe_info['transaction_id']))
+        logger.debug('Entering method to mark customer as charged outside of Stripe: '+str(stripe_info['transaction_id']))
         transaction_total = int(stripe_info['transaction_total'])
 
         stripe.InvoiceItem.create(
@@ -95,7 +95,7 @@ class StripeInstance():
             metadata={'transaction_id': stripe_info['transaction_id']},
         )
         stripe.Invoice.pay(transaction.id, paid_out_of_band=True)
-        logging.debug('Leaving method to mark customer as charged outside of Stripe: ' + str(stripe_info['transaction_id']))
+        logger.debug('Leaving method to mark customer as charged outside of Stripe: ' + str(stripe_info['transaction_id']))
 
         return {'status': 'success'}
 
@@ -116,10 +116,10 @@ class StripeInstance():
             raise Exception('Customer has neither existing nor new ACH details.')
 
         if existing_customer:
-            logging.debug('Exisiting customer: ' + str(stripe_info['stripe_customer_id']))
+            logger.debug('Exisiting customer: ' + str(stripe_info['stripe_customer_id']))
 
         if chosen_mode_of_payment == 'installment-payment-ach':
-            logging.debug('Installment payment ACH: ' + str(stripe_info['transaction_id']))
+            logger.debug('Installment payment ACH: ' + str(stripe_info['transaction_id']))
             for k in range(1, int(stripe_info['installment_counter'])):
                 if existing_customer:
                     # ensures that you always keep 72 hours to change method of payment promise to exisiting clients
@@ -148,7 +148,7 @@ class StripeInstance():
                                                 payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
         else:
             if existing_customer:
-                logging.debug('Full payment ACH for existing customer: ' + str(stripe_info['transaction_id']))
+                logger.debug('Full payment ACH for existing customer: ' + str(stripe_info['transaction_id']))
                 amount = stripe_info['transaction_total']
                 date = datetime.datetime.today() + datetime.timedelta(days=3)
                 transaction_total = int(stripe_info['transaction_total']) #this is ach; dont multiply by 3 percent
@@ -172,7 +172,7 @@ class StripeInstance():
                                                 payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
 
             else:
-                logging.debug('Full payment ACH for new customer: ' + str(stripe_info['transaction_id']))
+                logger.debug('Full payment ACH for new customer: ' + str(stripe_info['transaction_id']))
                 transaction_total = int(stripe_info['transaction_total'])
 
                 stripe.InvoiceItem.create(
@@ -209,10 +209,10 @@ class StripeInstance():
         )
 
         if existing_customer:
-            logging.debug('Existing customer: ' + str(stripe_info['stripe_customer_id']))
+            logger.debug('Existing customer: ' + str(stripe_info['stripe_customer_id']))
 
         if chosen_mode_of_payment == 'installment-payment-credit-card':
-            logging.debug('Installment payment credit card: ' + str(stripe_info['transaction_id']))
+            logger.debug('Installment payment credit card: ' + str(stripe_info['transaction_id']))
 
             for k in range(1, int(stripe_info['installment_counter'])):
                 if existing_customer:
@@ -244,7 +244,7 @@ class StripeInstance():
 
         else:
             if existing_customer:
-                logging.debug('Full payment credit card existing customer: ' + str(stripe_info['transaction_id']))
+                logger.debug('Full payment credit card existing customer: ' + str(stripe_info['transaction_id']))
                 # ensures that you always keep 72 hours to change method of payment promise to exisiting clients
                 amount = stripe_info['transaction_total']
                 date = datetime.datetime.today() + datetime.timedelta(days=3)
@@ -265,7 +265,7 @@ class StripeInstance():
                                                 transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
                                                 payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
             else:
-                logging.debug('Full payment credit card new customer: ' + str(stripe_info['transaction_id']))
+                logger.debug('Full payment credit card new customer: ' + str(stripe_info['transaction_id']))
                 transaction_total = int(math.ceil(stripe_info['transaction_total'] * 1.03))
                 stripe.InvoiceItem.create(
                     customer=stripe_info['stripe_customer_id'],
@@ -285,7 +285,7 @@ class StripeInstance():
         # date = datetime.datetime.today() + datetime.timedelta(days=3)
         # amount = stripe_info['transaction_total']
 
-        logging.debug('Inside setupAutoPaymentForExistingCustomer()' + str(stripe_info['transaction_id']))
+        logger.debug('Inside setupAutoPaymentForExistingCustomer()' + str(stripe_info['transaction_id']))
 
         customer = stripe.Customer.retrieve(stripe_info['stripe_customer_id'])
         default_card = customer.invoice_settings.default_payment_method
