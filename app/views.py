@@ -23,6 +23,14 @@ from app.config import stripe
 import threading
 from apscheduler.schedulers.background import BackgroundScheduler
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
 
 
 from app import server
@@ -207,20 +215,23 @@ def create_transaction():
         if transaction_setup_data.get('ask_for_student_info','') == 'yes':
             SendMessagesToClients.sendEmail(to_addresses=transaction_setup_data['email'], message=transaction_setup_data['prospect_id'], subject='New Student Information', type='student_info')
             SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'], message=transaction_setup_data['prospect_id'], type='student_info')
+            logging.debug('Ask for student info: ' + str(stripe_info['transaction_id']))
 
         if transaction_setup_data.get('mark_as_paid','') == 'yes':
             stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info)
             AppDBUtil.updateTransactionPaymentStarted(transaction_id)
-            print("marked transaction as paid")
+            logging.debug('Mark transaction as paid: '+str(stripe_info['transaction_id']))
         else:
             message_type = ''
             if does_customer_payment_info_exist:
                 message_type = 'create_transaction_existing_client'
+                logging.debug('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
                 stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
             else:
                 message_type = 'create_transaction_new_client'
 
             if transaction_setup_data.get('send_text_and_email', '') == 'yes':
+                logging.debug('Send transaction text and email notification: ' + str(stripe_info['transaction_id']))
                 try:
                     SendMessagesToClients.sendEmail(to_addresses=transaction_setup_data['email'], message=transaction_id, type=message_type)
                     SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'],message=transaction_id,type=message_type)
