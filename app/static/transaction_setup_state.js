@@ -404,18 +404,11 @@ $(document).ready(function() {
 
 		 if (installment_total != transactionTotal()) {
 		 document.getElementById("installment_not_equal_total_message_1").hidden=false;
-            $('input[name="create_transaction_button"]').attr('disabled', true);
-
             document.getElementById("installment_not_equal_total_message_2").hidden=false;
-            $('input[name="modify_transaction_button"]').attr('disabled', true);
-
         }
         else{
         document.getElementById("installment_not_equal_total_message_1").hidden=true;
-            $('input[name="create_transaction_button"]').attr('disabled', false);
-
              document.getElementById("installment_not_equal_total_message_2").hidden=true;
-            $('input[name="modify_transaction_button"]').attr('disabled', false);
             $(this).submit();
         }
 
