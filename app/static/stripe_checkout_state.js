@@ -91,7 +91,7 @@ var cardElement = document.getElementById('card-element');
     dataType: "json",
     async: false,
     success: function (result) {
-    if(result.status == 'failure'){
+    if(result.status != 'success'){
         location.reload();
         return false;
     }

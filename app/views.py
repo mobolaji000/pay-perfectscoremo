@@ -395,9 +395,9 @@ def execute_card_payment():
     payment_id = request.form['payment_id']
     does_customer_payment_info_exist = True if stripe_info.get('does_customer_payment_info_exist','') == 'yes' else False
     result = stripeInstance.chargeCustomerViaCard(stripe_info=stripe_info, chosen_mode_of_payment=chosen_mode_of_payment, payment_id=payment_id,existing_customer=does_customer_payment_info_exist)
-    if result['status'] == 'failure':
-        print("Failed because customer did not enter a credit card number to pay via installments.")
-        flash('Enter a credit card number to pay via installments.')
+    if result['status'] != 'success':
+        print("Stripe card payment failed")
+        flash('Payment failed. Enter a valid credit/debit card number. Or contact Mo.')
     else:
         AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
 
