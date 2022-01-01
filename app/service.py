@@ -104,28 +104,41 @@ class StripeInstance():
         for existing_invoice in existing_invoices:
             AppDBUtil.deleteInvoiceToBePaid(existing_invoice.transaction_id, existing_invoice.stripe_invoice_id)
 
+        stripe.Customer.modify(
+            stripe_info['stripe_customer_id'],
+            invoice_settings={'default_payment_method': None})
+
         if bank_account_token:
+
             stripe.Customer.modify(
                 stripe_info['stripe_customer_id'],
                 source=bank_account_token,
             )
             customer_default_source = stripe.Customer.retrieve(stripe_info['stripe_customer_id'])['default_source']
-            customer_default_source_type = stripe.Source.retrieve(customer_default_source,)['type']
-            updated_customer_default_source_type = stripe.Customer.list_payment_methods(
-                stripe_info['stripe_customer_id'],
-                type=customer_default_source_type,
-            )
-            payment_method = updated_customer_default_source_type['data'][0]['id']
+            # stripe.Invoice.modify(
+            #     stripe_info['stripe_customer_id'],
+            #     default_source=customer_default_source,
+            # )
 
-            stripe.PaymentMethod.attach(
-                payment_method,
-                customer=stripe_info['stripe_customer_id'],
-            )
 
-            stripe.Customer.modify(
-                stripe_info['stripe_customer_id'],
-                invoice_settings={'default_payment_method': payment_method},
-            )
+
+            # customer_default_source = stripe.Customer.retrieve(stripe_info['stripe_customer_id'])['default_source']
+            # customer_default_source_type = stripe.Source.retrieve(customer_default_source,)['type']
+            # updated_customer_default_source_type = stripe.Customer.list_payment_methods(
+            #     stripe_info['stripe_customer_id'],
+            #     type=customer_default_source_type,
+            # )
+            # payment_method = updated_customer_default_source_type['data'][0]['id']
+            #
+            # stripe.PaymentMethod.attach(
+            #     payment_method,
+            #     customer=stripe_info['stripe_customer_id'],
+            # )
+            #
+            # stripe.Customer.modify(
+            #     stripe_info['stripe_customer_id'],
+            #     invoice_settings={'default_payment_method': payment_method},
+            # )
 
         elif default_source:
             customer_default_source = default_source
