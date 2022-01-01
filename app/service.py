@@ -110,7 +110,7 @@ class StripeInstance():
                 source=bank_account_token,
             )
             customer_default_source = stripe.Customer.retrieve(stripe_info['stripe_customer_id'])['default_source']
-            customer_default_source_type = customer_default_source['type']
+            customer_default_source_type = stripe.Source.retrieve(customer_default_source,)['type']
             updated_customer_default_source_type = stripe.Customer.list_payment_methods(
                 stripe_info['stripe_customer_id'],
                 type=customer_default_source_type,
