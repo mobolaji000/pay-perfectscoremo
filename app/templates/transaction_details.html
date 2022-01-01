@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Invoice Page</title>
+	<title>Transaction Details</title>
 
 	<!-- Bootstrap core CSS -->
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-	<link href="static/page_style.css" rel="stylesheet">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+				<script type="text/javascript" src="static/transaction_details_state.js"></script>
+	  <link href="static/page_style.css" rel="stylesheet" >
 
 	<!-- Custom styles for this template -->
 	<style>
@@ -61,16 +63,16 @@
 <div class="container">
 	<div class="py-5 text-center">
 		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
-		<h2>Your Invoice</h2>
+		<h2>Your Transaction</h2>
 		<p class="lead">_________________________</p>
 	</div>
 
 	<div class="row">
 		<div class="col-md-8 order-md-1">
 			<br><br>
-			<h4 class="mb-3">Client Information</h4>
+			<h4 class="mb-3">Transaction Information</h4>
 
-			<form id="invoice" class="needs-validation" data-toggle="validator" action="{{ url_for('checkout') }}" method="post">
+			<form id="transaction" class="needs-validation" data-toggle="validator" action="{{ url_for('checkout') }}" method="post">
 				<div class="row">
 					<div class="col-md-6 mb-3">
 						<label for="first_name" class="font-weight-bold">First name</label>
@@ -142,10 +144,10 @@
 
   <tr>
       <th scope="row"></th>
-	  <td>Invoice Total</td>
+	  <td>Transaction Total</td>
       <td></td>
       <td></td>
-		<td>{{client_info.invoice_total}}</td>
+		<td>{{client_info.transaction_total}}</td>
     </tr>
 
   </tbody>
@@ -155,7 +157,7 @@
 				<br>
 
 				{% if client_info.payment_started %}
-				<div><span class="badge badge-danger">You previously started a payment for this invoice code. Contact Mo for a different invoice code.</span></div>
+				<div><span class="badge badge-danger">You previously started a payment for this transaction code. Contact Mo for a different transaction code.</span></div>
 				{% else %}
 
 
@@ -241,20 +243,20 @@
 
 
 
-   <tr>
+  <!-- <tr>
       <th scope="row">1</th>
       <td>Today</td>
       <td>{{client_info.deposit}}</td>
-    </tr>
+    </tr>-->
 
-  {% set count = namespace(value=1) %}
+  {% set count = namespace(value=0) %}
 
   {% for installment in client_info.installments %}
   {% set count.value = count.value + 1 %}
     <tr>
       <th scope="row">{{ count.value }}</th>
-      <td>{{installment.installment_date}}</td>
-      <td>{{installment.installment_amount}}</td>
+      <td>{{installment.date}}</td>
+      <td>{{installment.amount}}</td>
     </tr>
     {% endfor %}
 
@@ -264,10 +266,10 @@
 
 						<div class="container">
 
-      <div class="col-sm">
+     <!-- <div class="col-sm">
 <span class="badge badge-danger">Debit cards are not accepted for installments. Only credit cards are accepted for installments. </span>
 
-    </div>
+    </div>-->
 							<br>
 							      <div class="col-sm">
 <span class="badge badge-danger"> Installments are withdrawn automatically.</span>
@@ -295,6 +297,20 @@
 								</div>
 
 							</div>
+
+	<div class="col-sm">
+
+								<div id="selectorToHideACHInstallment" class="custom-control custom-radio">
+									<input id="installment-payment-ach" value="installment-payment-ach" name="installment-payment" type="radio"
+										   class="custom-control-input"
+										   required>
+									<label class="custom-control-label" for="installment-payment-ach">ACH (Free)</label>
+								</div>
+
+							</div>
+
+
+
 
 				</div>
 
@@ -352,6 +368,7 @@
 	</div>
 
 				<input id="stripe_info" type="hidden"  data-stripe_info="{{ stripe_info }}">
+				<input id="show_ach_override" type="hidden"  data-show_ach_override="{{ showACHOverride }}">
 
 
 	<div class="checkbox mb-3" style="text-align:center;">
@@ -384,14 +401,6 @@
 	</footer>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-		crossorigin="anonymous"></script>
-<script>window.jQuery || document.write('<script src="/docs/4.3/assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
-<script src="/docs/4.3/dist/js/bootstrap.bundle.min.js"
-		integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o"
-		crossorigin="anonymous"></script>
-			<script type="text/javascript" src="static/invoice_page_state.js"></script>
 	</div>
 	</div>
 </body>

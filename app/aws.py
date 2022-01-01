@@ -5,14 +5,10 @@ from botocore.exceptions import ClientError
 
 class AWSInstance():
     def __init__(self):
-        #self.client = None
-        #self.aws_access_key_id=os.environ.get('aws_access_key_id',)
-
         pass
 
     def getInstance(self, service_name):
         region_name = "us-east-2"
-        # Create a Secrets Manager client
 
         aws_access_key_id = os.environ.get('aws_access_key_id','')
         aws_secret_access_key = os.environ.get('aws_secret_access_key', '')
@@ -60,47 +56,28 @@ class AWSInstance():
         else:
             # Decrypts secret using the associated KMS CMK.
             # Depending on whether the secret is a string or binary, one of these fields will be populated.
-
-            #print(get_secret_value_response)
             if 'SecretString' in get_secret_value_response:
                 secret = json.loads(get_secret_value_response['SecretString'])[secret_key]
             else:
                 print("secret is not string!")
-                #decoded_binary_secret = base64.b64decode(get_secret_value_response['SecretBinary'])
 
 
         return secret
-        # Your code goes here.
 
 
-    def send_email(self, to_address='mo@vensti.com',message='perfectscoremo',subject='perfectscoremo',type=''):
+    def send_email(self, to_addresses='mo@vensti.com', message='perfectscoremo', subject='perfectscoremo', type=''):
 
-        if type == 'create':
-            created_or_modified_span = "<span>Your invoice has just been <strong>created</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
-        elif type == 'modify':
-            created_or_modified_span = "<span>Your invoice has just been <strong>modified</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
-        elif type == 'reminder':
-            created_or_modified_span = "<span>This is an automated reminder that your invoice <strong>is due</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
+        if type == 'create_transaction_new_client':
+            created_or_modified_span = "<span>Your transaction has just been <strong>created</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
+        elif type == 'modify_transaction':
+            created_or_modified_span = "<span>Your transaction has just been <strong>modified</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
+        elif type == 'reminder_to_make_payment':
+            created_or_modified_span = "<span>This is an automated reminder that your transaction <strong>is due</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
+        elif type == 'create_transaction_existing_client':
+            created_or_modified_span = "<span>Your new transaction has been created using your method of payment on file. At any point in the next <strong>72 hours</strong>, you can change your method of payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
 
-
-        # Replace sender@example.com with your "From" address.
-        # This address must be verified with Amazon SES.
-        #SENDER = "Perfect Score Mo <mo@vensti.com>"
         SENDER = "Perfect Score Mo <mo@info.perfectscoremo.com>"
-
-        # Replace recipient@example.com with a "To" address. If your account
-        # is still in the sandbox, this address must be verified.
-        RECIPIENT = to_address
-
-        # Specify a configuration set. If you do not want to use a configuration
-        # set, comment the following variable, and the
-        # ConfigurationSetName=CONFIGURATION_SET argument below.
-        #CONFIGURATION_SET = "ConfigSet"
-
-        # If necessary, replace us-west-2 with the AWS Region you're using for Amazon SES.
-        #AWS_REGION = "us-east-2"
-
-        # The subject line for the email.
+        RECIPIENT = [to_addresses] if isinstance(to_addresses, str) else to_addresses
         SUBJECT = subject
 
         # The email body for recipients with non-HTML email clients.
@@ -109,42 +86,63 @@ class AWSInstance():
                      "AWS SDK for Python (Boto). "+message
                      )
 
-        # The HTML body of the email.
-        #+ """<span>1. Go to pay.perfectscoremo.com/input_invoice_code</span><br>""" \
-
-        BODY_HTML = """<html>
+        if type == 'student_info':
+            link_url = os.environ["url_to_start_reminder"]+"""client_info/"""+message
+            BODY_HTML = """<html>
                 <head></head>
                 <body>
-                  <span>Dear parent, </span><br><br>""" \
-                    + created_or_modified_span \
-                    + """<span>1. Go to perfectscoremo.com</span><br>""" \
-                    + """<span>2. Choose ‘Make A Payment’ from the menu</span><br>""" \
-                    + """<span>3. Enter your code: </span>""" + "<strong>" + message + "</strong><br>" \
-                    + """<span>4. Read the instructions and invoice and choose a method of payment</span><br>""" \
-                    + """<span>5. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free</span><br>""" \
-                    + """<span>6. For installment payments, this is accepted: Credit Cards</span><br>""" \
-                    + """<span>7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH</span><br>""" \
-                    + """
+                  <span>Dear Parent, </span><br><br>""" \
+                    + """<span>Thank you for signing up with us! </span><br><br>""" \
+                    + """<span>Regular communication between us, you, and your student is a big part of our process. </span>""" \
+                    + """<span>To help further that, please go to <strong><a href='"""+link_url+"""'>"""+link_url+"""</a></strong> (also sent to your phone number) to input you and your student's information.</span><br>""" \
+                    + """<br><br><span>This will be used to setup text message and email updates on your student's regular progress.</span><br>""" \
+                        + """<br><span>Regards,</span><br>""" \
+                        + """<span>Mo</span><br>""" \
+                        + """
                 </body>
                 </html>
                             """
+        elif type == 'create_group_email':
+            BODY_HTML = """<html>
+                <head></head>
+                <body>
+                  <span>Welcome """+message+"""!</span><br><br>""" \
+                    + """<span>Regular communication between us all is a big part of our process. </span>""" \
+                        + """<span>To help further that, you will receive regular updates on our progress via this group email.</span><br><br>""" \
+                    + """<span>You can also reach me at mo@perfectscoremo.com</span><br>""" \
+                        + """<br><span>Regards,</span><br>""" \
+                        + """<span>Mo</span><br>""" \
+                        + """
+                </body>
+                </html>
+                            """
+        else:
+            BODY_HTML = """<html>
+                            <head></head>
+                            <body>
+                              <span>Dear Parent, </span><br><br>""" \
+                        + created_or_modified_span \
+                        + """<span>1. Go to perfectscoremo.com</span><br>""" \
+                        + """<span>2. Choose ‘Make A Payment’ from the menu</span><br>""" \
+                        + """<span>3. Enter your code: </span>""" + "<strong>" + message + "</strong><br>" \
+                        + """<span>4. Read the instructions and transaction and choose a method of payment</span><br>""" \
+                        + """<span>5. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free</span><br>""" \
+                        + """<span>6. For installment payments, these are accepted: Credit Cards, Debit Cards</span><br>""" \
+                        + """<span>7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH</span><br>""" \
+                        + """<br><span>Regards,</span><br>""" \
+                        + """<span>Mo</span><br>""" \
+                        + """
+                            </body>
+                            </html>
+                                        """
 
 
-        # The character encoding for the email.
         CHARSET = "UTF-8"
-
-        # Create a new SES resource and specify a region.
-        #client = boto3.client('ses', region_name=AWS_REGION)
         client = self.getInstance('ses')
-
-        # Try to send the email.
         try:
-            # Provide the contents of the email.
             response = client.send_email(
                 Destination={
-                    'ToAddresses': [
-                        RECIPIENT,
-                    ],
+                    'ToAddresses': RECIPIENT,
                 },
                 Message={
                     'Body': {
@@ -166,11 +164,7 @@ class AWSInstance():
                 ReplyToAddresses=[
                     'mo@perfectscoremo.com',
                 ],
-                # If you are not using a configuration set, comment or delete the
-                # following line
-                #ConfigurationSetName=CONFIGURATION_SET,
             )
-        # Display an error if something goes wrong.
         except ClientError as e:
             print(e.response['Error']['Message'])
         else:

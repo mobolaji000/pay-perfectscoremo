@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Lead Setup</title>
+
+	<!-- Bootstrap core CSS -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+	<link href="static/page_style.css" rel="stylesheet">
+	<script type="text/javascript" src="static/lead_info_state.js"></script>
+
+	<!-- Custom styles for this template -->
+	<style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+	</style>
+
+	<script type="text/javascript">
+		 function finalCheckBeforeSubmit(pressed_button_id)
+    {
+    var lead_name =  $('input[name="lead_name"]').val();
+    var lead_email =  $('input[name="lead_email"]').val();
+    var lead_phone_number =  $('input[name="lead_phone_number"]').val();
+    var search_query =  $('input[name="search_query"]').val();
+    var start_date =  $('input[name="start_date"]').val();
+    var end_date =  $('input[name="end_date"]').val();
+    var pressed_button_val = document.getElementById(event.srcElement.id).value
+    document.getElementById("action").value = pressed_button_val
+
+	if (pressed_button_val == "Create")
+	{
+	if (lead_name == "" && lead_email == "" && lead_phone_number == "")
+	{
+		document.getElementById("name-email-phone_number-checker").hidden=false;
+		event.preventDefault();
+	}
+	else
+	{
+	document.getElementById("lead_info_form").submit();
+	}
+	}
+	if (pressed_button_val == "Modify")
+	{
+	if (lead_name == "" && lead_email == "" && lead_phone_number == "")
+	{
+		document.getElementById("name-email-phone_number-checker").hidden=false;
+		event.preventDefault();
+	}
+	else
+	{
+            document.getElementById("lead_info_form").submit();
+    }
+	}
+	if (pressed_button_val == "Search")
+	{
+	if (search_query == "" && start_date == "" && end_date == "")
+	{
+		document.getElementById("search-text-date-checker").hidden=false;
+		document.getElementById('search_set').style.display = 'None';
+		event.preventDefault();
+	}
+	else
+	{
+	document.getElementById("lead_info_form").submit();
+	}
+	}
+
+    }
+
+     function populateFieldsFromSearch(result)
+     {
+     $('input[name="lead_id"]').val(result.lead_id);
+	$('input[name="lead_name"]').val(result.lead_name);
+     $('input[name="lead_email"]').val(result.lead_email);
+     $('input[name="lead_phone_number"]').val(result.lead_phone_number);
+
+     $('textarea[name="what_service_are_they_interested_in"]').val(result.what_service_are_they_interested_in);
+          $('textarea[name="what_next"]').val(result.what_next);
+     $('textarea[name="meeting_notes_to_keep_in_mind"]').val(result.meeting_notes_to_keep_in_mind);
+     $('select[name="how_did_they_hear_about_us"]').val(result.how_did_they_hear_about_us);
+          $('textarea[name="how_did_they_hear_about_us_details"]').val(result.how_did_they_hear_about_us_details);
+    }
+
+	</script>
+</head>
+
+
+<body class="bg-light">
+<div class="container">
+	<div class="py-5 text-center">
+		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
+		<h2><u>Lead Information</u></h2>
+	</div>
+
+	<div class="">
+		<div class="">
+			<form id="lead_info_form" class="needs-validation" action="{{ url_for('lead_info') }}" method="post" data-toggle="validator" >
+				<div class="col-md-6 mb-3">
+
+					<label for="search_query" class="form-label">Name, Email, Or Phone Number</label>
+					<input type="text" class="form-control" placeholder="Enter search query" id="search_query" name="search_query">
+					<div class="invalid-feedback">
+							Valid name, email, or phone number is required.
+						</div>
+				</div>
+
+				<br><br>
+
+				<div class="row">
+					<div class="col-md-3 mb-3">
+						<label for="start_date" class="form-label">Start Date</label>
+						<input type="date" class="form-control" id="start_date" name="start_date" />
+						<div class="invalid-feedback">
+							Valid start date is required.
+						</div>
+					</div>
+
+					<div class="col-md-3 mb-3">
+						<label for="end_date" class="form-label">End Date</label>
+						<input type="date" class="form-control" id="end_date" name="end_date" />
+						<div class="invalid-feedback">
+							Valid end date is required.
+						</div>
+					</div>
+				</div><br>
+
+				<div id="search-text-date-checker" class="text-danger" hidden>Please enter a search text or date</div><br><br>
+
+				<div class="row " style="display:inline-block; width:100%; margin-left: 20%;">
+					<div class="col-md-3 mb-3">
+						<input class="btn btn-secondary" id="search_lead_info" name="submitButton" type="submit" value="Search" onclick="finalCheckBeforeSubmit()"></input>
+					</div>
+				</div>
+
+				<div>
+
+
+					{% if search_results %}
+					<h4 class="mb-3">Search Results</h4>
+					{% endif %}
+
+
+					<div>
+
+						<div name="search_set" id="search_set" class="col-md-12 mb-3">
+
+							{% for result in search_results %}
+							<a name="search_link" href="javascript:populateFieldsFromSearch({{ result }});">
+								{{ result.lead_name+" "+result.lead_email+" "+result.lead_phone_number}}
+							</a>
+							<br><br><br>
+							{% endfor %}
+
+						</div>
+
+						<div>
+							{% if action == 'Search' %}
+							{% for message in get_flashed_messages() %}
+							<div class="alert alert-warning col-md-6 mb-6">
+								<button type="button" class="close" data-dismiss="alert">&times;</button>
+								{{ message }}
+							</div>
+							{% endfor %}
+							{% endif %}
+						</div>
+
+					</div>
+
+
+				</div>
+
+
+				<div class="col-md-8 order-md-1">
+					<h4 class="mb-3"><u>Bio</u></h4>
+
+					<div class="row">
+						<div class="col-md-6 mb-3">
+							<label for="lead_name">Name</label>
+							<input type="text" class="form-control" id="lead_name" name="lead_name" placeholder="" value="">
+							<div class="invalid-feedback">
+								Valid  name is required.
+							</div>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label for="lead_email">Email</label>
+						<input type="email" class="form-control" id="lead_email" name="lead_email" placeholder="you@example.com">
+						<div class="invalid-feedback">
+							Please enter a valid email address.
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label for="lead_phone_number">Phone number</span></label>
+						<input type="tel" class="form-control" id="lead_phone_number" name="lead_phone_number"
+							   placeholder="111-111-1111">
+						<div class="invalid-feedback">
+							Please enter a valid phone number.
+						</div>
+					</div><br>
+
+					<div id="name-email-phone_number-checker" class="text-danger" hidden>Please enter a name, email, or phone number</div>
+
+					<br><br><br>
+
+					<h4 class="mb-3 text-center" ><u>Details</u></h4>
+
+					<div>
+
+						<!--<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;width:20%;margin-left:40%;margin-right:10%;">-->
+						<br>
+
+						<div class="row" style="display:inline-block; width:100%; margin-left: 10%;">
+							<label for="what_service_are_they_interested_in">What service are they interested in?</label>
+							<textarea  id="what_service_are_they_interested_in"  name="what_service_are_they_interested_in" class="form-control" rows="5" placeholder=""></textarea>
+						</div><br><br><br>
+
+						<div class="row" style="display:inline-block; width:100%; margin-left: 10%;">
+							<label for="what_next">What are the next steps?</label>
+							<textarea  id="what_next"  name="what_next" class="form-control" rows="5"  placeholder=""></textarea>
+						</div><br><br><br>
+
+						<div class="row" style="display:inline-block; width:100%; margin-left: 10%;">
+							<label for="meeting_notes_to_keep_in_mind">Notes from conversation to keep in mind</label>
+							<textarea  id="meeting_notes_to_keep_in_mind"  name="meeting_notes_to_keep_in_mind" class="form-control" rows="5"  placeholder=""></textarea>
+						</div><br><br><br>
+
+						<div class="row" style="display:inline-block; width:100%; margin-left: 10%;">
+							<label for="how_did_they_hear_about_us">How did they hear about us?</label>
+							<select  id="how_did_they_hear_about_us"  name="how_did_they_hear_about_us" class="form-control">
+								<option value="" selected disabled hidden></option>
+								<option value='Southwest: Garland'>Southwest: Garland</option>
+								<option value='Southwest: Arlington'>Southwest: Arlington</option>
+								<option value='Referral'>Referral</option>
+								<option value='Other'>Other</option>
+							</select>
+						</div><br><br>
+
+						<div class="row" style="display:inline-block; width:100%; margin-left: 10%;">
+							<label for="how_did_they_hear_about_us_details">How did they hear about us (details)?</label>
+							<textarea  id="how_did_they_hear_about_us_details"  name="how_did_they_hear_about_us_details" class="form-control" rows="5"  placeholder="" ></textarea>
+						</div>
+
+
+
+
+
+						<br><br><br>
+
+
+					</div>
+
+					<div>
+							{% if action == 'Create' or action == 'Modify' %}
+							{% for message in get_flashed_messages() %}
+							<div class="alert alert-warning col-md-6 mb-6">
+								<button type="button" class="close" data-dismiss="alert">&times;</button>
+								{{ message }}
+							</div>
+							{% endfor %}
+							{% endif %}
+						</div>
+
+					<br><br>
+					<div class="row text-center">
+						<div class="col-md-6 mb-3">
+							<input id="create_lead_info" name="submitButton" class="btn btn-primary btn- btn-block" type="submit"   style="display:inline-block; width:50%; margin-left: 25%;"  value="Create" onclick="finalCheckBeforeSubmit()"></input>
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<input id="modify_lead_info" name="submitButton" class="btn btn-primary btn- btn-block" type="submit"   style="display:inline-block; width:50%; margin-left: 25%;"  value="Modify" hidden onclick="finalCheckBeforeSubmit()"></input>
+						</div>
+						<input id="lead_id" name="lead_id" hidden>
+						<input id="action" name="action" hidden>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<hr>
+
+	<footer class="my-5 pt-5 text-muted text-center text-small">
+		<p class="mb-1">&copy; 2017-2021 Perfect Score Mo</p>
+		<ul class="list-inline">
+			<li class="list-inline-item"><a href="#">Privacy</a></li>
+			<li class="list-inline-item"><a href="#">Terms</a></li>
+			<li class="list-inline-item"><a href="#">Support</a></li>
+		</ul>
+	</footer>
+</div>
+
+</body>
+</html>

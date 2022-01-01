@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Client Setup</title>
+	<title>Transaction Setup</title>
 
 	<!-- Bootstrap core CSS -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 	<link href="static/page_style.css" rel="stylesheet">
-	<script type="text/javascript" src="static/client_setup_state.js"></script>
+	<script type="text/javascript" src="static/transaction_setup_state.js"></script>
 
 	<!-- Custom styles for this template -->
 	<style>
@@ -29,6 +30,7 @@
 
 
 
+
 	</style>
 
 	<script type="text/javascript">
@@ -36,32 +38,18 @@
 
 		 function finalCheckBeforeSubmit()
     {
+
     var tp = $('input[name="tp_product"]:checked').attr("id");
     $('input[name="was_test_prep_purchased"]').val(tp);
     var ca = $('input[name="college_apps_product"]:checked').attr("id");
     $('input[name="was_college_apps_purchased"]').val(ca);
 
 
-    if ($('input[name="turn_on_installments"]').val() != "" && $('input[name="installment_date_1"]').val() == "" && $('input[name="installment_date_2"]').val() == "" && $('input[name="installment_date_3"]').val() == "")
-    {
-    $('input[name="installment_date_1"]').prop('required', true);
-    $('input[name="installment_date_2"]').prop('required', true);
-    $('input[name="installment_date_3"]').prop('required', true);
-	//$('input[name="turn_on_installments"]').prop('checked', true);
-    }
-    else
-    {
-    $('input[name="installment_date_1"]').prop('required', false);
-    $('input[name="installment_date_2"]').prop('required', false);
-    $('input[name="installment_date_3"]').prop('required', false);
-	//$('input[name="turn_on_installments"]').prop('checked', true);
-
-    }
 
     $('input[name="tp_total"]').attr('disabled', false);
     $('input[name="college_apps_total"]').attr('disabled', false);
     $('input[name="adjust_total"]').attr('disabled', false);
-    $('input[name="invoice_total"]').attr('disabled', false);
+    $('input[name="transaction_total"]').attr('disabled', false);
 
     }
 
@@ -73,15 +61,45 @@
      function populateFieldsFromSearch(result)
      {
 
-     //alert('Hello');
+     //clear state of fields
+     $('input[name="was_diagnostic_purchased"]').prop('checked', false);
+     $('input[name="diag_units"]').val('');
+     $('input[name="diag_total"]').val('');
+     $('input[name="was_test_prep_purchased"]').prop('checked', false);
+     $('input[name="tp_product"]').prop('checked', false);
+     $('input[name="tp_units"]').val('');
+     $('input[name="tp_total"]').val('');
+     $('input[name="was_college_apps_purchased"]').prop('checked', false);
+     $('input[name="college_consultation"]').prop('checked', false);
+     $('input[name="college_apps_product"]').prop('checked', false);
+     $('input[name="college_apps_units"]').val('');
+     $('input[name="college_apps_total"]').val('');
+     $('input[name="adjust_total"]').val('');
+     $('input[name="adjustment_explanation"]').val('');
+     $('input[name="transaction_total"]').val('');
+
+
+
+     var counter = $('input[name="installment_counter"]').val();
+
+     for (let k = 1; k < counter; k++) {
+     	var deleteRowButton = document.getElementById("ibtnDel");
+		deleteRowButton.click();
+		}
+
+
+	//fill fields based on search item selected
      $('input[name="first_name"]').val(result.first_name);
      $('input[name="last_name"]').val(result.last_name);
      $('input[name="email"]').val(result.email);
      $('input[name="phone_number"]').val(result.phone_number);
-     $('input[name="invoice_code_to_show"]').prop('hidden', false);
-     $('input[name="invoice_code_to_show"]').attr('disabled', true);
-     $('input[name="invoice_code_to_show"]').val(result.invoice_code);
+     $('input[name="transaction_id_to_show"]').prop('hidden', false);
+     $('input[name="transaction_id_to_show"]').attr('disabled', true);
+     $('input[name="transaction_id_to_show"]').val(result.transaction_id);
      $('input[name="stripe_customer_id"]').val(result.stripe_customer_id);
+
+     $('select[name="how_did_they_hear_about_us"]').val(result.how_did_they_hear_about_us);
+	 $('textarea[name="how_did_they_hear_about_us_details"]').val(result.how_did_they_hear_about_us_details);
 
 	//
 
@@ -123,19 +141,19 @@
      $('input[id="tp-tech-01wk"]').prop('checked', true);
      }
 
-     if (result.was_test_prep_purchased == "tp-vensti-12wks")
+     if (result.was_test_prep_purchased == "tp-vensti-center-12wks")
      {
-     $('input[id="tp-vensti-12wks"]').prop('checked', true);
+     $('input[id="tp-vensti-center-12wks"]').prop('checked', true);
      }
 
-     if (result.was_test_prep_purchased == "tp-vensti-08wks")
+     if (result.was_test_prep_purchased == "tp-vensti-center-08wks")
      {
-     $('input[id="tp-vensti-08wks"]').prop('checked', true);
+     $('input[id="tp-vensti-center-08wks"]').prop('checked', true);
      }
 
-     if (result.was_test_prep_purchased == "tp-vensti-01wk")
+     if (result.was_test_prep_purchased == "tp-vensti-center-01wk")
      {
-     $('input[id="tp-vensti-01wk"]').prop('checked', true);
+     $('input[id="tp-vensti-center-01wk"]').prop('checked', true);
      }
 
      if (result.was_test_prep_purchased == "tp-home-12wks")
@@ -187,83 +205,34 @@
 
      }
 
-	//
+//
 
+	$('input[name="adjust_total"]').prop('readonly', false);
+    $('input[name="adjustment_explanation"]').prop('readonly', false);
 
-	if (result.turn_on_installments == "True")
-     {
-     $('input[name="turn_on_installments"]').val("yes");
-     	$('input[name="turn_on_installments"]').prop('checked', true);
-
-
-     if (result.installment_date_1 != "1/1/1")
-     {
-      $('input[name="installment_date_1"]').attr('disabled', false);
-
-       var someDate = new Date(result.installment_date_1);
-       someDate.setDate(someDate.getDate() - 1);
-        var dd = (someDate.getDate() + 1 < 10) ? "0" + (someDate.getDate() + 1) : someDate.getDate() + 1
-        var mm = (someDate.getMonth() + 1 < 10) ? "0" + (someDate.getMonth() + 1) : someDate.getMonth() + 1
-        var yy = someDate.getFullYear();
-        var someFormattedDate = yy + '-' + mm + '-' + dd;
-
-        //alert(someFormattedDate);
-
-      $('input[name="installment_date_1"]').val(someFormattedDate);
+	if (result.adjust_total == 0)
+	{
+     $('input[name="adjust_total"]').val('');
      }
-
-     if (result.installment_date_2 != "1/1/1")
+     else
      {
-      $('input[name="installment_date_2"]').attr('disabled', false);
-
-       var someDate = new Date(result.installment_date_2);
-       someDate.setDate(someDate.getDate() - 1);
-        var dd = (someDate.getDate() + 1 < 10) ? "0" + (someDate.getDate() + 1) : someDate.getDate() + 1
-        var mm = (someDate.getMonth() + 1 < 10) ? "0" + (someDate.getMonth() + 1) : someDate.getMonth() + 1
-        var yy = someDate.getFullYear();
-        var someFormattedDate = yy + '-' + mm + '-' + dd;
-
-      $('input[name="installment_date_2"]').val(someFormattedDate);
-     }
-
-     if (result.installment_date_3 != "1/1/1")
-     {
-      $('input[name="installment_date_3"]').attr('disabled', false);
-
-       var someDate = new Date(result.installment_date_3);
-       someDate.setDate(someDate.getDate() - 1);
-        var dd = (someDate.getDate() + 1 < 10) ? "0" + (someDate.getDate() + 1) : someDate.getDate() + 1
-        var mm = (someDate.getMonth() + 1 < 10) ? "0" + (someDate.getMonth() + 1) : someDate.getMonth() + 1
-        var yy = someDate.getFullYear();
-        var someFormattedDate = yy + '-' + mm + '-' + dd;
-
-      $('input[name="installment_date_3"]').val(someFormattedDate);
-     }
-
-     }
-
-     //
-
-
-		$('input[name="adjust_total"]').prop('readonly', false);
-        $('input[name="adjustment_explanation"]').prop('readonly', false);
-
-
      $('input[name="adjust_total"]').val(result.adjust_total);
+     }
+
      $('input[name="adjustment_explanation"]').val(result.adjustment_explanation);
-     $('input[name="invoice_total"]').val(result.invoice_total);
+     $('input[name="transaction_total"]').val(result.transaction_total);
 
      //
 
 
 	//idea is it should not be easy to modify or delete a payment that has started
-	//this is consistent with Stripe where an invoice that is paid cant be deleted
+	//this is consistent with Stripe where an transaction that is paid cant be deleted
 	//if push comes to shove, make the necessary changes in stripe and after that go manually delete in the DB
      if (result.payment_started == "True")
      {
 
 $('div[id="cant_modify_or_delete_message"]').prop('hidden', false);
-        $('input[id="modify_button"]').attr('disabled', true);
+        $('input[id="modify_transaction_button"]').attr('disabled', true);
         $('input[id="delete_button"]').attr('disabled', true);
 
     // document.getElementById("cant_modify_or_delete_message").hidden=false;
@@ -271,9 +240,35 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', false);
           else
           {
 $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
-          $('input[id="modify_button"]').attr('disabled', false);
+          $('input[id="modify_transaction_button"]').attr('disabled', false);
           $('input[id="delete_button"]').attr('disabled', false);
           //document.getElementById("cant_modify_or_delete_message").hidden=true;
+          }
+
+          if (result.installment_details)
+          {
+          //alert(result.installment_counter);
+          var addRowButton = document.getElementById("addrow");
+
+          for (let k = 1; k < result.installment_counter; k++) {
+  				date = 'date_'.concat(k)
+			  amount = 'amount_'.concat(k)
+
+			  	addRowButton.click();
+
+			  	var someDate = new Date(result.installment_details[date]);
+       	someDate.setDate(someDate.getDate() - 1);
+        var dd = (someDate.getDate() + 1 < 10) ? "0" + (someDate.getDate() + 1) : someDate.getDate() + 1
+        var mm = (someDate.getMonth() + 1 < 10) ? "0" + (someDate.getMonth() + 1) : someDate.getMonth() + 1
+        var yy = someDate.getFullYear();
+        var someFormattedDate = yy + '-' + mm + '-' + dd;
+
+			  	$("input[name="+date+"]").val(someFormattedDate);
+			  $("input[name="+amount+"]").val(result.installment_details[amount]);
+}
+
+$('input[name="installment_counter"]').val(result.installment_counter);
+
           }
 
      }
@@ -289,7 +284,7 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
       	dataToModify['phone_number'] = $('input[name="phone_number"]').val();
       	dataToModify['adjust_total'] = $('input[name="adjust_total"]').val();
       	dataToModify['adjustment_explanation'] = $('input[name="adjustment_explanation"]').val();
-      	dataToModify['invoice_total'] = $('input[name="invoice_total"]').val();
+      	dataToModify['transaction_total'] = $('input[name="transaction_total"]').val();
       	dataToModify['was_diagnostic_purchased'] = $('input[name="was_diagnostic_purchased"]').val();
       	dataToModify['diag_units'] = $('input[name="diag_units"]').val();
       	dataToModify['diag_total'] = $('input[name="diag_total"]').val();
@@ -299,14 +294,23 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
       	dataToModify['was_college_apps_purchased'] = $('input[name="was_college_apps_purchased"]').val();
       	dataToModify['college_apps_units'] = $('input[name="college_apps_units"]').val();
       	dataToModify['college_apps_total'] = $('input[name="college_apps_total"]').val();
-      	dataToModify['turn_on_installments'] = $('input[name="turn_on_installments"]').val();
-      	dataToModify['installment_date_1'] = $('input[name="installment_date_1"]').val();
-      	dataToModify['installment_date_2'] = $('input[name="installment_date_2"]').val();
-      	dataToModify['installment_date_3'] = $('input[name="installment_date_3"]').val();
-		dataToModify['invoice_code'] = $('input[name="invoice_code_to_show"]').val();
+		dataToModify['transaction_id'] = $('input[name="transaction_id_to_show"]').val();
 		dataToModify['stripe_customer_id'] = $('input[name="stripe_customer_id"]').val();
 		dataToModify['send_text_and_email'] = $('input[name="send_text_and_email"]').val();
 		dataToModify['mark_as_paid'] = $('input[name="mark_as_paid"]').val();
+		dataToModify['installment_counter'] = $('input[name="installment_counter"]').val();
+		dataToModify['ask_for_student_info'] = $('input[name="ask_for_student_info"]').val();
+		dataToModify['how_did_they_hear_about_us'] = $('select[name="how_did_they_hear_about_us"]').val();
+		dataToModify['how_did_they_hear_about_us_details'] = $('textarea[name="how_did_they_hear_about_us_details"]').val();
+
+		 for (let k = 1; k < dataToModify['installment_counter']+1; k++) {
+  				date = 'date_'.concat(k)
+			  amount = 'amount_'.concat(k)
+			  dataToModify[date] = $("input[name="+date+"]").val();
+			  dataToModify[amount] = $("input[name="+amount+"]").val();
+
+}
+
 
       	$('input[id="data_to_modify"]').val(JSON.stringify(dataToModify));
 
@@ -314,8 +318,9 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 
       function finalCheckBeforeDelete()
       {
-      	$('input[id="invoice_code_to_delete"]').val($('input[name="invoice_code_to_show"]').val());
+      	$('input[id="transaction_id_to_delete"]').val($('input[name="transaction_id_to_show"]').val());
       }
+
 
 	</script>
 </head>
@@ -325,8 +330,7 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 <div class="container">
 	<div class="py-5 text-center">
 		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
-		<h2>Invoice Creation</h2>
-		<p class="lead">_________________________</p>
+		<h2><u>Transaction Creation</u></h2>
 	</div>
 
 	<br>
@@ -335,7 +339,7 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 
 	<div class="row">
 		<div class="col-md-4 order-md-2 mb-4">
-			<form class="card p-2" action="{{ url_for('search_invoice') }}" method="post">
+			<form class="card p-2" action="{{ url_for('search_transaction') }}" method="post">
 				<div class="input-group">
 					<input type="text" class="form-control" placeholder="Enter search query" id="search_query" name="search_query">
 					<div class="input-group-append">
@@ -347,80 +351,92 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 			<div>
 				<br><br>
 
-				 {% if search_results %}
-  <h4 class="mb-3">Search Result</h4>
-  {% endif %}
+				{% if search_results %}
+				<h4 class="mb-3">Search Results</h4>
+				{% endif %}
 
 
-				<div >
+				<div>
 
-					 <div class="col-md-12 mb-3" >
+					<div class="col-md-12 mb-3">
 
-    {% for result in search_results %}
-    <a href="javascript:populateFieldsFromSearch({{ result }});">
-        {{ result.first_name+" "+result.last_name+" "+result.invoice_code+" "+result.date_created }}
-    </a>
-						 <br><br><br>
-    {% endfor %}
+						{% for result in search_results %}
+						<a href="javascript:populateFieldsFromSearch({{ result }});">
+							{{ result.first_name+" "+result.last_name+" "+result.transaction_id+" "+result.date_created }}
+						</a>
+						<br><br><br>
+						{% endfor %}
 
-						 {% if search_results %}
-						 <div style="display: flex; justify-content: space-around;margin-right:50px">
-
-
-							 <div style="margin-left:50px"><form action="{{ url_for('modify_invoice') }}" method="post">
-
-								 <input id="modify_button" name="modify_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Modify" onclick="finalCheckBeforeModify();">
-									 <input id="data_to_modify" name="data_to_modify" hidden>
-
-								 </form></div>
+						{% if search_results %}
+						<div style="display: flex; justify-content: space-around;margin-right:50px">
 
 
-							 <div style="margin-left:50px"><form action="{{ url_for('delete_invoice') }}" method="post">
-								 <input id="delete_button" name="delete_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Delete" onclick="finalCheckBeforeDelete();">
-								 <input id="invoice_code_to_delete" name="invoice_code_to_delete" hidden>
-							  </form></div>
+							<div style="margin-left:50px">
+								<form id="modify_transaction_setup_form" name="modify_transaction_setup_form" action="{{ url_for('modify_transaction') }}" method="post">
 
-							 <div style="margin-left:50px">
-								 <input class="btn btn-primary btn-lg btn-block" style="border:none; background-color:red; color:black !important" id="invoice_code_to_show" name="invoice_code_to_show" type="button" hidden >
-								<input id="stripe_customer_id" name="stripe_customer_id" hidden >
+									<input id="modify_transaction_button" name="modify_transaction_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Modify"
+										   onclick="finalCheckBeforeModify();">
+									<input id="data_to_modify" name="data_to_modify" hidden>
 
-							 </div>
-
-							 </div>
-
-						 <br><br>
-
-						  <div class="col-sm" id="cant_modify_or_delete_message" name="cant_modify_or_delete_message" hidden>
-<span class="badge badge-danger">You can't modify or delete a payment that has started.</span>
-
-    </div>
-
-						 {% endif %}
+								</form>
+							</div>
 
 
-</div>
+							<div style="margin-left:50px">
+								<form action="{{ url_for('delete_transaction') }}" method="post">
+									<input id="delete_button" name="delete_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Delete"
+										   onclick="finalCheckBeforeDelete();">
+									<input id="transaction_id_to_delete" name="transaction_id_to_delete" hidden>
+								</form>
+							</div>
 
-					 <div>
-    {% for message in get_flashed_messages() %}
-    <div class="alert alert-warning">
-        <button type="button" class="close" data-dismiss="alert">&times;</button>
-        {{ message }}
-    </div>
-    {% endfor %}
-</div>
+							<div style="margin-left:50px">
+								<input class="btn btn-primary btn-lg btn-block" style="border:none; background-color:red; color:black !important" id="transaction_id_to_show"
+									   name="transaction_id_to_show" type="button" hidden>
+								<input id="stripe_customer_id" name="stripe_customer_id" hidden>
+
+							</div>
+
+						</div>
+
+						<br><br>
+
+						<div class="col-sm" id="cant_modify_or_delete_message" name="cant_modify_or_delete_message" hidden>
+							<span class="badge badge-danger">You can't modify or delete a payment that has started.</span>
+
+						</div>
+
+						<div class="col-sm" id="installment_not_equal_total_message_modify" name="installment_not_equal_total_message_modify" hidden="hidden">
+							<span class="badge badge-danger">The installment payments must equal the transaction total.</span>
+
+						</div>
+
+						{% endif %}
+
+
+					</div>
+
+					<div>
+						{% for message in get_flashed_messages() %}
+						<div class="alert alert-warning">
+							<button type="button" class="close" data-dismiss="alert">&times;</button>
+							{{ message }}
+						</div>
+						{% endfor %}
+					</div>
 
 				</div>
 
 
-		</div>
+			</div>
 
 		</div>
 
 
 		<div class="col-md-8 order-md-1">
 			<br><br><br><br><br>
-			<h4 class="mb-3">Client Information</h4>
-			<form class="needs-validation" action="{{ url_for('create_invoice') }}" method="post"
+			<h4 class="mb-3">Transaction Information</h4>
+			<form id="create_transaction_setup_form" name="create_transaction_setup_form"  class="needs-validation" action="{{ url_for('create_transaction') }}" method="post"
 				  data-toggle="validator">
 				<div class="row">
 					<div class="col-md-6 mb-3">
@@ -459,15 +475,33 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 					</div>
 				</div>
 
+				<div class="row">
+							<label for="how_did_they_hear_about_us">How did they hear about us?</label>
+							<select  id="how_did_they_hear_about_us"  name="how_did_they_hear_about_us" class="form-control">
+								<option value="" selected disabled hidden></option>
+								<option value='Southwest: Garland'>Southwest: Garland</option>
+								<option value='Southwest: Arlington'>Southwest: Arlington</option>
+								<option value='Referral'>Referral</option>
+								<option value='Other'>Other</option>
+							</select>
+						</div><br><br>
+
+						<div class="row">
+							<label for="how_did_they_hear_about_us_details">How did they hear about us (details)?</label>
+							<textarea  id="how_did_they_hear_about_us_details"  name="how_did_they_hear_about_us_details" class="form-control" rows="5"  placeholder="" ></textarea>
+						</div>
+
 				<br><br><br>
 
 				<h4 class="mb-3">Product Information</h4>
 
+				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+
 				<div class="d-block my-3">
 					<div container>
-						<p class="lead">Initial diagnostic/consultation</p>
+						<p class="lead">Initial Diagnostic/Consultation</p>
 
-				<div class="checkbox mb-3" style="text-align:center;">
+						<div class="checkbox mb-3" style="text-align:center;">
 
 							<input id="was_diagnostic_purchased" name="was_diagnostic_purchased" value="" type="checkbox"
 								   class="custom-control-input">
@@ -475,8 +509,8 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 							<br><br><br>
 						</div>
 
-						</div>
 					</div>
+				</div>
 
 
 				<div class="d-block my-3">
@@ -484,7 +518,7 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 
 						<div class="row">
 
-						<div class="col-sm">
+							<div class="col-sm">
 								<div class="mb-3">
 									<input id="diag_units" name="diag_units" type="number" min="1" class="form-control"
 										   required>
@@ -505,11 +539,11 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 				</div>
 
 
-
+				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
 
 				<div class="d-block my-3">
 					<div container>
-						<p class="lead">Test prep</p>
+						<p class="lead">Test Prep</p>
 
 						<div class="checkbox mb-3">
 							<label>
@@ -625,7 +659,7 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 
 				</div>
 
-				<hr class="mb-4">
+				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
 
 				<div class="d-block my-3">
 					<div container>
@@ -720,49 +754,17 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 				</div>
 
 
-				<hr class="mb-4">
+				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
 
 				<div class="d-block my-3">
 					<div container>
-						<p class="lead">Options</p>
+						<p class="lead">Transaction Adjustments</p>
 						<br>
-
-
-							<div class="checkbox mb-3">
-							<label>
-								<input type="checkbox" name="turn_on_installments" id="turn_on_installments"
-									   value=""> Turn on installments
-							</label>
-						</div>
-
-						<div class="row">
-
-
-							<div class="form-group">
-								<div class="col-12"  id="installment_date_1">
-									<input class="form-control" type="date" value="" name="installment_date_1">
-								</div>
-							</div>
-							<div class="form-group">
-								<div class="col-12" id="installment_date_2">
-									<input class="form-control" type="date" value=""  name="installment_date_2">
-								</div>
-							</div>
-
-							<div class="form-group">
-								<div class="col-12" id="installment_date_3" >
-									<input class="form-control" type="date" value="" name="installment_date_3">
-								</div>
-							</div>
-
-
-						</div>
 
 					</div>
 
 				</div>
 
-				<br>
 
 				<div class="d-block my-3">
 					<div container>
@@ -795,22 +797,50 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 
 						</div>
 
-						<br>
-						<hr class="mb-4">
-
-						<p class="lead">Total</p>
-
 						<div class="row">
 
 
 							<div class="col-sm">
 								<div class="mb-3">
-									<input id="invoice_total" name="invoice_total" type="number" class="form-control"
+									<input id="transaction_total" name="transaction_total" type="number" class="form-control"
 										   required readonly>
-									<label for="invoice_total">Invoice Total</label>
+									<label for="transaction_total">Transaction Total</label>
 								</div>
 							</div>
 						</div>
+
+						<br>
+
+						<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+
+						<div class="container">
+
+							<p class="lead">Installments</p>
+							<br>
+
+							<input id="installment_counter" name="installment_counter" value="1" hidden>
+							<table id="myTable" class=" table order-list">
+								<thead>
+								<tr>
+									<td style="text-align: center;">Installment Date</td>
+									<td style="text-align: center;">Installment Amount</td>
+								</tr>
+								</thead>
+								<tbody>
+
+								</tbody>
+								<tfoot>
+								<tr>
+									<td colspan="5" style="text-align: center;">
+										<input type="button" class="btn btn-md btn-secondary " id="addrow" value="Add"/>
+									</td>
+								</tr>
+								<tr>
+								</tr>
+								</tfoot>
+							</table>
+						</div>
+
 
 						<br>
 
@@ -824,6 +854,11 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 								<input type="checkbox" id="send_text_and_email"
 									   name="send_text_and_email" value=""> Send text and email
 							</label>
+							<br><br><br>
+							<label>
+								<input type="checkbox" id="ask_for_student_info"
+									   name="ask_for_student_info" value=""> Ask for student info
+							</label>
 						</div>
 
 
@@ -834,8 +869,20 @@ $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
 
 				<br><br>
 
+				<div class="col-sm" id="installment_not_equal_total_message_create" name="installment_not_equal_total_message_create" hidden="hidden">
+							<span class="badge badge-danger">The installment payments must equal the transaction total.</span>
 
-				<input class="btn btn-primary btn-lg btn-block" type="submit" value="Create Invoice"
+						</div>
+
+				<div class="col-sm" id="more_than_12_installments_message" name="more_than_12_installments_message" hidden="hidden">
+							<span class="badge badge-danger">The number of installment payments must be 12 or less.</span>
+
+						</div>
+
+				<br><br>
+
+
+				<input id="create_transaction_button" name="create_transaction_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Create Transaction"
 					   onclick="finalCheckBeforeSubmit();"></input>
 			</form>
 		</div>

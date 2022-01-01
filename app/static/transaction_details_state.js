@@ -5,7 +5,6 @@ $(document).ready(function() {
         $('#full-payment-div').attr('style', 'display: block !important');
         $('#installment-payment-div').attr('style', 'display: none !important');
 
-
         $('input[name="installment-payment"]').prop('required', false);
         $('input[name="installment-payment"]').attr('disabled', true);
         $('input[name="full-payment"]').attr('disabled', false);
@@ -18,7 +17,7 @@ $(document).ready(function() {
 
     $('#installment-payment-options').on('click', function() {
 
-        $('#installment-payment-div').attr('style', 'display: block !important');
+     $('#installment-payment-div').attr('style', 'display: block !important');
         $('#full-payment-div').attr('style', 'display: none !important');
 
         $('input[name="full-payment"]').prop('required', false);
@@ -28,12 +27,26 @@ $(document).ready(function() {
         $("#installment-payment-div").detach().appendTo('#holding-div');
         $("#installment-payment-div").show();
         $("#installment-payment-div").css("visibility", "visible");
+
+    var show_ach_override = $("#show_ach_override").attr("data-show_ach_override");
+
+    if (show_ach_override === 'True')
+    {
+    //alert(show_ach_override+" this is true");
+    $('#selectorToHideACHInstallment').attr('style', 'display: block !important');
+        $("#selectorToHideACHInstallment").show();
+        $("#selectorToHideACHInstallment").css("visibility", "visible");
+    }
+    else
+    {
+    //alert(show_ach_override+" this is false");
+    $('#selectorToHideACHInstallment').attr('style', 'display: none !important');
+    $("#selectorToHideACHInstallment").css("visibility", "hidden");
+    }
+
     });
 
-
-
-
-var form=document.getElementById('invoice');//retrieve the form as a DOM element
+var form=document.getElementById('transaction');//retrieve the form as a DOM element
 
 var stripe_info = $("#stripe_info").attr("data-stripe_info");
 

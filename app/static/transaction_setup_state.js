@@ -14,11 +14,8 @@ $(document).ready(function() {
 
     $('input[name="adjust_total"]').prop('readonly', true);
     $('input[name="adjustment_explanation"]').prop('readonly', true);
-    $('input[name="invoice_total"]').attr('disabled', true);
+    $('input[name="transaction_total"]').attr('disabled', true);
 
-    $('input[name="installment_date_1"]').attr('disabled', true);
-    $('input[name="installment_date_2"]').attr('disabled', true);
-    $('input[name="installment_date_3"]').attr('disabled', true);
 
     function addDays(numberOfDaysToAdd) {
         var someDate = new Date();
@@ -80,7 +77,7 @@ $(document).ready(function() {
             $('input[name="diag_units"]').val("1");
 
             $('input[name="diag_total"]').val(calculateDiagnosticTotal());
-            $('input[name="invoice_total"]').val(invoiceTotal());
+            $('input[name="transaction_total"]').val(transactionTotal());
 
 
             $(this).val("yes")
@@ -97,13 +94,13 @@ $(document).ready(function() {
         }
 
          $('input[name="diag_total"]').val(calculateDiagnosticTotal());
-        $('input[name="invoice_total"]').val(invoiceTotal());
+        $('input[name="transaction_total"]').val(transactionTotal());
 
     });
 
     $('input[name="diag_units"]').on('input', function() {
         $('input[name="diag_total"]').val(calculateDiagnosticTotal());
-        $('input[name="invoice_total"]').val(invoiceTotal());
+        $('input[name="transaction_total"]').val(transactionTotal());
     });
 
     function calculateDiagnosticTotal() {
@@ -134,17 +131,17 @@ $(document).ready(function() {
         }
 
         $('input[name="tp_total"]').val(calculateTestPrepTotal());
-        $('input[name="invoice_total"]').val(invoiceTotal());
+        $('input[name="transaction_total"]').val(transactionTotal());
     });
 
     $('input[name="tp_product"]').change(function() {
         $('input[name="tp_total"]').val(calculateTestPrepTotal());
-        $('input[name="invoice_total"]').val(invoiceTotal());
+        $('input[name="transaction_total"]').val(transactionTotal());
     });
 
     $('input[name="tp_units"]').on('input', function() {
         $('input[name="tp_total"]').val(calculateTestPrepTotal());
-        $('input[name="invoice_total"]').val(invoiceTotal());
+        $('input[name="transaction_total"]').val(transactionTotal());
     });
 
     function calculateTestPrepTotal() {
@@ -185,23 +182,23 @@ $(document).ready(function() {
         }
 
          $('input[name="college_apps_total"]').val(collegeAppsTotal());
-        $('input[name="invoice_total"]').val(invoiceTotal());
+        $('input[name="transaction_total"]').val(transactionTotal());
     });
 
     $('input[name="college_consultation"]').change(function() {
         $('input[name="college_apps_total"]').val(collegeAppsTotal());
-        $('input[name="invoice_total"]').val(invoiceTotal());
+        $('input[name="transaction_total"]').val(transactionTotal());
     });
 
     $('input[name="college_apps_product"]').change(function() {
         $('input[name="college_apps_total"]').val(collegeAppsTotal());
-        $('input[name="invoice_total"]').val(invoiceTotal());
+        $('input[name="transaction_total"]').val(transactionTotal());
         $('input[name="college_apps_units"]').attr('min', 1);
     });
 
     $('input[name="college_apps_units"]').on('input', function() {
         $('input[name="college_apps_total"]').val(collegeAppsTotal());
-        $('input[name="invoice_total"]').val(invoiceTotal());
+        $('input[name="transaction_total"]').val(transactionTotal());
     });
 
     function collegeAppsTotal() {
@@ -224,10 +221,10 @@ $(document).ready(function() {
     });
 
     $('input[name="adjust_total"]').on('input', function() {
-        $('input[name="invoice_total"]').val(invoiceTotal());
+        $('input[name="transaction_total"]').val(transactionTotal());
     });
 
-    function invoiceTotal() {
+    function transactionTotal() {
         var diagnostic_total = $('input[name="diag_total"]').val() || 0;
         var adjust_total = $('input[name="adjust_total"]').val() || 0;
         var tp_total = $('input[name="tp_total"]').val() || 0;
@@ -235,46 +232,21 @@ $(document).ready(function() {
         return Number(diagnostic_total) + Number(adjust_total) + Number(tp_total) + Number(college_apps_total);
     }
 
-    //    $('input[name="turn_on_installments"]','input[name="tp_products"]','input[name="college_apps_products"]').on('click', function() {
-    //
-    //    default_installment_date = (default_tp_date > default_college_apps_date) ? default_tp_date : default_college_apps_date
-    //
-    //    if ($('input[name="turn_on_installments"]').val() == "") {
-    //            $('input[name="installment_date_1"]').val(default_installment_date);
-    //        }
-    //    }
-
 
     function setDefaultInstallmentDate() {
         default_installment_date = (default_tp_date > default_college_apps_date) ? default_tp_date : default_college_apps_date
-        $('input[name="installment_date_1"]').val(default_installment_date);
     }
 
 
     $('input[name="turn_on_installments"]').on('click', function() {
 
-        //default_installment_date = (default_tp_date > default_college_apps_date) ? default_tp_date : default_college_apps_date
         if ($(this).val() == "") {
             setDefaultInstallmentDate();
-            //alert("1");
             $('input[name="mark_as_paid"]').prop('checked', false);
-            //alert("2");
             $('input[name="mark_as_paid"]').val("");
 
-            //$('input[name="installment_date_1"]').val(default_installment_date);
-
-            $('input[name="installment_date_1"]').attr('disabled', false);
-            $('input[name="installment_date_2"]').attr('disabled', false);
-            $('input[name="installment_date_3"]').attr('disabled', false);
             $(this).val("yes");
         } else {
-            $('input[name="installment_date_1"]').attr('disabled', true);
-            $('input[name="installment_date_2"]').attr('disabled', true);
-            $('input[name="installment_date_3"]').attr('disabled', true);
-
-            $('input[name="installment_date_1"]').val("");
-            $('input[name="installment_date_2"]').val("");
-            $('input[name="installment_date_3"]').val("");
 
             $(this).val("");
         }
@@ -287,35 +259,20 @@ $(document).ready(function() {
         if ($(this).val() == "") {
 
             $('input[name="turn_on_installments"]').prop('checked', false);
-            $('input[name="turn_on_installments"]').val("");
 
             $('input[name="send_text_and_email"]').prop('checked', false);
             $('input[name="send_text_and_email"]').val("");
-
-            $('input[name="installment_date_1"]').val("");
-            $('input[name="installment_date_2"]').val("");
-            $('input[name="installment_date_3"]').val("");
-
-            $('input[name="installment_date_1"]').attr('disabled', true);
-            $('input[name="installment_date_2"]').attr('disabled', true);
-            $('input[name="installment_date_3"]').attr('disabled', true);
 
             $(this).val("yes");
         } else {
 
             setDefaultInstallmentDate();
 
-            $('input[name="installment_date_1"]').attr('disabled', false);
-            $('input[name="installment_date_2"]').attr('disabled', false);
-            $('input[name="installment_date_3"]').attr('disabled', false);
-
             $(this).val("");
         }
     });
 
-    //var mp = $('input[name="mark_as_paid"]:checked').attr("id");
-    //alert(mp);
-    //$('input[name="mark_as_paid"]').val(mp);
+
 
     $('input[name="send_text_and_email"]').on('click', function() {
         if ($(this).val() == "") {
@@ -329,7 +286,157 @@ $(document).ready(function() {
         }
     });
 
+     $('input[name="ask_for_student_info"]').on('click', function() {
+        if ($(this).val() == "") {
+            $(this).val("yes");
+        } else {
+            $(this).val("");
+        }
+    });
 
+
+// add and delete rows
+
+
+
+    $("#addrow").on("click", function () {
+
+    var counter = $('input[name="installment_counter"]').val();
+
+    //alert(counter);
+
+    if (Number(counter) < 13)
+{
+        document.getElementById("more_than_12_installments_message").hidden=true;
+
+        var newRow = $("<tr>");
+        var cols = "";
+
+        cols += '<td><input type="date" class="form-control" name="date_' + counter + '" required/></td>';
+        cols += '<td><input type="number" class="form-control installment_amounts" min="1" name="amount_' + counter + '" required/></td>';
+
+        cols += '<td><input type="button" id="ibtnDel" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
+        //add </tr> to last col ? no, because that is how jquery works?
+        newRow.append(cols);
+        $("table.order-list").append(newRow);
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementsByName("date_"+counter )[0].setAttribute('min', today);
+        counter++;
+        $('input[name="installment_counter"]').val(counter);
+        //client-side counter is always one more; actual number has been set server-side
+        }
+        if (Number(counter) == 13)
+        {
+        document.getElementById("addrow").hidden=true;
+        document.getElementById("more_than_12_installments_message").hidden=false;
+
+        }
+
+    });
+
+    $("table.order-list").on("click", ".ibtnDel", function (event) {
+    var counter = $('input[name="installment_counter"]').val();
+
+        $(this).closest("tr").remove();
+        counter--;
+        $('input[name="installment_counter"]').val(counter);
+        if (Number(counter) == 1)
+        {
+        document.getElementById("installment_not_equal_total_message_create").hidden=true;
+        document.getElementById("installment_not_equal_total_message_modify").hidden=true;
+            $('input[name="create_transaction_button"]').attr('disabled', false);
+             $('input[name="modify_transaction_button"]').attr('disabled', false);
+        }
+
+    if (Number(counter) < 13)
+        {
+        document.getElementById("more_than_12_installments_message").hidden=true;
+        document.getElementById("addrow").hidden=false;
+        }
+    else
+        {
+        document.getElementById("more_than_12_installments_message").hidden=false;
+        }
+        //client-side counter is always one more; actual number has been set server-side
+    });
+
+     $("table.order-list").on('input', ".installment_amounts", function() {
+
+     var installment_total = 0;
+     var amount = '';
+      var counter = $('input[name="installment_counter"]').val();
+
+     for (let k = 1; k < counter; k++) {
+
+     amount = 'amount_'.concat(k);
+     	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
+		}
+
+		 if (installment_total != transactionTotal()) {
+		 document.getElementById("installment_not_equal_total_message_create").hidden=false;
+            $('input[name="create_transaction_button"]').attr('disabled', true);
+
+            document.getElementById("installment_not_equal_total_message_modify").hidden=false;
+            $('input[name="modify_transaction_button"]').attr('disabled', true);
+        }
+        else{
+        document.getElementById("installment_not_equal_total_message_create").hidden=true;
+            $('input[name="create_transaction_button"]').attr('disabled', false);
+
+             document.getElementById("installment_not_equal_total_message_modify").hidden=true;
+            $('input[name="modify_transaction_button"]').attr('disabled', false);
+        }
+
+    });
+
+
+
+     document.getElementById("create_transaction_button").addEventListener('click', function (event) {
+
+     var installment_total = 0;
+     var amount = '';
+      var counter = $('input[name="installment_counter"]').val();
+
+     for (let k = 1; k < counter; k++) {
+
+     amount = 'amount_'.concat(k);
+     	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
+		}
+
+		 if (installment_total != transactionTotal()) {
+		 document.getElementById("installment_not_equal_total_message_create").hidden=false;
+            event.preventDefault();
+            }
+        else{
+        document.getElementById("installment_not_equal_total_message_create").hidden=true;
+             document.getElementById("create_transaction_setup_form").submit();
+        }
+
+    });
+
+
+        document.getElementById("modify_transaction_button").addEventListener('click', function(event) {
+
+     var installment_total = 0;
+     var amount = '';
+      var counter = $('input[name="installment_counter"]').val();
+
+     for (let k = 1; k < counter; k++) {
+
+     amount = 'amount_'.concat(k);
+     	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
+		}
+
+		 if (installment_total != transactionTotal()) {
+		 document.getElementById("installment_not_equal_total_message_modify").hidden=false;
+            event.preventDefault();
+            }
+        else{
+        document.getElementById("installment_not_equal_total_message_modify").hidden=true;
+             document.getElementById("modify_transaction_setup_form").submit();
+        }
+
+    });
 
 
 });

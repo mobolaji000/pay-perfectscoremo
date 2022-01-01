@@ -6,17 +6,19 @@
 #college_apps_total::-webkit-inner-spin-button,
 #adjust_total::-webkit-outer-spin-button,
 #adjust_total::-webkit-inner-spin-button,
-#invoice_code::-webkit-outer-spin-button,
-#invoice_code::-webkit-inner-spin-button,
+#transaction_id::-webkit-outer-spin-button,
+#transaction_id::-webkit-inner-spin-button,
 #diag_units::-webkit-outer-spin-button,
-#diag_units::-webkit-inner-spin-button
+#diag_units::-webkit-inner-spin-button,
+.installment_amounts::-webkit-outer-spin-button,
+.installment_amounts::-webkit-inner-spin-button
 {
   -webkit-appearance: none;
   margin: 0;
 }
 
 /* Firefox */
-#tp_total,#college_apps_total,#adjust_total,#invoice_code,#diag_units {
+#tp_total,#college_apps_total,#adjust_total,#transaction_id,#diag_units, .installment_amounts {
   -moz-appearance: textfield;
 }
 

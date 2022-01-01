@@ -8,9 +8,10 @@ class Config(object):
     try:
         if os.environ['DEPLOY_REGION'] == 'local':
 
-            os.environ["price"] = "price_1J5rWJDbpRMio7qjrkWJfnk3"
-            os.environ["product"] = "prod_JjKA9beb14xw0F"
-            os.environ["url_to_start_reminder"] = "http://127.0.0.1:5000/"
+            os.environ["stripe_pk"] = 'pk_test_51Hlgy6DbpRMio7qjWV9YNuBPiQIgD6PrBwO7oek37OEafhZiRjkfs42owvLto0eO8c6CCaiSAOUrXn0uPEJdai6Z00DUYXi551'
+            os.environ["price"] = "price_1KC6jCDbpRMio7qjcRMFyqLi"
+            os.environ["product"] = "prod_KrqQbyKt9WHy3g"
+            os.environ["url_to_start_reminder"] = "http://127.0.0.1:5002/"
             flask_secret_key = os.environ.get('flask_secret_key')
             SECRET_KEY = os.environ.get('flask_secret_key')
             dbUserName = os.environ.get('dbUserNameLocal')
@@ -24,9 +25,10 @@ class Config(object):
 
         elif os.environ['DEPLOY_REGION'] == 'dev':
 
-            os.environ["price"] = "price_1J5rWJDbpRMio7qjrkWJfnk3"
-            os.environ["product"] = "prod_JjKA9beb14xw0F"
-            os.environ["url_to_start_reminder"] = "https://https://dev-pay-perfectscoremo-7stpz.ondigitalocean.app//health"
+            os.environ["stripe_pk"] = 'pk_test_51Hlgy6DbpRMio7qjWV9YNuBPiQIgD6PrBwO7oek37OEafhZiRjkfs42owvLto0eO8c6CCaiSAOUrXn0uPEJdai6Z00DUYXi551'
+            os.environ["price"] = "price_1KC6jCDbpRMio7qjcRMFyqLi"
+            os.environ["product"] = "prod_KrqQbyKt9WHy3g"
+            os.environ["url_to_start_reminder"] = "https://dev-pay-perfectscoremo-7stpz.ondigitalocean.app/"
             flask_secret_key = awsInstance.get_secret("vensti_admin", "flask_secret_key")
             SECRET_KEY = awsInstance.get_secret("vensti_admin", "flask_secret_key")
             dbUserName = awsInstance.get_secret("do_db_cred", "dev_username")
@@ -40,9 +42,10 @@ class Config(object):
 
         elif os.environ['DEPLOY_REGION'] == 'prod':
 
+            os.environ["stripe_pk"] = 'pk_live_51Hlgy6DbpRMio7qjB3uZkis2sPMKb6HmXUI8k5PNKvYgOK1jv2XfzqG5fNaRbEO68wJ7VaXXvISCKIF7Yj2rT01t00GFzi1FkX'
             os.environ["price"] = "price_1I3joBDbpRMio7qj78mNjIDr"
             os.environ["product"] = "prod_If3w0tfPuQpn52"
-            os.environ["url_to_start_reminder"] = "https://pay.perfectscoremo.com/health"
+            os.environ["url_to_start_reminder"] = "https://pay.perfectscoremo.com/"
             flask_secret_key = awsInstance.get_secret("vensti_admin", "flask_secret_key")
             SECRET_KEY = awsInstance.get_secret("vensti_admin", "flask_secret_key")
             dbUserName = awsInstance.get_secret("do_db_cred", "username")

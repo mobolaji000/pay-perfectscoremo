@@ -1,0 +1,56 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Transaction Code</title>
+
+    <!-- Bootstrap core CSS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+	  <link href="static/page_style.css" rel="stylesheet" >
+
+    <!-- Custom styles for this template -->
+  </head>
+
+  <body class="text-center">
+  <div class="container">
+  <img class="mb-4" src="/static/logo.png" alt="" width="330" height="255">
+  <h1 class="h3 mb-3 font-weight-normal">Enter transaction code:</h1>
+	     <br>
+
+	  <form class="needs-validation"  class="needs-validation" data-toggle="validator" action="{{ url_for('transaction_page') }}" method="post">
+
+		<div class="col-sm">
+								<div class="mb-3">
+									<input id="transaction_id" name="transaction_id" type="text" class="form-control"
+										    required>
+									<label for="transaction_id">Transaction Code</label>
+								</div>
+							</div>
+	  <br>
+
+
+	  <input class="btn btn-primary btn-lg btn-block" type="submit" value="Go To Transaction Page"></input>
+
+	  </form>
+
+	  <br>
+
+	  <div>
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+
+
+  </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  </body>
+</html>
