@@ -389,4 +389,36 @@ $(document).ready(function() {
 
     });
 
+     $("#transaction_setup_form").addEventListener('submit',function(event) {
+     event.preventDefault();
+
+     var installment_total = 0;
+     var amount = '';
+      var counter = $('input[name="installment_counter"]').val();
+
+     for (let k = 1; k < counter; k++) {
+
+     amount = 'amount_'.concat(k);
+     	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
+		}
+
+		 if (installment_total != transactionTotal()) {
+		 document.getElementById("installment_not_equal_total_message_1").hidden=false;
+            $('input[name="create_transaction_button"]').attr('disabled', true);
+
+            document.getElementById("installment_not_equal_total_message_2").hidden=false;
+            $('input[name="modify_transaction_button"]').attr('disabled', true);
+
+        }
+        else{
+        document.getElementById("installment_not_equal_total_message_1").hidden=true;
+            $('input[name="create_transaction_button"]').attr('disabled', false);
+
+             document.getElementById("installment_not_equal_total_message_2").hidden=true;
+            $('input[name="modify_transaction_button"]').attr('disabled', false);
+            $(this).submit();
+        }
+
+    });
+
 });

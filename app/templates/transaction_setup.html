@@ -38,6 +38,7 @@
 
 		 function finalCheckBeforeSubmit()
     {
+
     var tp = $('input[name="tp_product"]:checked').attr("id");
     $('input[name="was_test_prep_purchased"]').val(tp);
     var ca = $('input[name="college_apps_product"]:checked').attr("id");
@@ -329,8 +330,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 <div class="container">
 	<div class="py-5 text-center">
 		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
-		<h2>Transaction Creation</h2>
-		<p class="lead">_________________________</p>
+		<h2><u>Transaction Creation</u></h2>
 	</div>
 
 	<br>
@@ -339,7 +339,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 
 	<div class="row">
 		<div class="col-md-4 order-md-2 mb-4">
-			<form class="card p-2" action="{{ url_for('search_transaction') }}" method="post">
+			<form id="transaction_setup_form" name="transaction_setup_form" class="card p-2" action="{{ url_for('search_transaction') }}" method="post">
 				<div class="input-group">
 					<input type="text" class="form-control" placeholder="Enter search query" id="search_query" name="search_query">
 					<div class="input-group-append">
