@@ -339,7 +339,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 
 	<div class="row">
 		<div class="col-md-4 order-md-2 mb-4">
-			<form id="transaction_setup_form" name="transaction_setup_form" class="card p-2" action="{{ url_for('search_transaction') }}" method="post">
+			<form class="card p-2" action="{{ url_for('search_transaction') }}" method="post">
 				<div class="input-group">
 					<input type="text" class="form-control" placeholder="Enter search query" id="search_query" name="search_query">
 					<div class="input-group-append">
@@ -372,7 +372,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 
 
 							<div style="margin-left:50px">
-								<form action="{{ url_for('modify_transaction') }}" method="post">
+								<form id="modify_transaction_setup_form" name="modify_transaction_setup_form" action="{{ url_for('modify_transaction') }}" method="post">
 
 									<input id="modify_transaction_button" name="modify_transaction_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Modify"
 										   onclick="finalCheckBeforeModify();">
@@ -436,7 +436,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 		<div class="col-md-8 order-md-1">
 			<br><br><br><br><br>
 			<h4 class="mb-3">Transaction Information</h4>
-			<form class="needs-validation" action="{{ url_for('create_transaction') }}" method="post"
+			<form id="create_transaction_setup_form" name="create_transaction_setup_form"  class="needs-validation" action="{{ url_for('create_transaction') }}" method="post"
 				  data-toggle="validator">
 				<div class="row">
 					<div class="col-md-6 mb-3">

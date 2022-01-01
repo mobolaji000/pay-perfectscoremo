@@ -389,8 +389,7 @@ $(document).ready(function() {
 
     });
 
-     $("#transaction_setup_form").addEventListener('submit',function(event) {
-     event.preventDefault();
+    function checkInstallmentsBeforeSubmit (event) {
 
      var installment_total = 0;
      var amount = '';
@@ -405,6 +404,7 @@ $(document).ready(function() {
 		 if (installment_total != transactionTotal()) {
 		 document.getElementById("installment_not_equal_total_message_1").hidden=false;
             document.getElementById("installment_not_equal_total_message_2").hidden=false;
+                 event.preventDefault();
         }
         else{
         document.getElementById("installment_not_equal_total_message_1").hidden=true;
@@ -412,6 +412,10 @@ $(document).ready(function() {
             $(this).submit();
         }
 
-    });
+    }
+
+     document.getElementById("create_transaction_setup_form").addEventListener('submit',checkInstallmentsBeforeSubmit);
+          document.getElementById("modify_transaction_setup_form").addEventListener('submit',checkInstallmentsBeforeSubmit);
+
 
 });
