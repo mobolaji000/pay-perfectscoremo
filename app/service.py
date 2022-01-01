@@ -16,10 +16,10 @@ import os
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler()
+# handler = logging.StreamHandler()
 # formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 # handler.setFormatter(formatter)
-logger.addHandler(handler)
+# logger.addHandler(handler)
 
 import ssl
 ssl._create_default_https_context =  ssl._create_unverified_context

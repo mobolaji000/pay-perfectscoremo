@@ -23,10 +23,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler()
+# handler = logging.StreamHandler()
 # formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 # handler.setFormatter(formatter)
-logger.addHandler(handler)
+# logger.addHandler(handler)
 
 from app import server
 from app.aws import AWSInstance
