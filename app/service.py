@@ -197,7 +197,6 @@ class StripeInstance():
         for existing_invoice in existing_invoices:
             AppDBUtil.deleteInvoiceToBePaid(existing_invoice.transaction_id, existing_invoice.stripe_invoice_id)
 
-        #there is a chance this errors out if you are re-attaching the same method of payment to an existing customer
         stripe.PaymentMethod.attach(
             payment_id,
             customer=stripe_info['stripe_customer_id'],
