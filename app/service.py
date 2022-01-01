@@ -147,10 +147,10 @@ class StripeInstance():
                     metadata={'transaction_id': stripe_info['transaction_id']},
                 )
 
-                AppDBUtil.createOrModifyInvoice(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
-                                                phone_number=stripe_info['phone_number'], email=stripe_info['email'],
-                                                transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
-                                                payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
+                AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
+                                                        phone_number=stripe_info['phone_number'], email=stripe_info['email'],
+                                                        transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
+                                                        payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
         else:
             if existing_customer:
                 logger.debug('Full payment ACH for existing customer: ' + str(stripe_info['transaction_id']))
@@ -171,10 +171,10 @@ class StripeInstance():
                     metadata={'transaction_id': stripe_info['transaction_id']},
                 )
 
-                AppDBUtil.createOrModifyInvoice(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
-                                                phone_number=stripe_info['phone_number'], email=stripe_info['email'],
-                                                transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
-                                                payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
+                AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
+                                                        phone_number=stripe_info['phone_number'], email=stripe_info['email'],
+                                                        transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
+                                                        payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
 
             else:
                 logger.debug('Full payment ACH for new customer: ' + str(stripe_info['transaction_id']))
@@ -241,10 +241,10 @@ class StripeInstance():
                 )
 
 
-                AppDBUtil.createOrModifyInvoice(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
-                                                phone_number=stripe_info['phone_number'], email=stripe_info['email'],
-                                                transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
-                                                payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
+                AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
+                                                        phone_number=stripe_info['phone_number'], email=stripe_info['email'],
+                                                        transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
+                                                        payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
 
         else:
             if existing_customer:
@@ -264,10 +264,10 @@ class StripeInstance():
                     auto_advance=False,
                     metadata={'transaction_id': stripe_info['transaction_id']},
                 )
-                AppDBUtil.createOrModifyInvoice(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
-                                                phone_number=stripe_info['phone_number'], email=stripe_info['email'],
-                                                transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
-                                                payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
+                AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
+                                                        phone_number=stripe_info['phone_number'], email=stripe_info['email'],
+                                                        transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
+                                                        payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
             else:
                 logger.debug('Full payment credit card new customer: ' + str(stripe_info['transaction_id']))
                 transaction_total = int(math.ceil(stripe_info['transaction_total'] * 1.03))
@@ -340,7 +340,7 @@ class StripeInstance():
             print("weird: neither ach nor card was retrieved as default method of payment")
             raise ValueError('weird: neither ach nor card was retrieved as default method of payment')
 
-        # AppDBUtil.createOrModifyInvoice(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
+        # AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
         #                                 phone_number=stripe_info['phone_number'], email=stripe_info['email'],
         #                                 transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
         #                                 payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
