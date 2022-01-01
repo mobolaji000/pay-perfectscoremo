@@ -186,8 +186,9 @@ class AppDBUtil():
     @classmethod
     def updateInvoiceAsPaid(cls, stripe_invoice_id=None):
         invoice = InvoiceToBePaid.query.filter_by(stripe_invoice_id=stripe_invoice_id).first()
-        invoice.payment_made = True
-        cls.executeDBQuery()
+        if invoice:
+            invoice.payment_made = True
+            cls.executeDBQuery()
 
     @classmethod
     def findInvoicesToPay(cls):

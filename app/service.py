@@ -69,8 +69,8 @@ class StripeInstance():
             default_card = customer.invoice_settings.default_payment_method
             default_ach = customer.default_source
             print("payment options are: ")
-            print(default_ach)
-            print(default_card)
+            print("default_ach is ",default_ach)
+            print("default_card is ",default_card)
             does_customer_payment_info_exist = True if default_card or default_ach else False
         else:
             customer = stripe.Customer.create(email=clientSetupData['email'], name=clientSetupData['first_name'] + " " + clientSetupData['last_name'], phone=clientSetupData['phone_number'])
@@ -285,7 +285,7 @@ class StripeInstance():
         # date = datetime.datetime.today() + datetime.timedelta(days=3)
         # amount = stripe_info['transaction_total']
 
-        logger.debug('Inside setupAutoPaymentForExistingCustomer()' + str(stripe_info['transaction_id']))
+        logger.debug('Inside setupAutoPaymentForExistingCustomer() for ' + str(stripe_info['transaction_id']))
 
         customer = stripe.Customer.retrieve(stripe_info['stripe_customer_id'])
         default_card = customer.invoice_settings.default_payment_method

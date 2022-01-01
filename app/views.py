@@ -468,6 +468,7 @@ def stripe_webhook():
             else:
                 amount_paid = paid_invoice.total / 100
 
+            AppDBUtil.updateInvoiceAsPaid(paid_invoice.id)
             AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id,amount_paid)
 
             print("paid transaction is ", paid_invoice)
@@ -515,7 +516,7 @@ def start_background_jobs_before_first_request():
     def invoice_payment_background_job():
         try:
             print("Invoice payment background job started")
-            installment_name = ''
+            invoice_name = ''
             invoice_payment_failed = False
             invoicesToPay = AppDBUtil.findInvoicesToPay()
             for invoice in invoicesToPay:
@@ -527,13 +528,13 @@ def start_background_jobs_before_first_request():
                 else:
                     print("Invoice payment failed: ",invoice['last_name'])
                     invoice_payment_failed = True
-                    installment_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
+                    invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
 
             if invoice_payment_failed:
                 SendMessagesToClients.sendSMS(to_number='9725847364', message="Invoice payments failed for: "+invoice_name, type='to_mo')
 
         except Exception as e:
-            print("Error in making installment payments")
+            print("Error in background job to pay invoices")
             print(e)
             traceback.print_exc()
 
