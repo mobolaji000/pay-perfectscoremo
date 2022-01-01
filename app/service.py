@@ -106,7 +106,7 @@ class StripeInstance():
 
         stripe.Customer.modify(
             stripe_info['stripe_customer_id'],
-            invoice_settings={'default_payment_method': None})
+            invoice_settings={'default_payment_method': ''})
 
         if bank_account_token:
 
