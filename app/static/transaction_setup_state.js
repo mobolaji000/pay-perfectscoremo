@@ -342,8 +342,8 @@ $(document).ready(function() {
         $('input[name="installment_counter"]').val(counter);
         if (Number(counter) == 1)
         {
-        document.getElementById("installment_not_equal_total_message_1").hidden=true;
-        document.getElementById("installment_not_equal_total_message_2").hidden=true;
+        document.getElementById("installment_not_equal_total_message_create").hidden=true;
+        document.getElementById("installment_not_equal_total_message_modify").hidden=true;
             $('input[name="create_transaction_button"]').attr('disabled', false);
              $('input[name="modify_transaction_button"]').attr('disabled', false);
         }
@@ -373,23 +373,25 @@ $(document).ready(function() {
 		}
 
 		 if (installment_total != transactionTotal()) {
-		 document.getElementById("installment_not_equal_total_message_1").hidden=false;
+		 document.getElementById("installment_not_equal_total_message_create").hidden=false;
             $('input[name="create_transaction_button"]').attr('disabled', true);
 
-            document.getElementById("installment_not_equal_total_message_2").hidden=false;
+            document.getElementById("installment_not_equal_total_message_modify").hidden=false;
             $('input[name="modify_transaction_button"]').attr('disabled', true);
         }
         else{
-        document.getElementById("installment_not_equal_total_message_1").hidden=true;
+        document.getElementById("installment_not_equal_total_message_create").hidden=true;
             $('input[name="create_transaction_button"]').attr('disabled', false);
 
-             document.getElementById("installment_not_equal_total_message_2").hidden=true;
+             document.getElementById("installment_not_equal_total_message_modify").hidden=true;
             $('input[name="modify_transaction_button"]').attr('disabled', false);
         }
 
     });
 
-    function checkInstallmentsBeforeSubmit (event) {
+
+
+     document.getElementById("create_transaction_button").addEventListener('click', function (event) {
 
      var installment_total = 0;
      var amount = '';
@@ -402,20 +404,39 @@ $(document).ready(function() {
 		}
 
 		 if (installment_total != transactionTotal()) {
-		 document.getElementById("installment_not_equal_total_message_1").hidden=false;
-            document.getElementById("installment_not_equal_total_message_2").hidden=false;
-                 event.preventDefault();
-        }
+		 document.getElementById("installment_not_equal_total_message_create").hidden=false;
+            event.preventDefault();
+            }
         else{
-        document.getElementById("installment_not_equal_total_message_1").hidden=true;
-             document.getElementById("installment_not_equal_total_message_2").hidden=true;
-            $(this).submit();
+        document.getElementById("installment_not_equal_total_message_create").hidden=true;
+             document.getElementById("create_transaction_setup_form").submit();
         }
 
-    }
+    });
 
-     document.getElementById("create_transaction_setup_form").addEventListener('submit',checkInstallmentsBeforeSubmit);
-          document.getElementById("modify_transaction_setup_form").addEventListener('submit',checkInstallmentsBeforeSubmit);
+
+        document.getElementById("modify_transaction_button").addEventListener('click', function(event) {
+
+     var installment_total = 0;
+     var amount = '';
+      var counter = $('input[name="installment_counter"]').val();
+
+     for (let k = 1; k < counter; k++) {
+
+     amount = 'amount_'.concat(k);
+     	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
+		}
+
+		 if (installment_total != transactionTotal()) {
+		 document.getElementById("installment_not_equal_total_message_modify").hidden=false;
+            event.preventDefault();
+            }
+        else{
+        document.getElementById("installment_not_equal_total_message_modify").hidden=true;
+             document.getElementById("modify_transaction_setup_form").submit();
+        }
+
+    });
 
 
 });
