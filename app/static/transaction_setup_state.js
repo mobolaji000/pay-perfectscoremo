@@ -404,14 +404,6 @@ $(document).ready(function() {
 		}
 
 
-$('#adjustment_explanation,#adjust_total').change(function() {
-        if ($(this).val() != "") {
-            $('input[name="adjust_total"]').prop('required', true);
-            $('input[name="adjustment_explanation"]').prop('required', true);
-        }
-    });
-
-
         if (Number(counter) > 1){
 
 		 if (installment_total != transactionTotal()) {
@@ -429,6 +421,8 @@ $('#adjustment_explanation,#adjust_total').change(function() {
         }
         else
         {
+            $('input[name="adjust_total"]').checkValidity();
+            $('input[name="adjustment_explanation"]').checkValidity();
         event.preventDefault();
         }
         }
