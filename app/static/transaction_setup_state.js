@@ -389,7 +389,7 @@ $(document).ready(function() {
 
     });
 
-
+    Returning client
 
      document.getElementById("create_transaction_button").addEventListener('click', function (event) {
 
