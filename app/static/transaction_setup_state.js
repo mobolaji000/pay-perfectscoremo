@@ -421,8 +421,7 @@ $(document).ready(function() {
         }
         else
         {
-            $('input[name="adjust_total"]').checkValidity();
-            $('input[name="adjustment_explanation"]').checkValidity();
+            $('input[name="create_transaction_setup_form"]').checkValidity();
         event.preventDefault();
         }
         }
