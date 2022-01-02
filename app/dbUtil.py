@@ -117,21 +117,20 @@ class AppDBUtil():
 
     @classmethod
     def createOrModifyInstallmentPlan(cls, clientData={}, transaction_id=None):
-
         existing_installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id).first()
         if existing_installment_plan:
             db.session.delete(existing_installment_plan)
             cls.executeDBQuery()
 
-        installment_plan = InstallmentPlan(transaction_id=transaction_id, stripe_customer_id=clientData['stripe_customer_id'], first_name=clientData['first_name'], last_name=clientData['last_name'], phone_number=clientData['phone_number'],
-                                           email=clientData['email'])
-        db.session.add(installment_plan)
-        print("installment plan created is: ", installment_plan)
-        cls.executeDBQuery()
-
         if int(clientData['installment_counter']) > 1:
+            installment_plan = InstallmentPlan(transaction_id=transaction_id, stripe_customer_id=clientData['stripe_customer_id'], first_name=clientData['first_name'], last_name=clientData['last_name'], phone_number=clientData['phone_number'],
+                                               email=clientData['email'])
+            db.session.add(installment_plan)
+            print("installment plan created is: ", installment_plan)
+            cls.executeDBQuery()
+
             installments = {}
-            print("number of installments is " + str(int(clientData['installment_counter'])-1))
+            print("number of installments is " + str(int(clientData['installment_counter']) - 1))
             for k in range(1, int(clientData['installment_counter'])):
                 print("current installment being updated is " + str(k))
                 installments.update({'date_' + str(k): clientData['date_' + str(k)], 'amount_' + str(k): clientData['amount_' + str(k)]})
@@ -139,10 +138,10 @@ class AppDBUtil():
             installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id)
             number_of_rows_modified = installment_plan.update(installments)
             print("number of installment rows added or modified is: ", number_of_rows_modified)
-
             cls.executeDBQuery()
+
         else:
-            print("Installment plan created, but no installment dates created or modified")
+            print("No installment dates created/modified")
 
     @classmethod
     def is_date(cls,string_date, fuzzy=False):
