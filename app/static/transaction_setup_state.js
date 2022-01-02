@@ -403,6 +403,15 @@ $(document).ready(function() {
      	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
 		}
 
+
+$('#adjustment_explanation,#adjust_total').change(function() {
+        if ($(this).val() != "") {
+            $('input[name="adjust_total"]').prop('required', true);
+            $('input[name="adjustment_explanation"]').prop('required', true);
+        }
+    });
+
+
         if (Number(counter) > 1){
 
 		 if (installment_total != transactionTotal()) {
@@ -411,7 +420,17 @@ $(document).ready(function() {
             }
         else{
         document.getElementById("installment_not_equal_total_message_create").hidden=true;
-             document.getElementById("create_transaction_setup_form").submit();
+
+         var adjustment_explanation = $('input[name="adjustment_explanation"]').val();
+         var adjust_total = $('input[name="adjust_total"]').val();
+        if ((adjust_total == '' && adjustment_explanation == '') || (adjust_total != '' && adjustment_explanation != ''))
+        {
+          document.getElementById("create_transaction_setup_form").submit();
+        }
+        else
+        {
+        event.preventDefault();
+        }
         }
         }
 
@@ -437,7 +456,16 @@ if (Number(counter) > 1){
             }
         else{
         document.getElementById("installment_not_equal_total_message_modify").hidden=true;
-             document.getElementById("modify_transaction_setup_form").submit();
+             var adjustment_explanation = $('input[name="adjustment_explanation"]').val();
+         var adjust_total = $('input[name="adjust_total"]').val();
+        if ((adjust_total == '' && adjustment_explanation == '') || (adjust_total != '' && adjustment_explanation != ''))
+        {
+          document.getElementById("modify_transaction_setup_form").submit();
+        }
+        else
+        {
+        event.preventDefault();
+        }
         }
         }
 
