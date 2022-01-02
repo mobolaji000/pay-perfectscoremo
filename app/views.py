@@ -305,7 +305,7 @@ def delete_transaction():
     try:
         transaction_id_to_delete = str(request.form['transaction_id_to_delete'])
         print(transaction_id_to_delete)
-        AppDBUtil.deleteTransaction(transaction_id_to_delete)
+        AppDBUtil.deleteTransactionAndInstallmentPlan(transaction_id_to_delete)
         flash('Transaction sucessfully deleted.')
         return redirect(url_for('transaction_setup'))
     except Exception as e:

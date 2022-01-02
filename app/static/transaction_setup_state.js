@@ -393,6 +393,12 @@ $(document).ready(function() {
 
      document.getElementById("create_transaction_button").addEventListener('click', function (event) {
 
+     if ( $('input[name="create_transaction_setup_form"]').checkValidity() == false)
+     {
+     event.preventDefault();
+     }
+
+
      var installment_total = 0;
      var amount = '';
       var counter = $('input[name="installment_counter"]').val();
@@ -403,13 +409,27 @@ $(document).ready(function() {
      	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
 		}
 
+
+        if (Number(counter) > 1){
+
 		 if (installment_total != transactionTotal()) {
 		 document.getElementById("installment_not_equal_total_message_create").hidden=false;
             event.preventDefault();
             }
         else{
         document.getElementById("installment_not_equal_total_message_create").hidden=true;
-             document.getElementById("create_transaction_setup_form").submit();
+
+         var adjustment_explanation = $('input[name="adjustment_explanation"]').val();
+         var adjust_total = $('input[name="adjust_total"]').val();
+        if ((adjust_total == '' && adjustment_explanation == '') || (adjust_total != '' && adjustment_explanation != ''))
+        {
+          document.getElementById("create_transaction_setup_form").submit();
+        }
+        else
+        {
+        event.preventDefault();
+        }
+        }
         }
 
     });
@@ -427,13 +447,24 @@ $(document).ready(function() {
      	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
 		}
 
+if (Number(counter) > 1){
 		 if (installment_total != transactionTotal()) {
 		 document.getElementById("installment_not_equal_total_message_modify").hidden=false;
             event.preventDefault();
             }
         else{
         document.getElementById("installment_not_equal_total_message_modify").hidden=true;
-             document.getElementById("modify_transaction_setup_form").submit();
+             var adjustment_explanation = $('input[name="adjustment_explanation"]').val();
+         var adjust_total = $('input[name="adjust_total"]').val();
+        if ((adjust_total == '' && adjustment_explanation == '') || (adjust_total != '' && adjustment_explanation != ''))
+        {
+          document.getElementById("modify_transaction_setup_form").submit();
+        }
+        else
+        {
+        event.preventDefault();
+        }
+        }
         }
 
     });

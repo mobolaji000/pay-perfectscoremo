@@ -99,12 +99,12 @@ class AppDBUtil():
 
         cls.executeDBQuery()
 
-        cls.createOrModifyInstallmentPlan(clientData=clientData, transaction_id=transaction_id, action=action)
+        cls.createOrModifyInstallmentPlan(clientData=clientData, transaction_id=transaction_id)
 
         return transaction_id,number_of_rows_modified
 
     @classmethod
-    def createOrModifyInvoice(cls, first_name=None, last_name=None, phone_number=None, email=None, transaction_id=None, stripe_customer_id=None, stripe_invoice_id=None, payment_date=None, payment_amount=None):
+    def createOrModifyInvoiceToBePaid(cls, first_name=None, last_name=None, phone_number=None, email=None, transaction_id=None, stripe_customer_id=None, stripe_invoice_id=None, payment_date=None, payment_amount=None):
         #
         invoice = InvoiceToBePaid(first_name=first_name, last_name=last_name, phone_number=phone_number, email=email,
                                   transaction_id=transaction_id, stripe_customer_id=stripe_customer_id,
@@ -115,29 +115,33 @@ class AppDBUtil():
         print("invoice to be paid created is: ", invoice)
         cls.executeDBQuery()
 
-
     @classmethod
-    def createOrModifyInstallmentPlan(cls, clientData={}, transaction_id=None, action=''):
+    def createOrModifyInstallmentPlan(cls, clientData={}, transaction_id=None):
+        existing_installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id).first()
+        if existing_installment_plan:
+            db.session.delete(existing_installment_plan)
+            cls.executeDBQuery()
 
         if int(clientData['installment_counter']) > 1:
-            installments = {}
-            print("number of installments is " + str(int(clientData['installment_counter'])-1))
-            for k in range(1, int(clientData['installment_counter'])):
-                print("current installment being updated is " + str(k))
-                installments.update({'date_' + str(k): clientData['date_' + str(k)], 'amount_' + str(k): clientData['amount_' + str(k)]})
-
-            installment_plan = InstallmentPlan(transaction_id=transaction_id, stripe_customer_id=clientData['stripe_customer_id'], first_name=clientData['first_name'], last_name=clientData['last_name'], phone_number=clientData['phone_number'], email=clientData['email'])
+            installment_plan = InstallmentPlan(transaction_id=transaction_id, stripe_customer_id=clientData['stripe_customer_id'], first_name=clientData['first_name'], last_name=clientData['last_name'], phone_number=clientData['phone_number'],
+                                               email=clientData['email'])
             db.session.add(installment_plan)
             print("installment plan created is: ", installment_plan)
             cls.executeDBQuery()
 
+            installments = {}
+            print("number of installments is " + str(int(clientData['installment_counter']) - 1))
+            for k in range(1, int(clientData['installment_counter'])):
+                print("current installment being updated is " + str(k))
+                installments.update({'date_' + str(k): clientData['date_' + str(k)], 'amount_' + str(k): clientData['amount_' + str(k)]})
+
             installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id)
             number_of_rows_modified = installment_plan.update(installments)
             print("number of installment rows added or modified is: ", number_of_rows_modified)
-
             cls.executeDBQuery()
+
         else:
-            print("No installment created or modified")
+            print("No installment dates created/modified")
 
     @classmethod
     def is_date(cls,string_date, fuzzy=False):
@@ -166,9 +170,13 @@ class AppDBUtil():
         stripe.Invoice.delete(stripeInvoiceId,)
 
     @classmethod
-    def deleteTransaction(cls, codeOfTransactionToDelete):
+    def deleteTransactionAndInstallmentPlan(cls, codeOfTransactionToDelete):
         transaction = Transaction.query.filter_by(transaction_id=codeOfTransactionToDelete).first()
         db.session.delete(transaction)
+
+        existing_installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=codeOfTransactionToDelete).first()
+        db.session.delete(existing_installment_plan)
+
         cls.executeDBQuery()
 
     @classmethod
@@ -337,11 +345,6 @@ class AppDBUtil():
             parent_2_phone_number = studentData.get('parent_2_phone_number', '')
             parent_2_email = studentData.get('parent_2_email', '')
 
-            # student = Student( student_id=student_id,prospect_id=prospect_id,student_first_name=student_first_name,student_last_name=student_last_name,student_phone_number=student_phone_number,student_email=student_email,
-            #                    parent_1_salutation=parent_1_salutation,parent_1_first_name=parent_1_first_name,parent_1_last_name=parent_1_last_name,parent_1_phone_number=parent_1_phone_number,parent_1_email=parent_1_email,
-            #                    parent_2_salutation=parent_2_salutation,parent_2_first_name=parent_2_first_name,parent_2_last_name=parent_2_last_name,parent_2_phone_number=parent_2_phone_number,parent_2_email=parent_2_email)
-            #
-            # db.session.add(student)
 
             statement = insert(Student).values(student_id=student_id,prospect_id=prospect_id,student_first_name=student_first_name,student_last_name=student_last_name,student_phone_number=student_phone_number,student_email=student_email,
                                parent_1_salutation=parent_1_salutation,parent_1_first_name=parent_1_first_name,parent_1_last_name=parent_1_last_name,parent_1_phone_number=parent_1_phone_number,parent_1_email=parent_1_email,
