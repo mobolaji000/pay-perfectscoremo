@@ -403,6 +403,8 @@ $(document).ready(function() {
      	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
 		}
 
+        if (Number(counter) > 1){
+
 		 if (installment_total != transactionTotal()) {
 		 document.getElementById("installment_not_equal_total_message_create").hidden=false;
             event.preventDefault();
@@ -410,6 +412,7 @@ $(document).ready(function() {
         else{
         document.getElementById("installment_not_equal_total_message_create").hidden=true;
              document.getElementById("create_transaction_setup_form").submit();
+        }
         }
 
     });
@@ -427,6 +430,7 @@ $(document).ready(function() {
      	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
 		}
 
+if (Number(counter) > 1){
 		 if (installment_total != transactionTotal()) {
 		 document.getElementById("installment_not_equal_total_message_modify").hidden=false;
             event.preventDefault();
@@ -434,6 +438,7 @@ $(document).ready(function() {
         else{
         document.getElementById("installment_not_equal_total_message_modify").hidden=true;
              document.getElementById("modify_transaction_setup_form").submit();
+        }
         }
 
     });

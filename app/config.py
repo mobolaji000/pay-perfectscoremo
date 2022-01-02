@@ -9,8 +9,8 @@ class Config(object):
         if os.environ['DEPLOY_REGION'] == 'local':
 
             os.environ["stripe_pk"] = 'pk_test_51Hlgy6DbpRMio7qjWV9YNuBPiQIgD6PrBwO7oek37OEafhZiRjkfs42owvLto0eO8c6CCaiSAOUrXn0uPEJdai6Z00DUYXi551'
-            os.environ["price"] = "price_1KC6jCDbpRMio7qjcRMFyqLi"
-            os.environ["product"] = "prod_KrqQbyKt9WHy3g"
+            os.environ["price"] = "price_1KDVtuDbpRMio7qjxKzKZudW"
+            os.environ["product"] = "prod_KtIUggf8a6Poac"
             os.environ["url_to_start_reminder"] = "http://127.0.0.1:5002/"
             flask_secret_key = os.environ.get('flask_secret_key')
             SECRET_KEY = os.environ.get('flask_secret_key')
