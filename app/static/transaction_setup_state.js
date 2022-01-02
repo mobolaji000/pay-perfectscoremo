@@ -393,6 +393,12 @@ $(document).ready(function() {
 
      document.getElementById("create_transaction_button").addEventListener('click', function (event) {
 
+     if ( $('input[name="create_transaction_setup_form"]').checkValidity() == false)
+     {
+     event.preventDefault();
+     }
+
+
      var installment_total = 0;
      var amount = '';
       var counter = $('input[name="installment_counter"]').val();
@@ -421,7 +427,6 @@ $(document).ready(function() {
         }
         else
         {
-            $('input[name="create_transaction_setup_form"]').checkValidity();
         event.preventDefault();
         }
         }
