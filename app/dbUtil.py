@@ -171,11 +171,12 @@ class AppDBUtil():
 
     @classmethod
     def deleteTransactionAndInstallmentPlan(cls, codeOfTransactionToDelete):
+        existing_installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=codeOfTransactionToDelete).first()
+        if existing_installment_plan:
+            db.session.delete(existing_installment_plan)
+
         transaction = Transaction.query.filter_by(transaction_id=codeOfTransactionToDelete).first()
         db.session.delete(transaction)
-
-        existing_installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=codeOfTransactionToDelete).first()
-        db.session.delete(existing_installment_plan)
 
         cls.executeDBQuery()
 

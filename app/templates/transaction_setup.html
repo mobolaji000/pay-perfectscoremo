@@ -371,9 +371,20 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 
       }
 
-      function finalCheckBeforeDelete()
+      function finalCheckBeforeDelete(event)
       {
+
+      if ($('input[name="transaction_id_to_show"]').val() != '')
+      {
+      //alert("id given");
       	$('input[id="transaction_id_to_delete"]').val($('input[name="transaction_id_to_show"]').val());
+      	}
+      	else
+      	{
+      	//alert("no id");
+      	event.preventDefault();
+      	}
+
       }
 
 
@@ -440,7 +451,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 							<div style="margin-left:50px">
 								<form action="{{ url_for('delete_transaction') }}" method="post">
 									<input id="delete_button" name="delete_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Delete"
-										   onclick="finalCheckBeforeDelete();">
+										   onclick="finalCheckBeforeDelete(event);">
 									<input id="transaction_id_to_delete" name="transaction_id_to_delete" hidden>
 								</form>
 							</div>
