@@ -38,7 +38,7 @@ function miscellanousValidation()
       var counter = $('input[name="installment_counter"]').val();
       var transactionTotal = Number($('input[name="transaction_total"]').val());
 
-      var installmentValid = false;
+      var installmentValid = true;
       var adjustmentValid = false;
 
      for (let k = 1; k < counter; k++) {
@@ -329,9 +329,9 @@ $('input[name="installment_counter"]').val(result.installment_counter);
      }
 
 
-      function finalCheckBeforeModify()
+      function finalCheckBeforeModify(event)
       {
-       finalCheckBeforeSubmit();
+       finalCheckBeforeSubmit(event);
       	var dataToModify = {};
       	dataToModify['first_name'] = $('input[name="first_name"]').val();
       	dataToModify['last_name'] = $('input[name="last_name"]').val();
@@ -430,7 +430,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 								<form id="modify_transaction_setup_form" name="modify_transaction_setup_form" action="{{ url_for('modify_transaction') }}" method="post">
 
 									<input id="modify_transaction_button" name="modify_transaction_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Modify"
-										   onclick="finalCheckBeforeModify();">
+										   onclick="finalCheckBeforeModify(event);">
 									<input id="data_to_modify" name="data_to_modify" hidden>
 
 								</form>
