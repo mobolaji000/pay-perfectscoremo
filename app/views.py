@@ -270,8 +270,8 @@ def modify_transaction():
         transaction_id_again,number_of_rows_modified=AppDBUtil.modifyTransactionDetails(data_to_modify)
 
         if number_of_rows_modified < 1:
-            print("No transaction was modified, perhaps because no trnsaction code was provided")
-            flash('No transaction was modified, perhaps because no trnsaction code was provided')
+            print("No transaction was modified, perhaps because no transaction code was provided")
+            flash('No transaction was modified, perhaps because no transaction code was provided')
             return redirect(url_for('transaction_setup'))
 
         if number_of_rows_modified > 1:
