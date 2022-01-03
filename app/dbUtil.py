@@ -248,10 +248,9 @@ class AppDBUtil():
     @classmethod
     def searchTransactions(cls, search_query):
         if search_query.isdigit():
-            if len(search_query) == 6:
-                transaction_details = Transaction.query.filter_by(transaction_id=search_query).order_by(Transaction.date_created.desc()).all()
-            else:
-                transaction_details = Transaction.query.filter_by(phone_number=search_query).order_by(Transaction.date_created.desc()).all()
+            transaction_details = Transaction.query.filter_by(phone_number=search_query).order_by(Transaction.date_created.desc()).all()
+        elif search_query.startswith("t-"):
+            transaction_details = Transaction.query.filter_by(transaction_id=search_query).order_by(Transaction.date_created.desc()).all()
         elif "@" in search_query:
             transaction_details = Transaction.query.filter_by(email=search_query).order_by(Transaction.date_created.desc()).all()
         elif cls.is_date(search_query):
@@ -483,7 +482,7 @@ class AppDBUtil():
     @classmethod
     def getLeadInfo(cls, search_query,searchStartDate,searchEndDate):
         if search_query:
-            if search_query.isdigit():
+            if search_query.startswith("l-"):
                 lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
             elif "@" in search_query:
                 lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
