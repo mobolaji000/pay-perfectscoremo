@@ -107,7 +107,8 @@ class StripeInstance():
         #overwrite any exsiting default_payment_method to ensure that new ach is the default
         stripe.Customer.modify(
             stripe_info['stripe_customer_id'],
-            invoice_settings={'default_payment_method': ''})
+            invoice_settings={'default_payment_method': ''},
+        source='',)
 
         if bank_account_token:
             stripe.Customer.modify(
