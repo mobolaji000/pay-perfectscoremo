@@ -461,6 +461,8 @@ def stripe_webhook():
 
     # handle updating the DB when transactions are paid; these transactions should have transaction codes attahced already
     try:
+        #if necessary, handle charge.succeeded and charge.failed, which are specific to ach
+        #https://stripe.com/docs/ach#ach-specific-webhook-notifications
         if event.type == 'invoice.paid':
             paid_invoice = event.data.object
             transaction_id = paid_invoice.metadata['transaction_id']
