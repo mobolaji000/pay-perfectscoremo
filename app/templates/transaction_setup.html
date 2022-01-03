@@ -27,17 +27,71 @@
           font-size: 3.5rem;
         }
       }
-
-
-
-
 	</style>
 
 	<script type="text/javascript">
-
-
-		 function finalCheckBeforeSubmit()
+function miscellanousValidation()
     {
+    //alert("miscellanousValidation");
+     var installment_total = 0;
+     var amount = '';
+      var counter = $('input[name="installment_counter"]').val();
+      var transactionTotal = Number($('input[name="transaction_total"]').val());
+
+      var installmentValid = true;
+      var adjustmentValid = false;
+
+     for (let k = 1; k < counter; k++) {
+
+     amount = 'amount_'.concat(k);
+     	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
+		}
+        if (Number(counter) > 1){
+
+		 if (installment_total != transactionTotal) {
+		 installmentValid = false;
+           if(document.getElementById("installment_not_equal_total_message_create"))
+           {
+               document.getElementById("installment_not_equal_total_message_create").hidden=false;
+           }
+
+           if(document.getElementById("installment_not_equal_total_message_modify"))
+           {
+               document.getElementById("installment_not_equal_total_message_modify").hidden=false;
+           }
+            }
+        else{
+        installmentValid = true;
+        if(document.getElementById("installment_not_equal_total_message_create"))
+           {
+               document.getElementById("installment_not_equal_total_message_create").hidden=true;
+           }
+
+           if(document.getElementById("installment_not_equal_total_message_modify"))
+           {
+               document.getElementById("installment_not_equal_total_message_modify").hidden=true;
+           }
+        }
+        }
+        var adjustment_explanation = $('input[name="adjustment_explanation"]').val();
+         var adjust_total = $('input[name="adjust_total"]').val();
+        if ((adjust_total == '' && adjustment_explanation == '') || (adjust_total != '' && adjustment_explanation != ''))
+        {
+          adjustmentValid = true;
+        }
+        else
+        {
+        adjustmentValid = false;
+        }
+
+        //alert(adjustmentValid+"  "+installmentValid);
+        return adjustmentValid && installmentValid;
+    }
+
+		 function finalCheckBeforeSubmit(event)
+    {
+
+    //alert("finalCheckBeforeSubmit");
 
     var tp = $('input[name="tp_product"]:checked').attr("id");
     $('input[name="was_test_prep_purchased"]').val(tp);
@@ -50,6 +104,12 @@
     $('input[name="college_apps_total"]').attr('disabled', false);
     $('input[name="adjust_total"]').attr('disabled', false);
     $('input[name="transaction_total"]').attr('disabled', false);
+
+	var mV = miscellanousValidation();
+    if (!mV)
+    {
+    event.preventDefault();
+    }
 
     }
 
@@ -269,9 +329,9 @@ $('input[name="installment_counter"]').val(result.installment_counter);
      }
 
 
-      function finalCheckBeforeModify()
+      function finalCheckBeforeModify(event)
       {
-       finalCheckBeforeSubmit();
+       finalCheckBeforeSubmit(event);
       	var dataToModify = {};
       	dataToModify['first_name'] = $('input[name="first_name"]').val();
       	dataToModify['last_name'] = $('input[name="last_name"]').val();
@@ -311,9 +371,20 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 
       }
 
-      function finalCheckBeforeDelete()
+      function finalCheckBeforeDelete(event)
       {
+
+      if ($('input[name="transaction_id_to_show"]').val() != '')
+      {
+      //alert("id given");
       	$('input[id="transaction_id_to_delete"]').val($('input[name="transaction_id_to_show"]').val());
+      	}
+      	else
+      	{
+      	//alert("no id");
+      	event.preventDefault();
+      	}
+
       }
 
 
@@ -370,7 +441,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 								<form id="modify_transaction_setup_form" name="modify_transaction_setup_form" action="{{ url_for('modify_transaction') }}" method="post">
 
 									<input id="modify_transaction_button" name="modify_transaction_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Modify"
-										   onclick="finalCheckBeforeModify();">
+										   onclick="finalCheckBeforeModify(event);">
 									<input id="data_to_modify" name="data_to_modify" hidden>
 
 								</form>
@@ -380,7 +451,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 							<div style="margin-left:50px">
 								<form action="{{ url_for('delete_transaction') }}" method="post">
 									<input id="delete_button" name="delete_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Delete"
-										   onclick="finalCheckBeforeDelete();">
+										   onclick="finalCheckBeforeDelete(event);">
 									<input id="transaction_id_to_delete" name="transaction_id_to_delete" hidden>
 								</form>
 							</div>
@@ -431,8 +502,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 		<div class="col-md-8 order-md-1">
 			<br><br><br><br><br>
 			<h4 class="mb-3">Transaction Information</h4>
-			<form id="create_transaction_setup_form" name="create_transaction_setup_form"  class="needs-validation" action="{{ url_for('create_transaction') }}" method="post"
-				  data-toggle="validator">
+			<form id="create_transaction_setup_form" name="create_transaction_setup_form"  class="needs-validation" action="{{ url_for('create_transaction') }}" method="post" data-toggle="validator">
 				<div class="row">
 					<div class="col-md-6 mb-3">
 						<label for="first_name">First name</label>
@@ -476,6 +546,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 								<option value="" selected disabled hidden></option>
 								<option value='Southwest: Garland'>Southwest: Garland</option>
 								<option value='Southwest: Arlington'>Southwest: Arlington</option>
+								<option value='Returning Client'>Returning Client</option>
 								<option value='Referral'>Referral</option>
 								<option value='Other'>Other</option>
 							</select>
@@ -877,8 +948,8 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 				<br><br>
 
 
-				<input id="create_transaction_button" name="create_transaction_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Create Transaction"
-					   onclick="finalCheckBeforeSubmit();"></input>
+				<div class="row justify-content-center"><input id="create_transaction_button" name="create_transaction_button" class="btn btn-primary btn-lg btn-block w-25 p-3" type="submit" value="Create Transaction"
+															   onclick="finalCheckBeforeSubmit(event)"></input></div>
 			</form>
 		</div>
 	</div>

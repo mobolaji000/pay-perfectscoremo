@@ -263,10 +263,16 @@ def search_transaction():
 @login_required
 def modify_transaction():
     try:
+        #print(request.form)
         data_to_modify = ast.literal_eval(request.form['data_to_modify'])
         print(data_to_modify)
         transaction_id = data_to_modify['transaction_id']
         transaction_id_again,number_of_rows_modified=AppDBUtil.modifyTransactionDetails(data_to_modify)
+
+        if number_of_rows_modified < 1:
+            print("No transaction was modified, perhaps because no transaction code was provided")
+            flash('No transaction was modified, perhaps because no transaction code was provided')
+            return redirect(url_for('transaction_setup'))
 
         if number_of_rows_modified > 1:
             print("Somehow ended up with and modified duplicate transaction codes")
