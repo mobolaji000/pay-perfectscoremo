@@ -288,8 +288,8 @@ def modify_transaction():
 
         if data_to_modify.get('send_text_and_email','') == 'yes':
             try:
-                SendMessagesToClients.sendEmail(to_addresses=data_to_modify['email'], message=transaction_id, type='modify')
-                SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=transaction_id,type='modify')
+                SendMessagesToClients.sendEmail(to_addresses=data_to_modify['email'], message=transaction_id, type='modify_transaction')
+                SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=transaction_id,type='modify_transaction')
                 flash('Transaction modified and email/sms sent to client.')
             except Exception as e:
                 traceback.print_exc()
