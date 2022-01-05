@@ -269,6 +269,11 @@ def modify_transaction():
         transaction_id = data_to_modify['transaction_id']
         transaction_id_again,number_of_rows_modified=AppDBUtil.modifyTransactionDetails(data_to_modify)
 
+        if data_to_modify.get('ask_for_student_info','') == 'yes':
+            SendMessagesToClients.sendEmail(to_addresses=data_to_modify['email'], message=data_to_modify['prospect_id'], subject='New Student Information', type='student_info')
+            SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=data_to_modify['prospect_id'], type='student_info')
+            logger.debug('Ask for student info: ' + str(data_to_modify['transaction_id']))
+
         if number_of_rows_modified < 1:
             print("No transaction was modified, perhaps because no transaction code was provided")
             flash('No transaction was modified, perhaps because no transaction code was provided')
@@ -380,6 +385,7 @@ def parseDataForStripe(client_info):
     stripe_info['installment_counter'] = client_info.get('installment_counter', '')
     stripe_info['ask_for_student_info'] = client_info.get('ask_for_student_info', '')
     stripe_info['does_customer_payment_info_exist'] = client_info.get('does_customer_payment_info_exist', '')
+    stripe_info['prospect_id'] = client_info.get('prospect_id', '')
 
     if client_info.get('installments','') != '':
         for index,installment in enumerate(client_info.get('installments','')):
