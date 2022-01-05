@@ -157,6 +157,7 @@ function miscellanousValidation()
 
      $('select[name="how_did_they_hear_about_us"]').val(result.how_did_they_hear_about_us);
 	 $('textarea[name="how_did_they_hear_about_us_details"]').val(result.how_did_they_hear_about_us_details);
+	  $('input[name="prospect_id"]').val(result.prospect_id);
 
 	//
 
@@ -359,6 +360,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 		dataToModify['ask_for_student_info'] = $('input[name="ask_for_student_info"]').val();
 		dataToModify['how_did_they_hear_about_us'] = $('select[name="how_did_they_hear_about_us"]').val();
 		dataToModify['how_did_they_hear_about_us_details'] = $('textarea[name="how_did_they_hear_about_us_details"]').val();
+		dataToModify['prospect_id'] = $('input[name="prospect_id"]').val();
 
 		 for (let k = 1; k < dataToModify['installment_counter']+1; k++) {
   				date = 'date_'.concat(k)
@@ -445,6 +447,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 									<input id="modify_transaction_button" name="modify_transaction_button" class="btn btn-primary btn-lg btn-block" type="submit" value="Modify"
 										   onclick="finalCheckBeforeModify(event);">
 									<input id="data_to_modify" name="data_to_modify" hidden>
+									<input id="prospect_id" name="prospect_id" hidden>
 
 								</form>
 							</div>
