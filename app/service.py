@@ -431,6 +431,7 @@ class SendMessagesToClients():
 
         print("text sent!")
         print(sent_message.sid)
+        logger.debug(text_message)
 
     @classmethod
     def sendGroupEmail(cls, to_emails=[], type='', message='', subject='Group Email'):

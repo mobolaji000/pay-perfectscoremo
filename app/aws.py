@@ -170,4 +170,5 @@ class AWSInstance():
         else:
             print("Email sent! Message ID:"),
             print(response['MessageId'])
+            print(BODY_HTML)
 

@@ -292,6 +292,7 @@ class AppDBUtil():
             client['adjustment_explanation'] = transaction.adjustment_explanation
             client['transaction_total'] = transaction.transaction_total
             client['payment_started'] = str(transaction.payment_started)
+            client['prospect_id'] = str(transaction.prospect_id)
 
             installment_details = InstallmentPlan.query.filter_by(transaction_id=transaction.transaction_id).first()
 
