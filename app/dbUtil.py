@@ -314,6 +314,7 @@ class AppDBUtil():
             showACHOverride = True
             transaction_id = transaction_id.lower().split('ach')[0]
 
+        print("transaction id is: ",transaction_id)
         print("showACHOverride is: ",showACHOverride)
 
         admin_transaction_details = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
