@@ -109,6 +109,7 @@ def transaction_setup():
 @server.route('/client_info/<prospect_id>', methods=['GET','POST'])
 def client_info(prospect_id):
     if request.method == 'GET':
+        print("prospect_id is ",prospect_id)
         return render_template('client_info.html',prospect_id=prospect_id)
     elif request.method == 'POST':
         try:
