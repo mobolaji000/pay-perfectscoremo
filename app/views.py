@@ -114,6 +114,7 @@ def client_info(prospect_id):
     elif request.method == 'POST':
         try:
             student_data = request.form.to_dict()
+            print("student data is",student_data)
             AppDBUtil.createStudentData(student_data)
             to_numbers = [number for number in [student_data['parent_1_phone_number'],student_data['parent_2_phone_number'],student_data['student_phone_number']] if number != '']
             SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=student_data['student_first_name'], type='create_group_chat')

@@ -453,6 +453,7 @@ class SendMessagesToClients():
         cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+19725847364')
 
         for to_number in to_numbers:
+            print("number to add is :",to_number)
             cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+1' + to_number)
 
         if type == 'create_group_chat':
