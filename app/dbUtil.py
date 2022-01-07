@@ -310,7 +310,7 @@ class AppDBUtil():
     @classmethod
     def getTransactionDetails(cls,transaction_id):
         showACHOverride = False
-        transaction_id = transaction_id.strip()
+        #transaction_id = transaction_id.strip()
         if 'ach' in transaction_id.lower():
             showACHOverride = True
             transaction_id = transaction_id.lower().split('ach')[0]
