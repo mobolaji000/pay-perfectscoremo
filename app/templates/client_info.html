@@ -49,7 +49,8 @@
 		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
 		<h2><u>Enter Student & Parent Information</u></h2>
 		<h1><span class="badge badge-danger">Dont use the same phone number more than once.</span></h1>
-		<h1><span class="badge badge-danger">Dont put '1' at the start of a number. It's ok to leave extra fields blank</span></h1>
+		<h1><span class="badge badge-danger">Dont put '1' at the start of a number. Don't put dashes in betwween numbers</span></h1>
+		<h1><span class="badge badge-danger">Dont put '1' at the start of a number. It's ok to leave extra fields blank.</span></h1>
 	</div>
 
 		<div class="col-md-8 order-md-1">
@@ -90,7 +91,7 @@
 				<div class="mb-3">
 					<label for="student_phone_number">Phone number</span></label>
 					<input type="tel" class="form-control" id="student_phone_number" name="student_phone_number"
-						   placeholder="111-111-1111" required>
+						   placeholder="1111111111" pattern="[0-9]{10}" required>
 					<div class="invalid-feedback">
 						Please enter a valid phone number.
 					</div>
@@ -146,7 +147,7 @@
 				<div class="mb-3">
 					<label for="parent_1_phone_number">Phone number</span></label>
 					<input type="tel" class="form-control" id="parent_1_phone_number" name="parent_1_phone_number"
-						   placeholder="111-111-1111" required>
+						   placeholder="1111111111" required>
 					<div class="invalid-feedback">
 						Please enter a valid phone number.
 					</div>
@@ -201,7 +202,7 @@
 				<div class="mb-3">
 					<label for="parent_2_phone_number">Phone number</span></label>
 					<input type="tel" class="form-control" id="parent_2_phone_number" name="parent_2_phone_number"
-						   placeholder="111-111-1111" required>
+						   placeholder="1111111111" required>
 					<div class="invalid-feedback">
 						Please enter a valid phone number.
 					</div>
