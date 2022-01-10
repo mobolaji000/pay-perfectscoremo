@@ -401,7 +401,7 @@ class SendMessagesToClients():
         elif type == 'reminder_to_make_payment':
             created_or_modified_span = "Dear Parent,\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):"
         elif type == 'create_transaction_existing_client':
-            created_or_modified_span = "Dear Parent,\n\nYour new transaction has been created using your method of payment on file. At any point in the next 72 hours, you can change your method of payment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
+            created_or_modified_span = "Dear Parent,\n\nYour new transaction has been created using your method of payment on file, but there have been no charges. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
         elif type == 'student_info':
             link_url = os.environ["url_to_start_reminder"]+"client_info/"+message
             created_or_modified_span = "Dear Parent,\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. \n\n This will be used to setup text message and email updates on your student's regular progress."

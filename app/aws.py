@@ -74,7 +74,7 @@ class AWSInstance():
         elif type == 'reminder_to_make_payment':
             created_or_modified_span = "<span>This is an automated reminder that your transaction <strong>is due</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
         elif type == 'create_transaction_existing_client':
-            created_or_modified_span = "<span>Your new transaction has been created using your method of payment on file. At any point in the next <strong>72 hours</strong>, you can change your method of payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
+            created_or_modified_span = "<span>Your new transaction has been created using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
 
         SENDER = "Perfect Score Mo <mo@info.perfectscoremo.com>"
         RECIPIENT = [to_addresses] if isinstance(to_addresses, str) else to_addresses
