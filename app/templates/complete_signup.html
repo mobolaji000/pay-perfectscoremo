@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Transaction Details</title>
+
+	<!-- Bootstrap core CSS -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+				<script type="text/javascript" src="static/complete_signup.js"></script>
+	  <link href="static/page_style.css" rel="stylesheet" >
+
+	<!-- Custom styles for this template -->
+	<style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+
+	</style>
+
+
+		<script>
+
+
+		 function turnOffRequired()
+    {
+    {% if not client_info.turn_on_installments %}
+      $('input[name="installment-payment"]').prop('required', false);
+        $('input[name="full-payment"]').prop('required', false);
+        {% endif %}
+
+    }
+
+    	 function showPayButton()
+    {
+
+    if (document.getElementById('terms_and_conditions').checked) {
+            $('input[name="proceed_to_payment"]').prop('hidden', false);
+        } else {
+            $('input[name="proceed_to_payment"]').prop('hidden', true);
+        }
+
+    }
+
+	</script>
+
+</head>
+
+
+<body class="bg-light">
+<div class="container">
+	<div class="py-5 text-center">
+		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
+		<h2><u>Complete Signup</u></h2>
+	</div>
+			<form id="transaction" class="needs-validation" data-toggle="validator" action="{{ url_for('checkout') }}" method="post">
+		<br><br><br>
+
+
+					<div class="container">
+	<div class="py-5 text-center">
+		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
+		<h2><u>Enter Student & Parent Information</u></h2>
+<!--		<h1><span class="badge badge-danger">Don't use the same Phone number more than once.</span></h1>-->
+<!--		<h1><span class="badge badge-danger">Don't put '1' at the start of a number. Don't put dashes in betwween numbers</span></h1>-->
+<!--		<h1><span class="badge badge-danger">Don't put '1' at the start of a number. It's ok to leave extra fields blank.</span></h1>-->
+	</div>
+
+		<div class="col-md-8 order-md-1">
+			<br><br>
+					<h4 class="mb-3"><u>Student Information</u></h4>
+				<div class="row">
+					<div class="col-md-6 mb-3">
+						<label for="student_first_name">First name</label>
+						<input type="text" class="form-control" id="student_first_name" name="student_first_name" placeholder="" value="">
+						<div class="invalid-feedback">
+							Valid first name is required.
+						</div>
+					</div>
+					<div class="col-md-6 mb-3">
+						<label for="student_last_name">Last name</label>
+						<input type="text" class="form-control" id="student_last_name" name="student_last_name" placeholder="" value="">
+						<div class="invalid-feedback">
+							Valid last name is required.
+						</div>
+					</div>
+				</div>
+
+				<div class="mb-3">
+					<label for="student_email">Email</label>
+					<input type="email" class="form-control" id="student_email" name="student_email" placeholder="you@example.com">
+					<div class="invalid-feedback">
+						Please enter a valid email address.
+					</div>
+				</div>
+
+				<div class="mb-3">
+					<label for="student_phone_number">Phone number </span></label>
+					<input type="tel" class="form-control" id="student_phone_number" name="student_phone_number"
+						   placeholder="1111111111" pattern="[0-9]{10}" title="Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.">
+					<div class="form-text text-muted" style="color:red !important">
+						Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.
+					</div>
+				</div>
+
+				<br><br><br>
+
+				<h4 class="mb-3"><u>Parent 1 Information</u></h4>
+
+				<div class="row">
+
+				<div class="col-md-4 mb-3">
+					<label for="parent_1_salutation">Salutation</label>
+					<div>
+				<select id="parent_1_salutation" name="parent_1_salutation" class="custom-select col-md-12 mb-3" >
+					<option value=""></option>
+  <option value="Mr.">Mr.</option>
+  <option value="Ms.">Ms.</option>
+</select>
+					</div>
+					</div>
+
+
+
+					<div class="col-md-4 mb-3">
+						<label for="parent_1_first_name">First name</label>
+						<input type="text" class="form-control" id="parent_1_first_name" name="parent_1_first_name" placeholder="" value="">
+						<div class="invalid-feedback">
+							Valid first name is required.
+						</div>
+					</div>
+					<div class="col-md-4 mb-3">
+						<label for="parent_1_last_name">Last name</label>
+						<input type="text" class="form-control" id="parent_1_last_name" name="parent_1_last_name" placeholder="" value=""
+							   >
+						<div class="invalid-feedback">
+							Valid last name is required.
+						</div>
+					</div>
+
+					</div>
+
+				<div class="mb-3">
+					<label for="parent_1_email">Email</label>
+					<input type="parent_1_email" class="form-control" id="parent_1_email" name="parent_1_email" placeholder="you@example.com">
+					<div class="invalid-feedback">
+						Please enter a valid email address.
+					</div>
+				</div>
+
+				<div class="mb-3">
+					<label for="parent_1_phone_number">Phone number </span></label>
+					<input type="tel" class="form-control" id="parent_1_phone_number" name="parent_1_phone_number"
+						   placeholder="1111111111" pattern="[0-9]{10}" title="Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.">
+					<div class="form-text text-muted" style="color:red !important">
+						Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.
+					</div>
+				</div>
+
+				<br><br><br>
+
+				<h4 class="mb-3"><u>Parent 2 Information</u></h4>
+				<div class="row">
+
+				<div class="col-md-4 mb-3">
+					<label for="parent_2_salutation">Salutation</label>
+					<div>
+				<select id="parent_2_salutation" name="parent_2_salutation" class="custom-select col-md-12 mb-3" >
+  <option value=""></option>
+  <option value="Mr.">Mr.</option>
+  <option value="Ms.">Ms.</option>
+</select>
+					</div>
+					</div>
+
+
+
+					<div class="col-md-4 mb-3">
+						<label for="parent_2_first_name">First name</label>
+						<input type="text" class="form-control" id="parent_2_first_name" name="parent_2_first_name" placeholder="" value=""
+							   >
+						<div class="invalid-feedback">
+							Valid first name is required.
+						</div>
+					</div>
+					<div class="col-md-4 mb-3">
+						<label for="parent_2_last_name">Last name</label>
+						<input type="text" class="form-control" id="parent_2_last_name" name="parent_2_last_name" placeholder="" value="">
+						<div class="invalid-feedback">
+							Valid last name is required.
+						</div>
+					</div>
+
+					</div>
+
+				<div class="mb-3">
+					<label for="parent_2_email">Email</label>
+					<input type="parent_2_email" class="form-control" id="parent_2_email" name="parent_2_email" placeholder="you@example.com">
+					<div class="invalid-feedback">
+						Please enter a valid email address.
+					</div>
+				</div>
+
+				<div class="mb-3">
+					<label for="parent_2_phone_number">Phone number </span></label>
+					<input type="tel" class="form-control" id="parent_2_phone_number" name="parent_2_phone_number"
+						   placeholder="1111111111" pattern="[0-9]{10}" title="Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.">
+					<div class="form-text text-muted" style="color:red !important">
+						Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.
+					</div>
+				</div>
+
+				<br><br><br>
+
+				<input id="prospect_id" name="prospect_id" hidden  data-prospect_id="{{ prospect_id }}">
+
+		</div>
+	</div>
+
+				<br><br><br>
+
+
+				<div class="container">
+
+
+					<div class="card bg-primary text-white text-center p-3">
+    <blockquote class="blockquote mb-0">
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat.</p>
+      <footer class="blockquote-footer">
+        <small>
+          Someone famous in <cite title="Source Title">Source Title</cite>
+        </small>
+      </footer>
+    </blockquote>
+  </div>
+
+				</div>
+
+
+
+
+
+
+
+
+
+
+	<div class="row">
+		<div class="col-md-8 order-md-1">
+			<br><br>
+			<h4 class="mb-3"><u>Transaction Information</u></h4>
+
+				<div class="row">
+					<div class="col-md-6 mb-3">
+						<label for="first_name" class="font-weight-bold">First name</label>
+						<p class="mb-1" id="first_name">{{client_info.first_name}}</p>
+					</div>
+					<div class="col-md-6 mb-3">
+						<label for="last_name" class="font-weight-bold">Last name</label>
+						<p class="mb-1" id="last_name">{{client_info.last_name}}</p>
+					</div>
+				</div>
+
+				<div class="mb-3">
+					<label for="email" class="font-weight-bold">Email</label>
+						<p class="mb-1" id="email">{{client_info.email}}</p>
+				</div>
+
+				<div class="mb-3">
+					<label for="phone_number" class="font-weight-bold">Phone number</label>
+						<p class="mb-1" id="phone_number">{{client_info.phone_number}}</p>
+				</div>
+
+        <br>
+
+
+
+
+				<h4 class="mb-3">Product Information</h4>
+
+				<table class="table">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Description</th>
+      <th scope="col"># of Units</th>
+      <th scope="col">Per Product Cost</th>
+		<th scope="col">Total Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+
+  {% set count = namespace(value=0) %}
+
+  {% for product in products_info %}
+  {% set count.value = count.value + 1 %}
+    <tr>
+      <th scope="row">{{ count.value }}</th>
+      <td>{{product.product_description}}</td>
+      <td>{{product.number_of_product_units}}</td>
+      <td>{{product.per_product_cost}}</td>
+		<td>{{product.total_product_cost}}</td>
+    </tr>
+    {% endfor %}
+
+   {% if client_info.adjust_total %}
+  <tr>
+	  {% set count.value = count.value + 1 %}
+      <th scope="row">{{ count.value }}</th>
+	  <td>{{client_info.adjustment_explanation}}</td>
+      <td>1</td>
+      <td>{{client_info.adjust_total}}</td>
+		<td>{{client_info.adjust_total}}</td>
+    </tr>
+
+  {% endif %}
+
+  <tr>
+
+  </tr>
+
+  <tr>
+      <th scope="row"></th>
+	  <td>Transaction Total</td>
+      <td></td>
+      <td></td>
+		<td>{{client_info.transaction_total}}</td>
+    </tr>
+
+  </tbody>
+</table>
+
+
+				<br>
+
+				{% if client_info.payment_started %}
+				<div><span class="badge badge-danger">You previously started a payment for this transaction code. Contact Mo for a different transaction code.</span></div>
+				{% else %}
+
+
+
+					<div class="row">
+
+						{% if client_info.turn_on_installments %}
+
+							<div class="col-sm">
+
+								<div class="custom-control custom-radio">
+									<input id="full-payment-options" name="payment-options" type="radio" value="full-payment-options"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="full-payment-options">Pay in full</label>
+								</div>
+
+							</div>
+
+
+
+ 			<div class="col-sm">
+
+								<div class="custom-control custom-radio">
+									<input id="installment-payment-options" name="payment-options" type="radio" value="installment-payment-options"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="installment-payment-options">Pay in installments</label>
+								</div>
+
+							</div>
+
+
+						{% else %}
+
+							<div class="col-sm">
+
+								<div class="custom-control custom-radio">
+									<input id="no-installment-credit-card" value="no-installment-credit-card" name="payment-options" type="radio"
+										   class="custom-control-input"
+										   required>
+									<label class="custom-control-label" for="no-installment-credit-card">Credit/Debit (Regular Card Fees, 1-3%)</label>
+								</div>
+
+							</div>
+
+							<div class="col-sm">
+
+								<div class="custom-control custom-radio">
+									<input id="no-installment-ach" value="no-installment-ach" name="payment-options" type="radio"
+										   class="custom-control-input"
+										   required>
+									<label class="custom-control-label" for="no-installment-ach">ACH (Free)</label>
+								</div>
+
+							</div>
+
+{% endif %}
+
+
+						</div>
+
+				<br>
+
+
+				<div id="holding-div"></div>
+
+
+				<div id="installment-payment-div" class="d-block my-3" >
+					<div container>
+
+						<h4 class="mb-3">Options</h4>
+
+						  {% if client_info.turn_on_installments %}
+
+				<table class="table">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Date</th>
+      <th scope="col">Installment</th>
+    </tr>
+  </thead>
+  <tbody>
+
+
+
+  <!-- <tr>
+      <th scope="row">1</th>
+      <td>Today</td>
+      <td>{{client_info.deposit}}</td>
+    </tr>-->
+
+  {% set count = namespace(value=0) %}
+
+  {% for installment in client_info.installments %}
+  {% set count.value = count.value + 1 %}
+    <tr>
+      <th scope="row">{{ count.value }}</th>
+      <td>{{installment.date}}</td>
+      <td>{{installment.amount}}</td>
+    </tr>
+    {% endfor %}
+
+
+  </tbody>
+</table>
+
+						<div class="container">
+
+     <!-- <div class="col-sm">
+<span class="badge badge-danger">Debit cards are not accepted for installments. Only credit cards are accepted for installments. </span>
+
+    </div>-->
+							<br>
+							      <div class="col-sm">
+<span class="badge badge-danger"> Installments are withdrawn automatically.</span>
+
+    </div>
+
+  </div>
+						<br>
+
+
+						{% endif %}
+
+
+						<div container>
+
+<div class="row">
+
+							<div class="col-sm">
+
+								<div class="custom-control custom-radio">
+									<input id="installment-payment-credit-card" value="installment-payment-credit-card" name="installment-payment" type="radio"
+										   class="custom-control-input"
+										   required>
+									<label class="custom-control-label" for="installment-payment-credit-card">Credit/Debit (Regular Card Fees, 1-3%)</label>
+								</div>
+
+							</div>
+
+	<div class="col-sm">
+
+								<div id="selectorToHideACHInstallment" class="custom-control custom-radio">
+									<input id="installment-payment-ach" value="installment-payment-ach" name="installment-payment" type="radio"
+										   class="custom-control-input"
+										   required>
+									<label class="custom-control-label" for="installment-payment-ach">ACH (Free)</label>
+								</div>
+
+							</div>
+
+
+
+
+				</div>
+
+		</div>
+
+
+
+
+
+
+		</div>
+
+
+
+
+
+	</div>
+
+
+
+						<div id="full-payment-div" class="d-block my-3" >
+					<div container>
+
+						<h4 class="mb-3">Options</h4>
+
+<div class="row">
+
+							<div class="col-sm">
+
+								<div class="custom-control custom-radio">
+									<input id="full-payment-credit-card" value="full-payment-credit-card" name="full-payment" type="radio"
+										   class="custom-control-input"
+										   required>
+									<label class="custom-control-label" for="full-payment-credit-card">Credit/Debit (Regular Card Fees, 1-3%)</label>
+								</div>
+
+							</div>
+
+							<div class="col-sm">
+
+								<div class="custom-control custom-radio">
+									<input id="full-payment-ach" value="full-payment-ach" name="full-payment" type="radio"
+										   class="custom-control-input"
+										   required>
+									<label class="custom-control-label" for="full-payment-ach">ACH (Free)</label>
+								</div>
+
+							</div>
+
+				</div>
+
+		</div>
+
+
+	</div>
+
+				<input id="stripe_info" type="hidden"  data-stripe_info="{{ stripe_info }}">
+				<input id="show_ach_override" type="hidden"  data-show_ach_override="{{ showACHOverride }}">
+
+
+	<div class="checkbox mb-3" style="text-align:center;">
+												<div><span class="badge badge-danger"></span></div>
+
+
+							<input id="terms_and_conditions" name="terms_and_conditions" value="" type="checkbox" onclick="showPayButton();"
+								   class="custom-control-input">
+							<label class="custom-control-label" for="terms_and_conditions">You must accept terms and conditions to proceed. By clicking above, you agree to the terms and conditions.</label>
+							<br><br><br>
+						</div>
+
+				<div class="row justify-content-center"><input id="proceed_to_payment" name="proceed_to_payment" class="btn btn-primary btn-lg btn-block w-25 p-3" type="submit" hidden value="Go To Payment" onclick="turnOffRequired();"></div>
+{% endif %}
+</div>
+	</div>
+
+			</form>
+
+	</div>
+
+	<footer class="my-5 pt-5 text-muted text-center text-small">
+		<p class="mb-1">&copy; 2017-2021 Perfect Score Mo</p>
+		<ul class="list-inline">
+			<li class="list-inline-item"><a href="#">Privacy</a></li>
+			<li class="list-inline-item"><a href="#">Terms</a></li>
+			<li class="list-inline-item"><a href="#">Support</a></li>
+		</ul>
+	</footer>
+
+</body>
+</html>
