@@ -164,18 +164,22 @@ class AppDBUtil():
 
     @classmethod
     def deleteInvoiceToBePaid(cls, invoiceTransactionCode,stripeInvoiceId):
-        invoice_to_be_paid = InvoiceToBePaid.query.filter_by(transaction_id=invoiceTransactionCode).first()
+        invoice_to_be_paid = InvoiceToBePaid.query.filter_by(transaction_id=invoiceTransactionCode).all()
         db.session.delete(invoice_to_be_paid)
         cls.executeDBQuery()
         stripe.Invoice.delete(stripeInvoiceId,)
 
     @classmethod
-    def deleteTransactionAndInstallmentPlan(cls, codeOfTransactionToDelete):
-        existing_installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=codeOfTransactionToDelete).first()
+    def deleteTransactionAndInstallmentPlan(cls, transaction_id_to_delete):
+        existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=transaction_id_to_delete).all()
+        for existing_invoice in existing_invoices:
+            AppDBUtil.deleteInvoiceToBePaid(existing_invoice.transaction_id, existing_invoice.stripe_invoice_id)
+
+        existing_installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id_to_delete).first()
         if existing_installment_plan:
             db.session.delete(existing_installment_plan)
 
-        transaction = Transaction.query.filter_by(transaction_id=codeOfTransactionToDelete).first()
+        transaction = Transaction.query.filter_by(transaction_id=transaction_id_to_delete).first()
         db.session.delete(transaction)
 
         cls.executeDBQuery()
