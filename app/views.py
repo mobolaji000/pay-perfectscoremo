@@ -347,8 +347,8 @@ def transaction_page():
 
     stripe_info = parseDataForStripe(client_info)
 
-    #response = make_response(render_template('transaction_details.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride))
-    response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride))
+    response = make_response(render_template('transaction_details.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride))
+    #response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride))
 
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"  # HTTP 1.1.
     response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
