@@ -295,8 +295,8 @@ class AppDBUtil():
             client['prospect_id'] = str(transaction.prospect_id)
 
             prospect_details = Prospect.query.filter_by(prospect_id=transaction.prospect_id).first()
-            client['how_did_they_hear_about_us'] = str(prospect_details.how_did_they_hear_about_us)
-            client['how_did_they_hear_about_us_details'] = str(prospect_details.how_did_they_hear_about_us_details)
+            client['how_did_they_hear_about_us'] = prospect_details.how_did_they_hear_about_us
+            client['how_did_they_hear_about_us_details'] = prospect_details.how_did_they_hear_about_us_details
 
             installment_details = InstallmentPlan.query.filter_by(transaction_id=transaction.transaction_id).first()
 

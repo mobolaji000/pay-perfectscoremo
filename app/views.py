@@ -215,7 +215,7 @@ def create_transaction():
             logger.debug('Ask for student info: ' + str(stripe_info['transaction_id']))
 
         if transaction_setup_data.get('mark_as_paid','') == 'yes':
-            stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info)
+            stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info,action='create')
             AppDBUtil.updateTransactionPaymentStarted(transaction_id)
             logger.debug('Mark transaction as paid: '+str(stripe_info['transaction_id']))
         else:
@@ -289,7 +289,7 @@ def modify_transaction():
         if data_to_modify.get('mark_as_paid', '') == 'yes':
             client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
             stripe_info = parseDataForStripe(client_info)
-            stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info)
+            stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info,action='modify')
             AppDBUtil.updateTransactionPaymentStarted(transaction_id)
             print("marked transaction as paid")
 
