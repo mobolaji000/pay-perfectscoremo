@@ -164,7 +164,7 @@ class AppDBUtil():
 
     @classmethod
     def deleteInvoiceToBePaid(cls, invoiceTransactionCode,stripeInvoiceId):
-        invoice_to_be_paid = InvoiceToBePaid.query.filter_by(transaction_id=invoiceTransactionCode).all()
+        invoice_to_be_paid = InvoiceToBePaid.query.filter_by(transaction_id=invoiceTransactionCode).first()
         db.session.delete(invoice_to_be_paid)
         cls.executeDBQuery()
         stripe.Invoice.delete(stripeInvoiceId,)
