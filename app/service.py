@@ -81,23 +81,30 @@ class StripeInstance():
         intent = stripe.SetupIntent.create(customer=stripe_info['stripe_customer_id'])
         return intent.client_secret
 
-    def markCustomerAsChargedOutsideofStripe(self, stripe_info):
+    def markCustomerAsChargedOutsideofStripe(self, stripe_info, action=None):
         logger.debug('Entering method to mark customer as charged outside of Stripe: '+str(stripe_info['transaction_id']))
-        transaction_total = int(stripe_info['transaction_total'])
 
-        stripe.InvoiceItem.create(
-            customer=stripe_info['stripe_customer_id'],
-            quantity=transaction_total,
-            price=os.environ.get('price'),
-        )
-        transaction = stripe.Invoice.create(
-            customer=stripe_info['stripe_customer_id'],
-            metadata={'transaction_id': stripe_info['transaction_id']},
-        )
-        stripe.Invoice.pay(transaction.id, paid_out_of_band=True)
-        logger.debug('Leaving method to mark customer as charged outside of Stripe: ' + str(stripe_info['transaction_id']))
+        if action == 'modify':
+            existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=stripe_info['transaction_id']).all()
+            for existing_invoice in existing_invoices:
+                stripe.Invoice.pay(existing_invoice.stripe_invoice_id, paid_out_of_band=True)
+                AppDBUtil.deleteInvoiceToBePaid(existing_invoice.transaction_id, existing_invoice.stripe_invoice_id)
+        elif action == 'create':
+            transaction_total = int(stripe_info['transaction_total'])
 
-        return {'status': 'success'}
+            stripe.InvoiceItem.create(
+                customer=stripe_info['stripe_customer_id'],
+                quantity=transaction_total,
+                price=os.environ.get('price'),
+            )
+            stripe_invoice = stripe.Invoice.create(
+                customer=stripe_info['stripe_customer_id'],
+                metadata={'transaction_id': stripe_info['transaction_id']},
+            )
+            stripe.Invoice.pay(stripe_invoice.id, paid_out_of_band=True)
+            logger.debug('Leaving method to mark customer as charged outside of Stripe: ' + str(stripe_info['transaction_id']))
+
+            return {'status': 'success'}
 
     def chargeCustomerViaACH(self, stripe_info=None, bank_account_token=None,chosen_mode_of_payment=None,default_source=None,existing_customer=None):
         existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=stripe_info['transaction_id']).all()
