@@ -109,11 +109,12 @@ def transaction_setup():
 @server.route('/client_info/<prospect_id>', methods=['GET','POST'])
 def client_info(prospect_id):
     if request.method == 'GET':
-        print("prospect_id is ",prospect_id)
+        print("prospect_id in get is ",prospect_id)
         return render_template('client_info.html',prospect_id=prospect_id)
     elif request.method == 'POST':
         try:
             student_data = request.form.to_dict()
+            print("prospect_id in post is ", student_data['prospect_id'])
             print("student data is",student_data)
             AppDBUtil.createStudentData(student_data)
             to_numbers = [number for number in [student_data['parent_1_phone_number'],student_data['parent_2_phone_number'],student_data['student_phone_number']] if number != '']
@@ -126,7 +127,7 @@ def client_info(prospect_id):
             print(e)
             traceback.print_exc()
             flash("Error in submitting student information and creating group messages for regular updates created. Please contact Mo.")
-        return render_template('client_info.html', prospect_id=prospect_id)
+        return render_template('client_info.html', prospect_id=student_data['prospect_id'])
 
 @server.route('/lead_info', methods=['GET','POST'])
 @login_required
@@ -347,8 +348,8 @@ def transaction_page():
 
     stripe_info = parseDataForStripe(client_info)
 
-    response = make_response(render_template('transaction_details.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride))
-    #response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride))
+    #response = make_response(render_template('transaction_details.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride))
+    response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info','')))
 
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"  # HTTP 1.1.
     response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
@@ -378,6 +379,8 @@ def checkout():
 
 
 def parseDataForStripe(client_info):
+    #rememeber to not add more data here that could  be safely added to client_info or product_info. this seems to have been originally designed
+    # to parse specific data in a specifc way that was causing stripe processing to break
     stripe_info = {}
     stripe_info['name'] = client_info['first_name']+" "+client_info['last_name']
     stripe_info['phone_number'] = client_info['phone_number']
