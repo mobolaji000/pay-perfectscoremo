@@ -318,10 +318,10 @@ class AppDBUtil():
     @classmethod
     def getTransactionDetails(cls,transaction_id):
         showACHOverride = False
-        transaction_id = transaction_id.strip()
-        if 'ach' in transaction_id.lower():
+        transaction_id = transaction_id.strip().lower()
+        if 'ach' in transaction_id:
             showACHOverride = True
-            transaction_id = transaction_id.lower().split('ach')[0]
+            transaction_id = transaction_id.split('ach')[0]
 
         print("transaction id is: ",transaction_id)
         print("showACHOverride is: ",showACHOverride)
