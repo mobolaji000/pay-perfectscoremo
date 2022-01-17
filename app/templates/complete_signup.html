@@ -66,17 +66,9 @@
 		<h2><u>Complete Signup</u></h2>
 	</div>
 			<form id="transaction" class="needs-validation" data-toggle="validator" action="{{ url_for('checkout') }}" method="post">
-		<br><br><br>
 
-
+				 {% if askForStudentInfo == 'yes' %}
 					<div class="container">
-	<div class="py-5 text-center">
-		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
-		<h2><u>Enter Student & Parent Information</u></h2>
-<!--		<h1><span class="badge badge-danger">Don't use the same Phone number more than once.</span></h1>-->
-<!--		<h1><span class="badge badge-danger">Don't put '1' at the start of a number. Don't put dashes in betwween numbers</span></h1>-->
-<!--		<h1><span class="badge badge-danger">Don't put '1' at the start of a number. It's ok to leave extra fields blank.</span></h1>-->
-	</div>
 
 		<div class="col-md-8 order-md-1">
 			<br><br>
@@ -228,6 +220,7 @@
 
 		</div>
 	</div>
+				  {% endif %}
 
 				<br><br><br>
 
@@ -302,6 +295,7 @@
   </thead>
   <tbody>
 
+
   {% set count = namespace(value=0) %}
 
   {% for product in products_info %}
@@ -315,7 +309,7 @@
     </tr>
     {% endfor %}
 
-   {% if client_info.adjust_total %}
+   {% if client_info.adjust_total %} <!--evaluates to false when adjust_total is 0.0-->
   <tr>
 	  {% set count.value = count.value + 1 %}
       <th scope="row">{{ count.value }}</th>
