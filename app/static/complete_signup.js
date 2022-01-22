@@ -1,5 +1,6 @@
 $(document).ready(function() {
 
+
     $('#full-payment-options').on('click', function() {
 
         $('#full-payment-div').attr('style', 'display: block !important');
@@ -56,6 +57,32 @@ var stripe_info = $("#stripe_info").attr("data-stripe_info");
     input.setAttribute('value', stripe_info);//set the value
     input.setAttribute('type', 'hidden');//set the type, like "hidden" or other
     form.appendChild(input);//append the input to the form
+
+
+
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(function () {
+  'use strict'
+
+  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+  var forms = document.querySelectorAll('#complete_signup_form')
+
+  // Loop over them and prevent submission
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (1==1) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+
+        form.classList.add('was-validated')
+      }, false)
+    })
+})()
+
+
 
 
 });

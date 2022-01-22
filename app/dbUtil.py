@@ -167,6 +167,8 @@ class AppDBUtil():
         invoice_to_be_paid = InvoiceToBePaid.query.filter_by(transaction_id=invoiceTransactionCode).first()
         db.session.delete(invoice_to_be_paid)
         cls.executeDBQuery()
+        #you might have to chnage the delete to the stripe version of "make inactive" because if an existing method on file was attempted
+        # and it failed, you might not be able to delete that invoice, eventhough you can create a new one to charge
         stripe.Invoice.delete(stripeInvoiceId,)
 
     @classmethod

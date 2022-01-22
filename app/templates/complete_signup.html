@@ -65,7 +65,7 @@
 		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
 		<h2><u>Complete Signup</u></h2>
 	</div>
-			<form id="transaction" class="needs-validation" data-toggle="validator" action="{{ url_for('checkout') }}" method="post">
+			<form id="complete_signup_form" class="needs-validation" data-toggle="validator" action="{{ url_for('new_feature_checkout') }}" method="post">
 
 				 {% if askForStudentInfo == 'yes' %}
 					<div class="container">

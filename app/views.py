@@ -349,7 +349,7 @@ def transaction_page():
     stripe_info = parseDataForStripe(client_info)
 
     response = make_response(render_template('transaction_details.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride))
-    #response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info','')))
+   #response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info','')))
 
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"  # HTTP 1.1.
     response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
@@ -535,29 +535,34 @@ def start_background_jobs_before_first_request():
             traceback.print_exc()
 
     def invoice_payment_background_job():
+        print("Invoice payment background job started")
         try:
-            print("Invoice payment background job started")
-            invoice_name = ''
-            invoice_payment_failed = False
             invoicesToPay = AppDBUtil.findInvoicesToPay()
+
             for invoice in invoicesToPay:
-                stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
-                if stripe_invoice_object.paid:
-                    print("Invoice payment succeeded: ",invoice['last_name'])
-                    #might need to come back and handle this via webhook
-                    AppDBUtil.updateInvoiceAsPaid(stripe_invoice_id=invoice['stripe_invoice_id'])
-                else:
-                    print("Invoice payment failed: ",invoice['last_name'])
+                try:
                     invoice_payment_failed = True
-                    invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
+                    stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
+                    if stripe_invoice_object.paid:
+                        print("Invoice payment succeeded: ",invoice['last_name'])
+                        #might need to come back and handle this via webhook
+                        AppDBUtil.updateInvoiceAsPaid(stripe_invoice_id=invoice['stripe_invoice_id'])
+                        invoice_payment_failed = False
 
-            if invoice_payment_failed:
-                SendMessagesToClients.sendSMS(to_number='9725847364', message="Invoice payments failed for: "+invoice_name, type='to_mo')
-
+                except Exception as e:
+                    print("Error in attempting to pay invoices")
+                    print(e)
+                    traceback.print_exc()
+                finally:
+                    if invoice_payment_failed:
+                        print("Invoice payment failed: ", invoice['last_name'])
+                        invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
+                        SendMessagesToClients.sendSMS(to_number='9725847364', message="Invoice payments failed for: " + invoice_name, type='to_mo')
         except Exception as e:
-            print("Error in background job to pay invoices")
+            print("Error in finding invoices to pay")
             print(e)
             traceback.print_exc()
+
 
     scheduler = BackgroundScheduler(timezone='US/Central')
 
@@ -574,3 +579,36 @@ def start_background_jobs_before_first_request():
 
     scheduler.start()
 
+
+@server.route('/new_feature_checkout',methods=['POST'])
+def new_feature_checkout():
+    payment_data = request.form.to_dict()
+    chosen_mode_of_payment = payment_data.get('installment-payment', '') if payment_data.get('installment-payment','') != '' else payment_data.get('full-payment', '') if payment_data.get('full-payment', '') != '' else payment_data.get('payment-options', '') if payment_data.get('payment-options', '') != '' else ''
+    stripe_info = ''#ast.literal_eval(payment_data['stripe_info'])
+    stripe_pk = os.environ.get('stripe_pk')
+    if chosen_mode_of_payment.__contains__('ach'):
+        return render_template('plaid_checkout.html',stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment)
+    else:
+        return render_template('stripe_checkout.html', stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment,stripe_pk=stripe_pk)
+
+@server.route('/new_feature_transaction_page',methods=['POST'])
+def new_feature_transaction_page():
+    try:
+        client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(request.form.to_dict()['transaction_id'])
+    except Exception as e:
+        print(e)
+        flash('An error has occured. Contact Mo.')
+        return redirect(url_for('input_transaction_id'))
+    if not client_info and not products_info:
+        flash('You might have put in the wrong code. Try again or contact Mo.')
+        return redirect(url_for('input_transaction_id'))
+
+    stripe_info = parseDataForStripe(client_info)
+
+    response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info','')))
+
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"  # HTTP 1.1.
+    response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
+    response.headers["Expires"] = "0"  # Proxies.
+
+    return response
