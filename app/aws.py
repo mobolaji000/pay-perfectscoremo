@@ -116,6 +116,15 @@ class AWSInstance():
                 </body>
                 </html>
                             """
+        elif type == 'to_mo':
+            BODY_HTML = """<html>
+                    <head></head>
+                    <body>
+                      <span>Logging message: """ + message + """!</span><br><br>""" \
+                        + """
+                    </body>
+                    </html>
+                                """
         else:
             BODY_HTML = """<html>
                             <head></head>
