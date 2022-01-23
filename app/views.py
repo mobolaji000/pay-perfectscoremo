@@ -499,7 +499,7 @@ def stripe_webhook():
             failed_invoice = event.data.object
             try:
                 message = "Invoice "+str(failed_invoice.id)+" for "+str(failed_invoice.customer_name)+" failed to pay."
-                SendMessagesToClients.sendEmail(to_addresses='mo@prepwithmo.com', message=message, type='to_mo')
+                #SendMessagesToClients.sendEmail(to_addresses='mo@prepwithmo.com', message=message, type='to_mo')
                 SendMessagesToClients.sendSMS(to_number='9725847364', message=message, type='to_mo')
                 print(message)
             except Exception as e:
@@ -557,7 +557,8 @@ def start_background_jobs_before_first_request():
                     if invoice_payment_failed:
                         print("Invoice payment failed: ", invoice['last_name'])
                         invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
-                        SendMessagesToClients.sendSMS(to_number='9725847364', message="Invoice payments failed for: " + invoice_name, type='to_mo')
+                        #don't send message here as stripe webhook event that is caught sends message
+                        #SendMessagesToClients.sendSMS(to_number='9725847364', message="Invoice payments failed for: " + invoice_name, type='to_mo')
         except Exception as e:
             print("Error in finding invoices to pay")
             print(e)
