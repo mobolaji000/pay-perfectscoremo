@@ -588,11 +588,7 @@ def start_background_jobs_before_first_request():
         #scheduler.add_job(reminders_background_job,'cron',minute='55')
         scheduler.add_job(lambda: print("dummy reminders job for local"), 'cron', minute='55')
     else:
-        scheduler.add_job(reminders_background_job, 'cron', day_of_week='mon', hour='19', minute='45')
-        scheduler.add_job(reminders_background_job, 'cron', day_of_week='tue', hour='19', minute='45')
-        scheduler.add_job(reminders_background_job, 'cron', day_of_week='wed', hour='19', minute='45')
-        scheduler.add_job(reminders_background_job, 'cron', day_of_week='thu', hour='19', minute='45')
-        scheduler.add_job(reminders_background_job, 'cron', day_of_week='fri',hour='19',minute='45')
+        scheduler.add_job(reminders_background_job, 'cron', hour='19', minute='45')
         #uncomment after Akinyoade payment
         # scheduler.add_job(reminders_background_job, 'cron', day_of_week='sat', hour='19', minute='45')
         # scheduler.add_job(reminders_background_job, 'cron', day_of_week='sun', hour='19', minute='45')
