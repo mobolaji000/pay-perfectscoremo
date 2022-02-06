@@ -364,10 +364,7 @@ def transaction_page():
 
     stripe_info = parseDataForStripe(client_info)
 
-    if os.environ['DEPLOY_REGION'] == 'prod':
-        response = make_response(render_template('transaction_details.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride))
-    else:
-        response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info','')))
+    response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info','')))
 
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"  # HTTP 1.1.
     response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
@@ -591,6 +588,10 @@ def start_background_jobs_before_first_request():
         #scheduler.add_job(reminders_background_job,'cron',minute='55')
         scheduler.add_job(lambda: print("dummy reminders job for local"), 'cron', minute='55')
     else:
+        scheduler.add_job(reminders_background_job, 'cron', day_of_week='mon', hour='19', minute='45')
+        scheduler.add_job(reminders_background_job, 'cron', day_of_week='tue', hour='19', minute='45')
+        scheduler.add_job(reminders_background_job, 'cron', day_of_week='wed', hour='19', minute='45')
+        scheduler.add_job(reminders_background_job, 'cron', day_of_week='thur', hour='19', minute='45')
         scheduler.add_job(reminders_background_job, 'cron', day_of_week='fri',hour='19',minute='45')
         #uncomment after Akinyoade payment
         # scheduler.add_job(reminders_background_job, 'cron', day_of_week='sat', hour='19', minute='45')
