@@ -135,7 +135,7 @@ class AWSInstance():
                         + """<span>1. Go to perfectscoremo.com</span><br>""" \
                         + """<span>2. Choose ‘Make A Payment’ from the menu</span><br>""" \
                         + """<span>3. Enter your code: </span>""" + "<strong>" + message + "</strong><br>" \
-                        + """<span>4. If required, enter the student's contact information and the days/times that work best for their sessions. This will be used to reserve their slot in our calendar and to setup text message and email updates on their regular progress. </span>""" \
+                        + """<span>4. If required, enter the student's contact information and the days/times that work best for their sessions. This will be used to reserve their slot in our calendar and to setup text message and email updates on their regular progress. </span><br>""" \
                         + """<span>5. Read the instructions and transaction and choose a method of payment</span><br>""" \
                         + """<span>6. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free</span><br>""" \
                         + """<span>7. For installment payments, these are accepted: Credit Cards, Debit Cards</span><br>""" \
