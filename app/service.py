@@ -63,10 +63,10 @@ class StripeInstance():
 
     def createCustomer(self, clientSetupData):
         #existing_customer = Transaction.query.filter_by(email=clientSetupData['email']).order_by(Transaction.date_created.desc()).first() or Transaction.query.filter_by(phone_number=clientSetupData['phone_number']).order_by(Transaction.date_created.desc()).first()
-        existing_customer = Transaction.query.with_entities(func.sum(Transaction.transaction_total).label('sum')).filter(Transaction.email == clientSetupData['email']).all()['sum'] or Transaction.query.with_entities(func.sum(Transaction.transaction_total).label('sum')).filter(Transaction.phone_number == clientSetupData['phone_number']).all()['sum']
+        existing_customer = Transaction.query.filter(Transaction.email == clientSetupData['email']).with_entities(func.sum(Transaction.transaction_total).label('sum')).first()[0] or Transaction.query.filter(Transaction.phone_number == clientSetupData['phone_number']).with_entities(func.sum(Transaction.transaction_total).label('sum')).first()[0]
 
         print("existing customer total is: ",existing_customer)
-        if existing_customer > 800:
+        if existing_customer and int(existing_customer) > 800:
             customer = stripe.Customer.retrieve(existing_customer.stripe_customer_id)
             default_card = customer.invoice_settings.default_payment_method
             default_ach = customer.default_source

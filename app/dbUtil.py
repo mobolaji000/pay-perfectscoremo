@@ -30,7 +30,8 @@ class AppDBUtil():
         how_did_they_hear_about_us = prospectData.get('how_did_they_hear_about_us', '')
         how_did_they_hear_about_us_details = prospectData.get('how_did_they_hear_about_us_details', '')
 
-        existing_prospect = db.session.query(Prospect).filter_by(prospect_email=prospect_email,prospect_phone_number=prospect_phone_number).first()
+        existing_prospect = db.session.query(Prospect).filter_by(prospect_phone_number=prospect_phone_number).first() or db.session.query(Prospect).filter_by(prospect_email=prospect_email).first()
+
         if existing_prospect:
             prospect = existing_prospect
         else:
