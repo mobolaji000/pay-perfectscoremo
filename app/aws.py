@@ -68,11 +68,11 @@ class AWSInstance():
     def send_email(self, to_addresses='mo@vensti.com', message='perfectscoremo', subject='perfectscoremo', type=''):
 
         if type == 'create_transaction_new_client':
-            created_or_modified_span = "<span>Your transaction has just been <strong>created</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
+            created_or_modified_span = "<span>Your transaction has just been <strong>created</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
         elif type == 'modify_transaction':
-            created_or_modified_span = "<span>Your transaction has just been <strong>modified</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
+            created_or_modified_span = "<span>Your transaction has just been <strong>modified</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
         elif type == 'reminder_to_make_payment':
-            created_or_modified_span = "<span>This is an automated reminder that your transaction <strong>is due</strong>. Here are the payment instructions/options (also sent to your phone number):</span><br><br>"
+            created_or_modified_span = "<span>This is an automated reminder that your transaction <strong>is due</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
         elif type == 'create_transaction_existing_client':
             created_or_modified_span = "<span>Your new transaction has been created using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
 
@@ -129,15 +129,17 @@ class AWSInstance():
             BODY_HTML = """<html>
                             <head></head>
                             <body>
-                              <span>Dear Parent, </span><br><br>""" \
+                              <span>Dear Parent, </span><br>""" \
+                        + """<span><strong>PLEASE READ CAREFULLY!!</strong></span><br><br>""" \
                         + created_or_modified_span \
                         + """<span>1. Go to perfectscoremo.com</span><br>""" \
                         + """<span>2. Choose ‘Make A Payment’ from the menu</span><br>""" \
                         + """<span>3. Enter your code: </span>""" + "<strong>" + message + "</strong><br>" \
-                        + """<span>4. Read the instructions and transaction and choose a method of payment</span><br>""" \
-                        + """<span>5. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free</span><br>""" \
-                        + """<span>6. For installment payments, these are accepted: Credit Cards, Debit Cards</span><br>""" \
-                        + """<span>7. For full payments, these are accepted: Credit Cards, Debit Cards, ACH</span><br>""" \
+                        + """<span>4. If required, enter the student's contact information and the days/times that work best for their sessions. This will be used to reserve their slot in our calendar and to setup text message and email updates on their regular progress. </span>""" \
+                        + """<span>5. Read the instructions and transaction and choose a method of payment</span><br>""" \
+                        + """<span>6. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free</span><br>""" \
+                        + """<span>7. For installment payments, these are accepted: Credit Cards, Debit Cards</span><br>""" \
+                        + """<span>8. For full payments, these are accepted: Credit Cards, Debit Cards, ACH</span><br>""" \
                         + """<br><span>Regards,</span><br>""" \
                         + """<span>Mo</span><br>""" \
                         + """

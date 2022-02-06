@@ -41,6 +41,11 @@
         $('input[name="full-payment"]').prop('required', false);
         {% endif %}
 
+        var ask_for_student_info = $("#ask_for_student_info").attr("data-ask_for_student_info");
+		$('input[name="ask_for_student_info"]').val(ask_for_student_info);
+
+		 var prospect_id = $("#prospect_id").attr("data-prospect_id");
+		$('input[name="prospect_id"]').val(prospect_id);
     }
 
     	 function showPayButton()
@@ -65,47 +70,38 @@
 		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
 		<h2><u>Complete Signup</u></h2>
 	</div>
-			<form id="complete_signup_form" class="needs-validation" data-toggle="validator" action="{{ url_for('new_feature_checkout') }}" method="post">
+			<form id="complete_signup_form" class="needs-validation" data-toggle="validator" action="{{ url_for('post_signup_checkout') }}" method="post" >
 
 				 {% if askForStudentInfo == 'yes' %}
 					<div class="container">
-
+<h3><u>Onboarding Information</u></h3>
 		<div class="col-md-8 order-md-1">
 			<br><br>
 					<h4 class="mb-3"><u>Student Information</u></h4>
 				<div class="row">
 					<div class="col-md-6 mb-3">
 						<label for="student_first_name">First name</label>
-						<input type="text" class="form-control" id="student_first_name" name="student_first_name" placeholder="" value="">
-						<div class="invalid-feedback">
-							Valid first name is required.
-						</div>
+						<input type="text" class="form-control" id="student_first_name" name="student_first_name" placeholder="" value="" required>
 					</div>
 					<div class="col-md-6 mb-3">
 						<label for="student_last_name">Last name</label>
-						<input type="text" class="form-control" id="student_last_name" name="student_last_name" placeholder="" value="">
-						<div class="invalid-feedback">
-							Valid last name is required.
-						</div>
+						<input type="text" class="form-control" id="student_last_name" name="student_last_name" placeholder="" value="" required>
 					</div>
 				</div>
 
 				<div class="mb-3">
 					<label for="student_email">Email</label>
-					<input type="email" class="form-control" id="student_email" name="student_email" placeholder="you@example.com">
-					<div class="invalid-feedback">
-						Please enter a valid email address.
-					</div>
+					<input type="email" class="form-control" id="student_email" name="student_email" placeholder="you@example.com" required>
 				</div>
 
 				<div class="mb-3">
 					<label for="student_phone_number">Phone number </span></label>
-					<input type="tel" class="form-control" id="student_phone_number" name="student_phone_number"
-						   placeholder="1111111111" pattern="[0-9]{10}" title="Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.">
-					<div class="form-text text-muted" style="color:red !important">
-						Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.
-					</div>
+					<input type="tel" class="form-control" id="student_phone_number" name="student_phone_number" placeholder="1111111111" required>
 				</div>
+			<br>
+			<div id="student_info_error_message" hidden>
+							You must enter name, email, and phone number for the student.
+						</div>
 
 				<br><br><br>
 
@@ -124,22 +120,14 @@
 					</div>
 					</div>
 
-
-
 					<div class="col-md-4 mb-3">
 						<label for="parent_1_first_name">First name</label>
 						<input type="text" class="form-control" id="parent_1_first_name" name="parent_1_first_name" placeholder="" value="">
-						<div class="invalid-feedback">
-							Valid first name is required.
-						</div>
 					</div>
 					<div class="col-md-4 mb-3">
 						<label for="parent_1_last_name">Last name</label>
-						<input type="text" class="form-control" id="parent_1_last_name" name="parent_1_last_name" placeholder="" value=""
-							   >
-						<div class="invalid-feedback">
-							Valid last name is required.
-						</div>
+						<input type="text" class="form-control" id="parent_1_last_name" name="parent_1_last_name" placeholder="" value="">
+
 					</div>
 
 					</div>
@@ -147,20 +135,16 @@
 				<div class="mb-3">
 					<label for="parent_1_email">Email</label>
 					<input type="parent_1_email" class="form-control" id="parent_1_email" name="parent_1_email" placeholder="you@example.com">
-					<div class="invalid-feedback">
-						Please enter a valid email address.
-					</div>
 				</div>
 
 				<div class="mb-3">
 					<label for="parent_1_phone_number">Phone number </span></label>
 					<input type="tel" class="form-control" id="parent_1_phone_number" name="parent_1_phone_number"
-						   placeholder="1111111111" pattern="[0-9]{10}" title="Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.">
-					<div class="form-text text-muted" style="color:red !important">
-						Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.
-					</div>
+						   placeholder="1111111111">
 				</div>
 
+			<br>
+			<div id="parent_1_info_error_message" style="color:red !important" hidden>Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.</div>
 				<br><br><br>
 
 				<h4 class="mb-3"><u>Parent 2 Information</u></h4>
@@ -181,18 +165,11 @@
 
 					<div class="col-md-4 mb-3">
 						<label for="parent_2_first_name">First name</label>
-						<input type="text" class="form-control" id="parent_2_first_name" name="parent_2_first_name" placeholder="" value=""
-							   >
-						<div class="invalid-feedback">
-							Valid first name is required.
-						</div>
+						<input type="text" class="form-control" id="parent_2_first_name" name="parent_2_first_name" placeholder="" value="">
 					</div>
 					<div class="col-md-4 mb-3">
 						<label for="parent_2_last_name">Last name</label>
 						<input type="text" class="form-control" id="parent_2_last_name" name="parent_2_last_name" placeholder="" value="">
-						<div class="invalid-feedback">
-							Valid last name is required.
-						</div>
 					</div>
 
 					</div>
@@ -200,19 +177,15 @@
 				<div class="mb-3">
 					<label for="parent_2_email">Email</label>
 					<input type="parent_2_email" class="form-control" id="parent_2_email" name="parent_2_email" placeholder="you@example.com">
-					<div class="invalid-feedback">
-						Please enter a valid email address.
-					</div>
 				</div>
 
 				<div class="mb-3">
 					<label for="parent_2_phone_number">Phone number </span></label>
 					<input type="tel" class="form-control" id="parent_2_phone_number" name="parent_2_phone_number"
-						   placeholder="1111111111" pattern="[0-9]{10}" title="Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.">
-					<div class="form-text text-muted" style="color:red !important">
-						Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.
-					</div>
+						   placeholder="1111111111">
 				</div>
+			<br>
+			<div id="parent_2_info_error_message" hidden>Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.</div>
 
 				<br><br><br>
 
@@ -220,40 +193,89 @@
 
 		</div>
 	</div>
-				  {% endif %}
-
-				<br><br><br>
 
 
 				<div class="container">
 
+					<h4><u>Select Day for One-on-One</u></h4><br>
 
-					<div class="card bg-primary text-white text-center p-3">
-    <blockquote class="blockquote mb-0">
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat.</p>
-      <footer class="blockquote-footer">
-        <small>
-          Someone famous in <cite title="Source Title">Source Title</cite>
-        </small>
-      </footer>
-    </blockquote>
-  </div>
+					<div id="day_for_one_on_one_info_and_error" style="color:green">
+						Select as many options as work for you by clicking the cards.
+					</div><br>
 
-				</div>
+					<div class="card-columns">
+
+						<div name="day_for_one_on_one" class="card text-center p-3 ">
+      <p>Monday (5pm)<br><br></p>
+  </div><br>
+
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+      <p>Tuesday (5pm)<br><br></p>
+  </div><br>
+
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+      <p>Wednesday (5pm)<br><br></p>
+  </div><br>
+
+						<div name="day_for_one_on_one" class="card text-center p-3 ">
+      <p>Thursday (5pm)<br><br></p>
+  </div><br>
+
+						<div name="day_for_one_on_one" class="card text-center p-3">
+      <p>Friday (5pm)<br><br></p>
+  </div><br>
+
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+      <p>Monday (6pm)<br><br></p>
+  </div><br>
+
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+      <p>Tuesday (6pm)<br><br></p>
+  </div><br>
+
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+      <p>Wednesday (6pm)<br><br></p>
+  </div><br>
+
+						<div name="day_for_one_on_one" class="card text-center p-3 ">
+      <p>Thursday (6pm)<br><br></p>
+  </div><br>
+
+						<div name="day_for_one_on_one" class="card text-center p-3">
+      <p>Friday (6pm)<br><br></p>
+  </div><br>
+
+											<div name="day_for_one_on_one" class="card text-center p-3 ">
+      <p>Monday (7pm)<br><br></p>
+  </div><br>
+
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+      <p>Tuesday (7pm)<br><br></p>
+  </div><br>
+
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+      <p>Wednesday (7pm)<br><br></p>
+  </div><br>
+
+						<div name="day_for_one_on_one" class="card text-center p-3 ">
+      <p>Thursday (7pm)<br><br></p>
+  </div><br>
+
+						<div name="day_for_one_on_one" class="card text-center p-3">
+      <p>Friday (7pm)<br><br></p>
+  </div><br>
+
+						</div>
+
+						</div>
 
 
-
-
-
-
-
-
-
+  {% endif %}
 
 	<div class="row">
 		<div class="col-md-8 order-md-1">
 			<br><br>
-			<h4 class="mb-3"><u>Transaction Information</u></h4>
+			<h3 class="mb-3"><u>Transaction Information</u></h3>
 
 				<div class="row">
 					<div class="col-md-6 mb-3">
@@ -551,7 +573,8 @@
 	</div>
 
 				<input id="stripe_info" type="hidden"  data-stripe_info="{{ stripe_info }}">
-				<input id="show_ach_override" type="hidden"  data-show_ach_override="{{ showACHOverride }}">
+			<input id="ask_for_student_info" name="ask_for_student_info" type="hidden"  data-ask_for_student_info="{{ askForStudentInfo }}">
+				<input id="show_ach_override" name="show_ach_override" type="hidden"  data-show_ach_override="{{ showACHOverride }}">
 
 
 	<div class="checkbox mb-3" style="text-align:center;">
@@ -560,11 +583,11 @@
 
 							<input id="terms_and_conditions" name="terms_and_conditions" value="" type="checkbox" onclick="showPayButton();"
 								   class="custom-control-input">
-							<label class="custom-control-label" for="terms_and_conditions">You must accept terms and conditions to proceed. By clicking above, you agree to the terms and conditions.</label>
+							<label class="custom-control-label" for="terms_and_conditions">You must accept terms and conditions and privacy policy to proceed. By clicking above, you agree to the <a href="/terms_and_conditions" target="_blank",> terms and conditions</a> and <a href="/privacy_policy" target="_blank",> privacy policy.</a></label>
 							<br><br><br>
 						</div>
 
-				<div class="row justify-content-center"><input id="proceed_to_payment" name="proceed_to_payment" class="btn btn-primary btn-lg btn-block w-25 p-3" type="submit" hidden value="Go To Payment" onclick="turnOffRequired();"></div>
+				<div class="row justify-content-center"><input id="proceed_to_payment" name="proceed_to_payment" class="btn btn-primary btn-lg btn-block w-25 p-3" type="submit" hidden value="Go To Payment " onclick="turnOffRequired();"></div>
 {% endif %}
 </div>
 	</div>
