@@ -134,6 +134,7 @@ function miscellanousValidation()
      $('input[name="transaction_total"]').val('');
      $('select[name="how_did_they_hear_about_us"]').val('');
 	 $('textarea[name="how_did_they_hear_about_us_details"]').val('');
+	 $('input[name="ask_for_student_info"]').prop('checked', false);
 
 
 
@@ -160,6 +161,24 @@ function miscellanousValidation()
 	  $('input[name="prospect_id"]').val(result.prospect_id);
 
 	//
+
+	 if (result.ask_for_student_info == "yes")
+     {
+      //document.getElementById("ask_for_student_info").click();
+     //document.getElementById("ask_for_student_info").checked = true;
+      //$('input[name="ask_for_student_info"]').prop('checked', true);
+
+
+      //while it is good to have this here, I dont beleive I need it because
+      //if am modifying to ask for student info, then I should remember to ask for it
+      //besides, dont want a situation where I edit an exisitng invoice and by default
+      //ask for the student info again
+
+      //$('input[name="ask_for_student_info"]').attr('checked', true);
+       //$('input[name="ask_for_student_info"]').val("yes");
+     }
+
+     //
 
      if (result.was_diagnostic_purchased == "yes")
      {

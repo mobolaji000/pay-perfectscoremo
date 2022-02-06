@@ -91,7 +91,7 @@ class AppDBUtil():
                         "was_test_prep_purchased": was_test_prep_purchased,"tp_product": tp_product,"tp_units": tp_units,"tp_total": tp_total,
                         "was_college_apps_purchased": was_college_apps_purchased,"college_apps_product": college_apps_product,"college_apps_units": college_apps_units,
                         "college_apps_total": college_apps_total,"adjust_total": adjust_total,"adjustment_explanation": adjustment_explanation,
-                  "transaction_total": transaction_total, "installment_counter":installment_counter, "does_customer_payment_info_exist":does_customer_payment_info_exist})
+                  "transaction_total": transaction_total, "installment_counter":installment_counter, "does_customer_payment_info_exist":does_customer_payment_info_exist,"ask_for_student_info":ask_for_student_info})
 
             print("number of transaction rows modified is: ",number_of_rows_modified) #printing of rows modified to logs to help with auditing
 
@@ -299,10 +299,12 @@ class AppDBUtil():
             client['transaction_total'] = transaction.transaction_total
             client['payment_started'] = str(transaction.payment_started)
             client['prospect_id'] = str(transaction.prospect_id)
+            client['ask_for_student_info'] = transaction.ask_for_student_info
 
             prospect_details = Prospect.query.filter_by(prospect_id=transaction.prospect_id).first()
             client['how_did_they_hear_about_us'] = prospect_details.how_did_they_hear_about_us
             client['how_did_they_hear_about_us_details'] = prospect_details.how_did_they_hear_about_us_details
+
 
             installment_details = InstallmentPlan.query.filter_by(transaction_id=transaction.transaction_id).first()
 
@@ -504,7 +506,9 @@ class AppDBUtil():
                 lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
 
         elif searchStartDate and searchEndDate:
-            lead_info = Lead.query.filter(Lead.date_created.between(searchStartDate, searchEndDate)).order_by(Lead.date_created.desc()).all()
+            lead_info = Lead.query.filter(Lead.date_created <= searchEndDate).filter(Lead.date_created >= searchStartDate).order_by(Lead.date_created.desc()).all()
+            #changed way of searching lead_info because previous one was neither inclusive of start/end dates nor intuitive
+            #lead_info = Lead.query.filter(Lead.date_created.between(searchStartDate, searchEndDate)).order_by(Lead.date_created.desc()).all()
 
 
         search_results = []

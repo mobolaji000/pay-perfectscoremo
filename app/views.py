@@ -55,6 +55,14 @@ def usercode():
     name='Mo'
     return render_template('usercode.html', name=name)
 
+@server.route("/terms_and_conditions")
+def terms_and_conditions():
+    return render_template('terms_and_conditions.html')
+
+@server.route("/privacy_policy")
+def privacy_policy():
+    return render_template('privacy_policy.html')
+
 @server.route("/health")
 def health():
     print("healthy!")
@@ -105,6 +113,7 @@ def failure():
 def transaction_setup():
     return render_template('transaction_setup.html')
 
+#keep for when you need to send adhoc student info requests to parents
 @server.route('/client_info',defaults={'prospect_id': None}, methods=['GET','POST'])
 @server.route('/client_info/<prospect_id>', methods=['GET','POST'])
 def client_info(prospect_id):
@@ -210,10 +219,11 @@ def create_transaction():
         client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
         stripe_info = parseDataForStripe(client_info)
 
-        if transaction_setup_data.get('ask_for_student_info','') == 'yes':
-            SendMessagesToClients.sendEmail(to_addresses=transaction_setup_data['email'], message=transaction_setup_data['prospect_id'], subject='New Student Information', type='student_info')
-            SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'], message=transaction_setup_data['prospect_id'], type='student_info')
-            logger.debug('Ask for student info: ' + str(stripe_info['transaction_id']))
+        # stopped using after starting to asking for student info on transaction page
+        # if transaction_setup_data.get('ask_for_student_info','') == 'yes':
+        #     SendMessagesToClients.sendEmail(to_addresses=transaction_setup_data['email'], message=transaction_setup_data['prospect_id'], subject='New Student Information', type='student_info')
+        #     SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'], message=transaction_setup_data['prospect_id'], type='student_info')
+        #     logger.debug('Ask for student info: ' + str(stripe_info['transaction_id']))
 
         if transaction_setup_data.get('mark_as_paid','') == 'yes':
             stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info,action='create')
@@ -232,7 +242,12 @@ def create_transaction():
                 logger.debug('Send transaction text and email notification: ' + str(stripe_info['transaction_id']))
                 try:
                     SendMessagesToClients.sendEmail(to_addresses=transaction_setup_data['email'], message=transaction_id, type=message_type)
-                    SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'],message=transaction_id,type=message_type)
+                    if message_type == 'create_transaction_existing_client':
+                        SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type='create_transaction_existing_client')
+                        time.sleep(60)
+                        SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type='questions')
+                    else:
+                        SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'], message=transaction_id, type=message_type)
                     flash('Transaction created and email/sms sent to client.')
                 except Exception as e:
                     traceback.print_exc()
@@ -272,10 +287,11 @@ def modify_transaction():
         transaction_id = data_to_modify['transaction_id']
         transaction_id_again,number_of_rows_modified=AppDBUtil.modifyTransactionDetails(data_to_modify)
 
-        if data_to_modify.get('ask_for_student_info','') == 'yes':
-            SendMessagesToClients.sendEmail(to_addresses=data_to_modify['email'], message=data_to_modify['prospect_id'], subject='New Student Information', type='student_info')
-            SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=data_to_modify['prospect_id'], type='student_info')
-            logger.debug('Ask for student info: ' + str(data_to_modify['transaction_id']))
+        #stopped using after starting to asking for student info on transaction page
+        # if data_to_modify.get('ask_for_student_info','') == 'yes':
+        #     SendMessagesToClients.sendEmail(to_addresses=data_to_modify['email'], message=data_to_modify['prospect_id'], subject='New Student Information', type='student_info')
+        #     SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=data_to_modify['prospect_id'], type='student_info')
+        #     logger.debug('Ask for student info: ' + str(data_to_modify['transaction_id']))
 
         if number_of_rows_modified < 1:
             print("No transaction was modified, perhaps because no transaction code was provided")
@@ -348,8 +364,10 @@ def transaction_page():
 
     stripe_info = parseDataForStripe(client_info)
 
-    response = make_response(render_template('transaction_details.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride))
-   #response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info','')))
+    if os.environ['DEPLOY_REGION'] == 'prod':
+        response = make_response(render_template('transaction_details.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride))
+    else:
+        response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info','')))
 
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"  # HTTP 1.1.
     response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
@@ -370,7 +388,7 @@ def logout():
 def checkout():
     payment_data = request.form.to_dict()
     chosen_mode_of_payment = payment_data.get('installment-payment', '') if payment_data.get('installment-payment','') != '' else payment_data.get('full-payment', '') if payment_data.get('full-payment', '') != '' else payment_data.get('payment-options', '') if payment_data.get('payment-options', '') != '' else ''
-    stripe_info = ast.literal_eval(payment_data['stripe_info'])
+    stripe_info = ast.literal_eval(payment_data.get('stripe_info', ''))
     stripe_pk = os.environ.get('stripe_pk')
     if chosen_mode_of_payment.__contains__('ach'):
         return render_template('plaid_checkout.html',stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment)
@@ -491,6 +509,7 @@ def stripe_webhook():
 
             AppDBUtil.updateInvoiceAsPaid(paid_invoice.id)
             AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id,amount_paid)
+            AppDBUtil.updateTransactionPaymentStarted(transaction_id)
 
             print("paid transaction is ", paid_invoice)
             print("transaction id is ", transaction_id)
@@ -572,7 +591,11 @@ def start_background_jobs_before_first_request():
         #scheduler.add_job(reminders_background_job,'cron',minute='55')
         scheduler.add_job(lambda: print("dummy reminders job for local"), 'cron', minute='55')
     else:
-        scheduler.add_job(reminders_background_job, 'cron', day_of_week='sat',hour='19',minute='45')
+        scheduler.add_job(reminders_background_job, 'cron', day_of_week='fri',hour='19',minute='45')
+        #uncomment after Akinyoade payment
+        # scheduler.add_job(reminders_background_job, 'cron', day_of_week='sat', hour='19', minute='45')
+        # scheduler.add_job(reminders_background_job, 'cron', day_of_week='sun', hour='19', minute='45')
+
         scheduler.add_job(invoice_payment_background_job, 'cron', hour='23',minute='45')
 
     print("Reminders background job added")
@@ -581,19 +604,39 @@ def start_background_jobs_before_first_request():
     scheduler.start()
 
 
-@server.route('/new_feature_checkout',methods=['POST'])
-def new_feature_checkout():
-    payment_data = request.form.to_dict()
-    chosen_mode_of_payment = payment_data.get('installment-payment', '') if payment_data.get('installment-payment','') != '' else payment_data.get('full-payment', '') if payment_data.get('full-payment', '') != '' else payment_data.get('payment-options', '') if payment_data.get('payment-options', '') != '' else ''
-    stripe_info = ''#ast.literal_eval(payment_data['stripe_info'])
+@server.route('/post_signup_checkout',methods=['POST'])
+def post_signup_checkout():
+    payment_and_signup_data = request.form.to_dict()
+    ask_for_student_info = payment_and_signup_data.get('ask_for_student_info','')
+
+    if ask_for_student_info == 'yes':
+        try:
+            print("prospect_id in post is ", payment_and_signup_data['prospect_id'])
+            print("student data is", payment_and_signup_data)
+            AppDBUtil.createStudentData(payment_and_signup_data)
+            to_numbers = [number for number in [payment_and_signup_data['parent_1_phone_number'], payment_and_signup_data['parent_2_phone_number'], payment_and_signup_data['student_phone_number']] if number != '']
+            SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], type='create_group_chat')
+            message = ""
+            for k, v in ast.literal_eval(payment_and_signup_data['all_days_for_one_on_one']).items():
+                message = message + " "+k.split('\n')[1].strip()+","
+            SendMessagesToClients.sendEmail(message=message, subject="Suggested one-on-one days for "+str(payment_and_signup_data['student_first_name'])+" "+str(payment_and_signup_data['student_last_name']), type='to_mo')
+            # hold off on sending group emails until you dedcide there is a value add
+            # SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            return render_template('error.html',error_message="Error in submitting student information and creating group messages for regular updates. Please contact Mo at 972-584-7364.")
+
+    chosen_mode_of_payment = payment_and_signup_data.get('installment-payment', '') if payment_and_signup_data.get('installment-payment','') != '' else payment_and_signup_data.get('full-payment', '') if payment_and_signup_data.get('full-payment', '') != '' else payment_and_signup_data.get('payment-options', '') if payment_and_signup_data.get('payment-options', '') != '' else ''
+    stripe_info = ast.literal_eval(payment_and_signup_data['stripe_info'])
     stripe_pk = os.environ.get('stripe_pk')
     if chosen_mode_of_payment.__contains__('ach'):
         return render_template('plaid_checkout.html',stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment)
     else:
         return render_template('stripe_checkout.html', stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment,stripe_pk=stripe_pk)
 
-@server.route('/new_feature_transaction_page',methods=['POST'])
-def new_feature_transaction_page():
+@server.route('/complete_signup',methods=['POST'])
+def complete_signup():
     try:
         client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(request.form.to_dict()['transaction_id'])
     except Exception as e:
@@ -605,8 +648,7 @@ def new_feature_transaction_page():
         return redirect(url_for('input_transaction_id'))
 
     stripe_info = parseDataForStripe(client_info)
-
-    response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info','')))
+    response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info',''),prospect_id=client_info.get('prospect_id','')))
 
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"  # HTTP 1.1.
     response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
