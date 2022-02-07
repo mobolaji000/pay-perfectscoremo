@@ -110,6 +110,7 @@ var cardElement = document.getElementById('card-element');
   });
     },
     error: function (error) {
+    window.location.href ="/failure";
         console.log(error);
     }
 });
