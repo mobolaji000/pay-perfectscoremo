@@ -68,13 +68,15 @@ class StripeInstance():
         print("existing customer total is: ",existing_customer)
         if existing_customer:
             customer = stripe.Customer.retrieve(existing_customer.stripe_customer_id)
+            does_customer_payment_info_exist = False
             if int(existing_customer_total_payment_so_far) > 800:
                 default_card = customer.invoice_settings.default_payment_method
                 default_ach = customer.default_source
                 print("payment options are: ")
                 print("default_ach is ",default_ach)
                 print("default_card is ",default_card)
-                does_customer_payment_info_exist = True if default_card or default_ach else False
+                if default_card or default_ach:
+                    does_customer_payment_info_exist = True
         else:
             customer = stripe.Customer.create(email=clientSetupData['email'], name=clientSetupData['first_name'] + " " + clientSetupData['last_name'], phone=clientSetupData['phone_number'])
             does_customer_payment_info_exist = False
