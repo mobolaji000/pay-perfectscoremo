@@ -38,14 +38,12 @@ $(document).ready(function() {
 
     if (show_ach_override === 'True')
     {
-    //alert(show_ach_override+" this is true");
     $('#selectorToHideACHInstallment').attr('style', 'display: block !important');
         $("#selectorToHideACHInstallment").show();
         $("#selectorToHideACHInstallment").css("visibility", "visible");
     }
     else
     {
-    //alert(show_ach_override+" this is false");
     $('#selectorToHideACHInstallment').attr('style', 'display: none !important');
     $("#selectorToHideACHInstallment").css("visibility", "hidden");
     }
@@ -119,18 +117,11 @@ for(var key in selected_cards) {
  }
  if(one_on_one_info_present)
  {
-//  document.getElementById('day_for_one_on_one_info_and_error').style.visibility="visible";
-// document.getElementById('day_for_one_on_one_info_and_error').style.display="block";
-// document.getElementById("day_for_one_on_one_info_and_error").hidden=false;
   document.getElementById('day_for_one_on_one_info_and_error').style.color="green";
   document.getElementById('day_for_one_on_one_info_and_error').innerHTML="Select as many options as work for you by clicking the cards.";
  }
  else
  {
- //alert('Some fields contain errors. Try again.');
-//   document.getElementById('day_for_one_on_one_info_and_error').style.visibility="visible";
-//         document.getElementById('day_for_one_on_one_info_and_error').style.display="block";
-//         document.getElementById("day_for_one_on_one_info_and_error").hidden=false;
          document.getElementById('day_for_one_on_one_info_and_error').innerHTML="You must select at least one option for your one-on-one session.";
          document.getElementById('day_for_one_on_one_info_and_error').style.color="red";
  }
@@ -152,7 +143,6 @@ for(var key in selected_cards) {
     }
     else
     {
-            //alert('Some fields contain errors. Try again.');
 
        document.getElementById('parent_1_info_error_message').style.visibility="visible";
              document.getElementById('parent_1_info_error_message').style.display="block";
@@ -180,7 +170,6 @@ for(var key in selected_cards) {
     }
     else
     {
-              //alert('Some fields contain errors. Try again.');
               document.getElementById('student_info_error_message').style.visibility="visible";
              document.getElementById('student_info_error_message').style.display="block";
              document.getElementById("student_info_error_message").hidden=false;
@@ -210,7 +199,6 @@ for(var key in selected_cards) {
 
     // Fetch all the forms we want to apply custom Bootstrap validation styles to
     var cards = document.getElementsByName('day_for_one_on_one');
-    //alert(cards);
 
 
     // Loop over them and prevent submission
@@ -218,7 +206,6 @@ for(var key in selected_cards) {
       .forEach(function (card) {
         card.addEventListener('click', function (event) {
          var backgroundColor = window.getComputedStyle(card).getPropertyValue("background-color");
-        //alert(backgroundColor);
 
         function nameToRGB(name) {
     // Create fake div
