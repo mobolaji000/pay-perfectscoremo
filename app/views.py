@@ -495,9 +495,11 @@ def stripe_webhook():
             paid_invoice = event.data.object
             transaction_id = paid_invoice.metadata['transaction_id']
 
-            payment_intent = stripe.PaymentIntent.retrieve(paid_invoice.payment_intent,)
-            payment_method = stripe.PaymentMethod.retrieve(payment_intent['payment_method'],)
-            payment_type = payment_method['type']
+            payment_type = ''
+            if paid_invoice.payment_intent:
+                payment_intent = stripe.PaymentIntent.retrieve(paid_invoice.payment_intent,)
+                payment_method = stripe.PaymentMethod.retrieve(payment_intent['payment_method'],)
+                payment_type = payment_method['type']
 
             if payment_type == 'card':
                 amount_paid = int(math.floor(paid_invoice.total/103))
