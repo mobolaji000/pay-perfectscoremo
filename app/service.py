@@ -92,6 +92,7 @@ class StripeInstance():
         if action == 'modify':
             existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=stripe_info['transaction_id']).all()
             for existing_invoice in existing_invoices:
+                #paid_out_of_band updates in stripe invoice but does not update in stripe dashboard
                 stripe.Invoice.pay(existing_invoice.stripe_invoice_id, paid_out_of_band=True)
                 AppDBUtil.deleteInvoiceToBePaid(existing_invoice.transaction_id, existing_invoice.stripe_invoice_id)
         elif action == 'create':
@@ -106,6 +107,7 @@ class StripeInstance():
                 customer=stripe_info['stripe_customer_id'],
                 metadata={'transaction_id': stripe_info['transaction_id']},
             )
+            # paid_out_of_band updates in stripe invoice but does not update in stripe dashboard
             stripe.Invoice.pay(stripe_invoice.id, paid_out_of_band=True)
             logger.debug('Leaving method to mark customer as charged outside of Stripe: ' + str(stripe_info['transaction_id']))
 
