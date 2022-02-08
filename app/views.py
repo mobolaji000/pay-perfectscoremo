@@ -503,8 +503,11 @@ def stripe_webhook():
             # consider replacing below with this if there are further errors
 
             payment_intent = stripe.PaymentIntent.retrieve(paid_invoice.payment_intent, ) if paid_invoice.payment_intent else None
-            payment_method = stripe.PaymentMethod.retrieve(payment_intent['payment_method'], ) if payment_intent else None
+            payment_method = stripe.PaymentMethod.retrieve(payment_intent['payment_method'], ) if payment_intent and payment_intent['payment_method'] else stripe.PaymentMethod.retrieve(payment_intent['source'], ) if payment_intent and payment_intent['source'] else None
             payment_type = payment_method['type'] if payment_method else None
+
+            if not payment_type:
+                raise Exception('Somehow there is no payment intent, payment method, or payment type')
 
             if payment_type == 'card':
                 amount_paid = int(math.floor(paid_invoice.total/103))
