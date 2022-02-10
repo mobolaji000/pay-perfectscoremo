@@ -143,7 +143,7 @@ class StripeInstance():
             for k in range(1, int(stripe_info['installment_counter'])):
                 if existing_customer:
                     # ensures that you always keep 72 hours to change method of payment promise to exisiting clients
-                    date = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)]) + datetime.timedelta(days=3)
+                    date = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)]) + datetime.timedelta(days=1)
                 else:
                     date = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)])
 
@@ -171,7 +171,7 @@ class StripeInstance():
             if existing_customer:
                 logger.debug('Full payment ACH for existing customer: ' + str(stripe_info['transaction_id']))
                 amount = stripe_info['transaction_total']
-                date = datetime.datetime.today() + datetime.timedelta(days=3)
+                date = datetime.datetime.today() + datetime.timedelta(days=1)
                 transaction_total = int(stripe_info['transaction_total']) #this is ach; dont multiply by 3 percent
 
                 stripe.InvoiceItem.create(
@@ -237,7 +237,7 @@ class StripeInstance():
             for k in range(1, int(stripe_info['installment_counter'])):
                 if existing_customer:
                     #ensures that you always keep 72 hours to change method of payment promise to exisiting clients
-                    date = datetime.datetime.fromtimestamp(stripe_info['date_'+str(k)]) + datetime.timedelta(days=3)
+                    date = datetime.datetime.fromtimestamp(stripe_info['date_'+str(k)]) + datetime.timedelta(days=1)
                 else:
                     date = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)])
 
@@ -267,7 +267,7 @@ class StripeInstance():
                 logger.debug('Full payment credit card existing customer: ' + str(stripe_info['transaction_id']))
                 # ensures that you always keep 72 hours to change method of payment promise to exisiting clients
                 amount = stripe_info['transaction_total']
-                date = datetime.datetime.today() + datetime.timedelta(days=3)
+                date = datetime.datetime.today() + datetime.timedelta(days=1)
                 transaction_total = int(math.ceil(stripe_info['transaction_total'] * 1.03))
                 stripe.InvoiceItem.create(
                     customer=stripe_info['stripe_customer_id'],
@@ -302,7 +302,7 @@ class StripeInstance():
         return {'status': 'success'}
 
     def setupAutoPaymentForExistingCustomer(self, stripe_info):
-        # date = datetime.datetime.today() + datetime.timedelta(days=3)
+        # date = datetime.datetime.today() + datetime.timedelta(days=1)
         # amount = stripe_info['transaction_total']
 
         logger.debug('Inside setupAutoPaymentForExistingCustomer() for ' + str(stripe_info['transaction_id']))
