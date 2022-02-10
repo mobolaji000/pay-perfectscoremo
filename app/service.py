@@ -479,7 +479,9 @@ class SendMessagesToClients():
             created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges. If you choose to change your method of payment, however, you can always do so between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
         elif type == 'questions':
             link_url = os.environ["url_to_start_reminder"] + "client_info/" + message
-            created_or_modified_span = "If you don't need to change your current transaction setup, please go to "+link_url+" (also sent to your email address) to input you and your student's information. Regular communication between us, you, and your student is a big part of our process. So, your information will be used to setup text message and email updates on your student's regular progress.\n\n I am happy to clarify any questions you might have!"
+            #created_or_modified_span = "If you don't need to change your current transaction setup, please go to "+link_url+" (also sent to your email address) to input you and your student's information. Regular communication between us, you, and your student is a big part of our process. So, your information will be used to setup text message and email updates on your student's regular progress.\n\n I am happy to clarify any questions you might have!"
+
+            created_or_modified_span = "I am happy to clarify any questions you might have!"
             #
 
 

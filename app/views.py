@@ -381,17 +381,6 @@ def logout():
     logout_user()
     return redirect(url_for('admin_login'))
 
-@server.route('/checkout',methods=['POST'])
-def checkout():
-    payment_data = request.form.to_dict()
-    chosen_mode_of_payment = payment_data.get('installment-payment', '') if payment_data.get('installment-payment','') != '' else payment_data.get('full-payment', '') if payment_data.get('full-payment', '') != '' else payment_data.get('payment-options', '') if payment_data.get('payment-options', '') != '' else ''
-    stripe_info = ast.literal_eval(payment_data.get('stripe_info', ''))
-    stripe_pk = os.environ.get('stripe_pk')
-    if chosen_mode_of_payment.__contains__('ach'):
-        return render_template('plaid_checkout.html',stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment)
-    else:
-        return render_template('stripe_checkout.html', stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment,stripe_pk=stripe_pk)
-
 
 def parseDataForStripe(client_info):
     #rememeber to not add more data here that could  be safely added to client_info or product_info. this seems to have been originally designed
@@ -443,7 +432,6 @@ def get_link_token():
         link_token = plaidInstance.get_link_token(stripe_info['stripe_customer_id'])
         return jsonify({'link_token': link_token})
 
-
 @server.route("/exchange_plaid_for_stripe", methods=['POST'])
 def exchange_plaid_for_stripe():
     # Change sandbox to development to test with live users and change
@@ -464,8 +452,6 @@ def exchange_plaid_for_stripe():
         result = {'status': 200}
 
     return jsonify(result)
-
-
 
 @server.route("/stripe_webhook", methods=['POST'])
 def stripe_webhook():
