@@ -75,7 +75,7 @@ $(document).ready(function() {
             event.stopPropagation()
           }
           else{
-          alert('Remember that your student information and choice of days for one-on-one will not be processed until you make a payment on the next page.');
+          //alert('Remember that your student information and choice of days for one-on-one will not be processed until you make a payment on the next page.');
            var form=document.getElementById('complete_signup_form');//retrieve the form as a DOM element
       var input = document.createElement('input');//prepare a new input DOM element
       input.setAttribute('name', 'all_days_for_one_on_one');//set the param name
@@ -179,6 +179,10 @@ for(var key in selected_cards) {
    }
 
          return student_info_present && parent_info_distinct && one_on_one_info_present;
+      }
+      else
+      {
+      return true;
       }
       }
 
