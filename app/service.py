@@ -114,6 +114,9 @@ class StripeInstance():
             return {'status': 'success'}
 
     def chargeCustomerViaACH(self, stripe_info=None, bank_account_token=None,chosen_mode_of_payment=None,default_source=None,existing_customer=None):
+
+        #deleting exisiting invoices seems to account for a situation where we have created an invoice for exsiting customer
+        #which is set to be autopayed. If customer then attempts to pay via another methiod, we dont want to double-charge
         existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=stripe_info['transaction_id']).all()
         for existing_invoice in existing_invoices:
             AppDBUtil.deleteInvoiceToBePaid(existing_invoice.transaction_id, existing_invoice.stripe_invoice_id)
@@ -214,6 +217,8 @@ class StripeInstance():
 
     def chargeCustomerViaCard(self, stripe_info, chosen_mode_of_payment, payment_id,existing_customer=None):
 
+        # deleting exisiting invoices seems to account for a situation where we have created an invoice for exsiting customer
+        # which is set to be autopayed. If customer then attempts to pay via another methiod, we dont want to double-charge
         existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=stripe_info['transaction_id']).all()
         for existing_invoice in existing_invoices:
             AppDBUtil.deleteInvoiceToBePaid(existing_invoice.transaction_id, existing_invoice.stripe_invoice_id)
