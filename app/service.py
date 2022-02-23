@@ -421,7 +421,7 @@ class SendMessagesToClients():
         elif type == 'reminder_to_make_payment':
             created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):"
         elif type == 'create_transaction_existing_client':
-            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
+            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. You can always change your method of payment between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
         elif type == 'student_info':
             link_url = os.environ["url_to_start_reminder"]+"client_info/"+message
             created_or_modified_span = "Dear Parent,\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. \n\n This will be used to setup text message and email updates on your student's regular progress."
@@ -481,7 +481,7 @@ class SendMessagesToClients():
             created_or_modified_span = "Welcome "+message+"!\n\n"+"This group chat is where you will receive regular updates on our progress. Don't be surprised if on this group chat you get messages from both 956-477-1274 and 972-584-7364. That said, if you need to speak with me, the number to call is 972-584-7364."
         elif type == 'create_transaction_existing_client':
 
-            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges. If you choose to change your method of payment, however, you can always do so between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
+            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
         elif type == 'questions':
             link_url = os.environ["url_to_start_reminder"] + "client_info/" + message
             #created_or_modified_span = "If you don't need to change your current transaction setup, please go to "+link_url+" (also sent to your email address) to input you and your student's information. Regular communication between us, you, and your student is a big part of our process. So, your information will be used to setup text message and email updates on your student's regular progress.\n\n I am happy to clarify any questions you might have!"
