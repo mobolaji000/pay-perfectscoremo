@@ -191,6 +191,14 @@ function miscellanousValidation()
      	$('input[name="diag_units"]').val(result.diag_units);
      	$('input[name="diag_total"]').val(result.diag_total);
      }
+     else
+     {
+     $('input[name="was_diagnostic_purchased"]').prop('checked', false);
+     	 $('input[name="was_diagnostic_purchased"]').val("");
+
+     	$('input[name="diag_units"]').attr('disabled', true);
+        $('input[name="diag_total"]').attr('disabled', true);
+     }
 
      //
 
