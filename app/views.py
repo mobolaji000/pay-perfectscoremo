@@ -219,12 +219,6 @@ def create_transaction():
         client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
         stripe_info = parseDataForStripe(client_info)
 
-        # stopped using after starting to asking for student info on transaction page
-        # if transaction_setup_data.get('ask_for_student_info','') == 'yes':
-        #     SendMessagesToClients.sendEmail(to_addresses=transaction_setup_data['email'], message=transaction_setup_data['prospect_id'], subject='New Student Information', type='student_info')
-        #     SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'], message=transaction_setup_data['prospect_id'], type='student_info')
-        #     logger.debug('Ask for student info: ' + str(stripe_info['transaction_id']))
-
         if transaction_setup_data.get('mark_as_paid','') == 'yes':
             stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info,action='create')
             AppDBUtil.updateTransactionPaymentStarted(transaction_id)
@@ -243,7 +237,7 @@ def create_transaction():
                 try:
                     SendMessagesToClients.sendEmail(to_addresses=transaction_setup_data['email'], message=transaction_id, type=message_type)
                     if message_type == 'create_transaction_existing_client':
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type='create_transaction_existing_client')
+                        SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type=message_type)
                         time.sleep(60)
                         SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type='questions')
                     else:
@@ -281,17 +275,10 @@ def search_transaction():
 @login_required
 def modify_transaction():
     try:
-        #print(request.form)
         data_to_modify = ast.literal_eval(request.form['data_to_modify'])
         print(data_to_modify)
         transaction_id = data_to_modify['transaction_id']
         transaction_id_again,number_of_rows_modified=AppDBUtil.modifyTransactionDetails(data_to_modify)
-
-        #stopped using after starting to asking for student info on transaction page
-        # if data_to_modify.get('ask_for_student_info','') == 'yes':
-        #     SendMessagesToClients.sendEmail(to_addresses=data_to_modify['email'], message=data_to_modify['prospect_id'], subject='New Student Information', type='student_info')
-        #     SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=data_to_modify['prospect_id'], type='student_info')
-        #     logger.debug('Ask for student info: ' + str(data_to_modify['transaction_id']))
 
         if number_of_rows_modified < 1:
             print("No transaction was modified, perhaps because no transaction code was provided")
@@ -309,11 +296,29 @@ def modify_transaction():
             stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info,action='modify')
             AppDBUtil.updateTransactionPaymentStarted(transaction_id)
             print("marked transaction as paid")
+        else:
+            customer, does_customer_payment_info_exist = stripeInstance.createCustomer(data_to_modify)
+            client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
+            stripe_info = parseDataForStripe(client_info)
+            message_type = ''
+            if does_customer_payment_info_exist:
+                message_type = 'modify_transaction_existing_client'
+                logger.debug('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
+                stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
+            else:
+                message_type = 'modify_transaction_new_client'
 
         if data_to_modify.get('send_text_and_email','') == 'yes':
+            logger.debug('Send modified transaction text and email notification: ' + str(stripe_info['transaction_id']))
             try:
-                SendMessagesToClients.sendEmail(to_addresses=data_to_modify['email'], message=transaction_id, type='modify_transaction')
-                SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=transaction_id,type='modify_transaction')
+                SendMessagesToClients.sendEmail(to_addresses=data_to_modify['email'], message=transaction_id, type=message_type)
+                if message_type == 'modify_transaction_existing_client':
+                    SendMessagesToClients.sendGroupSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, type=message_type)
+                    time.sleep(60)
+                    SendMessagesToClients.sendGroupSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, type='questions')
+                else:
+                    SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=transaction_id, type=message_type)
+
                 flash('Transaction modified and email/sms sent to client.')
             except Exception as e:
                 traceback.print_exc()
