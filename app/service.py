@@ -115,8 +115,10 @@ class StripeInstance():
 
     def chargeCustomerViaACH(self, stripe_info=None, bank_account_token=None,chosen_mode_of_payment=None,default_source=None,existing_customer=None):
 
-        #deleting exisiting invoices seems to account for a situation where we have created an invoice for exsiting customer
-        #which is set to be autopayed. If customer then attempts to pay via another methiod, we dont want to double-charge
+        # deleting exisiting invoices seems to account for a situation where we have created an invoice for exsiting customer
+        # which is set to be autopayed. If customer then attempts to pay via another methiod, or if we modifgy the invoice,
+        # we dont want to double-charge
+
         existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=stripe_info['transaction_id']).all()
         for existing_invoice in existing_invoices:
             AppDBUtil.deleteInvoiceToBePaid(existing_invoice.transaction_id, existing_invoice.stripe_invoice_id)
@@ -218,7 +220,8 @@ class StripeInstance():
     def chargeCustomerViaCard(self, stripe_info, chosen_mode_of_payment, payment_id,existing_customer=None):
 
         # deleting exisiting invoices seems to account for a situation where we have created an invoice for exsiting customer
-        # which is set to be autopayed. If customer then attempts to pay via another methiod, we dont want to double-charge
+        # which is set to be autopayed. If customer then attempts to pay via another methiod, or if we modifgy the invoice,
+        # we dont want to double-charge
         existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=stripe_info['transaction_id']).all()
         for existing_invoice in existing_invoices:
             AppDBUtil.deleteInvoiceToBePaid(existing_invoice.transaction_id, existing_invoice.stripe_invoice_id)
@@ -233,8 +236,10 @@ class StripeInstance():
             invoice_settings={'default_payment_method':payment_id},
         )
 
+        #logger.debug('Value of existing_customer is: ' + str(existing_customer))
+
         if existing_customer:
-            logger.debug('Existing customer: ' + str(stripe_info['stripe_customer_id'])+' '+ str(stripe_info['name']))
+            logger.debug('Existing customer: ' + str(stripe_info['transaction_id']) + str(stripe_info['stripe_customer_id'])+' '+ str(stripe_info['name']))
 
         if chosen_mode_of_payment == 'installment-payment-credit-card':
             logger.debug('Installment payment credit card: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
@@ -270,7 +275,7 @@ class StripeInstance():
         else:
             if existing_customer:
                 logger.debug('Full payment credit card existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
-                # ensures that you always keep 72 hours to change method of payment promise to exisiting clients
+                # ensures that you always keep 48? hours to change method of payment promise to exisiting clients
                 amount = stripe_info['transaction_total']
                 date = datetime.datetime.today() + datetime.timedelta(days=1)
                 transaction_total = int(math.ceil(stripe_info['transaction_total'] * 1.03))
@@ -416,12 +421,14 @@ class SendMessagesToClients():
 
         if type == 'create_transaction_new_client':
             created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour transaction has just been created. Here are the payment/signup instructions/options (also sent to your email address):"
-        elif type == 'modify_transaction':
+        elif type == 'modify_transaction_new_client':
             created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour transaction has just been modified. Here are the payment/signup instructions/options (also sent to your email address):"
         elif type == 'reminder_to_make_payment':
             created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):"
         elif type == 'create_transaction_existing_client':
             created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. You can always change your method of payment between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
+        elif type == 'modify_transaction_existing_client':
+            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour transaction has just been modified using your method of payment on file, but there have been no charges yet. You can always change your method of payment between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
         elif type == 'student_info':
             link_url = os.environ["url_to_start_reminder"]+"client_info/"+message
             created_or_modified_span = "Dear Parent,\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. \n\n This will be used to setup text message and email updates on your student's regular progress."

@@ -132,6 +132,7 @@ class AppDBUtil():
 
             installments = {}
             print("number of installments is " + str(int(clientData['installment_counter']) - 1))
+
             for k in range(1, int(clientData['installment_counter'])):
                 print("current installment being updated is " + str(k))
                 installments.update({'date_' + str(k): clientData['date_' + str(k)], 'amount_' + str(k): clientData['amount_' + str(k)]})
