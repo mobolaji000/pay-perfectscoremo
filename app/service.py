@@ -487,8 +487,9 @@ class SendMessagesToClients():
         if type == 'create_group_chat':
             created_or_modified_span = "Welcome "+message+"!\n\n"+"This group chat is where you will receive regular updates on our progress. Don't be surprised if on this group chat you get messages from both 956-477-1274 and 972-584-7364. That said, if you need to speak with me, the number to call is 972-584-7364."
         elif type == 'create_transaction_existing_client':
-
             created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
+        elif type == 'modify_transaction_existing_client':
+            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour transaction has just been modified using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
         elif type == 'questions':
             link_url = os.environ["url_to_start_reminder"] + "client_info/" + message
             #created_or_modified_span = "If you don't need to change your current transaction setup, please go to "+link_url+" (also sent to your email address) to input you and your student's information. Regular communication between us, you, and your student is a big part of our process. So, your information will be used to setup text message and email updates on your student's regular progress.\n\n I am happy to clarify any questions you might have!"
@@ -501,7 +502,7 @@ class SendMessagesToClients():
             text_message = created_or_modified_span
         elif type == 'questions':
             text_message = created_or_modified_span
-        elif type == 'create_transaction_existing_client':
+        elif type == 'create_transaction_existing_client' or type == 'modify_transaction_existing_client':
             text_message = "\n" + created_or_modified_span + "\n\n" \
                            + """1. Go to perfectscoremo.com\n\n""" \
                            + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
