@@ -596,15 +596,14 @@ def start_background_jobs_before_first_request():
     print("Reminders background job added")
     print("Invoice payment background job added")
 
-    import datetime,time
-    stamp = int(datetime.datetime.now().timestamp())
-    date = datetime.datetime.fromtimestamp(stamp)
-    print("1. ",date)
-    print("2. timezone info is: ",datetime.datetime.today().astimezone().tzinfo)
-    print("3. ",datetime.datetime.today())
-    print("4. ",datetime.datetime.fromtimestamp(int(time.mktime(datetime.datetime.today().timetuple()))))
-
-
+    #THE KEY TO GETTING TIMEZONE RIGHT IS SETTING IT AS AN ENVIRONMENT VARIABLE ON DIGITAL OCEAN SERVER
+    # import datetime,time
+    # stamp = int(datetime.datetime.now().timestamp())
+    # date = datetime.datetime.fromtimestamp(stamp)
+    # print("1. ",date)
+    # print("2. timezone info is: ",datetime.datetime.today().astimezone().tzinfo)
+    # print("3. ",datetime.datetime.today())
+    # print("4. ",datetime.datetime.fromtimestamp(int(time.mktime(datetime.datetime.today().timetuple()))))
 
     scheduler.start()
 
