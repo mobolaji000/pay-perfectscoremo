@@ -553,8 +553,13 @@ def start_background_jobs_before_first_request():
 
     def invoice_payment_background_job():
         print("Invoice payment background job started")
+        import datetime
+        stamp = int(datetime.datetime.now().timestamp())
+        date = datetime.datetime.fromtimestamp(stamp)
+        print(date)
         try:
             invoicesToPay = AppDBUtil.findInvoicesToPay()
+            print("Invoices to pay are: ",invoicesToPay)
 
             for invoice in invoicesToPay:
                 try:
