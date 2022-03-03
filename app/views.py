@@ -474,14 +474,10 @@ def stripe_webhook():
         print("400 error from calling webhook. Check code and logs")
         print(e)
         traceback.print_exc()
-        return jsonify({'status': 400})
-
-    # Handle the event
-
-    # handle updating the DB when transactions are paid; these transactions should have transaction codes attahced already
+        return json.dumps({'success':False}), 400, {'ContentType':'application/json'}
+        #return jsonify({'status': 400})
     try:
-        #if necessary, handle charge.succeeded and charge.failed, which are specific to ach
-        #https://stripe.com/docs/ach#ach-specific-webhook-notifications
+        #using this for successful card payments
         if event.type == 'invoice.paid':
             paid_invoice = event.data.object
             transaction_id = paid_invoice.metadata['transaction_id']
@@ -501,36 +497,76 @@ def stripe_webhook():
                 raise Exception('Somehow there is no payment intent, payment method, or payment type')
 
             if payment_type == 'card':
-                amount_paid = int(math.floor(paid_invoice.total/103))
+                amount_paid = int(math.floor(paid_invoice.total / 103))
+
+
+                AppDBUtil.updateInvoiceAsPaid(paid_invoice.id)
+                AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id, amount_paid)
+                AppDBUtil.updateTransactionPaymentStarted(transaction_id)
+
+                print("paid transaction is ", paid_invoice)
+                print("transaction id is ", transaction_id)
             else:
-                amount_paid = paid_invoice.total / 100
+                raise Exception(f"Why is payment type not card for {transaction_id} ?")
 
-            AppDBUtil.updateInvoiceAsPaid(paid_invoice.id)
-            AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id,amount_paid)
-            AppDBUtil.updateTransactionPaymentStarted(transaction_id)
-
-            print("paid transaction is ", paid_invoice)
-            print("transaction id is ", transaction_id)
-
+        # using this for failed card payments and future failed ACH payments
         elif event.type == 'invoice.payment_failed':
             failed_invoice = event.data.object
             try:
                 message = "Invoice "+str(failed_invoice.id)+" for "+str(failed_invoice.customer_name)+" failed to pay."
-                #SendMessagesToClients.sendEmail(to_addresses='mo@prepwithmo.com', message=message, type='to_mo')
                 SendMessagesToClients.sendSMS(to_number='9725847364', message=message, type='to_mo')
                 print(message)
             except Exception as e:
                 print(e)
                 traceback.print_exc()
+
+        elif event.type == 'invoice.finalized':
+            finalized_invoice = event.data.object
+            transaction_id = finalized_invoice.metadata['transaction_id']
+
+            payment_intent = stripe.PaymentIntent.retrieve(finalized_invoice.payment_intent, ) if finalized_invoice.payment_intent else None
+            payment_attempt_status = payment_intent['charges']['data'][0]['outcome']['network_status'] if payment_intent and payment_intent['charges']['data'][0]['outcome'] else None
+            payment_method_details = payment_intent['charges']['data'][0]['payment_method_details']['type'] if payment_intent['charges']['data'][0]['payment_method_details'] else None
+
+            if not payment_method_details:
+                raise Exception('Somehow there is no payment intent or payment_method_details')
+
+            if payment_method_details == 'ach_debit':
+                amount_paid = finalized_invoice.total / 100
+
+                # using this for successful ach payments
+                if payment_attempt_status == 'approved_by_network':
+                    AppDBUtil.updateInvoiceAsPaid(finalized_invoice.id)
+                    AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id,amount_paid)
+                    AppDBUtil.updateTransactionPaymentStarted(transaction_id)
+
+                    print("paid transaction (VIA ACH) is ", finalized_invoice)
+                    print("transaction id is ", transaction_id)
+
+                # using this for failed ach payments
+                else:
+                    try:
+                        message = "Invoice " + str(finalized_invoice.id) + " for " + str(finalized_invoice.customer_name) + " failed to pay."
+                        SendMessagesToClients.sendSMS(to_number='9725847364', message=message, type='to_mo')
+                        print(message)
+                    except Exception as e:
+                        print(e)
+                        traceback.print_exc()
+            else:
+                raise Exception(f"Why is payment method detail not ach_debit for {transaction_id} ?")
+
         else:
             print('Unhandled event type {}'.format(event.type))
+
     except Exception as e:
-        print("500 error from calling webhook. Check code and logs")
+        print("500 error from calling webhook. Check code and logs.")
         print(e)
         traceback.print_exc()
-        return jsonify({'status': 500})
+        return json.dumps({'success': False}), 500, {'ContentType': 'application/json'}
+        #return jsonify({'status': 500})
 
-    return jsonify({'status': 200})
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+    #return jsonify({'status': 200})
 
 
 @server.before_first_request
@@ -561,7 +597,8 @@ def start_background_jobs_before_first_request():
                 try:
                     invoice_payment_failed = True
                     stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
-                    if stripe_invoice_object.paid:
+                    if stripe_invoice_object.paid or stripe_invoice_object.finalized:
+                        #added finalized because ach payments finalize immediately but do not send 'paid' events for 14 days
                         print("Invoice payment succeeded: ",invoice['last_name'])
                         #might need to come back and handle this via webhook
                         AppDBUtil.updateInvoiceAsPaid(stripe_invoice_id=invoice['stripe_invoice_id'])
