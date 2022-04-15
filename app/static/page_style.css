@@ -1,8 +1,7 @@
-
 /* Chrome, Safari, Edge, Opera */
 #tp_total::-webkit-outer-spin-button,
 #tp_total::-webkit-inner-spin-button,
- #college_apps_total::-webkit-outer-spin-button,
+#college_apps_total::-webkit-outer-spin-button,
 #college_apps_total::-webkit-inner-spin-button,
 #adjust_total::-webkit-outer-spin-button,
 #adjust_total::-webkit-inner-spin-button,
@@ -11,21 +10,22 @@
 #diag_units::-webkit-outer-spin-button,
 #diag_units::-webkit-inner-spin-button,
 .installment_amounts::-webkit-outer-spin-button,
-.installment_amounts::-webkit-inner-spin-button
-{
-  -webkit-appearance: none;
-  margin: 0;
+.installment_amounts::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 /* Firefox */
-#tp_total,#college_apps_total,#adjust_total,#transaction_id,#diag_units, .installment_amounts {
-  -moz-appearance: textfield;
+#tp_total, #college_apps_total, #adjust_total, #transaction_id, #diag_units, .installment_amounts {
+    -moz-appearance: textfield;
 }
 
 
 #full-payment-div, #installment-payment-div {
-display: none !important;
+    display: none !important;
 }
+
+/*TODO figure out effect of turning this into a .sass file to remove errors on @inlcude https://stackoverflow.com/questions/52448494/css-usage-of-include-in-this-example-can-i-replace-them-with-import, https://stackoverflow.com/questions/39311744/what-is-the-meaning-of-the-include-in-css-files*/
 
 .card-columns {
   @include media-breakpoint-only(xl) {
@@ -40,6 +40,7 @@ display: none !important;
   @include media-breakpoint-only(sm) {
     column-count: 3;
   }
+
 }
 
 
