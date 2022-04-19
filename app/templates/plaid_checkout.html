@@ -38,7 +38,7 @@
 
 	<div >
     {% for message in get_flashed_messages() %}
-    <div class="alert alert-warning text-danger">
+    <div class="alert alert-warning text-danger" style="color:red !important">
         {{ message }}
     </div>
     {% endfor %}
