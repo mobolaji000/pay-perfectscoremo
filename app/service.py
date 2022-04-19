@@ -499,7 +499,12 @@ class SendMessagesToClients():
             cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+1' + to_number)
 
         if type == 'create_group_chat':
-            created_or_modified_span = "Welcome "+message+"!\n\n"+"This group chat is where you will receive regular updates on our progress. Don't be surprised if on this group chat you get messages from both 956-477-1274 and 972-584-7364. That said, if you need to speak with me, the number to call is 972-584-7364."
+            print("adding assitant's number")
+            cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+1' + '8177160139')
+
+
+        if type == 'create_group_chat':
+            created_or_modified_span = "Welcome "+message+"!\n\n"+"I am Mo's automated assitant, and I will be sending reports on your progress via this group chat. Mo is also on this group chat on 972-584-7364. Mo's human assistant (817-716-0139) is on here as well and will help with following up with you on your daily homework/review sessions. These said, if you need to speak with someone, call Mo on 972-584-7364. We can't wait to see you succeeed!"
         elif type == 'create_transaction_existing_client':
             created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
         elif type == 'modify_transaction_existing_client':
@@ -530,6 +535,7 @@ class SendMessagesToClients():
                            + """### We don't receive messages on this number. If you have any questions, reach out on 972-584-7364 ###\n\n""" \
                            + """Regards,\n\n""" \
                            + """Mo\n\n"""
+
 
         cls.twilioClient.conversations.conversations(conversation.sid).messages.create(body=text_message, author='+19564771274')
         print("group chat created!")
