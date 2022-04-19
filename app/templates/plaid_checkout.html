@@ -99,8 +99,15 @@
     },
     dataType: "json",
     async: false,
-    success: function (data) {
-    window.location.href ="/success";
+    success: function (result) {
+   if(result.status != 'success'){
+        location.reload();
+        return false;
+    }
+    else
+    {
+        window.location.href ="/success";
+    }
     },
     error: function (error) {
     window.location.href ="/failure";
