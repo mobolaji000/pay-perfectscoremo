@@ -44,6 +44,8 @@
 
    <input id="stripe_info" hidden  type="stripe_info"  data-stripe_info="{{ stripe_info }}">
     <input id="chosen_mode_of_payment" type="hidden"  data-chosen_mode_of_payment="{{ chosen_mode_of_payment }}">
+	 <input id="payment_and_signup_data" type="hidden"  data-payment_and_signup_data="{{ payment_and_signup_data }}">
+
 
 </div>
 
@@ -61,6 +63,7 @@
 
   var stripe_info = $("#stripe_info").attr("data-stripe_info");
   var chosen_mode_of_payment = $("#chosen_mode_of_payment").attr("data-chosen_mode_of_payment");
+  var payment_and_signup_data = $("#payment_and_signup_data").attr("data-payment_and_signup_data");
 
       $.ajax({
     url: '/get_link_token',
@@ -90,7 +93,8 @@
         stripe_info: stripe_info,
         public_token: public_token,
         account_id: metadata.accounts[0].id,
-        chosen_mode_of_payment: chosen_mode_of_payment
+        chosen_mode_of_payment: chosen_mode_of_payment,
+		payment_and_signup_data: payment_and_signup_data
 
     },
     dataType: "json",

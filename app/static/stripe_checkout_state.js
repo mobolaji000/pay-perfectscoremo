@@ -5,6 +5,7 @@ var stripe = Stripe(stripe_pk);
 var elements = stripe.elements();
 var stripe_info = $("#stripe_info").attr("data-stripe_info");
 var chosen_mode_of_payment = $("#chosen_mode_of_payment").attr("data-chosen_mode_of_payment");
+var payment_and_signup_data = $("#payment_and_signup_data").attr("data-payment_and_signup_data");
 
 var card = elements.create('card', {
 hidePostalCode: false,
@@ -87,6 +88,7 @@ var cardElement = document.getElementById('card-element');
         chosen_mode_of_payment: chosen_mode_of_payment,
         stripe_info: stripe_info,
         payment_id: payment_id,
+        payment_and_signup_data: payment_and_signup_data
     },
     dataType: "json",
     async: false,

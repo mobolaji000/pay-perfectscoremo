@@ -428,6 +428,11 @@ def execute_card_payment():
         flash('Payment failed. Enter a valid credit/debit card number. Or contact Mo.')
     else:
         AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
+        payment_and_signup_data = ast.literal_eval(request.form['payment_and_signup_data'])
+        result = enterClientInfo(payment_and_signup_data)
+        if result['status'] != 'success':
+            print("Attempt to create client info failed.")
+            flash('Attempt to create client info failed. Contact Mo.')
 
     return jsonify(result)
 
@@ -454,9 +459,43 @@ def exchange_plaid_for_stripe():
         result = {'status': 400}
     else:
         AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
-        result = {'status': 200}
+
+        payment_and_signup_data = ast.literal_eval(request.form['payment_and_signup_data'])
+        result = enterClientInfo(payment_and_signup_data)
+        if result['status'] != 'success':
+            print("Attempt to create client info failed.")
+            result = {'status': 400}
+        else:
+            result = {'status': 200}
 
     return jsonify(result)
+
+
+
+def enterClientInfo(payment_and_signup_data={}):
+    #payment_and_signup_data = request.form.to_dict()
+    ask_for_student_info = payment_and_signup_data.get('ask_for_student_info', '')
+
+    if ask_for_student_info == 'yes':
+        try:
+            print("prospect_id in post is ", payment_and_signup_data['prospect_id'])
+            print("student data is", payment_and_signup_data)
+            AppDBUtil.createStudentData(payment_and_signup_data)
+            to_numbers = [number for number in [payment_and_signup_data['parent_1_phone_number'], payment_and_signup_data['parent_2_phone_number'], payment_and_signup_data['student_phone_number']] if number != '']
+            SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], type='create_group_chat')
+            message = ""
+            for k, v in ast.literal_eval(payment_and_signup_data['all_days_for_one_on_one']).items():
+                message = message + " " + k.split('\n')[1].strip() + ","
+            SendMessagesToClients.sendEmail(message=message, subject="Suggested one-on-one days for " + str(payment_and_signup_data['student_first_name']) + " " + str(payment_and_signup_data['student_last_name']), type='to_mo')
+            # hold off on sending group emails until you dedcide there is a value add
+            # SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+            return {'status': 'success'}
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            return {'status': 'failure'}
+            #return render_template('error.html', error_message="Error in submitting student information and creating group messages for regular updates. Please contact Mo at 972-584-7364.")
+
 
 @server.route("/stripe_webhook", methods=['POST'])
 def stripe_webhook():
@@ -648,33 +687,14 @@ def start_background_jobs_before_first_request():
 @server.route('/post_signup_checkout',methods=['POST'])
 def post_signup_checkout():
     payment_and_signup_data = request.form.to_dict()
-    ask_for_student_info = payment_and_signup_data.get('ask_for_student_info','')
-
-    if ask_for_student_info == 'yes':
-        try:
-            print("prospect_id in post is ", payment_and_signup_data['prospect_id'])
-            print("student data is", payment_and_signup_data)
-            AppDBUtil.createStudentData(payment_and_signup_data)
-            to_numbers = [number for number in [payment_and_signup_data['parent_1_phone_number'], payment_and_signup_data['parent_2_phone_number'], payment_and_signup_data['student_phone_number']] if number != '']
-            SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], type='create_group_chat')
-            message = ""
-            for k, v in ast.literal_eval(payment_and_signup_data['all_days_for_one_on_one']).items():
-                message = message + " "+k.split('\n')[1].strip()+","
-            SendMessagesToClients.sendEmail(message=message, subject="Suggested one-on-one days for "+str(payment_and_signup_data['student_first_name'])+" "+str(payment_and_signup_data['student_last_name']), type='to_mo')
-            # hold off on sending group emails until you dedcide there is a value add
-            # SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
-        except Exception as e:
-            print(e)
-            traceback.print_exc()
-            return render_template('error.html',error_message="Error in submitting student information and creating group messages for regular updates. Please contact Mo at 972-584-7364.")
 
     chosen_mode_of_payment = payment_and_signup_data.get('installment-payment', '') if payment_and_signup_data.get('installment-payment','') != '' else payment_and_signup_data.get('full-payment', '') if payment_and_signup_data.get('full-payment', '') != '' else payment_and_signup_data.get('payment-options', '') if payment_and_signup_data.get('payment-options', '') != '' else ''
     stripe_info = ast.literal_eval(payment_and_signup_data['stripe_info'])
     stripe_pk = os.environ.get('stripe_pk')
     if chosen_mode_of_payment.__contains__('ach'):
-        return render_template('plaid_checkout.html',stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment)
+        return render_template('plaid_checkout.html',stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment,payment_and_signup_data=payment_and_signup_data)
     else:
-        return render_template('stripe_checkout.html', stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment,stripe_pk=stripe_pk)
+        return render_template('stripe_checkout.html', stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment,stripe_pk=stripe_pk,payment_and_signup_data=payment_and_signup_data)
 
 @server.route('/complete_signup',methods=['POST'])
 def complete_signup():
