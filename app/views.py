@@ -431,8 +431,8 @@ def execute_card_payment():
         payment_and_signup_data = ast.literal_eval(request.form['payment_and_signup_data'])
         result = enterClientInfo(payment_and_signup_data)
         if result['status'] != 'success':
-            print("Attempt to create client info failed.")
-            flash('Attempt to create client info failed. Contact Mo.')
+            print('Attempt to create family information failed. Contact Mo.')
+            flash('Attempt to create family information failed. Contact Mo.')
 
     return jsonify(result)
 
@@ -455,18 +455,21 @@ def exchange_plaid_for_stripe():
     result = stripeInstance.chargeCustomerViaACH(stripe_info=stripe_info,bank_account_token=bank_account_token,chosen_mode_of_payment=chosen_mode_of_payment,existing_customer=does_customer_payment_info_exist)
 
     if result['status'] != 'success':
-        print("Attempt to pay via ACH failed")
-        result = {'status': 400}
+        print("Attempt to pay via ACH failed. Try again or contact Mo.")
+        flash('Attempt to pay via ACH failed. Try again or contact Mo.')
+        #result = {'status': 400}
     else:
         AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
 
         payment_and_signup_data = ast.literal_eval(request.form['payment_and_signup_data'])
         result = enterClientInfo(payment_and_signup_data)
         if result['status'] != 'success':
-            print("Attempt to create client info failed.")
-            result = {'status': 400}
+            print('Attempt to create family information failed. Contact Mo.')
+            flash('Attempt to create family information failed. Contact Mo.')
+            #result = {'status': 400}
         else:
-            result = {'status': 200}
+            pass
+            #result = {'status': 200}
 
     return jsonify(result)
 
