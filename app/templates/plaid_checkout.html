@@ -36,6 +36,16 @@
 
     <br>
 
+	<div >
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-warning text-danger">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+
+<br>
+
        <div class="row">
     <div  id="spinner" hidden class="col">
                     <div class="spinner-border text-warning"></div>
