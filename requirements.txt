@@ -1,4 +1,4 @@
-Flask==1.1.2
+Flask==2.1.0
 Flask-WTF==0.14.3
 python-dotenv==0.15.0
 WTForms==2.3.3
@@ -16,5 +16,8 @@ python-http-client==3.3.2
 PyJWT==1.7.1
 twilio==6.57.0
 APScheduler==3.7.0
+Jinja2==3.0.3
+itsdangerous==2.0.1
+werkzeug==2.0.2
 
 
