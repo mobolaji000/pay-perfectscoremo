@@ -429,10 +429,11 @@ def execute_card_payment():
     else:
         AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
         payment_and_signup_data = ast.literal_eval(request.form['payment_and_signup_data'])
-        result = enterClientInfo(payment_and_signup_data)
-        if result['status'] != 'success':
-            print('Attempt to create family information failed. Contact Mo.')
-            flash('Attempt to create family information failed. Contact Mo.')
+        if payment_and_signup_data.get('ask_for_student_info', '') == 'yes':
+            result = enterClientInfo(payment_and_signup_data)
+            if result['status'] != 'success':
+                print('Attempt to create family information failed. Contact Mo.')
+                flash('Attempt to create family information failed. Contact Mo.')
 
     return jsonify(result)
 
@@ -457,19 +458,15 @@ def exchange_plaid_for_stripe():
     if result['status'] != 'success':
         print("Attempt to pay via ACH failed. Try again or contact Mo.")
         flash('Attempt to pay via ACH failed. Try again or contact Mo.')
-        #result = {'status': 400}
     else:
         AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
 
         payment_and_signup_data = ast.literal_eval(request.form['payment_and_signup_data'])
         result = enterClientInfo(payment_and_signup_data)
-        if result['status'] != 'success':
-            print('Attempt to create family information failed. Contact Mo.')
-            flash('Attempt to create family information failed. Contact Mo.')
-            #result = {'status': 400}
-        else:
-            pass
-            #result = {'status': 200}
+        if payment_and_signup_data.get('ask_for_student_info', '') == 'yes':
+            if result['status'] != 'success':
+                print('Attempt to create family information failed. Contact Mo.')
+                flash('Attempt to create family information failed. Contact Mo.')
 
     return jsonify(result)
 
@@ -478,26 +475,24 @@ def exchange_plaid_for_stripe():
 def enterClientInfo(payment_and_signup_data={}):
     #payment_and_signup_data = request.form.to_dict()
     ask_for_student_info = payment_and_signup_data.get('ask_for_student_info', '')
-
-    if ask_for_student_info == 'yes':
-        try:
-            print("prospect_id in post is ", payment_and_signup_data['prospect_id'])
-            print("student data is", payment_and_signup_data)
-            AppDBUtil.createStudentData(payment_and_signup_data)
-            to_numbers = [number for number in [payment_and_signup_data['parent_1_phone_number'], payment_and_signup_data['parent_2_phone_number'], payment_and_signup_data['student_phone_number']] if number != '']
-            SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], type='create_group_chat')
-            message = ""
-            for k, v in ast.literal_eval(payment_and_signup_data['all_days_for_one_on_one']).items():
-                message = message + " " + k.split('\n')[1].strip() + ","
-            SendMessagesToClients.sendEmail(message=message, subject="Suggested one-on-one days for " + str(payment_and_signup_data['student_first_name']) + " " + str(payment_and_signup_data['student_last_name']), type='to_mo')
-            # hold off on sending group emails until you dedcide there is a value add
-            # SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
-            return {'status': 'success'}
-        except Exception as e:
-            print(e)
-            traceback.print_exc()
-            return {'status': 'failure'}
-            #return render_template('error.html', error_message="Error in submitting student information and creating group messages for regular updates. Please contact Mo at 972-584-7364.")
+    try:
+        print("prospect_id in post is ", payment_and_signup_data['prospect_id'])
+        print("student data is", payment_and_signup_data)
+        AppDBUtil.createStudentData(payment_and_signup_data)
+        to_numbers = [number for number in [payment_and_signup_data['parent_1_phone_number'], payment_and_signup_data['parent_2_phone_number'], payment_and_signup_data['student_phone_number']] if number != '']
+        SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], type='create_group_chat')
+        message = ""
+        for k, v in ast.literal_eval(payment_and_signup_data['all_days_for_one_on_one']).items():
+            message = message + " " + k.split('\n')[1].strip() + ","
+        SendMessagesToClients.sendEmail(message=message, subject="Suggested one-on-one days for " + str(payment_and_signup_data['student_first_name']) + " " + str(payment_and_signup_data['student_last_name']), type='to_mo')
+        # hold off on sending group emails until you dedcide there is a value add
+        # SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+        return {'status': 'success'}
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+        return {'status': 'failure'}
+        #return render_template('error.html', error_message="Error in submitting student information and creating group messages for regular updates. Please contact Mo at 972-584-7364.")
 
 
 @server.route("/stripe_webhook", methods=['POST'])
