@@ -590,7 +590,7 @@ def stripe_webhook():
                         print(e)
                         traceback.print_exc()
             else:
-                raise Exception(f"Why is payment method detail not ach_debit for {transaction_id} ?")
+                raise Exception(f"Why is payment method detail not ach_debit for {transaction_id} ? Probably because there this is an instance of a credit card payment, which was already handled under invoice.paid and is now being sent to be finalized, which I do not care for since it has already been updated as paid the under invoice.paid i.e. I only care about updating ach payments through invoice.finalized.")
 
         else:
             print('Unhandled event type {}'.format(event.type))
