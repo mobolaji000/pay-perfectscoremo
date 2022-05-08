@@ -427,7 +427,7 @@ def checkIfDetailsWereChangedOnFrontEnd(stripe_info={}):
         for k in range(1, int(stripe_info['installment_counter'])):
             date_from_back_end = client_info['installments'][k - 1]['date']
             amount_from_back_end = client_info['installments'][k - 1]['amount']
-            date_from_front_end = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)])
+            date_from_front_end = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)]).strftime("%Y-%m-%d")
             amount_from_front_end = stripe_info['amount_' + str(k)]
             if date_from_back_end != date_from_front_end or amount_from_back_end != amount_from_front_end:
                 logger.info("date_from_back_end is: {}".format(date_from_back_end))
