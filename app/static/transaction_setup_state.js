@@ -77,7 +77,7 @@ $(document).ready(function() {
             $('input[name="diag_units"]').val("1");
 
             $('input[name="diag_total"]').val(calculateDiagnosticTotal());
-            $('input[name="transaction_total"]').val(transactionTotal());
+            $('input[name="transaction_total"]').val(transactionTotal()).change();
 
 
             $(this).val("yes")
@@ -94,13 +94,13 @@ $(document).ready(function() {
         }
 
          $('input[name="diag_total"]').val(calculateDiagnosticTotal());
-        $('input[name="transaction_total"]').val(transactionTotal());
+        $('input[name="transaction_total"]').val(transactionTotal()).change();
 
     });
 
     $('input[name="diag_units"]').on('input', function() {
         $('input[name="diag_total"]').val(calculateDiagnosticTotal());
-        $('input[name="transaction_total"]').val(transactionTotal());
+        $('input[name="transaction_total"]').val(transactionTotal()).change();
     });
 
     function calculateDiagnosticTotal() {
@@ -110,8 +110,10 @@ $(document).ready(function() {
     }
 
     $('#was_test_prep_purchased').change(function() {
+
         if ($(this).val() == "") {
             $('input[name="tp_product"]').prop('required', true);
+
             $('input[name="tp_product"]').prop('checked', false);
 
 
@@ -121,6 +123,7 @@ $(document).ready(function() {
             $(this).val("yes");
         } else {
             $('input[name="tp_product"]').prop('required', false);
+
             $('input[name="tp_product"]').prop('checked', false);
 
             $('input[name="tp_product"]').attr('disabled', true);
@@ -131,17 +134,17 @@ $(document).ready(function() {
         }
 
         $('input[name="tp_total"]').val(calculateTestPrepTotal());
-        $('input[name="transaction_total"]').val(transactionTotal());
+        $('input[name="transaction_total"]').val(transactionTotal()).change();
     });
 
     $('input[name="tp_product"]').change(function() {
         $('input[name="tp_total"]').val(calculateTestPrepTotal());
-        $('input[name="transaction_total"]').val(transactionTotal());
+        $('input[name="transaction_total"]').val(transactionTotal()).change();
     });
 
     $('input[name="tp_units"]').on('input', function() {
         $('input[name="tp_total"]').val(calculateTestPrepTotal());
-        $('input[name="transaction_total"]').val(transactionTotal());
+        $('input[name="transaction_total"]').val(transactionTotal()).change();
     });
 
     function calculateTestPrepTotal() {
@@ -182,23 +185,23 @@ $(document).ready(function() {
         }
 
          $('input[name="college_apps_total"]').val(collegeAppsTotal());
-        $('input[name="transaction_total"]').val(transactionTotal());
+        $('input[name="transaction_total"]').val(transactionTotal()).change();
     });
 
     $('input[name="college_consultation"]').change(function() {
         $('input[name="college_apps_total"]').val(collegeAppsTotal());
-        $('input[name="transaction_total"]').val(transactionTotal());
+        $('input[name="transaction_total"]').val(transactionTotal()).change();
     });
 
     $('input[name="college_apps_product"]').change(function() {
         $('input[name="college_apps_total"]').val(collegeAppsTotal());
-        $('input[name="transaction_total"]').val(transactionTotal());
+        $('input[name="transaction_total"]').val(transactionTotal()).change();
         $('input[name="college_apps_units"]').attr('min', 1);
     });
 
     $('input[name="college_apps_units"]').on('input', function() {
         $('input[name="college_apps_total"]').val(collegeAppsTotal());
-        $('input[name="transaction_total"]').val(transactionTotal());
+        $('input[name="transaction_total"]').val(transactionTotal()).change();
     });
 
     function collegeAppsTotal() {
@@ -221,8 +224,10 @@ $(document).ready(function() {
     });
 
     $('input[name="adjust_total"]').on('input', function() {
-        $('input[name="transaction_total"]').val(transactionTotal());
+        $('input[name="transaction_total"]').val(transactionTotal()).change();
     });
+    
+   
 
     function transactionTotal() {
         var diagnostic_total = $('input[name="diag_total"]').val() || 0;
@@ -360,7 +365,7 @@ $(document).ready(function() {
         //client-side counter is always one more; actual number has been set server-side
     });
 
-     $("table.order-list").on('input', ".installment_amounts", function() {
+    doesInstallmentEqualTotal = function(event) {
 
      var installment_total = 0;
      var amount = '';
@@ -376,7 +381,7 @@ $(document).ready(function() {
 		 document.getElementById("installment_not_equal_total_message_create").hidden=false;
             $('input[name="create_transaction_button"]').attr('disabled', true);
 
-            document.getElementById("installment_not_equal_total_message_modify").hidden=false;
+              document.getElementById("installment_not_equal_total_message_modify").hidden=false;
             $('input[name="modify_transaction_button"]').attr('disabled', true);
         }
         else{
@@ -387,5 +392,11 @@ $(document).ready(function() {
             $('input[name="modify_transaction_button"]').attr('disabled', false);
         }
 
-    });
+    }
+
+     $("table.order-list").on('input', ".installment_amounts", doesInstallmentEqualTotal);
+
+
+     $("#transaction_total").on('change', doesInstallmentEqualTotal);
+
 });

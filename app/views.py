@@ -422,6 +422,26 @@ def execute_card_payment():
     stripe_info = ast.literal_eval(request.form['stripe_info'])
     payment_id = request.form['payment_id']
     does_customer_payment_info_exist = True if stripe_info.get('does_customer_payment_info_exist','') == 'yes' else False
+
+    transaction = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
+    logger.info("Transaction I am debgging is {}".format(str(transaction)))
+
+    # return redirect(url_for('error', error_message="There has been an unusual error. Conact Mo."))
+
+
+    # amount = stripe_info['transaction_total']
+    #
+    # for k in range(1, int(stripe_info['installment_counter'])):
+    #     if existing_customer:
+    #         # ensures that you always keep 72 hours to change method of payment promise to exisiting clients
+    #         date = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)]) + datetime.timedelta(days=1)
+    #     else:
+    #         date = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)])
+    #
+    #     amount = stripe_info['amount_' + str(k)]
+    #
+    #
+
     result = stripeInstance.chargeCustomerViaCard(stripe_info=stripe_info, chosen_mode_of_payment=chosen_mode_of_payment, payment_id=payment_id,existing_customer=does_customer_payment_info_exist)
     if result['status'] != 'success':
         print("Stripe card payment failed")
@@ -685,14 +705,14 @@ def start_background_jobs_before_first_request():
 @server.route('/post_signup_checkout',methods=['POST'])
 def post_signup_checkout():
     payment_and_signup_data = request.form.to_dict()
-
-    chosen_mode_of_payment = payment_and_signup_data.get('installment-payment', '') if payment_and_signup_data.get('installment-payment','') != '' else payment_and_signup_data.get('full-payment', '') if payment_and_signup_data.get('full-payment', '') != '' else payment_and_signup_data.get('payment-options', '') if payment_and_signup_data.get('payment-options', '') != '' else ''
+    chosen_mode_of_payment = payment_and_signup_data.get('installment-payment', '') if payment_and_signup_data.get('installment-payment', '') != '' else payment_and_signup_data.get('full-payment', '') if payment_and_signup_data.get('full-payment', '') != '' else payment_and_signup_data.get('payment-options', '') if payment_and_signup_data.get('payment-options', '') != '' else ''
     stripe_info = ast.literal_eval(payment_and_signup_data['stripe_info'])
     stripe_pk = os.environ.get('stripe_pk')
     if chosen_mode_of_payment.__contains__('ach'):
-        return render_template('plaid_checkout.html',stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment,payment_and_signup_data=payment_and_signup_data)
+        return render_template('plaid_checkout.html', stripe_info=stripe_info, chosen_mode_of_payment=chosen_mode_of_payment, payment_and_signup_data=payment_and_signup_data)
     else:
-        return render_template('stripe_checkout.html', stripe_info=stripe_info,chosen_mode_of_payment=chosen_mode_of_payment,stripe_pk=stripe_pk,payment_and_signup_data=payment_and_signup_data)
+        return render_template('stripe_checkout.html', stripe_info=stripe_info, chosen_mode_of_payment=chosen_mode_of_payment, stripe_pk=stripe_pk, payment_and_signup_data=payment_and_signup_data)
+
 
 @server.route('/complete_signup',methods=['POST'])
 def complete_signup():

@@ -254,7 +254,4 @@ for(var key in selected_cards) {
       input.setAttribute('type', 'hidden');//set the type, like "hidden" or other
       form.appendChild(input);//append the input to the form
 
-
-
-
 });
