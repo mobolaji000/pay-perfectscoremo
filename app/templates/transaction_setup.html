@@ -4,6 +4,8 @@
 	<meta charset="utf-8">
 	<title>Transaction Setup</title>
 
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
 	<!-- Bootstrap core CSS -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
@@ -122,10 +124,20 @@ function miscellanousValidation()
      $('input[name="was_diagnostic_purchased"]').prop('checked', false);
      $('input[name="diag_units"]').val('');
      $('input[name="diag_total"]').val('');
+
+
      $('input[name="was_test_prep_purchased"]').prop('checked', false);
-     $('input[name="tp_product"]').prop('checked', false);
+     $('input[name="was_test_prep_purchased"]').val("");
+
      $('input[name="tp_units"]').val('');
      $('input[name="tp_total"]').val('');
+
+     $('input[name="tp_product"]').prop('required', false);
+     $('input[name="tp_product"]').prop('checked', false);
+     $('input[name="tp_product"]').attr('disabled', true);
+     $('input[name="tp_units"]').attr('disabled', true);
+
+
      $('input[name="was_college_apps_purchased"]').prop('checked', false);
      $('input[name="college_consultation"]').prop('checked', false);
      $('input[name="college_apps_product"]').prop('checked', false);
@@ -437,7 +449,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 
 
 	<div class="row">
-		<div class="col-md-4 order-md-2 mb-4">
+		<div class="col-5 mb- order-2">
 			<form class="card p-2" action="{{ url_for('search_transaction') }}" method="post">
 				<div class="input-group">
 					<input type="text" class="form-control" placeholder="Enter search query" id="search_query" name="search_query">
@@ -533,7 +545,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 		</div>
 
 
-		<div class="col-md-8 order-md-1">
+		<div class="col-7 order-1">
 			<br><br><br><br><br>
 			<h4 class="mb-3">Transaction Information</h4>
 			<form id="create_transaction_setup_form" name="create_transaction_setup_form"  class="needs-validation" action="{{ url_for('create_transaction') }}" method="post" data-toggle="validator">
@@ -660,19 +672,19 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 								<div class="custom-control custom-radio">
 									<input id="tp-home-12wks" name="tp_product" value="4699" type="radio"
 										   class="custom-control-input"
-										   required>
+										    required>
 									<label class="custom-control-label" for="tp-home-12wks">12 Weeks Prep (Home)</label>
 								</div>
 								<div class="custom-control custom-radio">
 									<input id="tp-home-08wks" name="tp_product" value="3379" type="radio"
 										   class="custom-control-input"
-										   required>
+										    required>
 									<label class="custom-control-label" for="tp-home-08wks">8 Weeks Prep (Home)</label>
 								</div>
 								<div class="custom-control custom-radio">
 									<input id="tp-home-01wk" name="tp_product" value="375" type="radio"
 										   class="custom-control-input"
-										   required>
+										    required>
 									<label class="custom-control-label" for="tp-home-01wk">1 Week Prep (Home)</label>
 								</div>
 
@@ -983,7 +995,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 				<br><br>
 
 
-				<div class="row justify-content-center"><input id="create_transaction_button" name="create_transaction_button" class="btn btn-primary btn-lg btn-block w-25 p-3" type="submit" value="Create Transaction"
+				<div class="row justify-content-center"><input id="create_transaction_button" name="create_transaction_button" class="btn btn-primary btn-lg btn-block w-50 p-3" type="submit" value="Create Transaction"
 															   onclick="finalCheckBeforeSubmit(event)"></input></div>
 			</form>
 		</div>
