@@ -93,7 +93,10 @@ var cardElement = document.getElementById('card-element');
     dataType: "json",
     async: false,
     success: function (result) {
-    if(result.status != 'success'){
+     if(result.status == 'error'){
+        window.location.href ="/error/"+result.message;
+    }
+    else if(result.status != 'success'){
         location.reload();
         return false;
     }

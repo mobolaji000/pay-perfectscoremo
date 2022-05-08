@@ -434,6 +434,10 @@ def checkIfDetailsWereChangedOnFrontEnd(stripe_info={}):
             date_from_front_end = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)])
             amount_from_front_end = stripe_info['amount_' + str(k)]
             if date_from_back_end != date_from_front_end or amount_from_back_end != amount_from_front_end:
+                logger.info("date_from_back_end is: {}".format(date_from_back_end))
+                logger.info("date_from_front_end is: {}".format(date_from_front_end))
+                logger.info("amount_from_back_end is: {}".format(amount_from_back_end))
+                logger.info("amount_from_front_end is: {}".format(amount_from_front_end))
                 details_were_changed_from_front_end = True
                 break
     else:
@@ -452,7 +456,9 @@ def execute_card_payment():
     details_were_changed_from_front_end = checkIfDetailsWereChangedOnFrontEnd(stripe_info)
 
     if details_were_changed_from_front_end:
-        return redirect(url_for('error', error_message="Details were changed. Conact Mo."))
+        #return redirect(url_for('error', error_message="Details were changed. Conact Mo."))
+        logger.info("Details were changed on the front end.")
+        return jsonify({'status':'error','message':'Details were changed. Conact Mo.'})
 
     result = stripeInstance.chargeCustomerViaCard(stripe_info=stripe_info, chosen_mode_of_payment=chosen_mode_of_payment, payment_id=payment_id,existing_customer=does_customer_payment_info_exist)
     if result['status'] != 'success':
