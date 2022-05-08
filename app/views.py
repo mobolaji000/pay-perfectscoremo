@@ -423,8 +423,10 @@ def execute_card_payment():
     payment_id = request.form['payment_id']
     does_customer_payment_info_exist = True if stripe_info.get('does_customer_payment_info_exist','') == 'yes' else False
 
-    transaction = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
-    logger.info("Transaction I am debgging is {}".format(str(transaction)))
+    client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
+    logger.info("Transaction I am debugging is 1. {}".format(str(client_info)))
+    logger.info("Transaction I am debugging is 2. {}".format(str(products_info)))
+    logger.info("Transaction I am debugging is 3. {}".format(str(showACHOverride)))
 
     # return redirect(url_for('error', error_message="There has been an unusual error. Conact Mo."))
 
