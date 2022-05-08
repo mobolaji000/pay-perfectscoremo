@@ -514,10 +514,12 @@ class SendMessagesToClients():
             #created_or_modified_span = "If you don't need to change your current transaction setup, please go to "+link_url+" (also sent to your email address) to input you and your student's information. Regular communication between us, you, and your student is a big part of our process. So, your information will be used to setup text message and email updates on your student's regular progress.\n\n I am happy to clarify any questions you might have!"
 
             created_or_modified_span = "I am happy to clarify any questions you might have!"
+        elif type == 'referral_request':
+            created_or_modified_span = "Oh, and one more thing...if you have any friends/families looking to raise their SAT/ACT scores, have them check us out at prepwithmo.com or call us at 972-584-7364. We appreciate the referral!"
             #
 
 
-        if type == 'create_group_chat':
+        if type == 'create_group_chat' or type == 'referral_request':
             text_message = created_or_modified_span
         elif type == 'questions':
             text_message = created_or_modified_span
