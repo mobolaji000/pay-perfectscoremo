@@ -422,10 +422,6 @@ def setup_payment_intent():
 def checkIfDetailsWereChangedOnFrontEnd(stripe_info={}):
     client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
 
-    # logger.info("Transaction I am debugging is 1. {}".format(str(client_info)))
-    # logger.info("Transaction I am debugging is 2. {}".format(str(products_info)))
-    # logger.info("Transaction I am debugging is 3. {}".format(str(showACHOverride)))
-
     if client_info['transaction_total'] == stripe_info['transaction_total']:
         details_were_changed_from_front_end = False
         for k in range(1, int(stripe_info['installment_counter'])):
@@ -495,7 +491,8 @@ def exchange_plaid_for_stripe():
     details_were_changed_from_front_end = checkIfDetailsWereChangedOnFrontEnd(stripe_info)
 
     if details_were_changed_from_front_end:
-        return redirect(url_for('error', error_message="Details were changed. Conact Mo."))
+        logger.info("Details were changed on the front end.")
+        return jsonify({'status': 'error', 'message': 'Details were changed. Conact Mo.'})
 
     result = stripeInstance.chargeCustomerViaACH(stripe_info=stripe_info,bank_account_token=bank_account_token,chosen_mode_of_payment=chosen_mode_of_payment,existing_customer=does_customer_payment_info_exist)
 
