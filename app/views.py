@@ -425,7 +425,7 @@ def checkIfDetailsWereChangedOnFrontEnd(stripe_info={}):
     if client_info['transaction_total'] == stripe_info['transaction_total']:
         details_were_changed_from_front_end = False
         for k in range(1, int(stripe_info['installment_counter'])):
-            date_from_back_end = client_info['installments'][k - 1]['date'].date()#if (datetime.today() - yourdate).days == 0:
+            date_from_back_end = client_info['installments'][k - 1]['date']#if (datetime.today() - yourdate).days == 0:
             amount_from_back_end = client_info['installments'][k - 1]['amount']
             date_from_front_end = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)]).date()
             amount_from_front_end = stripe_info['amount_' + str(k)]
