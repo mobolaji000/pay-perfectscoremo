@@ -19,6 +19,7 @@ from app.service import SendMessagesToClients
 import traceback
 from app.config import stripe
 from apscheduler.schedulers.background import BackgroundScheduler
+import datetime
 
 import logging
 logger = logging.getLogger(__name__)
@@ -416,6 +417,30 @@ def setup_payment_intent():
     client_secret = stripeInstance.setUpIntent(stripe_info)
     return jsonify({'client_secret': client_secret})
 
+
+def checkIfDetailsWereChangedOnFrontEnd(stripe_info={}):
+    client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
+
+    # logger.info("Transaction I am debugging is 1. {}".format(str(client_info)))
+    # logger.info("Transaction I am debugging is 2. {}".format(str(products_info)))
+    # logger.info("Transaction I am debugging is 3. {}".format(str(showACHOverride)))
+
+    if client_info['transaction_total'] == stripe_info['transaction_total']:
+        details_were_changed_from_front_end = False
+        for k in range(1, int(stripe_info['installment_counter'])):
+            date_from_back_end = client_info['installments'][k - 1]['date']
+            amount_from_back_end = client_info['installments'][k - 1]['amount']
+            date_from_front_end = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)])
+            amount_from_front_end = stripe_info['amount_' + str(k)]
+            if date_from_back_end != date_from_front_end or amount_from_back_end != amount_from_front_end:
+                details_were_changed_from_front_end = True
+                break
+    else:
+        details_were_changed_from_front_end = True
+
+    return details_were_changed_from_front_end
+
+
 @server.route('/execute_card_payment',methods=['POST'])
 def execute_card_payment():
     chosen_mode_of_payment = request.form['chosen_mode_of_payment']
@@ -423,26 +448,10 @@ def execute_card_payment():
     payment_id = request.form['payment_id']
     does_customer_payment_info_exist = True if stripe_info.get('does_customer_payment_info_exist','') == 'yes' else False
 
-    client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
-    logger.info("Transaction I am debugging is 1. {}".format(str(client_info)))
-    logger.info("Transaction I am debugging is 2. {}".format(str(products_info)))
-    logger.info("Transaction I am debugging is 3. {}".format(str(showACHOverride)))
+    details_were_changed_from_front_end = checkIfDetailsWereChangedOnFrontEnd(stripe_info)
 
-    # return redirect(url_for('error', error_message="There has been an unusual error. Conact Mo."))
-
-
-    # amount = stripe_info['transaction_total']
-    #
-    # for k in range(1, int(stripe_info['installment_counter'])):
-    #     if existing_customer:
-    #         # ensures that you always keep 72 hours to change method of payment promise to exisiting clients
-    #         date = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)]) + datetime.timedelta(days=1)
-    #     else:
-    #         date = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)])
-    #
-    #     amount = stripe_info['amount_' + str(k)]
-    #
-    #
+    if details_were_changed_from_front_end:
+        return redirect(url_for('error', error_message="Details were changed. Conact Mo."))
 
     result = stripeInstance.chargeCustomerViaCard(stripe_info=stripe_info, chosen_mode_of_payment=chosen_mode_of_payment, payment_id=payment_id,existing_customer=does_customer_payment_info_exist)
     if result['status'] != 'success':
