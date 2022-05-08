@@ -519,6 +519,8 @@ def enterClientInfo(payment_and_signup_data={}):
         AppDBUtil.createStudentData(payment_and_signup_data)
         to_numbers = [number for number in [payment_and_signup_data['parent_1_phone_number'], payment_and_signup_data['parent_2_phone_number'], payment_and_signup_data['student_phone_number']] if number != '']
         SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], type='create_group_chat')
+        time.sleep(30)
+        SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, type='referral_request')
         message = ""
         for k, v in ast.literal_eval(payment_and_signup_data['all_days_for_one_on_one']).items():
             message = message + " " + k.split('\n')[1].strip() + ","
