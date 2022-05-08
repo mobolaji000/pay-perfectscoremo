@@ -101,7 +101,8 @@ def placeholder():
 def success():
     return render_template('success.html')
 
-@server.route('/error')
+@server.route('/error',defaults={'error_message': None}, methods=['GET'])
+@server.route('/error/<error_message>', methods=['GET'])
 def error(error_message):
     return render_template('error.html',error_message=error_message)
 
@@ -484,6 +485,12 @@ def exchange_plaid_for_stripe():
     chosen_mode_of_payment = request.form['chosen_mode_of_payment']
     bank_account_token = plaidInstance.exchange_plaid_for_stripe(public_token,account_id)
     does_customer_payment_info_exist = True if stripe_info.get('does_customer_payment_info_exist','') == 'yes' else False
+
+    details_were_changed_from_front_end = checkIfDetailsWereChangedOnFrontEnd(stripe_info)
+
+    if details_were_changed_from_front_end:
+        return redirect(url_for('error', error_message="Details were changed. Conact Mo."))
+
     result = stripeInstance.chargeCustomerViaACH(stripe_info=stripe_info,bank_account_token=bank_account_token,chosen_mode_of_payment=chosen_mode_of_payment,existing_customer=does_customer_payment_info_exist)
 
     if result['status'] != 'success':
