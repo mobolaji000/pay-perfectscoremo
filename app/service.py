@@ -69,7 +69,7 @@ class StripeInstance():
         if existing_customer:
             customer = stripe.Customer.retrieve(existing_customer.stripe_customer_id)
             does_customer_payment_info_exist = False
-            if int(existing_customer_total_payment_so_far) > 800:
+            if int(existing_customer_total_payment_so_far) > 8000:
                 default_card = customer.invoice_settings.default_payment_method
                 default_ach = customer.default_source
                 print("payment options are: ")
@@ -487,7 +487,7 @@ class SendMessagesToClients():
             print(record.sid)
             cls.twilioClient.conversations.conversations(record.sid).delete()
 
-        conversation = cls.twilioClient.conversations.conversations.create(messaging_service_sid='MG0faa1995ce52477a642163564295650c', friendly_name='DailyReport')
+        conversation = cls.twilioClient.conversations.conversations.create(messaging_service_sid='MG0faa1995ce52477a642163564295650c', friendly_name='PaymentService')
         print("conversation created!")
         print(conversation.sid)
 
