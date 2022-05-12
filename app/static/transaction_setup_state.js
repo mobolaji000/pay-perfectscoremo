@@ -377,18 +377,24 @@ $(document).ready(function() {
      	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
 		}
 
-		 if (installment_total != transactionTotal()) {
-		 document.getElementById("installment_not_equal_total_message_create").hidden=false;
-            $('input[name="create_transaction_button"]').attr('disabled', true);
+    // if(typeof job_ui_state['ids_of_attached_files_if_any'] !== "undefined")
 
-              document.getElementById("installment_not_equal_total_message_modify").hidden=false;
+		 if (installment_total != transactionTotal()) {
+		 //document.getElementById("installment_not_equal_total_message_create").hidden=false;
+         $('input[name="create_transaction_button"]').attr('disabled', true);
+            $('div[name="installment_not_equal_total_message_create"]').attr('hidden', false);
+
+              //document.getElementById("installment_not_equal_total_message_modify").hidden=false;
+              $('div[name="installment_not_equal_total_message_modify"]').attr('hidden', false);
             $('input[name="modify_transaction_button"]').attr('disabled', true);
         }
         else{
-        document.getElementById("installment_not_equal_total_message_create").hidden=true;
+        //document.getElementById("installment_not_equal_total_message_create").hidden=true;
+        $('div[name="installment_not_equal_total_message_create"]').attr('hidden', true);
             $('input[name="create_transaction_button"]').attr('disabled', false);
 
-             document.getElementById("installment_not_equal_total_message_modify").hidden=true;
+             //document.getElementById("installment_not_equal_total_message_modify").hidden=true;
+             $('div[name="installment_not_equal_total_message_modify"]').attr('hidden', true);
             $('input[name="modify_transaction_button"]').attr('disabled', false);
         }
 
