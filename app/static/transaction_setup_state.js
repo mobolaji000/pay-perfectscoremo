@@ -370,6 +370,7 @@ $(document).ready(function() {
      var installment_total = 0;
      var amount = '';
       var counter = $('input[name="installment_counter"]').val();
+      //console.log(counter);
 
      for (let k = 1; k < counter; k++) {
 
@@ -379,7 +380,9 @@ $(document).ready(function() {
 
     // if(typeof job_ui_state['ids_of_attached_files_if_any'] !== "undefined")
 
-		 if (installment_total != transactionTotal()) {
+        if (counter > 1)
+        {
+            if (installment_total != transactionTotal()) {
 		 //document.getElementById("installment_not_equal_total_message_create").hidden=false;
          $('input[name="create_transaction_button"]').attr('disabled', true);
             $('div[name="installment_not_equal_total_message_create"]').attr('hidden', false);
@@ -397,7 +400,7 @@ $(document).ready(function() {
              $('div[name="installment_not_equal_total_message_modify"]').attr('hidden', true);
             $('input[name="modify_transaction_button"]').attr('disabled', false);
         }
-
+        }
     }
 
      $("table.order-list").on('input', ".installment_amounts", doesInstallmentEqualTotal);
