@@ -515,7 +515,7 @@ class SendMessagesToClients():
 
             created_or_modified_span = "I am happy to clarify any questions you might have!"
         elif type == 'referral_request':
-            created_or_modified_span = "Oh, and one more thing...if you have any friends/families looking to raise their SAT/ACT scores, have them check us out at prepwithmo.com or call us at 972-584-7364. We appreciate the referral!"
+            created_or_modified_span = "Oh, and one more note to the family...if you have any friends/families looking to raise their SAT/ACT scores, have them check us out at prepwithmo.com or call us at 972-584-7364. We appreciate the referral!"
             #
 
 
