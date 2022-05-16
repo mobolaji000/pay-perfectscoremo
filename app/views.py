@@ -464,7 +464,7 @@ def execute_card_payment():
 
     result = stripeInstance.chargeCustomerViaCard(stripe_info=stripe_info, chosen_mode_of_payment=chosen_mode_of_payment, payment_id=payment_id,existing_customer=does_customer_payment_info_exist)
     if result['status'] != 'success':
-        print("Stripe card payment failed")
+        logger.error("Stripe card payment failed")
         flash('Payment failed. Enter a valid credit/debit card number. Or contact Mo.')
     else:
         AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
@@ -472,7 +472,7 @@ def execute_card_payment():
         if payment_and_signup_data.get('ask_for_student_info', '') == 'yes':
             result = enterClientInfo(payment_and_signup_data)
             if result['status'] != 'success':
-                print('Attempt to create family information failed. Contact Mo.')
+                logger.error('Attempt to create family information failed. Contact Mo.')
                 flash('Attempt to create family information failed. Contact Mo.')
 
     return jsonify(result)
