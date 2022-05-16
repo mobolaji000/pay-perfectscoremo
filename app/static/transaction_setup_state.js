@@ -401,9 +401,13 @@ $(document).ready(function() {
 
                var result = $('input[name="result"]').val();
                //only enable modifcation if this is an exisitn invoice with a payment that has not been started
-                alert(JSON.parse(result));
-                 if (typeof result != "undefined" && result.payment_started == "False")
+
+
+                //console.log(result);
+                //console.log(JSON.parse(result));
+                 if (typeof $('input[name="result"]').val() != "undefined" && JSON.parse(result).payment_started == "False")
                  {
+                     console.log("allowed to enable modify");
                        $('input[name="modify_transaction_button"]').attr('disabled', false);
                  }
         }
