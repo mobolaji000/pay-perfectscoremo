@@ -414,9 +414,15 @@ def parseDataForStripe(client_info):
 
 @server.route('/setup_payment_intent',methods=['POST'])
 def setup_payment_intent():
-    stripe_info = ast.literal_eval(request.form['stripe_info'])
-    client_secret = stripeInstance.setUpIntent(stripe_info)
-    return jsonify({'client_secret': client_secret})
+    try:
+        stripe_info = ast.literal_eval(request.form['stripe_info'])
+        client_secret = stripeInstance.setUpIntent(stripe_info)
+        return jsonify({'client_secret': client_secret})
+    except Exception as e:
+        logger.error("Error  in /setup_payment_intent")
+        print(e)
+        traceback.print_exc()
+
 
 
 def checkIfDetailsWereChangedOnFrontEnd(stripe_info={}):
@@ -473,9 +479,14 @@ def execute_card_payment():
 
 @server.route("/get_link_token", methods=['POST'])
 def get_link_token():
+    try:
         stripe_info = ast.literal_eval(request.form['stripe_info'])
         link_token = plaidInstance.get_link_token(stripe_info['stripe_customer_id'])
         return jsonify({'link_token': link_token})
+    except Exception as e:
+        logger.error("Error  in /get_link_token")
+        print(e)
+        traceback.print_exc()
 
 @server.route("/exchange_plaid_for_stripe", methods=['POST'])
 def exchange_plaid_for_stripe():
