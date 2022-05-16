@@ -401,6 +401,7 @@ $(document).ready(function() {
 
                var result = $('input[name="result"]').val();
                //only enable modifcation if this is an exisitn invoice with a payment that has not been started
+                alert(result);
                  if (typeof result != "undefined" && result.payment_started == "False")
                  {
                        $('input[name="modify_transaction_button"]').attr('disabled', false);
@@ -410,6 +411,8 @@ $(document).ready(function() {
     }
 
      $("table.order-list").on('input', ".installment_amounts", doesInstallmentEqualTotal);
+
+     $("table.order-list").on("click", ".ibtnDel", doesInstallmentEqualTotal);
 
 
      $("#transaction_total").on('change', doesInstallmentEqualTotal);
