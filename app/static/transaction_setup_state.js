@@ -401,7 +401,7 @@ $(document).ready(function() {
 
                var result = $('input[name="result"]').val();
                //only enable modifcation if this is an exisitn invoice with a payment that has not been started
-                alert(result);
+                alert(JSON.parse(result));
                  if (typeof result != "undefined" && result.payment_started == "False")
                  {
                        $('input[name="modify_transaction_button"]').attr('disabled', false);
