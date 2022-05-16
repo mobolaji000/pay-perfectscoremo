@@ -119,7 +119,10 @@ function miscellanousValidation()
 
      function populateFieldsFromSearch(result)
      {
-		$('input[name="result"]').val(result);
+		$('input[name="result"]').val(JSON.stringify(result));
+        //$('input[name="result"]').val(result);
+        //console.log(result);
+        //console.log($('input[name="result"]').val());
 
      //clear state of fields
      $('input[name="was_diagnostic_purchased"]').prop('checked', false);
@@ -474,12 +477,12 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 
 						{% for result in search_results %}
 						<a href="javascript:populateFieldsFromSearch({{ result }});">
-						<input id="result" name="result" hidden>
+
 							{{ result.first_name+" "+result.last_name+" "+result.transaction_id+" "+result.date_created }}
 						</a>
 						<br><br><br>
 						{% endfor %}
-
+						<input id="result" name="result" hidden>
 						{% if search_results %}
 						<div style="display: flex; justify-content: space-around;margin-right:50px">
 
