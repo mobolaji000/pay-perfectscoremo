@@ -498,13 +498,13 @@ class SendMessagesToClients():
             print("number to add is :",to_number)
             cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+1' + to_number)
 
-        if type == 'create_group_chat':
+        if type == 'create_group_chat' or type == 'referral_request':
             print("adding assitant's number")
             cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+1' + '8177160139')
 
 
         if type == 'create_group_chat':
-            created_or_modified_span = "Welcome "+message+"!\n\n"+"I am Mo's automated assistant, and I will be sending reports on your progress via this group chat. Mo (972-584-7364) and his personal assistant (817-716-0139) are on the chat as well to help with following up with your daily homework/review sessions. If you need to speak with someone, though, please feel free to call Mo. We can't wait to see you succeeed!"
+            created_or_modified_span = "Welcome "+message+"!\n\n"+"I am Mo's automated assistant, and I will be sending reports on your progress via this group chat. Mo (972-584-7364) and his personal assistant (817-716-0139) are on the chat as well to follow up with you on your daily homework/review sessions. If you need to speak with someone, though, please feel free to call Mo. We can't wait to see you succeeed!"
         elif type == 'create_transaction_existing_client':
             created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
         elif type == 'modify_transaction_existing_client':
