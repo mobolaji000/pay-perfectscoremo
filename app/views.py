@@ -473,7 +473,8 @@ def execute_card_payment():
             result = enterClientInfo(payment_and_signup_data)
             if result['status'] != 'success':
                 logger.error('Attempt to create family information failed. Contact Mo.')
-                flash('Attempt to create family information failed. Contact Mo.')
+                return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
+                #flash('Attempt to create family information failed. Contact Mo.')
 
     return jsonify(result)
 
@@ -517,8 +518,9 @@ def exchange_plaid_for_stripe():
         result = enterClientInfo(payment_and_signup_data)
         if payment_and_signup_data.get('ask_for_student_info', '') == 'yes':
             if result['status'] != 'success':
-                print('Attempt to create family information failed. Contact Mo.')
-                flash('Attempt to create family information failed. Contact Mo.')
+                logger.error('Attempt to create family information failed. Contact Mo.')
+                return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
+                # flash('Attempt to create family information failed. Contact Mo.')
 
     return jsonify(result)
 
