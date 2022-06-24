@@ -211,6 +211,7 @@ def lead_info():
 @login_required
 def create_transaction():
     try:
+
         transaction_setup_data = request.form.to_dict()
         prospect = AppDBUtil.createProspect(transaction_setup_data)
 
@@ -219,7 +220,14 @@ def create_transaction():
         transaction_id,number_of_rows_modified = AppDBUtil.createOrModifyClientTransaction(transaction_setup_data, action='create')
 
         client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
+        logger.debug('Transaction details (client_info) is: ' + str(client_info))
+        logger.debug('Transaction details (products_info) is: ' + str(products_info))
+        logger.debug('Transaction details (showACHOverride) is: ' + str(showACHOverride))
+
         stripe_info = parseDataForStripe(client_info)
+        logger.debug('stripe_info is: ' + str(stripe_info))
+
+
 
         if transaction_setup_data.get('mark_as_paid','') == 'yes':
             stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info,action='create')
@@ -248,6 +256,7 @@ def create_transaction():
                 except Exception as e:
                     traceback.print_exc()
                     flash('An error occured while sending an email/sms to the client after creating the transaction.')
+        logger.debug('Created transaction: ' + str(stripe_info['transaction_id']))
         return render_template('generate_transaction_id.html',transaction_id=transaction_id,input_transaction_id_url=os.environ.get("url_to_start_reminder")+"input_transaction_id")
     except Exception as e:
         print(e)
@@ -271,6 +280,7 @@ def search_transaction():
         flash('No transaction has the detail you searched for.')
         return redirect(url_for('transaction_setup'))
 
+    logger.debug('Searched for: ' + str(search_query))
     return render_template('transaction_setup.html',search_results=search_results)
 
 @server.route('/modify_transaction',methods=['POST'])
@@ -327,6 +337,7 @@ def modify_transaction():
                 flash('An error occured while sending an email/sms to the client after modifying the transaction.')
         else:
             flash('Transaction sucessfully modified.')
+        logger.debug('Modified transaction: ' + str(stripe_info['transaction_id']))
         return redirect(url_for('transaction_setup'))
     except Exception as e:
         print(e)
@@ -357,27 +368,27 @@ def delete_transaction():
 def input_transaction_id():
     return render_template('input_transaction_id.html')
 
-@server.route('/transaction_page',methods=['POST'])
-def transaction_page():
-    try:
-        client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(request.form.to_dict()['transaction_id'])
-    except Exception as e:
-        print(e)
-        flash('An error has occured. Contact Mo.')
-        return redirect(url_for('input_transaction_id'))
-    if not client_info and not products_info:
-        flash('You might have put in the wrong code. Try again or contact Mo.')
-        return redirect(url_for('input_transaction_id'))
-
-    stripe_info = parseDataForStripe(client_info)
-
-    response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info','')))
-
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"  # HTTP 1.1.
-    response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
-    response.headers["Expires"] = "0"  # Proxies.
-
-    return response
+# @server.route('/transaction_page',methods=['POST'])
+# def transaction_page():
+#     try:
+#         client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(request.form.to_dict()['transaction_id'])
+#     except Exception as e:
+#         print(e)
+#         flash('An error has occured. Contact Mo.')
+#         return redirect(url_for('input_transaction_id'))
+#     if not client_info and not products_info:
+#         flash('You might have put in the wrong code. Try again or contact Mo.')
+#         return redirect(url_for('input_transaction_id'))
+#
+#     stripe_info = parseDataForStripe(client_info)
+#
+#     response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info','')))
+#
+#     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"  # HTTP 1.1.
+#     response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
+#     response.headers["Expires"] = "0"  # Proxies.
+#
+#     return response
 
 @login_manager.user_loader
 def load_user(password):
