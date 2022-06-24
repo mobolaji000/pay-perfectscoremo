@@ -75,8 +75,8 @@ function miscellanousValidation()
            }
         }
         }
-        var adjustment_explanation = $('input[name="adjustment_explanation"]').val();
-         var adjust_total = $('input[name="adjust_total"]').val();
+        var adjustment_explanation = $('input[name="adjustment_explanation"]').trim();
+         var adjust_total = $('input[name="adjust_total"]').trim();
         if ((adjust_total == '' && adjustment_explanation == '') || (adjust_total != '' && adjustment_explanation != ''))
         {
           adjustmentValid = true;
