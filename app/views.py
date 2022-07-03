@@ -130,6 +130,8 @@ def client_info(prospect_id):
             AppDBUtil.createStudentData(student_data)
             to_numbers = [number for number in [student_data['parent_1_phone_number'],student_data['parent_2_phone_number'],student_data['student_phone_number']] if number != '']
             SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=student_data['student_first_name'], type='create_group_chat')
+            time.sleep(30)
+            SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, type='referral_request')
             #hold off on sending group emails until you dedcide there is a value add
             #SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
             #flash("Student information submitted successfully and group messages (email and text) for regular updates created.")
@@ -287,6 +289,7 @@ def search_transaction():
 @login_required
 def modify_transaction():
     try:
+        logger.debug(request.form['data_to_modify'])
         data_to_modify = ast.literal_eval(request.form['data_to_modify'])
         print(data_to_modify)
         transaction_id = data_to_modify['transaction_id']
