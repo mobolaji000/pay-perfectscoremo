@@ -345,8 +345,7 @@ $(document).ready(function() {
         $(this).closest("tr").remove();
         counter--;
         $('input[name="installment_counter"]').val(counter);
-         console.log("counter is: ");
-        console.log(counter);
+
         if (Number(counter) == 1)
         {
         document.getElementById("installment_not_equal_total_message_create").hidden=true;

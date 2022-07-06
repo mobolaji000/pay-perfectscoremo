@@ -442,33 +442,39 @@ def checkIfDetailsWereChangedOnFrontEnd(stripe_info={}):
 
 @server.route('/execute_card_payment',methods=['POST'])
 def execute_card_payment():
-    chosen_mode_of_payment = request.form['chosen_mode_of_payment']
-    stripe_info = ast.literal_eval(request.form['stripe_info'])
-    payment_id = request.form['payment_id']
-    does_customer_payment_info_exist = True if stripe_info.get('does_customer_payment_info_exist','') == 'yes' else False
+    try:
+        chosen_mode_of_payment = request.form['chosen_mode_of_payment']
+        stripe_info = ast.literal_eval(request.form['stripe_info'])
+        payment_id = request.form['payment_id']
+        does_customer_payment_info_exist = True if stripe_info.get('does_customer_payment_info_exist','') == 'yes' else False
 
-    details_were_changed_from_front_end = checkIfDetailsWereChangedOnFrontEnd(stripe_info)
+        details_were_changed_from_front_end = checkIfDetailsWereChangedOnFrontEnd(stripe_info)
 
-    if details_were_changed_from_front_end:
-        #return redirect(url_for('error', error_message="Details were changed. Conact Mo."))
-        logger.info("Details were changed on the front end.")
-        return jsonify({'status':'error','message':'Details were changed. Conact Mo.'})
+        if details_were_changed_from_front_end:
+            #return redirect(url_for('error', error_message="Details were changed. Conact Mo."))
+            logger.info("Details were changed on the front end.")
+            return jsonify({'status':'error','message':'Details were changed. Conact Mo.'})
 
-    result = stripeInstance.chargeCustomerViaCard(stripe_info=stripe_info, chosen_mode_of_payment=chosen_mode_of_payment, payment_id=payment_id,existing_customer=does_customer_payment_info_exist)
-    if result['status'] != 'success':
-        logger.error("Stripe card payment failed")
-        flash('Payment failed. Enter a valid credit/debit card number. Or contact Mo.')
-    else:
-        AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
-        payment_and_signup_data = ast.literal_eval(request.form['payment_and_signup_data'])
-        if payment_and_signup_data.get('ask_for_student_info', '') == 'yes':
-            result = enterClientInfo(payment_and_signup_data)
-            if result['status'] != 'success':
-                logger.error('Attempt to create family information failed. Contact Mo.')
-                return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
-                #flash('Attempt to create family information failed. Contact Mo.')
+        result = stripeInstance.chargeCustomerViaCard(stripe_info=stripe_info, chosen_mode_of_payment=chosen_mode_of_payment, payment_id=payment_id,existing_customer=does_customer_payment_info_exist)
+        if result['status'] != 'success':
+            logger.error("Stripe card payment failed")
+            flash('Payment failed. Enter a valid credit/debit card number. Or contact Mo.')
+        else:
+            AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
+            payment_and_signup_data = ast.literal_eval(request.form['payment_and_signup_data'])
+            if payment_and_signup_data.get('ask_for_student_info', '') == 'yes':
+                result = enterClientInfo(payment_and_signup_data)
+                if result['status'] != 'success':
+                    logger.error('Attempt to create family information failed. Contact Mo.')
+                    return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
+                    #flash('Attempt to create family information failed. Contact Mo.')
 
-    return jsonify(result)
+        logger.debug("Result from execute_card_payment is {}".format(jsonify(result)))
+        return jsonify(result)
+    except Exception as e:
+        logger.error("Error  in /execute_card_payment")
+        print(e)
+        traceback.print_exc()
 
 @server.route("/get_link_token", methods=['POST'])
 def get_link_token():
@@ -483,40 +489,44 @@ def get_link_token():
 
 @server.route("/exchange_plaid_for_stripe", methods=['POST'])
 def exchange_plaid_for_stripe():
-    # Change sandbox to development to test with live users and change
-    # to production when you're ready to go live!
-    stripe_info = ast.literal_eval(request.form['stripe_info'])
-    public_token = request.form['public_token']
-    account_id = request.form['account_id']
-    chosen_mode_of_payment = request.form['chosen_mode_of_payment']
-    bank_account_token = plaidInstance.exchange_plaid_for_stripe(public_token,account_id)
-    does_customer_payment_info_exist = True if stripe_info.get('does_customer_payment_info_exist','') == 'yes' else False
+    try:
+        # Change sandbox to development to test with live users and change
+        # to production when you're ready to go live!
+        stripe_info = ast.literal_eval(request.form['stripe_info'])
+        public_token = request.form['public_token']
+        account_id = request.form['account_id']
+        chosen_mode_of_payment = request.form['chosen_mode_of_payment']
+        bank_account_token = plaidInstance.exchange_plaid_for_stripe(public_token,account_id)
+        does_customer_payment_info_exist = True if stripe_info.get('does_customer_payment_info_exist','') == 'yes' else False
 
-    details_were_changed_from_front_end = checkIfDetailsWereChangedOnFrontEnd(stripe_info)
+        details_were_changed_from_front_end = checkIfDetailsWereChangedOnFrontEnd(stripe_info)
 
-    if details_were_changed_from_front_end:
-        logger.info("Details were changed on the front end.")
-        return jsonify({'status': 'error', 'message': 'Details were changed. Conact Mo.'})
+        if details_were_changed_from_front_end:
+            logger.info("Details were changed on the front end.")
+            return jsonify({'status': 'error', 'message': 'Details were changed. Conact Mo.'})
 
-    result = stripeInstance.chargeCustomerViaACH(stripe_info=stripe_info,bank_account_token=bank_account_token,chosen_mode_of_payment=chosen_mode_of_payment,existing_customer=does_customer_payment_info_exist)
+        result = stripeInstance.chargeCustomerViaACH(stripe_info=stripe_info,bank_account_token=bank_account_token,chosen_mode_of_payment=chosen_mode_of_payment,existing_customer=does_customer_payment_info_exist)
 
-    if result['status'] != 'success':
-        print("Attempt to pay via ACH failed. Try again or contact Mo.")
-        flash('Attempt to pay via ACH failed. Try again or contact Mo.')
-    else:
-        AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
+        if result['status'] != 'success':
+            print("Attempt to pay via ACH failed. Try again or contact Mo.")
+            flash('Attempt to pay via ACH failed. Try again or contact Mo.')
+        else:
+            AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
 
-        payment_and_signup_data = ast.literal_eval(request.form['payment_and_signup_data'])
-        result = enterClientInfo(payment_and_signup_data)
-        if payment_and_signup_data.get('ask_for_student_info', '') == 'yes':
-            if result['status'] != 'success':
-                logger.error('Attempt to create family information failed. Contact Mo.')
-                return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
-                # flash('Attempt to create family information failed. Contact Mo.')
+            payment_and_signup_data = ast.literal_eval(request.form['payment_and_signup_data'])
+            result = enterClientInfo(payment_and_signup_data)
+            if payment_and_signup_data.get('ask_for_student_info', '') == 'yes':
+                if result['status'] != 'success':
+                    logger.error('Attempt to create family information failed. Contact Mo.')
+                    return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
+                    # flash('Attempt to create family information failed. Contact Mo.')
 
-    return jsonify(result)
-
-
+        logger.debug("Result from exchange_plaid_for_stripe is {}".format(jsonify(result)))
+        return jsonify(result)
+    except Exception as e:
+        logger.error("Error  in /exchange_plaid_for_stripe")
+        print(e)
+        traceback.print_exc()
 
 def enterClientInfo(payment_and_signup_data={}):
     #payment_and_signup_data = request.form.to_dict()
