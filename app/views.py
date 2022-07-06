@@ -371,28 +371,6 @@ def delete_transaction():
 def input_transaction_id():
     return render_template('input_transaction_id.html')
 
-# @server.route('/transaction_page',methods=['POST'])
-# def transaction_page():
-#     try:
-#         client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(request.form.to_dict()['transaction_id'])
-#     except Exception as e:
-#         print(e)
-#         flash('An error has occured. Contact Mo.')
-#         return redirect(url_for('input_transaction_id'))
-#     if not client_info and not products_info:
-#         flash('You might have put in the wrong code. Try again or contact Mo.')
-#         return redirect(url_for('input_transaction_id'))
-#
-#     stripe_info = parseDataForStripe(client_info)
-#
-#     response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info','')))
-#
-#     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"  # HTTP 1.1.
-#     response.headers["Pragma"] = "no-cache"  # HTTP 1.0.
-#     response.headers["Expires"] = "0"  # Proxies.
-#
-#     return response
-
 @login_manager.user_loader
 def load_user(password):
     return User(awsInstance.get_secret("vensti_admin", 'password'))
@@ -574,12 +552,12 @@ def stripe_webhook():
         event = stripe.Event.construct_from(
             json.loads(payload), stripe.api_key
         )
-        print("Event is: ")
-        print(event)
+        logger.debug("Event is: {}".format(event))
+        #print(event)
     except ValueError as e:
         # Invalid payload
-        print("400 error from calling webhook. Check code and logs")
-        print(e)
+        logger.error("400 error from calling webhook. Check code and logs")
+        logger.error(e)
         traceback.print_exc()
         return json.dumps({'success':False}), 400, {'ContentType':'application/json'}
         #return jsonify({'status': 400})
@@ -611,8 +589,8 @@ def stripe_webhook():
                 AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id, amount_paid)
                 AppDBUtil.updateTransactionPaymentStarted(transaction_id)
 
-                print("paid transaction is ", paid_invoice)
-                print("transaction id is ", transaction_id)
+                logger.info("paid transaction is ", paid_invoice)
+                logger.info("transaction id is ", transaction_id)
             else:
                 raise Exception(f"Why is payment type not card for {transaction_id} ?")
 
@@ -624,7 +602,7 @@ def stripe_webhook():
                 SendMessagesToClients.sendSMS(to_number='9725847364', message=message, type='to_mo')
                 print(message)
             except Exception as e:
-                print(e)
+                logger.error(e)
                 traceback.print_exc()
 
         elif event.type == 'invoice.finalized':
@@ -647,27 +625,33 @@ def stripe_webhook():
                     AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id,amount_paid)
                     AppDBUtil.updateTransactionPaymentStarted(transaction_id)
 
-                    print("paid transaction (VIA ACH) is ", finalized_invoice)
-                    print("transaction id is ", transaction_id)
+                    logger.debug("paid transaction (VIA ACH) is ", finalized_invoice)
+                    logger.debug("transaction id is ", transaction_id)
 
                 # using this for failed ach payments
                 else:
                     try:
                         message = "Invoice " + str(finalized_invoice.id) + " for " + str(finalized_invoice.customer_name) + " failed to pay."
                         SendMessagesToClients.sendSMS(to_number='9725847364', message=message, type='to_mo')
-                        print(message)
+                        logger.debug(message)
                     except Exception as e:
-                        print(e)
+                        logger.error(e)
                         traceback.print_exc()
             else:
                 raise Exception(f"Why is payment method detail not ach_debit for {transaction_id} ? Probably because there this is an instance of a credit card payment, which was already handled under invoice.paid and is now being sent to be finalized, which I do not care for since it has already been updated as paid the under invoice.paid i.e. I only care about updating ach payments through invoice.finalized.")
 
+
+        elif event.type == 'invoice.created':
+            created_invoice = event.data.object
+            transaction_id = created_invoice.metadata['transaction_id']
+            logger.info('Transaction {} created in Stripe'.format(transaction_id))
         else:
-            print('Unhandled event type {}'.format(event.type))
+            logger.info('Unhandled event type {}'.format(event.type))
+
 
     except Exception as e:
-        print("500 error from calling webhook. Check code and logs.")
-        print(e)
+        logger.error("500 error from calling webhook. Check code and logs.")
+        logger.error(e)
         traceback.print_exc()
         return json.dumps({'success': False}), 500, {'ContentType': 'application/json'}
         #return jsonify({'status': 500})
