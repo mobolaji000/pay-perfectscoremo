@@ -345,6 +345,8 @@ $(document).ready(function() {
         $(this).closest("tr").remove();
         counter--;
         $('input[name="installment_counter"]').val(counter);
+         console.log("counter is: ");
+        console.log(counter);
         if (Number(counter) == 1)
         {
         document.getElementById("installment_not_equal_total_message_create").hidden=true;
@@ -383,28 +385,21 @@ $(document).ready(function() {
         if (counter > 1)
         {
             if (installment_total != transactionTotal()) {
-		 //document.getElementById("installment_not_equal_total_message_create").hidden=false;
          $('input[name="create_transaction_button"]').attr('disabled', true);
             $('div[name="installment_not_equal_total_message_create"]').attr('hidden', false);
 
-              //document.getElementById("installment_not_equal_total_message_modify").hidden=false;
               $('div[name="installment_not_equal_total_message_modify"]').attr('hidden', false);
             $('input[name="modify_transaction_button"]').attr('disabled', true);
         }
         else{
-        //document.getElementById("installment_not_equal_total_message_create").hidden=true;
         $('div[name="installment_not_equal_total_message_create"]').attr('hidden', true);
             $('input[name="create_transaction_button"]').attr('disabled', false);
 
-             //document.getElementById("installment_not_equal_total_message_modify").hidden=true;
              $('div[name="installment_not_equal_total_message_modify"]').attr('hidden', true);
 
                var result = $('input[name="result"]').val();
                //only enable modifcation if this is an exisitn invoice with a payment that has not been started
 
-
-                //console.log(result);
-                //console.log(JSON.parse(result));
                  if (typeof $('input[name="result"]').val() != "undefined" && JSON.parse(result).payment_started == "False")
                  {
                      console.log("allowed to enable modify");
