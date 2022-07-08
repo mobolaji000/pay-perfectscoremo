@@ -292,7 +292,8 @@ class StripeInstance():
                 # ensures that you always keep 48? hours to change method of payment promise to exisiting clients
                 amount = stripe_info['transaction_total']
                 date = datetime.datetime.today() + datetime.timedelta(days=1)
-                transaction_total = int(math.ceil(stripe_info['transaction_total'] * 1.03))
+                #(stripe_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics
+                transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (stripe_info['diag_total'] * 0.03)))
                 stripe.InvoiceItem.create(
                     customer=stripe_info['stripe_customer_id'],
                     quantity=transaction_total,
