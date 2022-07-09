@@ -311,7 +311,8 @@ class StripeInstance():
                                                         payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
             else:
                 logger.debug('Full payment credit card new customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
-                transaction_total = int(math.ceil(stripe_info['transaction_total'] * 1.03))
+                # (stripe_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics
+                transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (stripe_info['diag_total'] * 0.03)))
                 stripe.InvoiceItem.create(
                     customer=stripe_info['stripe_customer_id'],
                     quantity=transaction_total,
