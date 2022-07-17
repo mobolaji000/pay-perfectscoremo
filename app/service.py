@@ -292,9 +292,9 @@ class StripeInstance():
                 # ensures that you always keep 48? hours to change method of payment promise to exisiting clients
                 amount = stripe_info['transaction_total']
                 date = datetime.datetime.today() + datetime.timedelta(days=1)
-                #(stripe_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics
-                transaction = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
-                transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (transaction['diag_total'] * 0.03)))
+                #(client_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics
+                client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
+                transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
                 stripe.InvoiceItem.create(
                     customer=stripe_info['stripe_customer_id'],
                     quantity=transaction_total,
@@ -312,9 +312,9 @@ class StripeInstance():
                                                         payment_date=date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
             else:
                 logger.debug('Full payment credit card new customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
-                # (stripe_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics
-                transaction = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
-                transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (transaction['diag_total'] * 0.03)))
+                # (client_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics
+                client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
+                transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
                 stripe.InvoiceItem.create(
                     customer=stripe_info['stripe_customer_id'],
                     quantity=transaction_total,
