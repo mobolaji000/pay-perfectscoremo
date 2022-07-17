@@ -407,6 +407,9 @@ class AppDBUtil():
             client_info['showACHOverride'] = str(showACHOverride)
             client_info['does_customer_payment_info_exist'] = admin_transaction_details.does_customer_payment_info_exist
 
+            #added to get data fro not charging clients for credit card payment for diagnostics
+            client_info['diag_total'] = admin_transaction_details.diag_total
+
             print("client_info_installment_counter is "+str(admin_transaction_details.installment_counter))
 
             if admin_transaction_details.was_diagnostic_purchased:
