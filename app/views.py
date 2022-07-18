@@ -599,8 +599,8 @@ def stripe_webhook():
                 AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id, amount_paid)
                 AppDBUtil.updateTransactionPaymentStarted(transaction_id)
 
-                logger.info("paid transaction is ", paid_invoice)
-                logger.info("transaction id is ", transaction_id)
+                logger.info("paid transaction is {}".format(paid_invoice) )
+                logger.info("transaction id is {}".format( transaction_id))
             else:
                 raise Exception(f"Why is payment type not card for {transaction_id} ?")
 
@@ -610,7 +610,7 @@ def stripe_webhook():
             try:
                 message = "Invoice "+str(failed_invoice.id)+" for "+str(failed_invoice.customer_name)+" failed to pay."
                 SendMessagesToClients.sendSMS(to_number='9725847364', message=message, type='to_mo')
-                print(message)
+                logger.info(message)
             except Exception as e:
                 logger.error(e)
                 traceback.print_exc()
@@ -635,8 +635,8 @@ def stripe_webhook():
                     AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id,amount_paid)
                     AppDBUtil.updateTransactionPaymentStarted(transaction_id)
 
-                    logger.debug("paid transaction (VIA ACH) is ", finalized_invoice)
-                    logger.debug("transaction id is ", transaction_id)
+                    logger.debug("paid transaction (VIA ACH) is {}".format(finalized_invoice))
+                    logger.debug("transaction id is ".format(transaction_id))
 
                 # using this for failed ach payments
                 else:
