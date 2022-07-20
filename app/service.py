@@ -69,7 +69,7 @@ class StripeInstance():
         if existing_customer:
             customer = stripe.Customer.retrieve(existing_customer.stripe_customer_id)
             does_customer_payment_info_exist = False
-            if int(existing_customer_total_payment_so_far) > 40000:
+            if int(existing_customer_total_payment_so_far) > 400:
                 default_card = customer.invoice_settings.default_payment_method
                 default_ach = customer.default_source
                 print("payment options are: ")
