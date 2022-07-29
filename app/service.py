@@ -63,9 +63,10 @@ class StripeInstance():
 
     def createCustomer(self, clientSetupData):
         existing_customer = Transaction.query.filter_by(email=clientSetupData['email']).order_by(Transaction.date_created.desc()).first() or Transaction.query.filter_by(phone_number=clientSetupData['phone_number']).order_by(Transaction.date_created.desc()).first()
-        existing_customer_total_payment_so_far = Transaction.query.filter(Transaction.email == clientSetupData['email'],Transaction.email == clientSetupData['email']).with_entities(func.sum(Transaction.amount_from_transaction_paid_so_far).label('sum')).first()[0] or Transaction.query.filter(Transaction.phone_number == clientSetupData['phone_number']).with_entities(func.sum(Transaction.amount_from_transaction_paid_so_far).label('sum')).first()[0]
+        existing_customer_total_payment_so_far = Transaction.query.filter(Transaction.email == clientSetupData['email']).with_entities(func.sum(Transaction.amount_from_transaction_paid_so_far).label('sum')).first()[0] or Transaction.query.filter(Transaction.phone_number == clientSetupData['phone_number']).with_entities(func.sum(Transaction.amount_from_transaction_paid_so_far).label('sum')).first()[0]
 
-        print("existing customer total is: ",existing_customer)
+        logger.debug("existing customer is: {}".format(existing_customer))
+        logger.debug("existing customer total is: {}".format(existing_customer_total_payment_so_far))
         if existing_customer:
             customer = stripe.Customer.retrieve(existing_customer.stripe_customer_id)
             does_customer_payment_info_exist = False
