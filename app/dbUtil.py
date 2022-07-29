@@ -43,7 +43,15 @@ class AppDBUtil():
 
     @classmethod
     def createOrModifyClientTransaction(cls, clientData={}, transaction_id=None, action=''):
-        transaction_id = transaction_id if transaction_id else "t-"+str(uuid.uuid4().int>>64)[:6]
+        existing_transaction_ids = AppDBUtil.getAllTransactionIds()
+        if transaction_id:
+            transaction_id = transaction_id
+        else:
+            transaction_id = "t-"+str(uuid.uuid4().int>>64)[:6]
+            while transaction_id in  existing_transaction_ids:
+                logger.debug("Transaction id {} already exists".format(transaction_id))
+                transaction_id = "t-" + str(uuid.uuid4().int >> 64)[:6]
+
         prospect_id = clientData.get('prospect_id','')
         stripe_customer_id = clientData.get('stripe_customer_id','')
         first_name = clientData.get('first_name','')
@@ -541,6 +549,16 @@ class AppDBUtil():
         cls.executeDBQuery()
         print("number of lead rows modified is: ", number_of_rows_modified) # printing of rows modified to logs to help with auditing
         return number_of_rows_modified
+
+    @classmethod
+    def getAllTransactionIds(cls):
+        transactions = Transaction.query.all()
+        transaction_ids = []
+        for transaction in transactions:
+            transaction_ids.append(transaction.transaction_id)
+        logger.debug("All trasaction ids are: {}".format(transaction_ids))
+        return transaction_ids
+
 
     @classmethod
     def executeDBQuery(cls):
