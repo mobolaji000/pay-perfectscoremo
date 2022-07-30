@@ -102,6 +102,7 @@ class Prospect(db.Model):
     how_did_they_hear_about_us = db.Column(db.String, index=True, nullable=False, default='')
     how_did_they_hear_about_us_details = db.Column(db.String, index=True, nullable=False, default='')
     is_active = db.Column(db.Boolean, unique=False, nullable=False, server_default='True')
+    #
 
     def __repr__(self):
         return '<Prospect {} created with prospect_id {}>'.format(self.last_name, self.prospect_id)
