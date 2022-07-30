@@ -50,7 +50,7 @@ class Config(object):
             SECRET_KEY = awsInstance.get_secret("vensti_admin", "flask_secret_key")
             dbUserName = awsInstance.get_secret("do_db_cred", "username")
             dbPassword = awsInstance.get_secret("do_db_cred", "password")
-            SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://' + str(dbUserName) + ':' + str(dbPassword) + '@app-36443af6-ab5a-4b47-a64e-564101e951d6-do-user-9096158-0.b.db.ondigitalocean.com:25060/db'
+            SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://' + str(dbUserName) + ':' + str(dbPassword) + '@app-36443af6-ab5a-4b47-a64e-564101e951d6-jul-29-backup-do-user.b.db.ondigitalocean.com:25060/defaultdb'
             SQLALCHEMY_TRACK_MODIFICATIONS = False
             stripe.api_key = awsInstance.get_secret("stripe_cred", "stripe_api_key_prod")
             plaid_client_id = awsInstance.get_secret("plaid_cred", "plaid_client_id")
