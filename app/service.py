@@ -74,7 +74,7 @@ class StripeInstance():
                 default_card = customer.invoice_settings.default_payment_method
                 default_ach = customer.default_source
                 print("payment options are: ")
-                print("default_ach is ",default_ach)
+                print("default_ach is ",default_ach)#
                 print("default_card is ",default_card)
                 if default_card or default_ach:
                     does_customer_payment_info_exist = True
