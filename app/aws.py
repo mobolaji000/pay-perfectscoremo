@@ -3,6 +3,14 @@ import os
 import json
 from botocore.exceptions import ClientError
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+# handler = logging.StreamHandler()
+# formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+# handler.setFormatter(formatter)
+# logger.addHandler(handler)
+
 class AWSInstance():
     def __init__(self):
         pass
@@ -182,7 +190,7 @@ class AWSInstance():
         except ClientError as e:
             print(e.response['Error']['Message'])
         else:
-            print("Email sent! Message ID:"),
-            print(response['MessageId'])
-            print(BODY_HTML)
+            logger.debug("Email sent! Message ID:"),
+            logger.debug(response['MessageId'])
+            logger.debug(BODY_HTML)
 

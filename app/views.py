@@ -727,9 +727,9 @@ def start_background_jobs_before_first_request():
     #if os.environ['DEPLOY_REGION'] != 'local':
         scheduler.add_job(lambda: print("dummy reminders job for local and dev"), 'cron', minute='55')
     else:
-        scheduler.add_job(reminders_background_job, 'cron', hour='21', minute='00')
+        scheduler.add_job(reminders_background_job, 'cron', hour='16', minute='00')
         # scheduler.add_job(reminders_background_job, 'cron', day_of_week='sun', hour='19', minute='45')
-        scheduler.add_job(invoice_payment_background_job, 'cron', hour='20',minute='55')
+        scheduler.add_job(invoice_payment_background_job, 'cron', hour='15',minute='55')
 
     print("Reminders background job added")
     print("Invoice payment background job added")
