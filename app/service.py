@@ -74,7 +74,7 @@ class StripeInstance():
                 default_card = customer.invoice_settings.default_payment_method
                 default_ach = customer.default_source
                 print("payment options are: ")
-                print("default_ach is ",default_ach)
+                print("default_ach is ",default_ach)#
                 print("default_card is ",default_card)
                 if default_card or default_ach:
                     does_customer_payment_info_exist = True
@@ -476,13 +476,14 @@ class SendMessagesToClients():
         to='+1'+to_number
         )
 
-        print("text sent!")
-        print(sent_message.sid)
+        logger.debug("text sent!")
+        logger.debug(sent_message.sid)
         logger.debug(text_message)
 
     @classmethod
     def sendGroupEmail(cls, to_emails=[], type='', message='', subject='Group Email'):
         cls.awsInstance.send_email(to_addresses=to_emails, message=message, subject=subject, type=type)
+
 
     @classmethod
     def sendGroupSMS(cls, to_numbers=[], type='', message=''):
@@ -545,5 +546,5 @@ class SendMessagesToClients():
 
 
         cls.twilioClient.conversations.conversations(conversation.sid).messages.create(body=text_message, author='+19564771274')
-        print("group chat created!")
+        logger.debug("group chat created!")
 
