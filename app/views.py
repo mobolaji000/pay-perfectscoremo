@@ -329,7 +329,7 @@ def modify_transaction():
                 SendMessagesToClients.sendEmail(to_addresses=data_to_modify['email'], message=transaction_id, type=message_type)
                 if message_type == 'modify_transaction_existing_client':
                     SendMessagesToClients.sendGroupSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, type=message_type)
-                    time.sleep(5)
+                    time.sleep(5)#
                     SendMessagesToClients.sendGroupSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, type='questions')
                 else:
                     SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=transaction_id, type=message_type)
