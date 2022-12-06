@@ -148,6 +148,29 @@ class Student(db.Model):
         return '<Student {} created with student_id {}>'.format(self.parent_1_last_name, self.student_id)
 
 
+class Test(db.Model):
+    student_id = db.Column(db.String(8), unique=True, index=True, nullable=False, default='')
+    student_first_name = db.Column(db.String(64), index=True, nullable=False, default='')
+    student_last_name = db.Column(db.String(64), index=True, nullable=False, default='')
+    student_email = db.Column(db.String(64), index=True,primary_key=True,unique=True,nullable=False, default='')
+    student_phone_number = db.Column(db.String(22),index=True,nullable=False, default='')
+    parent_1_salutation = db.Column(db.String(6), index=True, nullable=False, default='')
+    parent_1_first_name = db.Column(db.String(64), index=True, nullable=False, default='')
+    parent_1_last_name = db.Column(db.String(64), index=True, nullable=False, default='')
+    parent_1_email = db.Column(db.String(64), index=True, nullable=False, default='')
+    parent_1_phone_number = db.Column(db.String(22),index=True,nullable=False, default='')
+    parent_2_salutation = db.Column(db.String(6), index=True, nullable=False, default='')
+    parent_2_first_name = db.Column(db.String(64), index=True, nullable=False, default='')
+    parent_2_last_name = db.Column(db.String(64), index=True, nullable=False, default='')
+    parent_2_email = db.Column(db.String(64), index=True, nullable=False, default='')
+    parent_2_phone_number = db.Column(db.String(22),index=True,nullable=False, default='')
+    is_active = db.Column(db.Boolean, unique=False,nullable=False, server_default='True')
+
+
+    def __repr__(self):
+        return '<Student {} created with student_id {}>'.format(self.parent_1_last_name, self.student_id)
+
+
 db.create_all()
 try:
     db.session.commit()

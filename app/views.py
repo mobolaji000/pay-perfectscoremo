@@ -49,6 +49,7 @@ plaidInstance = PlaidInstance()
 @server.route("/")
 def hello():
     #server.logger.debug('Processing default request')
+    AppDBUtil.test()
     return ("You have landed on the wrong page")
 
 @server.route("/usercode.html")
@@ -697,6 +698,12 @@ def start_background_jobs_before_first_request():
             for invoice in invoicesToPay:
                 try:
                     invoice_payment_failed = True
+
+                    stripe_invoice_ach_charge = stripe.Charge.retrieve(stripe.Invoice.retrieve(invoice['stripe_invoice_id']).charge)
+                    if stripe_invoice_ach_charge.status == 'pending' and stripe_invoice_ach_charge.payment_method_details.type == "ach_debit":
+                        logger.info("ACH payment already started for: {}".format(invoice['last_name']))
+                        continue
+
                     stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
                     if stripe_invoice_object.paid or stripe_invoice_object.finalized:
                         #added finalized because ach payments finalize immediately but do not send 'paid' events for 14 days
