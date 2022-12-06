@@ -2,8 +2,18 @@ import os
 from app.aws import AWSInstance
 import stripe
 import plaid
+
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 awsInstance = AWSInstance()
+
 class Config(object):
     try:
         if os.environ['DEPLOY_REGION'] == 'local':
@@ -58,7 +68,7 @@ class Config(object):
             plaidClient = plaid.Client(client_id=plaid_client_id, secret=plaid_secret, environment='development')
 
     except Exception as e:
-        print("error in initialization")
-        print(e)
+        logger.exception("Error in Config Initialization")
+        #print(e)
         #trigger10
 

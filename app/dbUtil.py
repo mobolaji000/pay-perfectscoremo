@@ -1,4 +1,4 @@
-from app.models import Transaction,InstallmentPlan,InvoiceToBePaid,Prospect,Student,Lead
+from app.models import Transaction,InstallmentPlan,InvoiceToBePaid,Prospect,Student,Lead,Test
 from app import db
 from app.config import stripe
 from datetime import datetime
@@ -19,6 +19,46 @@ logger.addHandler(ch)
 class AppDBUtil():
     def __init__(self):
         pass
+
+    # @classmethod
+    # def test(cls):
+    #     try:
+    #         student_id = "s-" + str(uuid.uuid4().int >> 64)[:6]
+    #         student_first_name = 'a'
+    #         student_last_name = 'a'
+    #         student_phone_number = 'a'
+    #         student_email = 'a'
+    #         parent_1_salutation = 'a'
+    #         parent_1_first_name = 'a'
+    #         parent_1_last_name = 'a'
+    #         parent_1_phone_number = 'a'
+    #         parent_1_email = 'a'
+    #         parent_2_salutation = 'a'
+    #         parent_2_first_name = 'a'
+    #         parent_2_last_name = 'a'
+    #         parent_2_phone_number = 'a'
+    #         parent_2_email = 'a'
+    #
+    #         statement = insert(Test).values(student_id=student_id,  student_first_name=student_first_name, student_last_name=student_last_name, student_phone_number=student_phone_number, student_email=student_email,
+    #                                            parent_1_salutation=parent_1_salutation, parent_1_first_name=parent_1_first_name, parent_1_last_name=parent_1_last_name, parent_1_phone_number=parent_1_phone_number, parent_1_email=parent_1_email,
+    #                                            parent_2_salutation=parent_2_salutation, parent_2_first_name=parent_2_first_name, parent_2_last_name=parent_2_last_name, parent_2_phone_number=parent_2_phone_number, parent_2_email=parent_2_email)
+    #
+    #         updated_content = dict(student_id=student_id, student_first_name=student_first_name, student_last_name=student_last_name, student_phone_number=student_phone_number,
+    #                                parent_1_salutation=parent_1_salutation, parent_1_first_name=parent_1_first_name, parent_1_last_name=parent_1_last_name, parent_1_phone_number=parent_1_phone_number, parent_1_email=parent_1_email,
+    #                                parent_2_salutation=parent_2_salutation, parent_2_first_name=parent_2_first_name, parent_2_last_name=parent_2_last_name, parent_2_phone_number=parent_2_phone_number, parent_2_email=parent_2_email)
+    #
+    #         statement = statement.on_conflict_do_update(
+    #             index_elements=['student_email'],
+    #             set_=updated_content
+    #         )
+    #
+    #         db.session.execute(statement)
+    #         cls.executeDBQuery()
+    #
+    #     except Exception as e:
+    #         print(e)
+    #         print(traceback.print_exc())
+    #         raise e
 
     @classmethod
     def createProspect(cls, prospectData={}):
