@@ -432,7 +432,7 @@ class SendMessagesToClients():
         pass
 
     @classmethod
-    def sendEmail(cls, to_address='mo@vensti.com', message='perfectscoremo', subject='Payment Instructions/Options', type='', recipient_name=''):
+    def sendEmail(cls, to_address='mo@vensti.com', message='perfectscoremo', subject='Payment Instructions/Options', type=''):
         cls.awsInstance.send_email(to_address=to_address, message=message, subject=subject, type=type)
 
     @classmethod

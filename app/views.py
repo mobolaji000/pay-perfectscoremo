@@ -248,7 +248,7 @@ def create_transaction():
             if transaction_setup_data.get('send_text_and_email', '') == 'yes':
                 logger.debug('Send transaction text and email notification: ' + str(stripe_info['transaction_id']))
                 try:
-                    SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_id, type=message_type,recipient_name=transaction_setup_data[''])
+                    SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_id, type=message_type)
                     if message_type == 'create_transaction_existing_client':
                         SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type=message_type)
                         time.sleep(5)
