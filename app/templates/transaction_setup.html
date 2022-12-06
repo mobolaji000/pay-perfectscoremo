@@ -555,7 +555,18 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 			<h4 class="mb-3">Transaction Information</h4>
 			<form id="create_transaction_setup_form" name="create_transaction_setup_form"  class="needs-validation" action="{{ url_for('create_transaction') }}" method="post" data-toggle="validator">
 				<div class="row">
-					<div class="col-md-6 mb-3">
+					<div class="col-md-2 mb-3">
+						<label for="salutation">Salutation</label>
+						<select  id="salutation" name="salutation" class="form-control" required>
+								<option value="" selected disabled hidden></option>
+								<option value='Mr.'>Mr.</option>
+								<option value='Ms.'>Ms.</option>
+							</select>
+						<div class="invalid-feedback">
+							Valid salutation is required.
+						</div>
+					</div>
+					<div class="col-md-5 mb-3">
 						<label for="first_name">First name</label>
 						<input type="text" class="form-control" id="first_name" name="first_name" placeholder="" value=""
 							   required>
@@ -563,7 +574,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 							Valid first name is required.
 						</div>
 					</div>
-					<div class="col-md-6 mb-3">
+					<div class="col-md-5 mb-3">
 						<label for="last_name">Last name</label>
 						<input type="text" class="form-control" id="last_name" name="last_name" placeholder="" value=""
 							   required>

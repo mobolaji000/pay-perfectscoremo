@@ -432,8 +432,8 @@ class SendMessagesToClients():
         pass
 
     @classmethod
-    def sendEmail(cls, to_addresses='mo@vensti.com', message='perfectscoremo', subject='Payment Instructions/Options', type=''):
-        cls.awsInstance.send_email(to_addresses=to_addresses, message=message, subject=subject, type=type)
+    def sendEmail(cls, to_address='mo@vensti.com', message='perfectscoremo', subject='Payment Instructions/Options', type=''):
+        cls.awsInstance.send_email(to_address=to_address, message=message, subject=subject, type=type)
 
     @classmethod
     def sendSMS(cls,message='perfectscoremo',from_number='+19564771274',to_number='9725847364',type=''):
@@ -482,7 +482,7 @@ class SendMessagesToClients():
 
     @classmethod
     def sendGroupEmail(cls, to_emails=[], type='', message='', subject='Group Email'):
-        cls.awsInstance.send_email(to_addresses=to_emails, message=message, subject=subject, type=type)
+        cls.awsInstance.send_email(to_address=to_emails, message=message, subject=subject, type=type)
 
 
     @classmethod

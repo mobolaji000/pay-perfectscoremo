@@ -134,7 +134,7 @@ def client_info(prospect_id):
             time.sleep(5)
             SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, type='referral_request')
             #hold off on sending group emails until you dedcide there is a value add
-            #SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+            #SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
             #flash("Student information submitted successfully and group messages (email and text) for regular updates created.")
             flash("Student information submitted successfully and text group message for regular updates created.")
         except Exception as e:
@@ -248,7 +248,7 @@ def create_transaction():
             if transaction_setup_data.get('send_text_and_email', '') == 'yes':
                 logger.debug('Send transaction text and email notification: ' + str(stripe_info['transaction_id']))
                 try:
-                    SendMessagesToClients.sendEmail(to_addresses=transaction_setup_data['email'], message=transaction_id, type=message_type)
+                    SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_id, type=message_type)
                     if message_type == 'create_transaction_existing_client':
                         SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type=message_type)
                         time.sleep(5)
@@ -327,7 +327,7 @@ def modify_transaction():
         if data_to_modify.get('send_text_and_email','') == 'yes':
             logger.debug('Send modified transaction text and email notification: ' + str(stripe_info['transaction_id']))
             try:
-                SendMessagesToClients.sendEmail(to_addresses=data_to_modify['email'], message=transaction_id, type=message_type)
+                SendMessagesToClients.sendEmail(to_address=data_to_modify['email'], message=transaction_id, type=message_type)
                 if message_type == 'modify_transaction_existing_client':
                     SendMessagesToClients.sendGroupSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, type=message_type)
                     time.sleep(5)#
@@ -545,7 +545,7 @@ def enterClientInfo(payment_and_signup_data={}):
             message = message + " " + k.split('\n')[1].strip() + ","
         SendMessagesToClients.sendEmail(message=message, subject="Suggested one-on-one days for " + str(payment_and_signup_data['student_first_name']) + " " + str(payment_and_signup_data['student_last_name']), type='to_mo')
         # hold off on sending group emails until you dedcide there is a value add
-        # SendMessagesToClients.sendEmail(to_addresses=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+        # SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
         return {'status': 'success'}
     except Exception as e:
         print(e)
@@ -679,7 +679,7 @@ def start_background_jobs_before_first_request():
             reminder_last_names = ''
             clientsToReceiveReminders = AppDBUtil.findClientsToReceiveReminders()
             for client in clientsToReceiveReminders:
-                SendMessagesToClients.sendEmail(to_addresses=client['email'], message=client['transaction_id'], type='reminder_to_make_payment')
+                SendMessagesToClients.sendEmail(to_address=client['email'], message=client['transaction_id'], type='reminder_to_make_payment')
                 SendMessagesToClients.sendSMS(to_number=client['phone_number'], message=client['transaction_id'],type='reminder_to_make_payment')
                 reminder_last_names = reminder_last_names+client['last_name']+", "
             SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')

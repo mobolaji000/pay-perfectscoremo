@@ -73,7 +73,7 @@ class AWSInstance():
         return secret
 
 
-    def send_email(self, to_addresses='mo@vensti.com', message='perfectscoremo', subject='perfectscoremo', type=''):
+    def send_email(self, to_address='mo@vensti.com', message='perfectscoremo', subject='perfectscoremo', type=''):
 
         if type == 'create_transaction_new_client':
             created_or_modified_span = "<span>Your transaction has just been <strong>created</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
@@ -88,7 +88,7 @@ class AWSInstance():
 
 
         SENDER = "Perfect Score Mo <mo@info.perfectscoremo.com>"
-        RECIPIENT = [to_addresses] if isinstance(to_addresses, str) else to_addresses
+        RECIPIENT = [to_address] if isinstance(to_address, str) else to_address
         SUBJECT = subject
 
         # The email body for recipients with non-HTML email clients.
