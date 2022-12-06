@@ -49,7 +49,7 @@ plaidInstance = PlaidInstance()
 @server.route("/")
 def hello():
     #server.logger.debug('Processing default request')
-    AppDBUtil.test()
+    #AppDBUtil.test()
     return ("You have landed on the wrong page")
 
 @server.route("/usercode.html")
