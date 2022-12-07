@@ -432,25 +432,25 @@ class SendMessagesToClients():
         pass
 
     @classmethod
-    def sendEmail(cls, to_address='mo@vensti.com', message='perfectscoremo', subject='Payment Instructions/Options', type=''):
-        cls.awsInstance.send_email(to_address=to_address, message=message, subject=subject, type=type)
+    def sendEmail(cls, to_address='mo@vensti.com', message='perfectscoremo', subject='Payment Instructions/Options', type='', recipient_name=''):
+        cls.awsInstance.send_email(to_address=to_address, message=message, subject=subject, type=type, recipient_name=recipient_name)
 
     @classmethod
-    def sendSMS(cls,message='perfectscoremo',from_number='+19564771274',to_number='9725847364',type=''):
+    def sendSMS(cls,message='perfectscoremo',from_number='+19564771274',to_number='9725847364',type='', recipient_name=''):
 
         if type == 'create_transaction_new_client':
-            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour transaction has just been created. Here are the payment/signup instructions/options (also sent to your email address):"
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been created. Here are the payment/signup instructions/options (also sent to your email address):".format(recipient_name)
         elif type == 'modify_transaction_new_client':
-            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour transaction has just been modified. Here are the payment/signup instructions/options (also sent to your email address):"
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified. Here are the payment/signup instructions/options (also sent to your email address):".format(recipient_name)
         elif type == 'reminder_to_make_payment':
-            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):"
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):".format(recipient_name)
         elif type == 'create_transaction_existing_client':
-            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. You can always change your method of payment between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. You can always change your method of payment between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
         elif type == 'modify_transaction_existing_client':
-            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour transaction has just been modified using your method of payment on file, but there have been no charges yet. You can always change your method of payment between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified using your method of payment on file, but there have been no charges yet. You can always change your method of payment between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
         elif type == 'student_info':
             link_url = os.environ["url_to_start_reminder"]+"client_info/"+message
-            created_or_modified_span = "Dear Parent,\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. \n\n This will be used to setup text message and email updates on your student's regular progress."
+            created_or_modified_span = "Dear {},\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. \n\n This will be used to setup text message and email updates on your student's regular progress.".format(recipient_name)
 
 
         if type == 'to_mo':
@@ -486,7 +486,7 @@ class SendMessagesToClients():
 
 
     @classmethod
-    def sendGroupSMS(cls, to_numbers=[], type='', message=''):
+    def sendGroupSMS(cls, to_numbers=[], type='', message='',recipient_name=''):
         # cls.twilioClient.messaging.services('MGd37b2dce09791f42239043b6e949f96b').delete()
         conversations = cls.twilioClient.conversations.conversations.list(limit=50)
         for record in conversations:
@@ -512,9 +512,9 @@ class SendMessagesToClients():
         if type == 'create_group_chat':
             created_or_modified_span = "Welcome "+message+"!\n\n"+"I am Mo's automated assistant, and I will be sending reports on your progress via this group chat. Mo (972-584-7364) and his personal assistant (972-503-9573) are on the chat as well to follow up with you on your daily homework/review sessions. If you need to speak with someone, though, please feel free to call Mo. We can't wait to see you succeeed!"
         elif type == 'create_transaction_existing_client':
-            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
         elif type == 'modify_transaction_existing_client':
-            created_or_modified_span = "Dear Parent,\n\nPLEASE READ CAREFULLY!!\n\nYour transaction has just been modified using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):"
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
         elif type == 'questions':
             link_url = os.environ["url_to_start_reminder"] + "client_info/" + message
             #created_or_modified_span = "If you don't need to change your current transaction setup, please go to "+link_url+" (also sent to your email address) to input you and your student's information. Regular communication between us, you, and your student is a big part of our process. So, your information will be used to setup text message and email updates on your student's regular progress.\n\n I am happy to clarify any questions you might have!"
