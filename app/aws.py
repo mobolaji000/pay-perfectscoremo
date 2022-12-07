@@ -73,7 +73,7 @@ class AWSInstance():
         return secret
 
 
-    def send_email(self, to_address='mo@vensti.com', message='perfectscoremo', subject='perfectscoremo', type=''):
+    def send_email(self, to_address='mo@vensti.com', message='perfectscoremo', subject='perfectscoremo', type='',recipient_name=''):
 
         if type == 'create_transaction_new_client':
             created_or_modified_span = "<span>Your transaction has just been <strong>created</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
@@ -102,7 +102,7 @@ class AWSInstance():
             BODY_HTML = """<html>
                 <head></head>
                 <body>
-                  <span>Dear Parent, </span><br><br>""" \
+                  <span>Dear {}, </span><br><br>""".format(recipient_name) \
                     + """<span>Thank you for signing up with us! </span><br><br>""" \
                     + """<span>Regular communication between us, you, and your student is a big part of our process. </span>""" \
                     + """<span>To help further that, please go to <strong><a href='"""+link_url+"""'>"""+link_url+"""</a></strong> (also sent to your phone number) to input you and your student's information.</span><br>""" \
@@ -140,8 +140,8 @@ class AWSInstance():
             BODY_HTML = """<html>
                             <head></head>
                             <body>
-                              <span>Dear Parent, </span><br>""" \
-                        + """<span><strong>PLEASE READ CAREFULLY!!</strong></span><br><br>""" \
+                              <span>Dear {}, </span><br><br>""".format(recipient_name) \
+                        + """<span><strong>PLEASE READ CAREFULLY!!!</strong></span><br><br>""" \
                         + created_or_modified_span \
                         + """<span>1. Go to perfectscoremo.com</span><br>""" \
                         + """<span>2. Choose ‘Make A Payment’ from the menu</span><br>""" \
@@ -192,5 +192,6 @@ class AWSInstance():
         else:
             logger.debug("Email sent! Message ID:"),
             logger.debug(response['MessageId'])
+            logger.debug(("Email message type is: {}".format(type)))
             logger.debug(BODY_HTML)
 

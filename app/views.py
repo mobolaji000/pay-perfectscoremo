@@ -223,9 +223,9 @@ def create_transaction():
         transaction_id,number_of_rows_modified = AppDBUtil.createOrModifyClientTransaction(transaction_setup_data, action='create')
 
         client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
-        logger.debug('Transaction details (client_info) is: ' + str(client_info))
-        logger.debug('Transaction details (products_info) is: ' + str(products_info))
-        logger.debug('Transaction details (showACHOverride) is: ' + str(showACHOverride))
+        logger.debug('Transaction details (client_info) are: ' + str(client_info))
+        logger.debug('Transaction details (products_info) are: ' + str(products_info))
+        logger.debug('Transaction details (showACHOverride) are: ' + str(showACHOverride))
 
         stripe_info = parseDataForStripe(client_info)
         logger.debug('stripe_info is: ' + str(stripe_info))
@@ -248,13 +248,13 @@ def create_transaction():
             if transaction_setup_data.get('send_text_and_email', '') == 'yes':
                 logger.debug('Send transaction text and email notification: ' + str(stripe_info['transaction_id']))
                 try:
-                    SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_id, type=message_type)
+                    SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_id, type=message_type,recipient_name=transaction_setup_data['salutation']+' '+transaction_setup_data['first_name']+' '+transaction_setup_data['last_name'])
                     if message_type == 'create_transaction_existing_client':
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type=message_type)
+                        SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type=message_type,recipient_name=transaction_setup_data['salutation']+' '+transaction_setup_data['first_name']+' '+transaction_setup_data['last_name'])
                         time.sleep(5)
                         SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type='questions')
                     else:
-                        SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'], message=transaction_id, type=message_type)
+                        SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'], message=transaction_id, type=message_type,recipient_name=transaction_setup_data['salutation']+' '+transaction_setup_data['first_name']+' '+transaction_setup_data['last_name'])
                     flash('Transaction created and email/sms sent to client.')
                 except Exception as e:
                     traceback.print_exc()
@@ -733,8 +733,11 @@ def start_background_jobs_before_first_request():
     if os.environ['DEPLOY_REGION'] != 'prod':
     #if os.environ['DEPLOY_REGION'] != 'local':
         scheduler.add_job(lambda: print("dummy reminders job for local and dev"), 'cron', minute='55')
+        scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
     else:
-        scheduler.add_job(reminders_background_job, 'cron', hour='16', minute='00')
+        #BE EXTREMELY CAREFULY WITH THE CRON JOB AND COPIOUSLY TEST. IF YOU GET IT WRONG, YOU CAN EASILY ANNOY A CUSTOMER BY SENDING A MESSAGE EVERY MINUTE OR EVERY SECOND
+        scheduler.add_job(reminders_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
+        #scheduler.add_job(reminders_background_job, 'cron', hour='16', minute='00')
         # scheduler.add_job(reminders_background_job, 'cron', day_of_week='sun', hour='19', minute='45')
         scheduler.add_job(invoice_payment_background_job, 'cron', hour='15',minute='55')
 
