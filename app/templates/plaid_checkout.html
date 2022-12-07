@@ -84,9 +84,11 @@
     dataType: "json",
     async: false,
     success: function (data) {
+        console.log("get_link_token success result is: "+data)
     link_token = data.link_token;
     },
     error: function (error) {
+        console.log("get_link_token error result is: "+error)
         console.log(error);
     }
 });
@@ -110,6 +112,7 @@
     dataType: "json",
     async: false,
     success: function (result) {
+        console.log("exchange_plaid_for_stripe success result is: "+result)
    if(result.status == 'error'){
         window.location.href ="/error/"+result.message;
     }
@@ -123,6 +126,7 @@
     }
     },
     error: function (error) {
+        console.log("exchange_plaid_for_stripe error result is: "+error)
     window.location.href ="/failure";
     }
 });
