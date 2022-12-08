@@ -326,6 +326,7 @@ class AppDBUtil():
             client = {}
             client['first_name'] = transaction.first_name
             client['last_name'] = transaction.last_name
+            client['salutation'] = transaction.salutation
             client['phone_number'] = transaction.phone_number
             client['email'] = transaction.email
             client['stripe_customer_id'] = transaction.stripe_customer_id

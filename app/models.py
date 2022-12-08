@@ -4,6 +4,7 @@ class Transaction(db.Model):
     transaction_id = db.Column(db.String(8), primary_key=True, index=True, nullable=False, unique=True, default='')
     prospect_id = db.Column(db.String(8), db.ForeignKey('prospect.prospect_id'), index=True, nullable=False, default='')
     stripe_customer_id = db.Column(db.String(48),index=True,nullable=False, default='')
+    salutation_type = db.Column(db.Enum('Mr.', 'Ms.', name='salutation'), index=True, nullable=False, default='')
     first_name = db.Column(db.String(64), index=True,nullable=False, default='')
     last_name = db.Column(db.String(64), index=True,nullable=False, default='')
     phone_number = db.Column(db.String(22),index=True,nullable=False, default='')
