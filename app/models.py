@@ -1,6 +1,6 @@
 from app import db
 
-class Transaction(db.Model):
+class Transaction(db.Model):#
     transaction_id = db.Column(db.String(8), primary_key=True, index=True, nullable=False, unique=True, default='')
     prospect_id = db.Column(db.String(8), db.ForeignKey('prospect.prospect_id'), index=True, nullable=False, default='')
     stripe_customer_id = db.Column(db.String(48),index=True,nullable=False, default='')
