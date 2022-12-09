@@ -84,11 +84,11 @@
     dataType: "json",
     async: false,
     success: function (data) {
-        console.log("get_link_token success result is: "+data)
+        console.log("get_link_token success result is: "+JSON.stringify(data))
     link_token = data.link_token;
     },
     error: function (error) {
-        console.log("get_link_token error result is: "+error)
+        console.log("get_link_token error result is: "+JSON.stringify(error))
         console.log(error);
     }
 });
@@ -112,7 +112,7 @@
     dataType: "json",
     async: false,
     success: function (result) {
-        console.log("exchange_plaid_for_stripe success result is: "+result)
+        console.log("exchange_plaid_for_stripe success result is: "+JSON.stringify(result))
    if(result.status == 'error'){
         window.location.href ="/error/"+result.message;
     }
@@ -126,7 +126,7 @@
     }
     },
     error: function (error) {
-        console.log("exchange_plaid_for_stripe error result is: "+error)
+        console.log("exchange_plaid_for_stripe error result is: "+JSON.stringify(error))
     window.location.href ="/failure";
     }
 });
