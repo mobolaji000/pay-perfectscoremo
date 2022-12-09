@@ -402,10 +402,10 @@ class PlaidInstance():
                 'client_user_id': customer_id,
             },
             'products': ['auth'],
-            'client_name': 'PerfectScoreMo',
+            'client_name': 'PrepWithMo',
             'country_codes': ['US'],
             'language': 'en',
-            'webhook': 'perfectscoremo.com',
+            'webhook': 'prepwithmo.com',
         })
         link_token = response['link_token']
 

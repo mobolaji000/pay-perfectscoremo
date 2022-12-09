@@ -522,7 +522,7 @@ def exchange_plaid_for_stripe():
                     return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
                     # flash('Attempt to create family information failed. Contact Mo.')
 
-        logger.debug("Result from exchange_plaid_for_stripe is {}".format(jsonify(result)))
+        logger.debug("Result from exchange_plaid_for_stripe is {}".format(result.json()))
         return jsonify(result)
     except Exception as e:
         logger.error("Error  in /exchange_plaid_for_stripe")
