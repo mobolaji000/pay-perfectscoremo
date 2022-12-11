@@ -556,6 +556,10 @@ def enterClientInfo(payment_and_signup_data={}):
 
 @server.route("/stripe_webhook", methods=['POST'])
 def stripe_webhook():
+    if os.environ['DEPLOY_REGION'] != 'prod':
+        return json.dumps({'success': True,'message':'dummy true for non-prod environment'}), 200, {'ContentType': 'application/json'}
+
+
     payload = json.dumps(request.json)
     event = None
 
