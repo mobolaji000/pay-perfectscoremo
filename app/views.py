@@ -522,7 +522,7 @@ def exchange_plaid_for_stripe():
                     return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
                     # flash('Attempt to create family information failed. Contact Mo.')
 
-        logger.debug("Result from exchange_plaid_for_stripe is {}".format(result.json()))
+        logger.debug("Result from exchange_plaid_for_stripe is {}".format(result))
         return jsonify(result)
     except Exception as e:
         logger.error("Error  in /exchange_plaid_for_stripe")
@@ -557,7 +557,7 @@ def enterClientInfo(payment_and_signup_data={}):
 @server.route("/stripe_webhook", methods=['POST'])
 def stripe_webhook():
     if os.environ['DEPLOY_REGION'] != 'prod':
-        return json.dumps({'success': True,'message':'dummy true for non-prod environment'}), 200, {'ContentType': 'application/json'}
+        return json.dumps({'success': True,'message':'dummy success for non-prod environment'}), 200, {'ContentType': 'application/json'}
 
 
     payload = json.dumps(request.json)
