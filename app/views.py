@@ -515,14 +515,13 @@ def exchange_plaid_for_stripe():
             AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
 
             payment_and_signup_data = ast.literal_eval(request.form['payment_and_signup_data'])
-            result = enterClientInfo(payment_and_signup_data)
             if payment_and_signup_data.get('ask_for_student_info', '') == 'yes':
+                result = enterClientInfo(payment_and_signup_data)
                 if result['status'] != 'success':
                     logger.error('Attempt to create family information failed. Contact Mo.')
                     return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
                     # flash('Attempt to create family information failed. Contact Mo.')
 
-        logger.debug("Result from exchange_plaid_for_stripe is {}".format(result))
         return jsonify(result)
     except Exception as e:
         logger.error("Error  in /exchange_plaid_for_stripe")
@@ -530,8 +529,6 @@ def exchange_plaid_for_stripe():
         traceback.print_exc()
 
 def enterClientInfo(payment_and_signup_data={}):
-    #payment_and_signup_data = request.form.to_dict()
-    ask_for_student_info = payment_and_signup_data.get('ask_for_student_info', '')
     try:
         print("prospect_id in post is ", payment_and_signup_data['prospect_id'])
         print("student data is", payment_and_signup_data)

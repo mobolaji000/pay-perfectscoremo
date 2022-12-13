@@ -378,8 +378,8 @@ class AppDBUtil():
             showACHOverride = True
             transaction_id = transaction_id.split('ach')[0]
 
-        print("transaction id is: ",transaction_id)
-        print("showACHOverride is: ",showACHOverride)
+        logger.debug("transaction id is: ",transaction_id)
+        logger.debug("showACHOverride is: ",showACHOverride)
 
         admin_transaction_details = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
         admin_transaction_details.turn_on_installments = True if admin_transaction_details.installment_counter > 1 else False
@@ -440,6 +440,7 @@ class AppDBUtil():
         client_info = {}
         products_info = []
         try:
+            client_info['salutation'] = admin_transaction_details.salutation
             client_info['first_name'] = admin_transaction_details.first_name
             client_info['last_name'] = admin_transaction_details.last_name
             client_info['phone_number'] = admin_transaction_details.phone_number
