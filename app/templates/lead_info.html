@@ -84,9 +84,11 @@
      function populateFieldsFromSearch(result)
      {
      $('input[name="lead_id"]').val(result.lead_id);
+     $('select[name="lead_salutation"]').val(result.lead_salutation);
 	$('input[name="lead_name"]').val(result.lead_name);
      $('input[name="lead_email"]').val(result.lead_email);
      $('input[name="lead_phone_number"]').val(result.lead_phone_number);
+     $('input[name="appointment_date_and_time"]').val(result.appointment_date_and_time);
 
      $('textarea[name="what_service_are_they_interested_in"]').val(result.what_service_are_they_interested_in);
           $('textarea[name="what_next"]').val(result.what_next);
@@ -102,11 +104,12 @@
 <body class="bg-light">
 <div class="container">
 	<div class="py-5 text-center">
-		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
-		<h2><u>Lead Information</u></h2>
+		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="528" height="201">
+		<h2><u>Lead Information</u></h2><br>
 	</div>
 
 	<div class="">
+	<h4 class="mb-3 text-center font-weight-light font-italic"><u>Search For Existing Lead</u></h4>
 		<div class="">
 			<form id="lead_info_form" class="needs-validation" action="{{ url_for('lead_info') }}" method="post" data-toggle="validator" >
 				<div class="col-md-6 mb-3">
@@ -184,8 +187,24 @@
 				</div>
 
 
+				<h4 class="mb-3 text-center font-weight-light font-italic"><u>Enter New Lead</u></h4>
 				<div class="col-md-8 order-md-1">
+
 					<h4 class="mb-3"><u>Bio</u></h4>
+
+				<div class="row">
+						<div class="col-md-3 mb-3">
+							<label for="salutation">Salutation</label>
+						<select  id="salutation" name="salutation" class="form-control" required>
+								<option value="" selected disabled hidden></option>
+								<option value='Mr.'>Mr.</option>
+								<option value='Ms.'>Ms.</option>
+							</select>
+						<div class="invalid-feedback">Valid  salutation is required.</div>
+						</div>
+					</div>
+
+				{# TODO When salutation present, use it to send email; when absent, default to 'Dear Sir/Maam', which will apply to leads that are both parents and students #}
 
 					<div class="row">
 						<div class="col-md-6 mb-3">
@@ -206,7 +225,7 @@
 					</div>
 
 					<div class="mb-3">
-						<label for="lead_phone_number">Phone number</span></label>
+						<label for="lead_phone_number">Phone number</label>
 						<input type="tel" class="form-control" id="lead_phone_number" name="lead_phone_number"
 							   placeholder="111-111-1111">
 						<div class="invalid-feedback">
@@ -218,29 +237,32 @@
 
 					<br><br><br>
 
-					<h4 class="mb-3 text-center" ><u>Details</u></h4>
+					<h4 class="mb-3" ><u>Details</u></h4>
 
-					<div>
 
-						<!--<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;width:20%;margin-left:40%;margin-right:10%;">-->
 						<br>
 
-						<div class="row" style="display:inline-block; width:100%; margin-left: 10%;">
+						<div class="row col-md-6" >
+							<label for="appointment_date_and_time">Appointment Date/Time</label>
+							<input type="datetime-local" class="form-control" id="appointment_date_and_time" name="appointment_date_and_time" required>
+						  </div><br><br><br>
+
+						<div class="row" >
 							<label for="what_service_are_they_interested_in">What service are they interested in?</label>
 							<textarea  id="what_service_are_they_interested_in"  name="what_service_are_they_interested_in" class="form-control" rows="5" placeholder=""></textarea>
 						</div><br><br><br>
 
-						<div class="row" style="display:inline-block; width:100%; margin-left: 10%;">
+						<div class="row" >
 							<label for="what_next">What are the next steps?</label>
 							<textarea  id="what_next"  name="what_next" class="form-control" rows="5"  placeholder=""></textarea>
 						</div><br><br><br>
 
-						<div class="row" style="display:inline-block; width:100%; margin-left: 10%;">
+						<div class="row" >
 							<label for="meeting_notes_to_keep_in_mind">Notes from conversation to keep in mind</label>
 							<textarea  id="meeting_notes_to_keep_in_mind"  name="meeting_notes_to_keep_in_mind" class="form-control" rows="5"  placeholder=""></textarea>
 						</div><br><br><br>
 
-						<div class="row" style="display:inline-block; width:100%; margin-left: 10%;">
+						<div class="row" >
 							<label for="how_did_they_hear_about_us">How did they hear about us?</label>
 							<select  id="how_did_they_hear_about_us"  name="how_did_they_hear_about_us" class="form-control">
 								<option value="" selected disabled hidden></option>
@@ -254,7 +276,7 @@
 							</select>
 						</div><br><br>
 
-						<div class="row" style="display:inline-block; width:100%; margin-left: 10%;">
+						<div class="row" >
 							<label for="how_did_they_hear_about_us_details">How did they hear about us (details)?</label>
 							<textarea  id="how_did_they_hear_about_us_details"  name="how_did_they_hear_about_us_details" class="form-control" rows="5"  placeholder="" ></textarea>
 						</div>
@@ -266,7 +288,7 @@
 						<br><br><br>
 
 
-					</div>
+
 
 					<div>
 							{% if action == 'Create' or action == 'Modify' %}

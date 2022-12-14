@@ -156,10 +156,9 @@ def lead_info():
         if action == 'Create':
             try:
                 leadInfo = {}
-                leadInfo.update({'lead_id': "l-" + str(uuid.uuid4().int >> 64)[:6], 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
-                                 'what_service_are_they_interested_in': lead_info_contents.get('what_service_are_they_interested_in', ''), 'what_next': lead_info_contents.get('what_next', ''),
-                                 'meeting_notes_to_keep_in_mind': lead_info_contents.get('meeting_notes_to_keep_in_mind', ''),
-                                 'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'how_did_they_hear_about_us_details': lead_info_contents.get('how_did_they_hear_about_us_details', '')})
+                leadInfo.update({'lead_id': "l-" + str(uuid.uuid4().int >> 64)[:6],'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
+                                 'appointment_date_and_time': lead_info_contents.get('appointment_date_and_time', ''),'what_service_are_they_interested_in': lead_info_contents.get('what_service_are_they_interested_in', ''), 'what_next': lead_info_contents.get('what_next', ''),
+                                 'meeting_notes_to_keep_in_mind': lead_info_contents.get('meeting_notes_to_keep_in_mind', ''),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'how_did_they_hear_about_us_details': lead_info_contents.get('how_did_they_hear_about_us_details', '')})
                 AppDBUtil.createLead(leadInfo)
                 flash('The lead info was created successfully.')
                 return render_template('lead_info.html', action=action)
@@ -172,8 +171,8 @@ def lead_info():
         if action == 'Modify':
             try:
                 leadInfo = {}
-                leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''),
-                                 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
+                leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''),'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_email': lead_info_contents.get('lead_email', ''),
+                                 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'appointment_date_and_time': lead_info_contents.get('appointment_date_and_time', ''),
                                  'what_service_are_they_interested_in': lead_info_contents.get('what_service_are_they_interested_in', ''), 'what_next': lead_info_contents.get('what_next', ''),
                                  'meeting_notes_to_keep_in_mind': lead_info_contents.get('meeting_notes_to_keep_in_mind', ''),
                                  'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'how_did_they_hear_about_us_details': lead_info_contents.get('how_did_they_hear_about_us_details', '')})
