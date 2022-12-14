@@ -163,6 +163,8 @@ function miscellanousValidation()
 		deleteRowButton.click();
 		}
 
+     console.log("search result is: "+JSON.stringify(result));
+
 
 	//fill fields based on search item selected
      $('select[name="salutation"]').val(result.salutation);
@@ -446,7 +448,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 <body class="bg-light">
 <div class="container">
 	<div class="py-5 text-center">
-		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="200" height="150">
+		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="528" height="201">
 		<h2><u>Transaction Creation</u></h2>
 	</div>
 

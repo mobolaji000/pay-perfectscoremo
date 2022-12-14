@@ -281,7 +281,11 @@ class AppDBUtil():
     @classmethod
     def findClientsToReceiveReminders(cls):
         try:
-            transaction_details = Transaction.query.filter_by(payment_started=False).all()
+            #transaction_details = Transaction.query.filter_by(payment_started=False).all()
+
+            #send reminders only to new customers who have not started paying
+            transaction_details = db.session.query(Transaction).filter((Transaction.payment_started == False) & (Transaction.does_customer_payment_info_exist == 'no')).all()
+
             search_results = []
             for transaction in transaction_details:
                 client = {}

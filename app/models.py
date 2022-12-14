@@ -110,9 +110,11 @@ class Prospect(db.Model):
 
 class Lead(db.Model):
     lead_id = db.Column(db.String(8), primary_key=True, unique=True, index=True, nullable=False, default='')
+    lead_salutation = db.Column(db.Enum('Mr.', 'Ms.', '', name='salutation_type'), index=True, nullable=False, default='')
     lead_name = db.Column(db.String(64), index=True,nullable=False, default='')
     lead_email = db.Column(db.String(64), index=True, nullable=False, default='')
-    lead_phone_number = db.Column(db.String(22), index=True,nullable=False, default='')
+    lead_phone_number = db.Column(db.String(22), index=True,nullable=False,  default='')
+    appointment_date_and_time = db.Column(db.DateTime(timezone=True), index=True, nullable=True)
     what_service_are_they_interested_in = db.Column(db.String, index=True, nullable=False, default='')
     what_next = db.Column(db.String, index=True, nullable=False, default='')
     meeting_notes_to_keep_in_mind = db.Column(db.String, index=True, nullable=False, default='')
