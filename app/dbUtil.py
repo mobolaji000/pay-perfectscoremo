@@ -96,6 +96,7 @@ class AppDBUtil():
         stripe_customer_id = clientData.get('stripe_customer_id','')
         first_name = clientData.get('first_name','')
         last_name = clientData.get('last_name','')
+        salutation = clientData.get('salutation','')
         phone_number = clientData.get('phone_number','999')
         email = clientData.get('email','')
         was_diagnostic_purchased = clientData.get('was_diagnostic_purchased', '')
@@ -122,7 +123,7 @@ class AppDBUtil():
         number_of_rows_modified = None
         if action=='create':
 
-            transaction = Transaction(transaction_id=transaction_id, prospect_id=prospect_id, stripe_customer_id=stripe_customer_id, first_name=first_name, last_name=last_name,
+            transaction = Transaction(transaction_id=transaction_id, prospect_id=prospect_id, stripe_customer_id=stripe_customer_id, first_name=first_name, last_name=last_name,salutation=salutation,
                                   phone_number=phone_number, email=email, was_diagnostic_purchased=was_diagnostic_purchased, diag_units=diag_units,
                                   diag_total=diag_total, was_test_prep_purchased=was_test_prep_purchased, tp_product=tp_product, tp_units=tp_units,
                                   tp_total=tp_total, was_college_apps_purchased=was_college_apps_purchased, college_apps_product=college_apps_product,
@@ -135,7 +136,7 @@ class AppDBUtil():
         elif action=='modify':
             #what happens in the unlikely event that 2 rows have the same transaction code?
             number_of_rows_modified = db.session.query(Transaction).filter_by(transaction_id=transaction_id).update\
-                ({"stripe_customer_id": stripe_customer_id,"first_name": first_name,"last_name": last_name,"phone_number": phone_number,
+                ({"stripe_customer_id": stripe_customer_id,"first_name": first_name,"last_name": last_name,"phone_number": phone_number,"salutation":salutation,
                         "email": email,"was_diagnostic_purchased": was_diagnostic_purchased,"diag_units": diag_units,"diag_total": diag_total,
                         "was_test_prep_purchased": was_test_prep_purchased,"tp_product": tp_product,"tp_units": tp_units,"tp_total": tp_total,
                         "was_college_apps_purchased": was_college_apps_purchased,"college_apps_product": college_apps_product,"college_apps_units": college_apps_units,
