@@ -670,7 +670,6 @@ def stripe_webhook():
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
     #return jsonify({'status': 200})
 
-
 @server.before_first_request
 def start_background_jobs_before_first_request():
     def reminders_background_job():
