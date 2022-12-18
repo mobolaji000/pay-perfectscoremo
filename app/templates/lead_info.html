@@ -112,7 +112,8 @@
 	<h4 class="mb-3 text-center font-weight-light font-italic"><u>Search For Existing Lead</u></h4>
 		<div class="">
 			<form id="lead_info_form" class="needs-validation" action="{{ url_for('lead_info') }}" method="post" data-toggle="validator" >
-				<div class="col-md-6 mb-3">
+				<div class="row no-padding">
+					<div class="col-md-3 mb-3">
 
 					<label for="search_query" class="form-label">Name, Email, Or Phone Number</label>
 					<input type="text" class="form-control" placeholder="Enter search query" id="search_query" name="search_query">
@@ -120,10 +121,11 @@
 							Valid name, email, or phone number is required.
 						</div>
 				</div>
+				</div>
 
 				<br><br>
 
-				<div class="row">
+				<div class="row no-padding">
 					<div class="col-md-3 mb-3">
 						<label for="start_date" class="form-label">Start Date</label>
 						<input type="date" class="form-control" id="start_date" name="start_date" />
@@ -190,10 +192,12 @@
 				<h4 class="mb-3 text-center font-weight-light font-italic"><u>Enter New Lead</u></h4>
 				<div class="col-md-8 order-md-1">
 
+				<div class="row no-padding">
 					<h4 class="mb-3"><u>Bio</u></h4>
+				</div>
 
-				<div class="row">
-						<div class="col-md-3 mb-3">
+				<div class="row no-padding">
+						<div class="mb-3">
 							<label for="salutation">Salutation</label>
 						<select  id="salutation" name="salutation" class="form-control" required>
 								<option value="" selected disabled hidden></option>
@@ -206,8 +210,8 @@
 
 				{# TODO When salutation present, use it to send email; when absent, default to 'Dear Sir/Maam', which will apply to leads that are both parents and students #}
 
-					<div class="row">
-						<div class="col-md-6 mb-3">
+					<div class="row no-padding">
+						<div class=" mb-3">
 							<label for="lead_name">Name</label>
 							<input type="text" class="form-control" id="lead_name" name="lead_name" placeholder="" value="">
 							<div class="invalid-feedback">
@@ -216,53 +220,59 @@
 						</div>
 					</div>
 
-					<div class="mb-3">
+					<div class="row no-padding">
+						<div class=" mb-3">
 						<label for="lead_email">Email</label>
 						<input type="email" class="form-control" id="lead_email" name="lead_email" placeholder="you@example.com">
 						<div class="invalid-feedback">
 							Please enter a valid email address.
 						</div>
 					</div>
+					</div>
 
-					<div class="mb-3">
+					<div class="row no-padding">
+						<div class=" mb-3">
 						<label for="lead_phone_number">Phone number</label>
 						<input type="tel" class="form-control" id="lead_phone_number" name="lead_phone_number"
 							   placeholder="111-111-1111">
 						<div class="invalid-feedback">
 							Please enter a valid phone number.
 						</div>
-					</div><br>
+					</div>
+						</div><br>
 
 					<div id="name-email-phone_number-checker" class="text-danger" hidden>Please enter a name, email, or phone number</div>
 
-					<br><br><br>
+					<br><br>
 
-					<h4 class="mb-3" ><u>Details</u></h4>
+					<div class="row no-padding">
+						<h4 class="mb-3" ><u>Details</u></h4>
+					</div>
 
 
 						<br>
 
-						<div class="row col-md-6" >
+						<div class="row no-padding" >
 							<label for="appointment_date_and_time">Appointment Date/Time</label>
 							<input type="datetime-local" class="form-control" id="appointment_date_and_time" name="appointment_date_and_time" required>
-						  </div><br><br><br>
+						   </div><br><br><br>
 
-						<div class="row" >
+						<div class="row no-padding" >
 							<label for="what_service_are_they_interested_in">What service are they interested in?</label>
 							<textarea  id="what_service_are_they_interested_in"  name="what_service_are_they_interested_in" class="form-control" rows="5" placeholder=""></textarea>
 						</div><br><br><br>
 
-						<div class="row" >
+						<div class="row no-padding" >
 							<label for="what_next">What are the next steps?</label>
 							<textarea  id="what_next"  name="what_next" class="form-control" rows="5"  placeholder=""></textarea>
 						</div><br><br><br>
 
-						<div class="row" >
+						<div class="row no-padding" >
 							<label for="meeting_notes_to_keep_in_mind">Notes from conversation to keep in mind</label>
 							<textarea  id="meeting_notes_to_keep_in_mind"  name="meeting_notes_to_keep_in_mind" class="form-control" rows="5"  placeholder=""></textarea>
 						</div><br><br><br>
 
-						<div class="row" >
+						<div class="row no-padding" >
 							<label for="how_did_they_hear_about_us">How did they hear about us?</label>
 							<select  id="how_did_they_hear_about_us"  name="how_did_they_hear_about_us" class="form-control">
 								<option value="" selected disabled hidden></option>
@@ -276,7 +286,7 @@
 							</select>
 						</div><br><br>
 
-						<div class="row" >
+						<div class="row no-padding" >
 							<label for="how_did_they_hear_about_us_details">How did they hear about us (details)?</label>
 							<textarea  id="how_did_they_hear_about_us_details"  name="how_did_they_hear_about_us_details" class="form-control" rows="5"  placeholder="" ></textarea>
 						</div>
