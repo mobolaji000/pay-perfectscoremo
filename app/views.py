@@ -158,7 +158,7 @@ def lead_info():
                 leadInfo = {}
                 leadInfo.update({'lead_id': "l-" + str(uuid.uuid4().int >> 64)[:6],'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
                                  'appointment_date_and_time': lead_info_contents.get('appointment_date_and_time', ''),'what_service_are_they_interested_in': lead_info_contents.get('what_service_are_they_interested_in', ''), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
-                                 'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'how_did_they_hear_about_us_details': lead_info_contents.get('how_did_they_hear_about_us_details', '')})
+                                 'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', '')})
                 AppDBUtil.createLead(leadInfo)
                 flash('The lead info was created successfully.')
                 return render_template('lead_info.html', action=action)
@@ -175,7 +175,7 @@ def lead_info():
                                  'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'appointment_date_and_time': lead_info_contents.get('appointment_date_and_time', ''),
                                  'what_service_are_they_interested_in': lead_info_contents.get('what_service_are_they_interested_in', ''), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
                                  'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),
-                                 'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'how_did_they_hear_about_us_details': lead_info_contents.get('how_did_they_hear_about_us_details', '')})
+                                 'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', '')})
 
                 number_of_rows_modified = AppDBUtil.modifyLeadInfo(lead_info_contents.get('lead_id', ''),leadInfo)
 

@@ -101,7 +101,7 @@ class Prospect(db.Model):
     prospect_email = db.Column(db.String(64), index=True, primary_key=True, nullable=False, default='')
     prospect_phone_number = db.Column(db.String(22),index=True,nullable=False, default='')
     how_did_they_hear_about_us = db.Column(db.String, index=True, nullable=False, default='')
-    how_did_they_hear_about_us_details = db.Column(db.String, index=True, nullable=False, default='')
+    details_on_how_they_heard_about_us = db.Column(db.String, index=True, nullable=False, default='')
     #is_active = db.Column(db.Boolean, unique=False, nullable=False, server_default='True')
     #TODO add prospect salutation column
 
@@ -120,7 +120,7 @@ class Lead(db.Model):
     appointment_date_and_time = db.Column(db.DateTime(timezone=True), index=True, nullable=True)
     miscellaneous_notes = db.Column(db.String, index=True, nullable=False, default='')
     how_did_they_hear_about_us = db.Column(db.String, index=True, nullable=False, default='')
-    how_did_they_hear_about_us_details = db.Column(db.String, index=True, nullable=False, default='')
+    details_on_how_they_heard_about_us = db.Column(db.String, index=True, nullable=False, default='')
     date_created = db.Column(db.DateTime(timezone=True), index=True, server_default=db.func.now())
     #is_active = db.Column(db.Boolean, unique=False, nullable=False, server_default='True')
 

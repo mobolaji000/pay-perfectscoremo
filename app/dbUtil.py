@@ -68,7 +68,7 @@ class AppDBUtil():
         prospect_phone_number = prospectData.get('phone_number', '999')
         prospect_email = prospectData.get('email', '')
         how_did_they_hear_about_us = prospectData.get('how_did_they_hear_about_us', '')
-        how_did_they_hear_about_us_details = prospectData.get('how_did_they_hear_about_us_details', '')
+        details_on_how_they_heard_about_us = prospectData.get('details_on_how_they_heard_about_us', '')
 
         existing_prospect = db.session.query(Prospect).filter_by(prospect_phone_number=prospect_phone_number).first() or db.session.query(Prospect).filter_by(prospect_email=prospect_email).first()
 
@@ -76,7 +76,7 @@ class AppDBUtil():
             prospect = existing_prospect
         else:
             prospect = Prospect(prospect_id=prospect_id,prospect_first_name=prospect_first_name, prospect_last_name=prospect_last_name,prospect_phone_number=prospect_phone_number, prospect_email=prospect_email,
-                                how_did_they_hear_about_us=how_did_they_hear_about_us,how_did_they_hear_about_us_details=how_did_they_hear_about_us_details)
+                                how_did_they_hear_about_us=how_did_they_hear_about_us,details_on_how_they_heard_about_us=details_on_how_they_heard_about_us)
             db.session.add(prospect)
             cls.executeDBQuery()
         return prospect
@@ -359,7 +359,7 @@ class AppDBUtil():
 
             prospect_details = Prospect.query.filter_by(prospect_id=transaction.prospect_id).first()
             client['how_did_they_hear_about_us'] = prospect_details.how_did_they_hear_about_us
-            client['how_did_they_hear_about_us_details'] = prospect_details.how_did_they_hear_about_us_details
+            client['details_on_how_they_heard_about_us'] = prospect_details.details_on_how_they_heard_about_us
 
 
             installment_details = InstallmentPlan.query.filter_by(transaction_id=transaction.transaction_id).first()
@@ -582,7 +582,7 @@ class AppDBUtil():
             lead['details_on_what_service_they_are_interested_in'] = info.details_on_what_service_they_are_interested_in
             lead['miscellaneous_notes'] = info.miscellaneous_notes
             lead['how_did_they_hear_about_us'] = info.how_did_they_hear_about_us
-            lead['how_did_they_hear_about_us_details'] = info.how_did_they_hear_about_us_details
+            lead['details_on_how_they_heard_about_us'] = info.details_on_how_they_heard_about_us
             lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
 
             search_results.append(lead)
