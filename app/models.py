@@ -120,7 +120,7 @@ class Lead(db.Model):
 
     appointment_date_and_time = db.Column(db.DateTime(timezone=True), index=True, nullable=True)
 
-    meeting_notes_to_keep_in_mind = db.Column(db.String, index=True, nullable=False, default='')
+    miscellaneous_notes = db.Column(db.String, index=True, nullable=False, default='')
 
     how_did_they_hear_about_us = db.Column(db.String, index=True, nullable=False, default='')
     how_did_they_hear_about_us_details = db.Column(db.String, index=True, nullable=False, default='')

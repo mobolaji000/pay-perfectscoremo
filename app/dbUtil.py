@@ -541,7 +541,7 @@ class AppDBUtil():
         try:
             lead_info = Lead(lead_id=leadInfo['lead_id'], lead_name=leadInfo['lead_name'], lead_email=leadInfo['lead_email'], lead_phone_number=leadInfo['lead_phone_number'],
                              what_service_are_they_interested_in=leadInfo['what_service_are_they_interested_in'], details_on_what_service_they_are_interested_in=leadInfo['details_on_what_service_they_are_interested_in'],
-                             meeting_notes_to_keep_in_mind=leadInfo['meeting_notes_to_keep_in_mind'], how_did_they_hear_about_us=leadInfo['how_did_they_hear_about_us'])
+                             miscellaneous_notes=leadInfo['miscellaneous_notes'], how_did_they_hear_about_us=leadInfo['how_did_they_hear_about_us'])
 
             db.session.add(lead_info)
             cls.executeDBQuery()
@@ -580,7 +580,7 @@ class AppDBUtil():
             lead['lead_email'] = info.lead_email
             lead['what_service_are_they_interested_in'] = info.what_service_are_they_interested_in
             lead['details_on_what_service_they_are_interested_in'] = info.details_on_what_service_they_are_interested_in
-            lead['meeting_notes_to_keep_in_mind'] = info.meeting_notes_to_keep_in_mind
+            lead['miscellaneous_notes'] = info.miscellaneous_notes
             lead['how_did_they_hear_about_us'] = info.how_did_they_hear_about_us
             lead['how_did_they_hear_about_us_details'] = info.how_did_they_hear_about_us_details
             lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
