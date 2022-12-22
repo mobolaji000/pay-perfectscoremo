@@ -383,8 +383,8 @@ class AppDBUtil():
             showACHOverride = True
             transaction_id = transaction_id.split('ach')[0]
 
-        logger.debug("transaction id is: ",transaction_id)
-        logger.debug("showACHOverride is: ",showACHOverride)
+        logger.debug("transaction id is: {}".format(transaction_id))
+        logger.debug("showACHOverride is: {}".format(showACHOverride))
 
         admin_transaction_details = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
         admin_transaction_details.turn_on_installments = True if admin_transaction_details.installment_counter > 1 else False

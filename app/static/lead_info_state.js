@@ -1,5 +1,14 @@
 $(document).ready(function() {
-    // By Default Disable radio button
+
+    //find detials of hos this works here: https://bbbootstrap.com/snippets/multiselect-dropdown-list-83601849
+    var multipleCancelButton = new Choices('#what_service_are_they_interested_in', {
+        removeItemButton: true,
+        // maxItemCount:5,
+        // searchResultLimit:5,
+        // renderChoiceLimit:5
+      });
+
+
  $('input[name="search_query"]').on('input', function() {
 	//alert($(this).val());
 	if ( $(this).val() != "")
