@@ -540,7 +540,7 @@ class AppDBUtil():
     def createLead(cls, leadInfo):
         try:
             lead_info = Lead(lead_id=leadInfo['lead_id'], lead_name=leadInfo['lead_name'], lead_email=leadInfo['lead_email'], lead_phone_number=leadInfo['lead_phone_number'],
-                             what_service_are_they_interested_in=leadInfo['what_service_are_they_interested_in'], what_next=leadInfo['what_next'],
+                             what_service_are_they_interested_in=leadInfo['what_service_are_they_interested_in'], details_on_what_service_they_are_interested_in=leadInfo['details_on_what_service_they_are_interested_in'],
                              meeting_notes_to_keep_in_mind=leadInfo['meeting_notes_to_keep_in_mind'], how_did_they_hear_about_us=leadInfo['how_did_they_hear_about_us'])
 
             db.session.add(lead_info)
@@ -579,7 +579,7 @@ class AppDBUtil():
             lead['lead_phone_number'] = info.lead_phone_number
             lead['lead_email'] = info.lead_email
             lead['what_service_are_they_interested_in'] = info.what_service_are_they_interested_in
-            lead['what_next'] = info.what_next
+            lead['details_on_what_service_they_are_interested_in'] = info.details_on_what_service_they_are_interested_in
             lead['meeting_notes_to_keep_in_mind'] = info.meeting_notes_to_keep_in_mind
             lead['how_did_they_hear_about_us'] = info.how_did_they_hear_about_us
             lead['how_did_they_hear_about_us_details'] = info.how_did_they_hear_about_us_details
