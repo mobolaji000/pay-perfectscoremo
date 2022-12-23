@@ -539,6 +539,7 @@ class AppDBUtil():
     @classmethod
     def createLead(cls, leadInfo):
         try:
+            logger.debug("lead info agian is {}".format(leadInfo))
             lead_info = Lead(lead_id=leadInfo['lead_id'], lead_salutation=leadInfo['lead_salutation'],lead_name=leadInfo['lead_name'], lead_email=leadInfo['lead_email'], lead_phone_number=leadInfo['lead_phone_number'],appointment_date_and_time=leadInfo['appointment_date_and_time'],
                              what_service_are_they_interested_in=leadInfo['what_service_are_they_interested_in'], details_on_what_service_they_are_interested_in=leadInfo['details_on_what_service_they_are_interested_in'],send_confirmation_to_lead=leadInfo['send_confirmation_to_lead'],
                              miscellaneous_notes=leadInfo['miscellaneous_notes'], how_did_they_hear_about_us=leadInfo['how_did_they_hear_about_us'],details_on_how_they_heard_about_us=leadInfo['details_on_how_they_heard_about_us'])
@@ -549,55 +550,61 @@ class AppDBUtil():
 
         except Exception as e:
             create_lead_info_message = "Error in submitting lead information."
-            print(e)
-            print(traceback.print_exc())
-        finally:
-            return create_lead_info_message
+            raise e
+        # finally:
+        #     return create_lead_info_message
 
     @classmethod
     def getLeadInfo(cls, search_query,searchStartDate,searchEndDate):
-        if search_query:
-            if search_query.startswith("l-"):
-                lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
-            elif "@" in search_query:
-                lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
-            else:
-                search = "%{}%".format(search_query)
-                lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
+        try:
+            if search_query:
+                if search_query.startswith("l-"):
+                    lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
+                elif "@" in search_query:
+                    lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
+                else:
+                    search = "%{}%".format(search_query)
+                    lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
 
-        elif searchStartDate and searchEndDate:
-            lead_info = Lead.query.filter(Lead.date_created <= searchEndDate).filter(Lead.date_created >= searchStartDate).order_by(Lead.date_created.desc()).all()
-            #changed way of searching lead_info because previous one was neither inclusive of start/end dates nor intuitive
-            #lead_info = Lead.query.filter(Lead.date_created.between(searchStartDate, searchEndDate)).order_by(Lead.date_created.desc()).all()
+            elif searchStartDate and searchEndDate:
+                lead_info = Lead.query.filter(Lead.date_created <= searchEndDate).filter(Lead.date_created >= searchStartDate).order_by(Lead.date_created.desc()).all()
+                #changed way of searching lead_info because previous one was neither inclusive of start/end dates nor intuitive
+                #lead_info = Lead.query.filter(Lead.date_created.between(searchStartDate, searchEndDate)).order_by(Lead.date_created.desc()).all()
 
 
-        search_results = []
-        for info in lead_info:
+            search_results = []
+            for info in lead_info:
 
-            lead = {}
-            lead['lead_salutation'] = info.lead_salutation
-            lead['lead_name'] = info.lead_name
-            lead['lead_phone_number'] = info.lead_phone_number
-            lead['lead_email'] = info.lead_email
-            lead['what_service_are_they_interested_in'] = info.what_service_are_they_interested_in
-            lead['details_on_what_service_they_are_interested_in'] = info.details_on_what_service_they_are_interested_in
-            lead['miscellaneous_notes'] = info.miscellaneous_notes
-            lead['how_did_they_hear_about_us'] = info.how_did_they_hear_about_us
-            lead['details_on_how_they_heard_about_us'] = info.details_on_how_they_heard_about_us
-            lead['appointment_date_and_time'] = info.appointment_date_and_time
-            lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
+                lead = {}
+                lead['lead_id'] = info.lead_id
+                lead['lead_salutation'] = info.lead_salutation
+                lead['lead_name'] = info.lead_name
+                lead['lead_phone_number'] = info.lead_phone_number
+                lead['lead_email'] = info.lead_email
+                lead['what_service_are_they_interested_in'] = info.what_service_are_they_interested_in
+                lead['details_on_what_service_they_are_interested_in'] = info.details_on_what_service_they_are_interested_in
+                lead['miscellaneous_notes'] = info.miscellaneous_notes
+                lead['how_did_they_hear_about_us'] = info.how_did_they_hear_about_us
+                lead['details_on_how_they_heard_about_us'] = info.details_on_how_they_heard_about_us
+                lead['appointment_date_and_time'] = info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S") if info.appointment_date_and_time else 'null'
+                lead['send_confirmation_to_lead'] = info.send_confirmation_to_lead
+                lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
 
-            search_results.append(lead)
-        print("search results are ", search_results)
-        return search_results
+                search_results.append(lead)
+            logger.info("search results are {}".format(search_results))
+            return search_results
+        except Exception as e:
+            raise e
 
     @classmethod
     def modifyLeadInfo(cls, lead_id, lead_info):
-
-        number_of_rows_modified = db.session.query(Lead).filter_by(lead_id=lead_id).update(lead_info)
-        cls.executeDBQuery()
-        print("number of lead rows modified is: ", number_of_rows_modified) # printing of rows modified to logs to help with auditing
-        return number_of_rows_modified
+        try:
+            number_of_rows_modified = db.session.query(Lead).filter_by(lead_id=lead_id).update(lead_info)
+            cls.executeDBQuery()
+            print("number of lead rows modified is: ", number_of_rows_modified) # printing of rows modified to logs to help with auditing
+            return number_of_rows_modified
+        except Exception as e:
+            raise e
 
     @classmethod
     def getAllTransactionIds(cls):

@@ -156,26 +156,28 @@ def lead_info():
         if action == 'Create':
             try:
                 leadInfo = {}
+                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
                 leadInfo.update({'lead_id': "l-" + str(uuid.uuid4().int >> 64)[:6],'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
-                                 'appointment_date_and_time': lead_info_contents.get('appointment_date_and_time', ''),'what_service_are_they_interested_in': lead_info_contents.get('what_service_are_they_interested_in', ''), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
-                                 'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', ''),leadInfo.get('send_confirmation_to_lead','')})
+                                 'appointment_date_and_time': appointment_date_and_time,'what_service_are_they_interested_in': lead_info_contents.get('what_service_are_they_interested_in', ''), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
+                                 'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead','')})
                 AppDBUtil.createLead(leadInfo)
                 flash('The lead info was created successfully.')
                 return render_template('lead_info.html', action=action)
             except Exception as e:
-                print(e)
-                traceback.print_exc()
+                logger.exception(e)
                 flash('An error has occured during the creation.')
-                return redirect(url_for('lead_info'))
+                return render_template('lead_info.html', action=action)
 
         if action == 'Modify':
             try:
                 leadInfo = {}
+                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
                 leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''),'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_email': lead_info_contents.get('lead_email', ''),
-                                 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'appointment_date_and_time': lead_info_contents.get('appointment_date_and_time', ''),
+                                 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'appointment_date_and_time': appointment_date_and_time,
                                  'what_service_are_they_interested_in': lead_info_contents.get('what_service_are_they_interested_in', ''), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
-                                 'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'appointment_date_and_time': lead_info_contents.get('appointment_date_and_time', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead',''),
+                                 'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead',''),
                                  'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', '')})
+
 
                 number_of_rows_modified = AppDBUtil.modifyLeadInfo(lead_info_contents.get('lead_id', ''),leadInfo)
 
@@ -186,8 +188,7 @@ def lead_info():
                 flash('Lead sucessfully modified.')
                 return render_template('lead_info.html', action=action)
             except Exception as e:
-                print(e)
-                traceback.print_exc()
+                logger.exception(e)
                 flash('An error occured while modifying the lead.')
                 return render_template('lead_info.html', action=action)
 
@@ -196,8 +197,7 @@ def lead_info():
                 search_results = {}
                 search_results = AppDBUtil.getLeadInfo(lead_info_contents.get('search_query', None), lead_info_contents.get('start_date', None), lead_info_contents.get('end_date', None))
             except Exception as e:
-                print(e)
-                traceback.print_exc()
+                logger.exception(e)
                 flash('An error has occured during the search.')
                 render_template('lead_info.html', action=action)
 

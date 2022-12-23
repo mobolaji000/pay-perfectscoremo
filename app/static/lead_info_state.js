@@ -56,5 +56,24 @@ $(document).ready(function() {
         document.getElementById("modify_lead_info").hidden=false;
     });
 
+     $('input[name="send_confirmation_to_lead"]').on('click', function() {
+        if ($(this).val() == "") {
+            $(this).val("yes")
+        } else {
+            $(this).val("");
+        }
+    });
+
+
+
+   //
+   //   $('input[name="send_confirmation_to_lead"]').change(function() {
+   // if ($(this).val() == "" || $(this).val() == "no") {
+   //          $(this).val("yes")
+   //      } else {
+   //          $(this).val("no");
+   //      }
+   //  });
+
 
 });
