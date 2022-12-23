@@ -122,6 +122,7 @@ class Lead(db.Model):
     how_did_they_hear_about_us = db.Column(db.String, index=True, nullable=False, default='')
     details_on_how_they_heard_about_us = db.Column(db.String, index=True, nullable=False, default='')
 
+    send_confirmation_to_lead = db.Column(db.String(4), index=True,nullable=False, default='')
     date_created = db.Column(db.DateTime(timezone=True), index=True, server_default=db.func.now())
     #is_active = db.Column(db.Boolean, unique=False, nullable=False, server_default='True')
 
