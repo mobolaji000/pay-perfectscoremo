@@ -57,10 +57,10 @@ $(document).ready(function() {
     });
 
      $('input[name="send_confirmation_to_lead"]').on('click', function() {
-        if ($(this).val() == "") {
+        if ($(this).val() == "" || $(this).val() == "no") {
             $(this).val("yes")
         } else {
-            $(this).val("");
+            $(this).val("no");
         }
     });
 
