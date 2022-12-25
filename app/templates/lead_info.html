@@ -51,8 +51,8 @@
     var pressed_button_val = document.getElementById(event.srcElement.id).value
     document.getElementById("action").value = pressed_button_val
 
-		// console.log($('#what_service_are_they_interested_in').val());
-	   // alert($('#what_service_are_they_interested_in').val());
+		// console.log($('#what_services_are_they_interested_in').val());
+	   // alert($('#what_services_are_they_interested_in').val());
 
 	if (pressed_button_val == "Create")
 	{
@@ -103,18 +103,18 @@
      $('input[name="lead_phone_number"]').val(result.lead_phone_number);
 
 
-	 console.log(result.what_service_are_they_interested_in);
-	 console.log(result.what_service_are_they_interested_in[0]);
+	 console.log(result.what_services_are_they_interested_in);
+	 console.log(result.what_services_are_they_interested_in[0]);
 
 	 // find detials of hos this works here: https://github.com/Choices-js/Choices
-    var multipleCancelButton = new Choices('#what_service_are_they_interested_in', {
+    var multipleCancelButton = new Choices('#what_services_are_they_interested_in', {
         removeItemButton: true,
       });
 	multipleCancelButton.clearChoices();
 
 
 
-     $('textarea[name="what_service_are_they_interested_in"]').val(result.what_service_are_they_interested_in);
+     $('textarea[name="what_services_are_they_interested_in"]').val(result.what_services_are_they_interested_in);
 
 
 
@@ -317,8 +317,8 @@
 
 <!--						<div class="row no-padding" >-->
 <!--							<div class="row  col-md-7 " >-->
-<!--							<label for="what_service_are_they_interested_in">What service are they interested in?</label>-->
-<!--							<select  id="what_service_are_they_interested_in"  name="what_service_are_they_interested_in" class="form-control">-->
+<!--							<label for="what_services_are_they_interested_in">What service are they interested in?</label>-->
+<!--							<select  id="what_services_are_they_interested_in"  name="what_services_are_they_interested_in" class="form-control">-->
 <!--								<option value="" selected disabled hidden></option>-->
 <!--								<option value='PSAT'>PSAT</option>-->
 <!--								<option value='SAT/ACT'>SAT/ACT</option>-->
@@ -331,8 +331,8 @@
 <!--					find detials of hos this works here: https://bbbootstrap.com/snippets/multiselect-dropdown-list-83601849-->
 					<div class="row no-padding" >
     <div class="col-md-7" style="padding-left: 0px !important; padding-left: 0px !important;padding-right: 0px !important;">
-		<label for="what_service_are_they_interested_in">What service are they interested in?</label>
-		<select id="what_service_are_they_interested_in" name="what_service_are_they_interested_in" class="form-control" placeholder="" multiple >
+		<label for="what_services_are_they_interested_in">What service are they interested in?</label>
+		<select id="what_services_are_they_interested_in" name="what_services_are_they_interested_in" class="form-control" placeholder="" multiple >
 <!--            <option value="" selected disabled hidden></option>-->
 								<option value='PSAT'>PSAT</option>
 								<option value='SAT/ACT'>SAT/ACT</option>

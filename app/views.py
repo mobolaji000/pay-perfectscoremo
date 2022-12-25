@@ -150,8 +150,8 @@ def lead_info():
         return render_template('lead_info.html')
     elif request.method == 'POST':
         lead_info_contents = request.form.to_dict()
-        what_service_are_they_interested_in = request.form.getlist('what_service_are_they_interested_in')
-        print(what_service_are_they_interested_in)
+        what_services_are_they_interested_in = request.form.getlist('what_services_are_they_interested_in')
+        print(what_services_are_they_interested_in)
         print(lead_info_contents)
         action = lead_info_contents['action']
 
@@ -160,7 +160,7 @@ def lead_info():
                 leadInfo = {}
                 appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
                 leadInfo.update({'lead_id': "l-" + str(uuid.uuid4().int >> 64)[:6],'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
-                                 'appointment_date_and_time': appointment_date_and_time,'what_service_are_they_interested_in': request.form.getlist('what_service_are_they_interested_in'), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
+                                 'appointment_date_and_time': appointment_date_and_time,'what_services_are_they_interested_in': request.form.getlist('what_services_are_they_interested_in'), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
                                  'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead','no')})
                 AppDBUtil.createLead(leadInfo)
                 flash('The lead info was created successfully.')
@@ -176,7 +176,7 @@ def lead_info():
                 appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
                 leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''),'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_email': lead_info_contents.get('lead_email', ''),
                                  'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'appointment_date_and_time': appointment_date_and_time,
-                                 'what_service_are_they_interested_in': request.form.getlist('what_service_are_they_interested_in'), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
+                                 'what_services_are_they_interested_in': request.form.getlist('what_services_are_they_interested_in'), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
                                  'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead','no'),
                                  'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', '')})
 

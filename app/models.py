@@ -115,7 +115,7 @@ class Lead(db.Model):
     lead_email = db.Column(db.String(64), index=True, nullable=False, default='')
     lead_phone_number = db.Column(db.String(22), index=True,nullable=False,  default='')
 
-    what_service_are_they_interested_in = db.Column(db.String, index=True, nullable=False, default='')
+    what_services_are_they_interested_in = db.Column(db.String, index=True, nullable=False, default='')
     details_on_what_service_they_are_interested_in = db.Column(db.String, index=True, nullable=False, default='')
     appointment_date_and_time = db.Column(db.DateTime(timezone=True), index=True, nullable=True)
     miscellaneous_notes = db.Column(db.String, index=True, nullable=False, default='')

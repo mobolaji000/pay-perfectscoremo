@@ -1,14 +1,14 @@
 $(document).ready(function() {
 
     //find detials of hos this works here: https://bbbootstrap.com/snippets/multiselect-dropdown-list-83601849
-    var choicesForWhatServiceLeadIsInterestedIn = new Choices('#what_service_are_they_interested_in', {
+    var choicesForWhatServiceLeadIsInterestedIn = new Choices('#what_services_are_they_interested_in', {
         removeItemButton: true,
         // maxItemCount:5,
         // searchResultLimit:5,
         // renderChoiceLimit:5
       });
 
-    $('#what_service_are_they_interested_in').data('choices', choicesForWhatServiceLeadIsInterestedIn);
+    $('#what_services_are_they_interested_in').data('choices', choicesForWhatServiceLeadIsInterestedIn);
 
 
  $('input[name="search_query"]').on('input', function() {
@@ -66,9 +66,9 @@ $(document).ready(function() {
         }
     });
 
-	// 	 $('select[name="what_service_are_they_interested_in"]').on('change', function() {
-   //     console.log($('#what_service_are_they_interested_in').val());
-	//    alert($('#what_service_are_they_interested_in').val());
+	// 	 $('select[name="what_services_are_they_interested_in"]').on('change', function() {
+   //     console.log($('#what_services_are_they_interested_in').val());
+	//    alert($('#what_services_are_they_interested_in').val());
    // });
 
 
