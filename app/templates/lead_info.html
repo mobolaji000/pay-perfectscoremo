@@ -36,16 +36,6 @@
     background: white !important;
 	}
 
-	/*.choices__input {*/
-    /*background-color: white !important;*/
-    /*font-size: 14px;*/
-    /*max-width: 100%;*/
-    /*padding: 0px 0px 0px 0px !important;*/
-
-
-	/*}*/
-
-
 	</style>
 
 	<script type="text/javascript">
@@ -61,6 +51,8 @@
     var pressed_button_val = document.getElementById(event.srcElement.id).value
     document.getElementById("action").value = pressed_button_val
 
+		// console.log($('#what_service_are_they_interested_in').val());
+	   // alert($('#what_service_are_they_interested_in').val());
 
 	if (pressed_button_val == "Create")
 	{
@@ -111,8 +103,21 @@
      $('input[name="lead_phone_number"]').val(result.lead_phone_number);
 
 
+	 console.log(result.what_service_are_they_interested_in);
+	 console.log(result.what_service_are_they_interested_in[0]);
+
+	 // find detials of hos this works here: https://github.com/Choices-js/Choices
+    var multipleCancelButton = new Choices('#what_service_are_they_interested_in', {
+        removeItemButton: true,
+      });
+	multipleCancelButton.clearChoices();
+
+
 
      $('textarea[name="what_service_are_they_interested_in"]').val(result.what_service_are_they_interested_in);
+
+
+
           $('textarea[name="details_on_what_service_they_are_interested_in"]').val(result.details_on_what_service_they_are_interested_in);
      $('textarea[name="miscellaneous_notes"]').val(result.miscellaneous_notes);
      $('select[name="how_did_they_hear_about_us"]').val(result.how_did_they_hear_about_us);
