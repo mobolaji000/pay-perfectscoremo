@@ -151,7 +151,7 @@ function miscellanousValidation()
      $('input[name="adjustment_explanation"]').val('');
      $('input[name="transaction_total"]').val('');
      $('select[name="how_did_they_hear_about_us"]').val('');
-	 $('textarea[name="details_on_how_they_heard_about_us"]').val('');
+	 $('textarea[name="how_did_they_hear_about_us_details"]').val('');
 	 $('input[name="ask_for_student_info"]').prop('checked', false);
 
 
@@ -178,7 +178,7 @@ function miscellanousValidation()
      $('input[name="stripe_customer_id"]').val(result.stripe_customer_id);
 
      $('select[name="how_did_they_hear_about_us"]').val(result.how_did_they_hear_about_us);
-	 $('textarea[name="details_on_how_they_heard_about_us"]').val(result.details_on_how_they_heard_about_us);
+	 $('textarea[name="how_did_they_hear_about_us_details"]').val(result.how_did_they_hear_about_us_details);
 	  $('input[name="prospect_id"]').val(result.prospect_id);
 
 	//
@@ -408,7 +408,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 		dataToModify['ask_for_student_info'] = $('input[name="ask_for_student_info"]').val();
 		dataToModify['how_did_they_hear_about_us'] = $('select[name="how_did_they_hear_about_us"]').val();
         dataToModify['salutation'] = $('select[name="salutation"]').val();
-		dataToModify['details_on_how_they_heard_about_us'] = $('textarea[name="details_on_how_they_heard_about_us"]').val();
+		dataToModify['how_did_they_hear_about_us_details'] = $('textarea[name="how_did_they_hear_about_us_details"]').val();
 		dataToModify['prospect_id'] = $('input[name="prospect_id"]').val();
 
 		 for (let k = 1; k < dataToModify['installment_counter']+1; k++) {
@@ -621,8 +621,8 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 						</div><br><br>
 
 						<div class="row">
-							<label for="details_on_how_they_heard_about_us">How did they hear about us (details)?</label>
-							<textarea  id="details_on_how_they_heard_about_us"  name="details_on_how_they_heard_about_us" class="form-control" rows="5"  placeholder="" ></textarea>
+							<label for="how_did_they_hear_about_us_details">How did they hear about us (details)?</label>
+							<textarea  id="how_did_they_hear_about_us_details"  name="how_did_they_hear_about_us_details" class="form-control" rows="5"  placeholder="" ></textarea>
 						</div>
 
 				<br><br><br>
