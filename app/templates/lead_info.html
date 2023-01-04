@@ -8,6 +8,10 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
 		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.css">
+<script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
+
 	<link href="static/page_style.css" rel="stylesheet">
 	<script type="text/javascript" src="static/lead_info_state.js"></script>
 
@@ -27,6 +31,11 @@
           font-size: 3.5rem;
         }
       }
+
+	.choices__inner, .choices__list, .choices__input, .choices__list--multiple {
+    background: white !important;
+	}
+
 	</style>
 
 	<script type="text/javascript">
@@ -38,8 +47,12 @@
     var search_query =  $('input[name="search_query"]').val();
     var start_date =  $('input[name="start_date"]').val();
     var end_date =  $('input[name="end_date"]').val();
+	var appointment_date_and_time = $('input[name="appointment_date_and_time"]').val();
     var pressed_button_val = document.getElementById(event.srcElement.id).value
     document.getElementById("action").value = pressed_button_val
+
+		// console.log($('#what_services_are_they_interested_in').val());
+	   // alert($('#what_services_are_they_interested_in').val());
 
 	if (pressed_button_val == "Create")
 	{
@@ -88,13 +101,59 @@
 	$('input[name="lead_name"]').val(result.lead_name);
      $('input[name="lead_email"]').val(result.lead_email);
      $('input[name="lead_phone_number"]').val(result.lead_phone_number);
-     $('input[name="appointment_date_and_time"]').val(result.appointment_date_and_time);
 
-     $('textarea[name="what_service_are_they_interested_in"]').val(result.what_service_are_they_interested_in);
-          $('textarea[name="what_next"]').val(result.what_next);
-     $('textarea[name="meeting_notes_to_keep_in_mind"]').val(result.meeting_notes_to_keep_in_mind);
+
+	 console.log(result.what_services_are_they_interested_in);
+	 console.log(result.what_services_are_they_interested_in[0]);
+
+	 // find detials of hos this works here: https://github.com/Choices-js/Choices
+    var multipleCancelButton = new Choices('#what_services_are_they_interested_in', {
+        removeItemButton: true,
+      });
+	multipleCancelButton.clearChoices();
+
+
+
+     $('textarea[name="what_services_are_they_interested_in"]').val(result.what_services_are_they_interested_in);
+
+
+
+          $('textarea[name="details_on_what_service_they_are_interested_in"]').val(result.details_on_what_service_they_are_interested_in);
+     $('textarea[name="miscellaneous_notes"]').val(result.miscellaneous_notes);
      $('select[name="how_did_they_hear_about_us"]').val(result.how_did_they_hear_about_us);
-          $('textarea[name="how_did_they_hear_about_us_details"]').val(result.how_did_they_hear_about_us_details);
+          $('textarea[name="details_on_how_they_heard_about_us"]').val(result.details_on_how_they_heard_about_us);
+
+		  if (result.send_confirmation_to_lead == "yes")
+     {
+     	$('input[name="send_confirmation_to_lead"]').prop('checked', true);
+     	 $('input[name="send_confirmation_to_lead"]').val("yes");
+
+     }
+     else
+     {
+     $('input[name="send_confirmation_to_lead"]').prop('checked', false);
+     	 $('input[name="send_confirmation_to_lead"]').val("no");
+
+     }
+
+	 if (result.appointment_date_and_time != 'null')
+	 {
+
+	  var someDate = new Date(result.appointment_date_and_time);
+       	someDate.setDate(someDate.getDate() - 1);
+        var dd = (someDate.getDate() + 1 < 10) ? "0" + (someDate.getDate() + 1) : someDate.getDate() + 1
+        var mm = (someDate.getMonth() + 1 < 10) ? "0" + (someDate.getMonth() + 1) : someDate.getMonth() + 1
+        var yy = someDate.getFullYear();
+
+		var HH = (someDate.getHours() < 10) ? "0" + (someDate.getHours()) : someDate.getHours() ;
+		 var MM = (someDate.getMinutes() < 10) ? "0" + (someDate.getMinutes()) : someDate.getMinutes();
+
+
+        var someFormattedDate = yy + '-' + mm + '-' + dd + 'T' + HH + ':' + MM;
+
+			  	$('input[name="appointment_date_and_time"]').val(someFormattedDate);
+	 }
+
     }
 
 	</script>
@@ -164,8 +223,14 @@
 						<div name="search_set" id="search_set" class="col-md-12 mb-3">
 
 							{% for result in search_results %}
+							{% if result.appointment_date_and_time == 'null' %}
+					{% set appointment_date_and_time = "No appointment scheduled" %}
+								{% else %}
+								{% set appointment_date_and_time = result.appointment_date_and_time %}
+					{% endif %}
 							<a name="search_link" href="javascript:populateFieldsFromSearch({{ result }});">
-								{{ result.lead_name+" "+result.lead_email+" "+result.lead_phone_number}}
+
+								{{ result.lead_salutation+" "+result.lead_name+" "+result.lead_email+" "+result.lead_phone_number+" "+appointment_date_and_time}}
 							</a>
 							<br><br><br>
 							{% endfor %}
@@ -198,8 +263,8 @@
 
 				<div class="row no-padding">
 						<div class="mb-3">
-							<label for="salutation">Salutation</label>
-						<select  id="salutation" name="salutation" class="form-control" required>
+							<label for="lead_salutation">Salutation</label>
+						<select  id="lead_salutation" name="lead_salutation" class="form-control">
 								<option value="" selected disabled hidden></option>
 								<option value='Mr.'>Mr.</option>
 								<option value='Ms.'>Ms.</option>
@@ -248,47 +313,55 @@
 					<div class="row no-padding">
 						<h4 class="mb-3" ><u>Details</u></h4>
 					</div>
-
-
 						<br>
 
+<!--						<div class="row no-padding" >-->
+<!--							<div class="row  col-md-7 " >-->
+<!--							<label for="what_services_are_they_interested_in">What service are they interested in?</label>-->
+<!--							<select  id="what_services_are_they_interested_in"  name="what_services_are_they_interested_in" class="form-control">-->
+<!--								<option value="" selected disabled hidden></option>-->
+<!--								<option value='PSAT'>PSAT</option>-->
+<!--								<option value='SAT/ACT'>SAT/ACT</option>-->
+<!--								<option value='College Admissions Counselling'>College Admissions Counselling</option>-->
+<!--								<option value='General Tutoring'>General Tutoring</option>-->
+<!--								<option value='Other'>Other</option>-->
+<!--							</select>-->
+<!--						</div></div><br><br><br>-->
+
+<!--					find detials of hos this works here: https://bbbootstrap.com/snippets/multiselect-dropdown-list-83601849-->
+					<div class="row no-padding" >
+    <div class="col-md-7" style="padding-left: 0px !important; padding-left: 0px !important;padding-right: 0px !important;">
+		<label for="what_services_are_they_interested_in">What service are they interested in?</label>
+		<select id="what_services_are_they_interested_in" name="what_services_are_they_interested_in" class="form-control" placeholder="" multiple >
+<!--            <option value="" selected disabled hidden></option>-->
+								<option value='PSAT'>PSAT</option>
+								<option value='SAT/ACT'>SAT/ACT</option>
+								<option value='College Admissions Counselling'>College Admissions Counselling</option>
+								<option value='General Tutoring'>General Tutoring</option>
+								<option value='Other'>Other</option>
+        </select> </div>
+</div><br><br><br>
 
 						<div class="row no-padding" >
-							<div class="row  col-md-4 " >
+							<div class="row  col-md-7 " >
+							<label for="details_on_what_service_they_are_interested_in">Details on what service they are interested in</label>
+							<textarea  id="details_on_what_service_they_are_interested_in"  name="details_on_what_service_they_are_interested_in" class="form-control" rows="2" placeholder=""></textarea>
+						</div></div><br><br><br>
+
+							<div class="row no-padding" >
+								<div class="row  col-md-6 " >
 							<label for="appointment_date_and_time">Appointment Date/Time</label>
-							<input type="datetime-local" class="form-control" id="appointment_date_and_time" name="appointment_date_and_time" required>
+							<input type="datetime-local" class="form-control" id="appointment_date_and_time" name="appointment_date_and_time" >
 						  </div> </div><br><br><br>
 
 						<div class="row no-padding" >
-							<label for="what_service_are_they_interested_in">What service are they interested in?</label>
-							<select  id="what_service_are_they_interested_in"  name="what_service_are_they_interested_in" class="form-control">
-								<option value="" selected disabled hidden></option>
-								<option value='Southwest: Garland'>Southwest: Garland</option>
-								<option value='Southwest: Arlington'>Southwest: Arlington</option>
-								<option value='Returning Client'>Returning Client</option>
-								<option value='USPS Mailer'>USPS Mailer</option>
-								<option value='Gidi Lounge'>Gidi Lounge</option>
-								<option value='Referral'>Referral</option>
-								<option value='Other'>Other</option>
-							</select>
-						</div><br><br><br>
+							<div class="row  col-md-8 " >
+							<label for="miscellaneous_notes">Miscellaneous Notes (e.g. what they mentioned about the kid, next steps if not an appointment etc)</label>
+							<textarea  id="miscellaneous_notes"  name="miscellaneous_notes" class="form-control" rows="5"  placeholder=""></textarea>
+						</div></div><br><br><br>
 
 						<div class="row no-padding" >
-							<label for="what_service_are_they_interested_in">What service are they interested in?</label>
-							<textarea  id="what_service_are_they_interested_in"  name="what_service_are_they_interested_in" class="form-control" rows="5" placeholder=""></textarea>
-						</div><br><br><br>
-
-						<div class="row no-padding" >
-							<label for="what_next">What are the next steps?</label>
-							<textarea  id="what_next"  name="what_next" class="form-control" rows="5"  placeholder=""></textarea>
-						</div><br><br><br>
-
-						<div class="row no-padding" >
-							<label for="meeting_notes_to_keep_in_mind">Notes from conversation to keep in mind</label>
-							<textarea  id="meeting_notes_to_keep_in_mind"  name="meeting_notes_to_keep_in_mind" class="form-control" rows="5"  placeholder=""></textarea>
-						</div><br><br><br>
-
-						<div class="row no-padding" >
+							<div class="row  col-md-6 " >
 							<label for="how_did_they_hear_about_us">How did they hear about us?</label>
 							<select  id="how_did_they_hear_about_us"  name="how_did_they_hear_about_us" class="form-control">
 								<option value="" selected disabled hidden></option>
@@ -300,18 +373,21 @@
 								<option value='Referral'>Referral</option>
 								<option value='Other'>Other</option>
 							</select>
-						</div><br><br>
+						</div></div><br><br>
 
 						<div class="row no-padding" >
-							<label for="how_did_they_hear_about_us_details">How did they hear about us (details)?</label>
-							<textarea  id="how_did_they_hear_about_us_details"  name="how_did_they_hear_about_us_details" class="form-control" rows="5"  placeholder="" ></textarea>
-						</div>
+							<div class="row  col-md-6 " >
+							<label for="details_on_how_they_heard_about_us">Details on how they heard about us</label>
+							<textarea  id="details_on_how_they_heard_about_us"  name="details_on_how_they_heard_about_us" class="form-control" rows="2"  placeholder="" ></textarea>
+						</div></div><br><br><br>
 
-
-
-
-
-						<br><br><br>
+					<div class="row no-padding" >
+						<div class="row  col-md-6 " >
+							<label>
+								<input type="checkbox" id="send_confirmation_to_lead"
+									   name="send_confirmation_to_lead" value=""> Send confirmation to lead
+							</label>
+						</div></div><br><br><br>
 
 
 
@@ -338,8 +414,7 @@
 						</div>
 						<input id="lead_id" name="lead_id" hidden>
 						<input id="action" name="action" hidden>
-					</div>
-				</div>
+					</div></div>
 			</form>
 		</div>
 	</div>
