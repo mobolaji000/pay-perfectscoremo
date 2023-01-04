@@ -1,16 +1,5 @@
 $(document).ready(function() {
-
-    //find detials of hos this works here: https://bbbootstrap.com/snippets/multiselect-dropdown-list-83601849
-    var choicesForWhatServiceLeadIsInterestedIn = new Choices('#what_services_are_they_interested_in', {
-        removeItemButton: true,
-        // maxItemCount:5,
-        // searchResultLimit:5,
-        // renderChoiceLimit:5
-      });
-
-    $('#what_services_are_they_interested_in').data('choices', choicesForWhatServiceLeadIsInterestedIn);
-
-
+    // By Default Disable radio button
  $('input[name="search_query"]').on('input', function() {
 	//alert($(this).val());
 	if ( $(this).val() != "")
@@ -57,22 +46,6 @@ $(document).ready(function() {
     $('a[name="search_link"]').on('click', function() {
         document.getElementById("modify_lead_info").hidden=false;
     });
-
-     $('input[name="send_confirmation_to_lead"]').on('click', function() {
-        if ($(this).val() == "" || $(this).val() == "no") {
-            $(this).val("yes")
-        } else {
-            $(this).val("no");
-        }
-    });
-
-	// 	 $('select[name="what_services_are_they_interested_in"]').on('change', function() {
-   //     console.log($('#what_services_are_they_interested_in').val());
-	//    alert($('#what_services_are_they_interested_in').val());
-   // });
-
-
-
 
 
 });
