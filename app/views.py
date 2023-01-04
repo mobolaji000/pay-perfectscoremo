@@ -163,6 +163,14 @@ def lead_info():
                                  'appointment_date_and_time': appointment_date_and_time,'what_services_are_they_interested_in': request.form.getlist('what_services_are_they_interested_in'), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
                                  'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead','no')})
                 AppDBUtil.createLead(leadInfo)
+
+                if lead_info_contents.get('send_confirmation_to_lead','') == 'yes':
+                    if lead_info_contents.get('lead_phone_number'):
+                        message = lead_info_contents.get('lead_salutation') + lead_info_contents.get('lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
+                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead_info_contents.get('lead_phone_number')],message=message,type='create_group_chat')
+                    if lead_info_contents.get('lead_email'):
+                        SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+
                 flash('The lead info was created successfully.')
                 return render_template('lead_info.html', action=action)
             except Exception as e:
@@ -184,7 +192,7 @@ def lead_info():
                 number_of_rows_modified = AppDBUtil.modifyLeadInfo(lead_info_contents.get('lead_id', ''),leadInfo)
 
                 if number_of_rows_modified > 1:
-                    print("Somehow ended up with and modified duplicate lead ids")
+                    logger.debug("Somehow ended up with and modified duplicate lead ids")
                     flash('Somehow ended up with and modified duplicate lead ids')
 
                 flash('Lead sucessfully modified.')
