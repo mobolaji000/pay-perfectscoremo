@@ -504,12 +504,12 @@ class SendMessagesToClients():
             print("number to add is :",to_number)
             cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+1' + to_number)
 
-        if type == 'create_group_chat' or type == 'referral_request':
+        if type == 'welcome_new_student' or type == 'referral_request':
             print("adding assitant's number")
             cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+19725039573')
 
 
-        if type == 'create_group_chat':
+        if type == 'welcome_new_student':
             created_or_modified_span = "Welcome "+message+"!\n\n"+"I am Mo's automated assistant, and I will be sending reports on your progress via this group chat. Mo (972-584-7364) and his personal assistant (972-503-9573) are on the chat as well to follow up with you on your daily homework/review sessions. If you need to speak with someone, though, please feel free to call Mo. We can't wait to see you succeeed!"
         elif type == 'create_transaction_existing_client':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
@@ -525,7 +525,7 @@ class SendMessagesToClients():
             #
 
 
-        if type == 'create_group_chat' or type == 'referral_request':
+        if type == 'welcome_new_student' or type == 'referral_request':
             text_message = created_or_modified_span
         elif type == 'questions':
             text_message = created_or_modified_span

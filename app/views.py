@@ -130,7 +130,7 @@ def client_info(prospect_id):
             print("student data is",student_data)
             AppDBUtil.createStudentData(student_data)
             to_numbers = [number for number in [student_data['parent_1_phone_number'],student_data['parent_2_phone_number'],student_data['student_phone_number']] if number != '']
-            SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=student_data['student_first_name'], type='create_group_chat')
+            SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=student_data['student_first_name'], type='welcome_new_student')
             time.sleep(5)
             SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, type='referral_request')
             #hold off on sending group emails until you dedcide there is a value add
@@ -167,7 +167,7 @@ def lead_info():
                 if lead_info_contents.get('send_confirmation_to_lead','') == 'yes':
                     if lead_info_contents.get('lead_phone_number'):
                         message = lead_info_contents.get('lead_salutation') + lead_info_contents.get('lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead_info_contents.get('lead_phone_number')],message=message,type='create_group_chat')
+                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead_info_contents.get('lead_phone_number')],message=message,type='welcome_new_student')
                     if lead_info_contents.get('lead_email'):
                         SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
 
@@ -543,7 +543,7 @@ def enterClientInfo(payment_and_signup_data={}):
         print("student data is", payment_and_signup_data)
         AppDBUtil.createStudentData(payment_and_signup_data)
         to_numbers = [number for number in [payment_and_signup_data['parent_1_phone_number'], payment_and_signup_data['parent_2_phone_number'], payment_and_signup_data['student_phone_number']] if number != '']
-        SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], type='create_group_chat')
+        SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], type='welcome_new_student')
         time.sleep(5)
         SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, type='referral_request')
         message = ""
