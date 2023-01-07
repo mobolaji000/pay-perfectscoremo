@@ -522,23 +522,21 @@ class SendMessagesToClients():
             created_or_modified_span = "I am happy to clarify any questions you might have!"
         elif type == 'referral_request':
             created_or_modified_span = "Oh, and one more note to the family...if you have any friends/families looking to raise their SAT/ACT scores, have them check us out at prepwithmo.com or call us at 972-584-7364. We appreciate the referral!"
-            #
+        elif type == 'confirm_lead_appointment':
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour appointment is {}".format(message[0],message[1])
 
 
-        if type == 'welcome_new_student' or type == 'referral_request':
+        if type in ['welcome_new_student','referral_request','questions','confirm_lead_appointment']:
             text_message = created_or_modified_span
-        elif type == 'questions':
-            text_message = created_or_modified_span
-        elif type == 'create_transaction_existing_client' or type == 'modify_transaction_existing_client':
+        elif type in ['create_transaction_existing_client','modify_transaction_existing_client']:
             text_message = "\n" + created_or_modified_span + "\n\n" \
-                           + """1. Go to perfectscoremo.com\n\n""" \
+                           + """1. Go to prepwithmo.com\n\n""" \
                            + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
                            + """3. Enter your code: """ + message + "\n\n" \
                            + """4. If required, enter the student's contact information and the days/times that work best for their sessions. This will be used to reserve their slot in our calendar and to setup text message and email updates on their regular progress.\n\n""" \
                            + """5. Read the instructions and transaction and choose a method of payment\n\n""" \
                            + """6. Please pay attention to the mode of payment you choose. Cards come with fees and ACH is free\n\n""" \
                            + """7. For installment payments, these are accepted: Credit Cards, Debit Cards\n\n""" \
-                           + """8. For full payments, these are accepted: Credit Cards, Debit Cards, ACH\n\n""" \
                            + """8. For full payments, these are accepted: Credit Cards, Debit Cards, ACH\n\n""" \
                            + """### We don't receive messages on this number. If you have any questions, reach out on 972-584-7364 ###\n\n""" \
                            + """Regards,\n\n""" \

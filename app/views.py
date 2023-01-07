@@ -165,11 +165,11 @@ def lead_info():
                 AppDBUtil.createLead(leadInfo)
 
                 if lead_info_contents.get('send_confirmation_to_lead','') == 'yes':
+                    message = lead_info_contents.get('lead_salutation') + lead_info_contents.get('lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
                     if lead_info_contents.get('lead_phone_number'):
-                        message = lead_info_contents.get('lead_salutation') + lead_info_contents.get('lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead_info_contents.get('lead_phone_number')],message=message,type='welcome_new_student')
+                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead_info_contents.get('lead_phone_number')],message=[message,lead_info_contents.get('appointment_date_and_time')],type='confirm_lead_appointment')
                     if lead_info_contents.get('lead_email'):
-                        SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+                        SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'),'mo@prepwithmo.com'], message=[message,lead_info_contents.get('appointment_date_and_time')], type='confirm_lead_appointment',subject='Confirming Your Appointment')
 
                 flash('The lead info was created successfully.')
                 return render_template('lead_info.html', action=action)
