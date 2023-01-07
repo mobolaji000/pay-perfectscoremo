@@ -280,6 +280,30 @@ class AppDBUtil():
             db.session.close()
 
     @classmethod
+    def findLeadsToReceiveReminders(cls):
+        try:
+            lead_details = Lead.query.filter_by(completed_appointment=False).all()
+
+            search_results = []
+            for lead in lead_details:
+                lead = {}
+                lead['lead_salutation'] = lead.lead_salutation
+                lead['name'] = lead.name
+                lead['phone_number'] = lead.phone_number
+                lead['email'] = lead.email
+                lead['appointment_date_and_time'] = lead.appointment_date_and_time
+                search_results.append(lead)
+
+            return search_results
+        except Exception as e:
+            # if any kind of exception occurs, rollback lead
+            db.session.rollback()
+            traceback.print_exc()
+        finally:
+            db.session.close()
+
+
+    @classmethod
     def findClientsToReceiveReminders(cls):
         try:
             transaction_details = Transaction.query.filter_by(payment_started=False).all()

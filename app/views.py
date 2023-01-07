@@ -164,12 +164,13 @@ def lead_info():
                                  'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead','no')})
                 AppDBUtil.createLead(leadInfo)
 
-                if lead_info_contents.get('send_confirmation_to_lead','') == 'yes':
-                    message = lead_info_contents.get('lead_salutation') + lead_info_contents.get('lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
+                if lead_info_contents.get('send_confirmation_to_lead', '') == 'yes':
+                    message = lead_info_contents.get('lead_salutation') + lead_info_contents.get(
+                        'lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
                     if lead_info_contents.get('lead_phone_number'):
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead_info_contents.get('lead_phone_number')],message=[message,lead_info_contents.get('appointment_date_and_time')],type='confirm_lead_appointment')
+                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead_info_contents.get('lead_phone_number')],message=[message, lead_info_contents.get('appointment_date_and_time')],type='confirm_lead_appointment')
                     if lead_info_contents.get('lead_email'):
-                        SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'),'mo@prepwithmo.com'], message=[message,lead_info_contents.get('appointment_date_and_time')], type='confirm_lead_appointment',subject='Confirming Your Appointment')
+                        SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'), 'mo@prepwithmo.com'],message=[message, lead_info_contents.get('appointment_date_and_time')],type='confirm_lead_appointment', subject='Confirming Your Appointment')
 
                 flash('The lead info was created successfully.')
                 return render_template('lead_info.html', action=action)
@@ -682,10 +683,28 @@ def stripe_webhook():
 
 @server.before_first_request
 def start_background_jobs_before_first_request():
+    def remind_lead_about_appointment_background_job():
+        try:
+            logger.info("remind_lead_about_appointment_background_job started")
+            reminder_last_names = 'remind_lead_about_appointment_background_job executed for: '
+            leadsToReceiveReminders = AppDBUtil.findLeadsToReceiveReminders()
+            for lead in leadsToReceiveReminders:
+                if lead.get('appointment_date_and_time') - datetime.datetime.today() in [0,-1,-3]:
+                    message = lead.get('lead_salutation') + lead.get('lead_name') if lead.get('lead_salutation') else 'Parent'
+                    if lead.get('lead_email'):
+                        SendMessagesToClients.sendEmail(to_address=[lead.get('lead_email'), 'mo@prepwithmo.com'], message=[message, lead.get('appointment_date_and_time')], type='reminder_about_appointment')
+                    if lead.get('lead_phone_number'):
+                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead.get('lead_phone_number')], message=[message,lead.get('appointment_date_and_time')],type='reminder_about_appointment',subject='Reminder About Your Appointment')
+                    reminder_last_names = reminder_last_names+lead['name']+", "
+            SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')
+
+        except Exception as e:
+            logger.exception("Error in sending reminders")
+
     def remind_client_about_invoice_background_job():
         try:
-            print("Reminders background job started")
-            reminder_last_names = ''
+            logger.info("remind_client_about_invoice_background_job started")
+            reminder_last_names = 'remind_client_about_invoice_background_job started executed for: '
             clientsToReceiveReminders = AppDBUtil.findClientsToReceiveReminders()
             for client in clientsToReceiveReminders:
                 SendMessagesToClients.sendEmail(to_address=client['email'], message=client['transaction_id'], type='reminder_to_make_payment')
@@ -746,9 +765,11 @@ def start_background_jobs_before_first_request():
     else:
         #BE EXTREMELY CAREFULY WITH THE CRON JOB AND COPIOUSLY TEST. IF YOU GET IT WRONG, YOU CAN EASILY ANNOY A CUSTOMER BY SENDING A MESSAGE EVERY MINUTE OR EVERY SECOND
         scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
+        scheduler.add_job(remind_lead_about_appointment_background_job(), 'cron', hour='15', minute='5')
+        scheduler.add_job(pay_invoice_background_job, 'cron', hour='15',minute='55')
+
         #scheduler.add_job(remind_client_about_invoice_background_job, 'cron', hour='16', minute='00')
         # scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='sun', hour='19', minute='45')
-        scheduler.add_job(pay_invoice_background_job, 'cron', hour='15',minute='55')
 
     print("Reminders background job added")
     print("Invoice payment background job added")
