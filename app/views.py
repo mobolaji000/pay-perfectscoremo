@@ -682,7 +682,7 @@ def stripe_webhook():
 
 @server.before_first_request
 def start_background_jobs_before_first_request():
-    def reminders_background_job():
+    def payment_reminder_background_job():
         try:
             print("Reminders background job started")
             reminder_last_names = ''
@@ -745,9 +745,9 @@ def start_background_jobs_before_first_request():
         scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
     else:
         #BE EXTREMELY CAREFULY WITH THE CRON JOB AND COPIOUSLY TEST. IF YOU GET IT WRONG, YOU CAN EASILY ANNOY A CUSTOMER BY SENDING A MESSAGE EVERY MINUTE OR EVERY SECOND
-        scheduler.add_job(reminders_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
-        #scheduler.add_job(reminders_background_job, 'cron', hour='16', minute='00')
-        # scheduler.add_job(reminders_background_job, 'cron', day_of_week='sun', hour='19', minute='45')
+        scheduler.add_job(payment_reminder_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
+        #scheduler.add_job(payment_reminder_background_job, 'cron', hour='16', minute='00')
+        # scheduler.add_job(payment_reminder_background_job, 'cron', day_of_week='sun', hour='19', minute='45')
         scheduler.add_job(invoice_payment_background_job, 'cron', hour='15',minute='55')
 
     print("Reminders background job added")
