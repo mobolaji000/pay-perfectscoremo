@@ -134,7 +134,7 @@ def client_info(prospect_id):
             time.sleep(5)
             SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, type='referral_request')
             #hold off on sending group emails until you dedcide there is a value add
-            #SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+            #SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='welcome_message',subject='Setting Up Group Email')
             #flash("Student information submitted successfully and group messages (email and text) for regular updates created.")
             flash("Student information submitted successfully and text group message for regular updates created.")
         except Exception as e:
@@ -552,7 +552,7 @@ def enterClientInfo(payment_and_signup_data={}):
             message = message + " " + k.split('\n')[1].strip() + ","
         SendMessagesToClients.sendEmail(message=message, subject="Suggested one-on-one days for " + str(payment_and_signup_data['student_first_name']) + " " + str(payment_and_signup_data['student_last_name']), type='to_mo')
         # hold off on sending group emails until you dedcide there is a value add
-        # SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+        # SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='welcome_message',subject='Setting Up Group Email')
         return {'status': 'success'}
     except Exception as e:
         print(e)

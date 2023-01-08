@@ -448,14 +448,14 @@ class SendMessagesToClients():
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. You can always change your method of payment between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
         elif type == 'modify_transaction_existing_client':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified using your method of payment on file, but there have been no charges yet. You can always change your method of payment between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
-        elif type == 'student_info':
+        elif type == 'ask_for_student_info':
             link_url = os.environ["url_to_start_reminder"]+"client_info/"+message
             created_or_modified_span = "Dear {},\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. \n\n This will be used to setup text message and email updates on your student's regular progress.".format(recipient_name)
 
 
         if type == 'to_mo':
             text_message = message
-        elif  type == 'student_info':
+        elif  type == 'ask_for_student_info':
             text_message = created_or_modified_span
         else:
             text_message = "\n" + created_or_modified_span + "\n\n" \

@@ -97,10 +97,10 @@ class AWSInstance():
         # The email body for recipients with non-HTML email clients.
         BODY_TEXT = ("Amazon SES Test (Python)\r\n"
                      "This email was sent with Amazon SES using the "
-                     "AWS SDK for Python (Boto). {}"
+                     "AWS SDK for Python (Boto)."
                      )
 
-        if type == 'student_info':
+        if type == 'ask_for_student_info':
             link_url = os.environ["url_to_start_reminder"]+"""client_info/"""+message
             BODY_HTML = """<html>
                 <head></head>
@@ -116,7 +116,7 @@ class AWSInstance():
                 </body>
                 </html>
                             """
-        elif type == 'create_group_email':
+        elif type == 'welcome_message':
             BODY_HTML = """<html>
                 <head></head>
                 <body>
@@ -139,7 +139,7 @@ class AWSInstance():
                     </body>
                     </html>
                                 """
-        else:
+        elif type in ['create_transaction_new_client','modify_transaction_new_client','create_transaction_existing_client','modify_transaction_existing_client','reminder_to_make_payment']:
             BODY_HTML = """<html>
                             <head></head>
                             <body>
@@ -160,6 +160,14 @@ class AWSInstance():
                             </body>
                             </html>
                                         """
+        elif type == 'reminder_about_appointment':
+            BODY_HTML = """<html>
+                    <head></head>
+                    <body>
+                       """ + created_or_modified_span + """
+                    </body>
+                    </html>
+                                """
 
 
         CHARSET = "UTF-8"
