@@ -20,7 +20,7 @@ import traceback
 from app.config import stripe
 from apscheduler.schedulers.background import BackgroundScheduler
 import datetime
-
+import pytz
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -689,7 +689,10 @@ def start_background_jobs_before_first_request():
             reminder_last_names = 'remind_lead_about_appointment_background_job executed for: '
             leadsToReceiveReminders = AppDBUtil.findLeadsToReceiveReminders()
             for lead in leadsToReceiveReminders:
-                if lead.get('appointment_date_and_time') - datetime.datetime.today() in [0,-1,-3]:
+                number_of_days_until_appointment = (lead.get('appointment_date_and_time').date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
+                logger.debug("appointment date is: {}".format(lead.get('appointment_date_and_time').date()))
+                logger.debug("number of days until appointment is: {}".format(number_of_days_until_appointment))
+                if number_of_days_until_appointment in [0,1,3]:
                     message = lead.get('lead_salutation') + lead.get('lead_name') if lead.get('lead_salutation') else 'Parent'
                     if lead.get('lead_email'):
                         SendMessagesToClients.sendEmail(to_address=[lead.get('lead_email'), 'mo@prepwithmo.com'], message=[message, lead.get('appointment_date_and_time')], type='reminder_about_appointment')
@@ -713,15 +716,13 @@ def start_background_jobs_before_first_request():
             SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')
 
         except Exception as e:
-            print("Error in sending reminders")
-            print(e)
-            traceback.print_exc()
+            logger.exception("Error in sending reminders")
 
     def pay_invoice_background_job():
-        print("Invoice payment background job started")
+        logger.info("pay_invoice_background_job started")
         try:
             invoicesToPay = AppDBUtil.findInvoicesToPay()
-            print("Invoices to pay are: ",invoicesToPay)
+            logger.info("Invoices to pay are: {}".format(invoicesToPay))
 
             for invoice in invoicesToPay:
                 try:
@@ -735,15 +736,13 @@ def start_background_jobs_before_first_request():
                     stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
                     if stripe_invoice_object.paid or stripe_invoice_object.finalized:
                         #added finalized because ach payments finalize immediately but do not send 'paid' events for 14 days
-                        print("Invoice payment succeeded: ",invoice['last_name'])
+                        logger.info("Invoice payment succeeded: {}".format(invoice['last_name']))
                         #might need to come back and handle this via webhook
                         AppDBUtil.updateInvoiceAsPaid(stripe_invoice_id=invoice['stripe_invoice_id'])
                         invoice_payment_failed = False
 
                 except Exception as e:
-                    print("Error in attempting to pay invoices")
-                    print(e)
-                    traceback.print_exc()
+                    logger.exception("Error in attempting to pay invoices")
                 finally:
                     if invoice_payment_failed:
                         print("Invoice payment failed: ", invoice['last_name'])
@@ -751,28 +750,36 @@ def start_background_jobs_before_first_request():
                         #don't send message here as stripe webhook event that is caught sends message
                         #SendMessagesToClients.sendSMS(to_number='9725847364', message="Invoice payments failed for: " + invoice_name, type='to_mo')
         except Exception as e:
-            print("Error in finding invoices to pay")
-            print(e)
-            traceback.print_exc()
+            logger.exception("Error in finding invoices to pay")
 
 
     scheduler = BackgroundScheduler(timezone='US/Central')
 
     if os.environ['DEPLOY_REGION'] != 'prod':
-    #if os.environ['DEPLOY_REGION'] != 'local':
+        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='14', minute='37')
         scheduler.add_job(lambda: print("dummy reminders job for local and dev"), 'cron', minute='55')
         scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
     else:
         #BE EXTREMELY CAREFULY WITH THE CRON JOB AND COPIOUSLY TEST. IF YOU GET IT WRONG, YOU CAN EASILY ANNOY A CUSTOMER BY SENDING A MESSAGE EVERY MINUTE OR EVERY SECOND
         scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
-        scheduler.add_job(remind_lead_about_appointment_background_job(), 'cron', hour='15', minute='5')
+        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='15', minute='5')
         scheduler.add_job(pay_invoice_background_job, 'cron', hour='15',minute='55')
 
         #scheduler.add_job(remind_client_about_invoice_background_job, 'cron', hour='16', minute='00')
         # scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='sun', hour='19', minute='45')
 
-    print("Reminders background job added")
-    print("Invoice payment background job added")
+    logger.info("remind_client_about_invoice_background_job added")
+    logger.info("remind_lead_about_appointment_background_job added")
+    logger.info("pay_invoice_background_job added")
+
+    # logger.debug('Current time with timezone is: {}'.format(datetime.datetime.now().astimezone()))
+    # day1 = datetime.datetime.now(pytz.timezone('US/Central'))
+    # day2 = datetime.datetime.now(pytz.timezone('US/Central')).date()
+    # day3 = pytz.timezone('US/Central').localize(datetime.datetime.now()).strftime('%Y-%m-%d---%H-%M')
+    # logger.debug('day1 is: {}'.format(day1))
+    # logger.debug('day2 is: {}'.format(day2))
+    # logger.debug('day3 is: {}'.format(day3))
+
 
     #THE KEY TO GETTING TIMEZONE RIGHT IS SETTING IT AS AN ENVIRONMENT VARIABLE ON DIGITAL OCEAN SERVER
     # import datetime,time

@@ -282,17 +282,19 @@ class AppDBUtil():
     @classmethod
     def findLeadsToReceiveReminders(cls):
         try:
-            lead_details = Lead.query.filter_by(completed_appointment=False).all()
+            leadsToReceiveReminders = Lead.query.filter((Lead.completed_appointment == False) & (Lead.appointment_date_and_time != None)).all()
 
+            logger.debug("Leads to receive reminders are: {}".format(leadsToReceiveReminders))
             search_results = []
-            for lead in lead_details:
-                lead = {}
-                lead['lead_salutation'] = lead.lead_salutation
-                lead['name'] = lead.name
-                lead['phone_number'] = lead.phone_number
-                lead['email'] = lead.email
-                lead['appointment_date_and_time'] = lead.appointment_date_and_time
-                search_results.append(lead)
+            for lead in leadsToReceiveReminders:
+                logger.debug("Individual lead is: {}".format(lead))
+                lead_details = {}
+                lead_details['lead_salutation'] = lead.lead_salutation
+                lead_details['lead_name'] = lead.lead_name
+                lead_details['lead_phone_number'] = lead.lead_phone_number
+                lead_details['lead_email'] = lead.lead_email
+                lead_details['appointment_date_and_time'] = lead.appointment_date_and_time
+                search_results.append(lead_details)
 
             return search_results
         except Exception as e:

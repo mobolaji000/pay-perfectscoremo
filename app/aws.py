@@ -85,6 +85,9 @@ class AWSInstance():
             created_or_modified_span = "<span>Your new transaction has been created using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
         elif type == 'modify_transaction_existing_client':
             created_or_modified_span = "<span>Your transaction has just been modified using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
+        elif type == 'reminder_about_appointment':
+            created_or_modified_span = "<span>Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour appointment is {}</span><br><br>".format(message[0],message[1])
+
 
 
         SENDER = "Perfect Score Mo <mo@info.perfectscoremo.com>"
@@ -94,7 +97,7 @@ class AWSInstance():
         # The email body for recipients with non-HTML email clients.
         BODY_TEXT = ("Amazon SES Test (Python)\r\n"
                      "This email was sent with Amazon SES using the "
-                     "AWS SDK for Python (Boto). "+message
+                     "AWS SDK for Python (Boto). {}"
                      )
 
         if type == 'student_info':
