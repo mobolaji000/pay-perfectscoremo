@@ -20,6 +20,7 @@ import traceback
 from app.config import stripe
 from apscheduler.schedulers.background import BackgroundScheduler
 import datetime
+import re
 import pytz
 import logging
 logger = logging.getLogger(__name__)
@@ -690,15 +691,29 @@ def start_background_jobs_before_first_request():
             leadsToReceiveReminders = AppDBUtil.findLeadsToReceiveReminders()
             for lead in leadsToReceiveReminders:
                 number_of_days_until_appointment = (lead.get('appointment_date_and_time').date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
+                # appointment_day = datetime.datetime.now(pytz.timezone('US/Central')).strftime('%A')
+                # appointment_date = datetime.datetime.now(pytz.timezone('US/Central')).date()
+                # appointment_time = datetime.datetime.now(pytz.timezone('US/Central')).time()
+
+                appointment_date_and_time = lead.get('appointment_date_and_time').strftime("%c %p")
+
+                res = re.search(r'\s[0-9]{1,2}[:]', appointment_date_and_time)
+                start = res.start()
+                end = res.end()
+
+                hour_as_24 = appointment_date_and_time[start:end].split()[0].split(':')[0]
+                appointment_date_and_time = appointment_date_and_time[:start] + ' ' + str(int(hour_as_24) % 12) + ':' + appointment_date_and_time[start + 1:]
+                appointment_date_and_time = appointment_date_and_time[:16] + appointment_date_and_time[27:] + ' CST'
+
                 logger.debug("appointment date is: {}".format(lead.get('appointment_date_and_time').date()))
                 logger.debug("number of days until appointment is: {}".format(number_of_days_until_appointment))
                 if number_of_days_until_appointment in [0,1,3]:
                     message = lead.get('lead_salutation') + lead.get('lead_name') if lead.get('lead_salutation') else 'Parent'
                     if lead.get('lead_email'):
-                        SendMessagesToClients.sendEmail(to_address=[lead.get('lead_email'), 'mo@prepwithmo.com'], message=[message, lead.get('appointment_date_and_time')], type='reminder_about_appointment')
+                        SendMessagesToClients.sendEmail(to_address=[lead.get('lead_email'), 'mo@prepwithmo.com'], message=[message, appointment_date_and_time], type='reminder_about_appointment',subject='Reminder About Your Appointment')
                     if lead.get('lead_phone_number'):
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead.get('lead_phone_number')], message=[message,lead.get('appointment_date_and_time')],type='reminder_about_appointment',subject='Reminder About Your Appointment')
-                    reminder_last_names = reminder_last_names+lead['name']+", "
+                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead.get('lead_phone_number')], message=[message,appointment_date_and_time],type='reminder_about_appointment')
+                    reminder_last_names = reminder_last_names+lead['lead_name']+", "
             SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')
 
         except Exception as e:
@@ -756,7 +771,7 @@ def start_background_jobs_before_first_request():
     scheduler = BackgroundScheduler(timezone='US/Central')
 
     if os.environ['DEPLOY_REGION'] != 'prod':
-        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='14', minute='37')
+        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='15', minute='6')
         scheduler.add_job(lambda: print("dummy reminders job for local and dev"), 'cron', minute='55')
         scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
     else:

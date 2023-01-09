@@ -523,10 +523,14 @@ class SendMessagesToClients():
         elif type == 'referral_request':
             created_or_modified_span = "Oh, and one more note to the family...if you have any friends/families looking to raise their SAT/ACT scores, have them check us out at prepwithmo.com or call us at 972-584-7364. We appreciate the referral!"
         elif type == 'confirm_lead_appointment':
-            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour appointment is {}".format(message[0],message[1])
+            created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a confirmation that your appointment is on  {}. Ahead of your appointment, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo".format(message[0],message[1],message[2])
+        elif type == 'reminder_about_appointment':
+            created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a reminder that your appointment is on  {}. If you have not already done so, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo".format(message[0],message[1],message[2])
 
 
-        if type in ['welcome_new_student','referral_request','questions','confirm_lead_appointment']:
+
+
+        if type in ['welcome_new_student','referral_request','questions','confirm_lead_appointment','reminder_about_appointment']:
             text_message = created_or_modified_span
         elif type in ['create_transaction_existing_client','modify_transaction_existing_client']:
             text_message = "\n" + created_or_modified_span + "\n\n" \
