@@ -144,11 +144,11 @@ def client_info(prospect_id):
             flash("Error in submitting student information and creating group messages for regular updates created. Please contact Mo.")
         return render_template('client_info.html', prospect_id=student_data['prospect_id'])
 
-@server.route('/lead_info', methods=['GET','POST'])
+@server.route('/lead_info_by_mo', methods=['GET','POST'])
 @login_required
-def lead_info():
+def lead_info_by_mo():
     if request.method == 'GET':
-        return render_template('lead_info.html')
+        return render_template('lead_info_by_mo.html')
     elif request.method == 'POST':
         lead_info_contents = request.form.to_dict()
         what_services_are_they_interested_in = request.form.getlist('what_services_are_they_interested_in')
@@ -174,11 +174,11 @@ def lead_info():
                         SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'), 'mo@prepwithmo.com'],message=[message, lead_info_contents.get('appointment_date_and_time')],type='confirm_lead_appointment', subject='Confirming Your Appointment')
 
                 flash('The lead info was created successfully.')
-                return render_template('lead_info.html', action=action)
+                return render_template('lead_info_by_mo.html', action=action)
             except Exception as e:
                 logger.exception(e)
                 flash('An error has occured during the creation.')
-                return render_template('lead_info.html', action=action)
+                return render_template('lead_info_by_mo.html', action=action)
 
         if action == 'Modify':
             try:
@@ -198,11 +198,11 @@ def lead_info():
                     flash('Somehow ended up with and modified duplicate lead ids')
 
                 flash('Lead sucessfully modified.')
-                return render_template('lead_info.html', action=action)
+                return render_template('lead_info_by_mo.html', action=action)
             except Exception as e:
                 logger.exception(e)
                 flash('An error occured while modifying the lead.')
-                return render_template('lead_info.html', action=action)
+                return render_template('lead_info_by_mo.html', action=action)
 
         if action == 'Search':
             try:
@@ -211,13 +211,13 @@ def lead_info():
             except Exception as e:
                 logger.exception(e)
                 flash('An error has occured during the search.')
-                render_template('lead_info.html', action=action)
+                render_template('lead_info_by_mo.html', action=action)
 
             if not search_results:
                 flash('No lead info has the detail you searched for.')
-                render_template('lead_info.html', action=action)
+                render_template('lead_info_by_mo.html', action=action)
 
-            return render_template('lead_info.html', search_results=search_results, action=action)
+            return render_template('lead_info_by_mo.html', search_results=search_results, action=action)
 
 
 

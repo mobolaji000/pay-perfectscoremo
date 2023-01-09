@@ -565,11 +565,11 @@ class AppDBUtil():
     @classmethod
     def createLead(cls, leadInfo):
         try:
-            lead_info = Lead(lead_id=leadInfo['lead_id'], lead_salutation=leadInfo['lead_salutation'],lead_name=leadInfo['lead_name'], lead_email=leadInfo['lead_email'], lead_phone_number=leadInfo['lead_phone_number'],appointment_date_and_time=leadInfo['appointment_date_and_time'],
+            lead_info_by_mo = Lead(lead_id=leadInfo['lead_id'], lead_salutation=leadInfo['lead_salutation'],lead_name=leadInfo['lead_name'], lead_email=leadInfo['lead_email'], lead_phone_number=leadInfo['lead_phone_number'],appointment_date_and_time=leadInfo['appointment_date_and_time'],
                              what_services_are_they_interested_in=leadInfo['what_services_are_they_interested_in'], details_on_what_service_they_are_interested_in=leadInfo['details_on_what_service_they_are_interested_in'],send_confirmation_to_lead=leadInfo['send_confirmation_to_lead'],
                              miscellaneous_notes=leadInfo['miscellaneous_notes'], how_did_they_hear_about_us=leadInfo['how_did_they_hear_about_us'],details_on_how_they_heard_about_us=leadInfo['details_on_how_they_heard_about_us'])
 
-            db.session.add(lead_info)
+            db.session.add(lead_info_by_mo)
             cls.executeDBQuery()
             create_lead_info_message = "Lead Info created successfully."
 
@@ -584,21 +584,21 @@ class AppDBUtil():
         try:
             if search_query:
                 if search_query.startswith("l-"):
-                    lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
+                    lead_info_by_mo = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
                 elif "@" in search_query:
-                    lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
+                    lead_info_by_mo = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
                 else:
                     search = "%{}%".format(search_query)
-                    lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
+                    lead_info_by_mo = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
 
             elif searchStartDate and searchEndDate:
-                lead_info = Lead.query.filter(Lead.date_created <= searchEndDate).filter(Lead.date_created >= searchStartDate).order_by(Lead.date_created.desc()).all()
-                #changed way of searching lead_info because previous one was neither inclusive of start/end dates nor intuitive
-                #lead_info = Lead.query.filter(Lead.date_created.between(searchStartDate, searchEndDate)).order_by(Lead.date_created.desc()).all()
+                lead_info_by_mo = Lead.query.filter(Lead.date_created <= searchEndDate).filter(Lead.date_created >= searchStartDate).order_by(Lead.date_created.desc()).all()
+                #changed way of searching lead_info_by_mo because previous one was neither inclusive of start/end dates nor intuitive
+                #lead_info_by_mo = Lead.query.filter(Lead.date_created.between(searchStartDate, searchEndDate)).order_by(Lead.date_created.desc()).all()
 
 
             search_results = []
-            for info in lead_info:
+            for info in lead_info_by_mo:
 
                 lead = {}
                 lead['lead_id'] = info.lead_id
@@ -622,9 +622,9 @@ class AppDBUtil():
             raise e
 
     @classmethod
-    def modifyLeadInfo(cls, lead_id, lead_info):
+    def modifyLeadInfo(cls, lead_id, lead_info_by_mo):
         try:
-            number_of_rows_modified = db.session.query(Lead).filter_by(lead_id=lead_id).update(lead_info)
+            number_of_rows_modified = db.session.query(Lead).filter_by(lead_id=lead_id).update(lead_info_by_mo)
             cls.executeDBQuery()
             print("number of lead rows modified is: ", number_of_rows_modified) # printing of rows modified to logs to help with auditing
             return number_of_rows_modified
