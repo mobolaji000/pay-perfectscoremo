@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Lead Setup</title>
+
+	<!-- Bootstrap core CSS -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.css">
+<script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
+
+	<link href="static/page_style.css" rel="stylesheet">
+	<script type="text/javascript" src="static/lead_info_by_lead_state.js"></script>
+
+	<!-- Custom styles for this template -->
+	<style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+
+	.choices__inner, .choices__list, .choices__input, .choices__list--multiple {
+    background: white !important;
+	}
+
+	</style>
+
+	<script type="text/javascript">
+		 function finalCheckBeforeSubmit(pressed_button_id)
+    {
+    var lead_name =  $('input[name="lead_name"]').val();
+    var lead_email =  $('input[name="lead_email"]').val();
+    var lead_phone_number =  $('input[name="lead_phone_number"]').val();
+    var search_query =  $('input[name="search_query"]').val();
+    var start_date =  $('input[name="start_date"]').val();
+    var end_date =  $('input[name="end_date"]').val();
+	var appointment_date_and_time = $('input[name="appointment_date_and_time"]').val();
+    var pressed_button_val = document.getElementById(event.srcElement.id).value
+    document.getElementById("action").value = pressed_button_val
+
+		var lead_id = $("#lead_id").attr("data-lead_id");
+	$('input[name="lead_id"]').val(lead_id);
+
+	if (pressed_button_val == "Create")
+	{
+	if (lead_name == "" && lead_email == "" && lead_phone_number == "")
+	{
+		document.getElementById("name-email-phone_number-checker").hidden=false;
+		event.preventDefault();
+	}
+	else
+	{
+	document.getElementById("lead_info_form").submit();
+	}
+	}
+	if (pressed_button_val == "Modify")
+	{
+	if (lead_name == "" && lead_email == "" && lead_phone_number == "")
+	{
+		document.getElementById("name-email-phone_number-checker").hidden=false;
+		event.preventDefault();
+	}
+	else
+	{
+            document.getElementById("lead_info_form").submit();
+    }
+	}
+	if (pressed_button_val == "Search")
+	{
+	if (search_query == "" && start_date == "" && end_date == "")
+	{
+		document.getElementById("search-text-date-checker").hidden=false;
+		document.getElementById('search_set').style.display = 'None';
+		event.preventDefault();
+	}
+	else
+	{
+	document.getElementById("lead_info_form").submit();
+	}
+	}
+
+    }
+
+     function populateFieldsFromSearch(result)
+     {
+     $('input[name="lead_id"]').val(result.lead_id);
+     $('select[name="lead_salutation"]').val(result.lead_salutation);
+	$('input[name="lead_name"]').val(result.lead_name);
+     $('input[name="lead_email"]').val(result.lead_email);
+     $('input[name="lead_phone_number"]').val(result.lead_phone_number);
+
+
+	 console.log(result.what_services_are_they_interested_in);
+	 console.log(result.what_services_are_they_interested_in[0]);
+
+	 // find detials of hos this works here: https://github.com/Choices-js/Choices
+    var multipleCancelButton = new Choices('#what_services_are_they_interested_in', {
+        removeItemButton: true,
+      });
+	multipleCancelButton.clearChoices();
+
+
+
+     $('textarea[name="what_services_are_they_interested_in"]').val(result.what_services_are_they_interested_in);
+
+
+
+          $('textarea[name="details_on_what_service_they_are_interested_in"]').val(result.details_on_what_service_they_are_interested_in);
+     $('textarea[name="miscellaneous_notes"]').val(result.miscellaneous_notes);
+     $('select[name="how_did_they_hear_about_us"]').val(result.how_did_they_hear_about_us);
+          $('textarea[name="details_on_how_they_heard_about_us"]').val(result.details_on_how_they_heard_about_us);
+
+		  if (result.send_confirmation_to_lead == "yes")
+     {
+     	$('input[name="send_confirmation_to_lead"]').prop('checked', true);
+     	 $('input[name="send_confirmation_to_lead"]').val("yes");
+
+     }
+     else
+     {
+     $('input[name="send_confirmation_to_lead"]').prop('checked', false);
+     	 $('input[name="send_confirmation_to_lead"]').val("no");
+
+     }
+
+	 if (result.appointment_date_and_time != 'null')
+	 {
+
+	  var someDate = new Date(result.appointment_date_and_time);
+       	someDate.setDate(someDate.getDate() - 1);
+        var dd = (someDate.getDate() + 1 < 10) ? "0" + (someDate.getDate() + 1) : someDate.getDate() + 1
+        var mm = (someDate.getMonth() + 1 < 10) ? "0" + (someDate.getMonth() + 1) : someDate.getMonth() + 1
+        var yy = someDate.getFullYear();
+
+		var HH = (someDate.getHours() < 10) ? "0" + (someDate.getHours()) : someDate.getHours() ;
+		 var MM = (someDate.getMinutes() < 10) ? "0" + (someDate.getMinutes()) : someDate.getMinutes();
+
+
+        var someFormattedDate = yy + '-' + mm + '-' + dd + 'T' + HH + ':' + MM;
+
+			  	$('input[name="appointment_date_and_time"]').val(someFormattedDate);
+	 }
+
+    }
+
+	</script>
+</head>
+
+
+<body class="bg-light">
+<div class="container">
+	<div class="py-5 text-center">
+		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="528" height="201">
+		<h2><u>Lead Information</u></h2><br>
+	</div>
+
+	<div class="">
+	<h4 class="mb-3 text-center font-weight-light font-italic"><u>Search For Existing Lead</u></h4>
+		<div class="">
+			<form id="lead_info_form" class="needs-validation" action="{{ url_for('lead_info_by_lead') }}" method="post" data-toggle="validator" >
+				<div class="row no-padding">
+					<div class="col-md-3 mb-3">
+
+					<label for="search_query" class="form-label">Name, Email, Or Phone Number</label>
+					<input type="text" class="form-control" placeholder="Enter search query" id="search_query" name="search_query">
+					<div class="invalid-feedback">
+							Valid name, email, or phone number is required.
+						</div>
+				</div>
+				</div>
+
+				<br><br>
+
+				<div class="row no-padding">
+					<div class="col-md-3 mb-3">
+						<label for="start_date" class="form-label">Start Date</label>
+						<input type="date" class="form-control" id="start_date" name="start_date" />
+						<div class="invalid-feedback">
+							Valid start date is required.
+						</div>
+					</div>
+
+					<div class="col-md-3 mb-3">
+						<label for="end_date" class="form-label">End Date</label>
+						<input type="date" class="form-control" id="end_date" name="end_date" />
+						<div class="invalid-feedback">
+							Valid end date is required.
+						</div>
+					</div>
+				</div><br>
+
+				<div id="search-text-date-checker" class="text-danger" hidden>Please enter a search text or date</div><br><br>
+
+				<div class="row " style="display:inline-block; width:100%; margin-left: 20%;">
+					<div class="col-md-3 mb-3">
+						<input class="btn btn-secondary" id="search_lead_info" name="submitButton" type="submit" value="Search" onclick="finalCheckBeforeSubmit()"></input>
+					</div>
+				</div>
+
+				<div>
+
+
+					{% if search_results %}
+					<h4 class="mb-3">Search Results</h4>
+					{% endif %}
+
+
+					<div>
+
+						<div name="search_set" id="search_set" class="col-md-12 mb-3">
+
+							{% for result in search_results %}
+							{% if result.appointment_date_and_time == 'null' %}
+					{% set appointment_date_and_time = "No appointment scheduled" %}
+								{% else %}
+								{% set appointment_date_and_time = result.appointment_date_and_time %}
+					{% endif %}
+							<a name="search_link" href="javascript:populateFieldsFromSearch({{ result }});">
+
+								{{ result.lead_salutation+" "+result.lead_name+" "+result.lead_email+" "+result.lead_phone_number+" "+appointment_date_and_time}}
+							</a>
+							<br><br><br>
+							{% endfor %}
+
+						</div>
+
+						<div>
+							{% if action == 'Search' %}
+							{% for message in get_flashed_messages() %}
+							<div class="alert alert-warning col-md-6 mb-6">
+								<button type="button" class="close" data-dismiss="alert">&times;</button>
+								{{ message }}
+							</div>
+							{% endfor %}
+							{% endif %}
+						</div>
+
+					</div>
+
+
+				</div>
+
+
+				<h4 class="mb-3 text-center font-weight-light font-italic"><u>Enter New Lead</u></h4>
+				<div class="col-md-8 order-md-1">
+
+				<div class="row no-padding">
+					<h4 class="mb-3"><u>Bio</u></h4>
+				</div>
+
+				<div class="row no-padding">
+						<div class="mb-3">
+							<label for="lead_salutation">Salutation</label>
+						<select  id="lead_salutation" name="lead_salutation" class="form-control">
+								<option value="" selected disabled hidden></option>
+								<option value='Mr.'>Mr.</option>
+								<option value='Ms.'>Ms.</option>
+							</select>
+						<div class="invalid-feedback">Valid  salutation is required.</div>
+						</div>
+					</div>
+
+				{# TODO When salutation present, use it to send email; when absent, default to 'Dear Sir/Maam', which will apply to leads that are both parents and students #}
+
+					<div class="row no-padding">
+						<div class=" mb-3">
+							<label for="lead_name">Name</label>
+							<input type="text" class="form-control" id="lead_name" name="lead_name" placeholder="" value="">
+							<div class="invalid-feedback">
+								Valid  name is required.
+							</div>
+						</div>
+					</div>
+
+					<div class="row no-padding">
+						<div class=" mb-3">
+						<label for="lead_email">Email</label>
+						<input type="email" class="form-control" id="lead_email" name="lead_email" placeholder="you@example.com">
+						<div class="invalid-feedback">
+							Please enter a valid email address.
+						</div>
+					</div>
+					</div>
+
+					<div class="row no-padding">
+						<div class=" mb-3">
+						<label for="lead_phone_number">Phone number</label>
+						<input type="tel" class="form-control" id="lead_phone_number" name="lead_phone_number"
+							   placeholder="111-111-1111">
+						<div class="invalid-feedback">
+							Please enter a valid phone number.
+						</div>
+					</div>
+						</div><br>
+
+					<div id="name-email-phone_number-checker" class="text-danger" hidden>Please enter a name, email, or phone number</div>
+
+					<br><br>
+
+					<div class="row no-padding">
+						<h4 class="mb-3" ><u>Details</u></h4>
+					</div>
+						<br>
+
+<!--						<div class="row no-padding" >-->
+<!--							<div class="row  col-md-7 " >-->
+<!--							<label for="what_services_are_they_interested_in">What service are they interested in?</label>-->
+<!--							<select  id="what_services_are_they_interested_in"  name="what_services_are_they_interested_in" class="form-control">-->
+<!--								<option value="" selected disabled hidden></option>-->
+<!--								<option value='PSAT'>PSAT</option>-->
+<!--								<option value='SAT/ACT'>SAT/ACT</option>-->
+<!--								<option value='College Admissions Counselling'>College Admissions Counselling</option>-->
+<!--								<option value='General Tutoring'>General Tutoring</option>-->
+<!--								<option value='Other'>Other</option>-->
+<!--							</select>-->
+<!--						</div></div><br><br><br>-->
+
+<!--					find detials of hos this works here: https://bbbootstrap.com/snippets/multiselect-dropdown-list-83601849-->
+					<div class="row no-padding" >
+    <div class="col-md-7" style="padding-left: 0px !important; padding-left: 0px !important;padding-right: 0px !important;">
+		<label for="what_services_are_they_interested_in">What service are they interested in?</label>
+		<select id="what_services_are_they_interested_in" name="what_services_are_they_interested_in" class="form-control" placeholder="" multiple >
+<!--            <option value="" selected disabled hidden></option>-->
+								<option value='PSAT'>PSAT</option>
+								<option value='SAT/ACT'>SAT/ACT</option>
+								<option value='College Admissions Counselling'>College Admissions Counselling</option>
+								<option value='General Tutoring'>General Tutoring</option>
+								<option value='Other'>Other</option>
+        </select> </div>
+</div><br><br><br>
+
+						<div class="row no-padding" >
+							<div class="row  col-md-7 " >
+							<label for="details_on_what_service_they_are_interested_in">Details on what service they are interested in</label>
+							<textarea  id="details_on_what_service_they_are_interested_in"  name="details_on_what_service_they_are_interested_in" class="form-control" rows="2" placeholder=""></textarea>
+						</div></div><br><br><br>
+
+							<div class="row no-padding" >
+								<div class="row  col-md-6 " >
+							<label for="appointment_date_and_time">Appointment Date/Time</label>
+							<input type="datetime-local" class="form-control" id="appointment_date_and_time" name="appointment_date_and_time" >
+						  </div> </div><br><br><br>
+
+						<div class="row no-padding" >
+							<div class="row  col-md-8 " >
+							<label for="miscellaneous_notes">Miscellaneous Notes (e.g. what they mentioned about the kid, next steps if not an appointment etc)</label>
+							<textarea  id="miscellaneous_notes"  name="miscellaneous_notes" class="form-control" rows="5"  placeholder=""></textarea>
+						</div></div><br><br><br>
+
+						<div class="row no-padding" >
+							<div class="row  col-md-6 " >
+							<label for="how_did_they_hear_about_us">How did they hear about us?</label>
+							<select  id="how_did_they_hear_about_us"  name="how_did_they_hear_about_us" class="form-control">
+								<option value="" selected disabled hidden></option>
+								<option value='Southwest: Garland'>Southwest: Garland</option>
+								<option value='Southwest: Arlington'>Southwest: Arlington</option>
+								<option value='Returning Client'>Returning Client</option>
+								<option value='USPS Mailer'>USPS Mailer</option>
+								<option value='Gidi Lounge'>Gidi Lounge</option>
+								<option value='Referral'>Referral</option>
+								<option value='Other'>Other</option>
+							</select>
+						</div></div><br><br>
+
+						<div class="row no-padding" >
+							<div class="row  col-md-6 " >
+							<label for="details_on_how_they_heard_about_us">Details on how they heard about us</label>
+							<textarea  id="details_on_how_they_heard_about_us"  name="details_on_how_they_heard_about_us" class="form-control" rows="2"  placeholder="" ></textarea>
+						</div></div><br><br><br>
+
+					<div class="row no-padding" >
+						<div class="row  col-md-6 " >
+							<label>
+								<input type="checkbox" id="send_confirmation_to_lead"
+									   name="send_confirmation_to_lead" value=""> Send confirmation to lead
+							</label>
+						</div></div><br><br><br>
+
+
+
+
+					<div>
+							{% if action == 'Create' or action == 'Modify' %}
+							{% for message in get_flashed_messages() %}
+							<div class="alert alert-warning col-md-6 mb-6">
+								<button type="button" class="close" data-dismiss="alert">&times;</button>
+								{{ message }}
+							</div>
+							{% endfor %}
+							{% endif %}
+						</div>
+
+					<br><br>
+					<div class="row text-center">
+						<div class="col-md-6 mb-3">
+							<input id="create_lead_info" name="submitButton" class="btn btn-primary btn- btn-block" type="submit"   style="display:inline-block; width:50%; margin-left: 25%;"  value="Create" onclick="finalCheckBeforeSubmit()"></input>
+						</div>
+
+						<div class="col-md-6 mb-3">
+							<input id="modify_lead_info" name="submitButton" class="btn btn-primary btn- btn-block" type="submit"   style="display:inline-block; width:50%; margin-left: 25%;"  value="Modify" hidden onclick="finalCheckBeforeSubmit()"></input>
+						</div>
+						<input id="lead_id" name="lead_id" hidden  data-lead_id="{{ lead_id }}">
+						<input id="action" name="action" hidden>
+					</div></div>
+			</form>
+		</div>
+	</div>
+
+	<hr>
+
+	<footer class="my-5 pt-5 text-muted text-center text-small">
+		<p class="mb-1">&copy; 2017-2021 Perfect Score Mo</p>
+		<ul class="list-inline">
+			<li class="list-inline-item"><a href="#">Privacy</a></li>
+			<li class="list-inline-item"><a href="#">Terms</a></li>
+			<li class="list-inline-item"><a href="#">Support</a></li>
+		</ul>
+	</footer>
+</div>
+
+</body>
+</html>

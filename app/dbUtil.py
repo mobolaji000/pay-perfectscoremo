@@ -622,9 +622,9 @@ class AppDBUtil():
             raise e
 
     @classmethod
-    def modifyLeadInfo(cls, lead_id, lead_info_by_mo):
+    def modifyLeadInfo(cls, lead_id, lead_info):
         try:
-            number_of_rows_modified = db.session.query(Lead).filter_by(lead_id=lead_id).update(lead_info_by_mo)
+            number_of_rows_modified = db.session.query(Lead).filter_by(lead_id=lead_id).update(lead_info)
             cls.executeDBQuery()
             print("number of lead rows modified is: ", number_of_rows_modified) # printing of rows modified to logs to help with auditing
             return number_of_rows_modified

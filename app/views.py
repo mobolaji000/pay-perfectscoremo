@@ -144,6 +144,42 @@ def client_info(prospect_id):
             flash("Error in submitting student information and creating group messages for regular updates created. Please contact Mo.")
         return render_template('client_info.html', prospect_id=student_data['prospect_id'])
 
+
+#keep for when you need to send adhoc student info requests to parents
+@server.route('/lead_info_by_lead',defaults={'lead_id': None}, methods=['GET','POST'])
+@server.route('/lead_info_by_lead/<lead_id>', methods=['GET','POST'])
+def lead_info_by_lead(lead_id):
+    if request.method == 'GET':
+        print("lead_id in get is ",lead_id)
+        return render_template('lead_info_by_lead.html',lead_id=lead_id)
+    elif request.method == 'POST':
+        try:
+            lead_info_contents = request.form.to_dict()
+            print("lead_id in post is ", lead_info_contents['lead_id'])
+            print("lead info contents is",lead_info_contents)
+
+            leadInfo = {}
+
+            leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''),'lead_salutation': lead_info_contents.get('lead_salutation', ''),'lead_email': lead_info_contents.get('lead_email', ''),
+                             'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'what_services_are_they_interested_in': request.form.getlist('what_services_are_they_interested_in'),
+                             'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),
+                             'send_confirmation_to_lead': lead_info_contents.get('send_confirmation_to_lead', 'no'),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''),
+                             'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', '')})
+
+            number_of_rows_modified = AppDBUtil.modifyLeadInfo(lead_info_contents.get('lead_id', ''), leadInfo)
+
+            if number_of_rows_modified > 1:
+                logger.error("Somehow ended up with and modified duplicate lead ids")
+                raise Exception
+
+            flash("Your information has been submitted successfully")
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            flash("Error in submitting your information. Please contact Mo.")
+        return render_template('lead_info_by_lead.html', lead_id=lead_info_contents['lead_id'])
+
+
 @server.route('/lead_info_by_mo', methods=['GET','POST'])
 @login_required
 def lead_info_by_mo():
@@ -691,9 +727,6 @@ def start_background_jobs_before_first_request():
             leadsToReceiveReminders = AppDBUtil.findLeadsToReceiveReminders()
             for lead in leadsToReceiveReminders:
                 number_of_days_until_appointment = (lead.get('appointment_date_and_time').date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
-                # appointment_day = datetime.datetime.now(pytz.timezone('US/Central')).strftime('%A')
-                # appointment_date = datetime.datetime.now(pytz.timezone('US/Central')).date()
-                # appointment_time = datetime.datetime.now(pytz.timezone('US/Central')).time()
 
                 appointment_date_and_time = lead.get('appointment_date_and_time').strftime("%c %p")
 
@@ -705,14 +738,14 @@ def start_background_jobs_before_first_request():
                 appointment_date_and_time = appointment_date_and_time[:start] + ' ' + str(int(hour_as_24) % 12) + ':' + appointment_date_and_time[start + 1:]
                 appointment_date_and_time = appointment_date_and_time[:16] + appointment_date_and_time[27:] + ' CST'
 
-                logger.debug("appointment date is: {}".format(lead.get('appointment_date_and_time').date()))
-                logger.debug("number of days until appointment is: {}".format(number_of_days_until_appointment))
+                link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + lead.get('lead_id')
+
                 if number_of_days_until_appointment in [0,1,3]:
                     message = lead.get('lead_salutation') + lead.get('lead_name') if lead.get('lead_salutation') else 'Parent'
                     if lead.get('lead_email'):
-                        SendMessagesToClients.sendEmail(to_address=[lead.get('lead_email'), 'mo@prepwithmo.com'], message=[message, appointment_date_and_time], type='reminder_about_appointment',subject='Reminder About Your Appointment')
+                        SendMessagesToClients.sendEmail(to_address=[lead.get('lead_email'), 'mo@prepwithmo.com'], message=[message, appointment_date_and_time, link_url], type='reminder_about_appointment',subject='Reminder About Your Appointment')
                     if lead.get('lead_phone_number'):
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead.get('lead_phone_number')], message=[message,appointment_date_and_time],type='reminder_about_appointment')
+                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead.get('lead_phone_number')], message=[message,appointment_date_and_time, link_url],type='reminder_about_appointment')
                     reminder_last_names = reminder_last_names+lead['lead_name']+", "
             SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')
 
