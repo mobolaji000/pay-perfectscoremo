@@ -736,12 +736,12 @@ def start_background_jobs_before_first_request():
 
                 hour_as_24 = appointment_date_and_time[start:end].split()[0].split(':')[0]
                 appointment_date_and_time = appointment_date_and_time[:start] + ' ' + str(int(hour_as_24) % 12) + ':' + appointment_date_and_time[start + 1:]
-                appointment_date_and_time = appointment_date_and_time[:16] + appointment_date_and_time[27:] + ' CST'
+                appointment_date_and_time = appointment_date_and_time[:15] + " " + appointment_date_and_time[27:] + ' CST'
 
                 link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + lead.get('lead_id')
 
                 if number_of_days_until_appointment in [0,1,3]:
-                    message = lead.get('lead_salutation') + lead.get('lead_name') if lead.get('lead_salutation') else 'Parent'
+                    message = lead.get('lead_salutation') + " " + lead.get('lead_name') if lead.get('lead_salutation') else 'Parent'
                     if lead.get('lead_email'):
                         SendMessagesToClients.sendEmail(to_address=[lead.get('lead_email'), 'mo@prepwithmo.com'], message=[message, appointment_date_and_time, link_url], type='reminder_about_appointment',subject='Reminder About Your Appointment')
                     if lead.get('lead_phone_number'):
@@ -804,7 +804,7 @@ def start_background_jobs_before_first_request():
     scheduler = BackgroundScheduler(timezone='US/Central')
 
     if os.environ['DEPLOY_REGION'] != 'prod':
-        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='15', minute='6')
+        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='18', minute='10')
         scheduler.add_job(lambda: print("dummy reminders job for local and dev"), 'cron', minute='55')
         scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
     else:

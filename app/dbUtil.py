@@ -289,6 +289,7 @@ class AppDBUtil():
             for lead in leadsToReceiveReminders:
                 logger.debug("Individual lead is: {}".format(lead))
                 lead_details = {}
+                lead_details['lead_id'] = lead.lead_id
                 lead_details['lead_salutation'] = lead.lead_salutation
                 lead_details['lead_name'] = lead.lead_name
                 lead_details['lead_phone_number'] = lead.lead_phone_number
