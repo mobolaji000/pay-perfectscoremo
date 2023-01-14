@@ -117,6 +117,8 @@ class Lead(db.Model):
 
     what_services_are_they_interested_in = db.Column(db.String, index=True, nullable=False, default='')
     details_on_what_service_they_are_interested_in = db.Column(db.String, index=True, nullable=False, default='')
+    grade_level = db.Column(db.Enum('Middle School', '9th Grade', '10th Grade', '11th Grade', '12th Grade', 'Other','', name='grade_level_options'), index=True, nullable=False, default='')
+    recent_test_score = db.Column(db.Integer, index=True,nullable=False,  default=-1)
     appointment_date_and_time = db.Column(db.DateTime(timezone=True), index=True, nullable=True)
     miscellaneous_notes = db.Column(db.String, index=True, nullable=False, default='')
     how_did_they_hear_about_us = db.Column(db.String, index=True, nullable=False, default='')

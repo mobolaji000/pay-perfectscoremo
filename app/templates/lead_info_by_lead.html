@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Lead Setup</title>
+	<title>Your Information</title>
+
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
 	<!-- Bootstrap core CSS -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
@@ -12,8 +14,8 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.css">
 <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
 
-	<link href="static/page_style.css" rel="stylesheet">
-	<script type="text/javascript" src="static/lead_info_by_lead_state.js"></script>
+	<link type="text/css" href="/static/page_style.css" rel="stylesheet">
+	<script type="text/javascript" src="/static/lead_info_by_lead_state.js"></script>
 
 	<!-- Custom styles for this template -->
 	<style>
@@ -71,7 +73,6 @@
 <div class="container">
 	<div class="py-5 text-center">
 		<img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="528" height="201">
-		<h2><u>Your Information</u></h2><br>
 	</div>
 
 	<div class="">
@@ -83,7 +84,7 @@
 				<div class="col-md-8 order-md-1">
 
 				<div class="row no-padding">
-					<h4 class="mb-3"><u>Bio</u></h4>
+					<h4 class="mb-3"><u>Parent/Guardian Bio</u></h4>
 				</div>
 
 				<div class="row no-padding">
@@ -144,7 +145,7 @@
 <!--					find detials of hos this works here: https://bbbootstrap.com/snippets/multiselect-dropdown-list-83601849-->
 					<div class="row no-padding" >
     <div class="col-md-7" style="padding-left: 0px !important; padding-left: 0px !important;padding-right: 0px !important;">
-		<label for="what_services_are_you_interested_in">What service are you interested in?</label>
+		<label for="what_services_are_you_interested_in">What service are you interested in? (You can choose more than one)</label>
 		<select id="what_services_are_you_interested_in" name="what_services_are_you_interested_in" class="form-control" placeholder="" multiple >
 <!--            <option value="" selected disabled hidden></option>-->
 								<option value='PSAT'>PSAT</option>
@@ -160,6 +161,30 @@
 							<label for="details_on_what_service_you_are_interested_in">Details on what service you are interested in</label>
 							<textarea  id="details_on_what_service_you_are_interested_in"  name="details_on_what_service_you_are_interested_in" class="form-control" rows="2" placeholder=""></textarea>
 						</div></div><br><br><br>
+
+					<div class="row no-padding" >
+							<div class="row  col-md-6 " >
+							<label for="grade_level">Grade Level?</label>
+							<select  id="grade_level"  name="grade_level" class="form-control">
+								<option value="" selected disabled hidden></option>
+								<option value='Middle School'>Middle School</option>
+								<option value='9th Grade'>9th Grade</option>
+								<option value='10th Grade'>10th Grade</option>
+								<option value='11th Grade'>11th Grade</option>
+								<option value='12th Grade'>12th Grade</option>
+								<option value='Other'>Other</option>
+							</select>
+						</div></div><br><br>
+
+					<div class="row no-padding">
+						<div class=" mb-3">
+							<label for="recent_test_score">SAT/ACT/P-SAT/P-ACT Score (if taken within the last 1 year)</label>
+							<input type="number" class="form-control" id="recent_test_score" name="recent_test_score" placeholder="" value="">
+							<div class="invalid-feedback">
+								Valid  number is required.
+							</div>
+						</div>
+					</div><br><br>
 
 
 						<div class="row no-padding" >

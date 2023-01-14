@@ -86,12 +86,12 @@ class AWSInstance():
         elif type == 'modify_transaction_existing_client':
             created_or_modified_span = "<span>Your transaction has just been modified using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
         elif type == 'reminder_about_appointment':
-            created_or_modified_span = "<span>Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour appointment is {}</span><br><br>".format(message[0],message[1])
+            created_or_modified_span = "<span>Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a reminder that your appointment is on  {}. If you have not already done so, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo</span><br><br>".format(message[0],message[1],message[2])
         elif type == 'confirm_lead_appointment':
-            created_or_modified_span = "<span>Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour appointment is {}</span><br><br>".format(message[0],message[1])
+            created_or_modified_span = "<span>Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a confirmation that your appointment is on  {}. Ahead of your appointment, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo</span><br><br>".format(message[0],message[1],message[2])
 
 
-        SENDER = "Perfect Score Mo <mo@info.perfectscoremo.com>"
+        SENDER = "PrepWithMo <mo@info.perfectscoremo.com>"
         RECIPIENT = [to_address] if isinstance(to_address, str) else to_address
         SUBJECT = subject
 

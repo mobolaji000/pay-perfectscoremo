@@ -4,6 +4,8 @@
 	<meta charset="utf-8">
 	<title>Lead Setup</title>
 
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
 	<!-- Bootstrap core CSS -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
@@ -102,9 +104,9 @@
      $('input[name="lead_email"]').val(result.lead_email);
      $('input[name="lead_phone_number"]').val(result.lead_phone_number);
 
+	 $('select[name="grade_level"]').val(result.grade_level);
+	 $('input[name="recent_test_score"]').val(result.recent_test_score);
 
-	 console.log(result.what_services_are_they_interested_in);
-	 console.log(result.what_services_are_they_interested_in[0]);
 
 	 // find detials of hos this works here: https://github.com/Choices-js/Choices
     var multipleCancelButton = new Choices('#what_services_are_they_interested_in', {
@@ -347,6 +349,30 @@
 							<label for="details_on_what_service_they_are_interested_in">Details on what service they are interested in</label>
 							<textarea  id="details_on_what_service_they_are_interested_in"  name="details_on_what_service_they_are_interested_in" class="form-control" rows="2" placeholder=""></textarea>
 						</div></div><br><br><br>
+
+					<div class="row no-padding" >
+							<div class="row  col-md-6 " >
+							<label for="grade_level">Grade Level?</label>
+							<select  id="grade_level"  name="grade_level" class="form-control">
+								<option value="" selected disabled hidden></option>
+								<option value='Middle School'>Middle School</option>
+								<option value='9th Grade'>9th Grade</option>
+								<option value='10th Grade'>10th Grade</option>
+								<option value='11th Grade'>11th Grade</option>
+								<option value='12th Grade'>12th Grade</option>
+								<option value='Other'>Other</option>
+							</select>
+						</div></div><br><br>
+
+					<div class="row no-padding">
+						<div class=" mb-3">
+							<label for="recent_test_score">SAT/ACT/P-SAT/P-ACT Score (if taken within the last 1 year)</label>
+							<input type="number" class="form-control" id="recent_test_score" name="recent_test_score" placeholder="" value="">
+							<div class="invalid-feedback">
+								Valid  number is required.
+							</div>
+						</div>
+					</div><br><br>
 
 							<div class="row no-padding" >
 								<div class="row  col-md-6 " >
