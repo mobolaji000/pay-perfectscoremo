@@ -131,9 +131,9 @@ def client_info(prospect_id):
             print("student data is",student_data)
             AppDBUtil.createStudentData(student_data)
             to_numbers = [number for number in [student_data['parent_1_phone_number'],student_data['parent_2_phone_number'],student_data['student_phone_number']] if number != '']
-            SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=student_data['student_first_name'], type='welcome_new_student')
+            SendMessagesToClients.sendSMS(to_numbers=to_numbers, message=student_data['student_first_name'], type='welcome_new_student')
             time.sleep(5)
-            SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, type='referral_request')
+            SendMessagesToClients.sendSMS(to_numbers=to_numbers, type='referral_request')
             #hold off on sending group emails until you dedcide there is a value add
             #SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='welcome_message',subject='Setting Up Group Email')
             #flash("Student information submitted successfully and group messages (email and text) for regular updates created.")
@@ -206,7 +206,7 @@ def lead_info_by_mo():
                     message = lead_info_contents.get('lead_salutation') + lead_info_contents.get(
                         'lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
                     if lead_info_contents.get('lead_phone_number'):
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead_info_contents.get('lead_phone_number')],message=[message, lead_info_contents.get('appointment_date_and_time')],type='confirm_lead_appointment')
+                        SendMessagesToClients.sendSMS(to_numbers=[lead_info_contents.get('lead_phone_number')], message=[message, lead_info_contents.get('appointment_date_and_time')], type='confirm_lead_appointment')
                     if lead_info_contents.get('lead_email'):
                         SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'), 'mo@prepwithmo.com'],message=[message, lead_info_contents.get('appointment_date_and_time')],type='confirm_lead_appointment', subject='Confirming Your Appointment')
 
@@ -299,11 +299,11 @@ def create_transaction():
                 try:
                     SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_id, type=message_type,recipient_name=transaction_setup_data['salutation']+' '+transaction_setup_data['first_name']+' '+transaction_setup_data['last_name'])
                     if message_type == 'create_transaction_existing_client':
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type=message_type,recipient_name=transaction_setup_data['salutation']+' '+transaction_setup_data['first_name']+' '+transaction_setup_data['last_name'])
+                        SendMessagesToClients.sendSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
                         time.sleep(5)
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type='questions')
+                        SendMessagesToClients.sendSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type='questions')
                     else:
-                        SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'], message=transaction_id, type=message_type,recipient_name=transaction_setup_data['salutation']+' '+transaction_setup_data['first_name']+' '+transaction_setup_data['last_name'])
+                        SendMessagesToClients.sendSMS(to_numbers=transaction_setup_data['phone_number'], message=transaction_id, type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
                     flash('Transaction created and email/sms sent to client.')
                 except Exception as e:
                     traceback.print_exc()
@@ -378,11 +378,11 @@ def modify_transaction():
             try:
                 SendMessagesToClients.sendEmail(to_address=data_to_modify['email'], message=transaction_id, type=message_type)
                 if message_type == 'modify_transaction_existing_client':
-                    SendMessagesToClients.sendGroupSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, type=message_type)
+                    SendMessagesToClients.sendSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, type=message_type)
                     time.sleep(5)#
-                    SendMessagesToClients.sendGroupSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, type='questions')
+                    SendMessagesToClients.sendSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, type='questions')
                 else:
-                    SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=transaction_id, type=message_type)
+                    SendMessagesToClients.sendSMS(to_numbers=data_to_modify['phone_number'], message=transaction_id, type=message_type)
 
                 flash('Transaction modified and email/sms sent to client.')
             except Exception as e:
@@ -583,9 +583,9 @@ def enterClientInfo(payment_and_signup_data={}):
         print("student data is", payment_and_signup_data)
         AppDBUtil.createStudentData(payment_and_signup_data)
         to_numbers = [number for number in [payment_and_signup_data['parent_1_phone_number'], payment_and_signup_data['parent_2_phone_number'], payment_and_signup_data['student_phone_number']] if number != '']
-        SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], type='welcome_new_student')
+        SendMessagesToClients.sendSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], type='welcome_new_student')
         time.sleep(5)
-        SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, type='referral_request')
+        SendMessagesToClients.sendSMS(to_numbers=to_numbers, type='referral_request')
         message = ""
         for k, v in ast.literal_eval(payment_and_signup_data['all_days_for_one_on_one']).items():
             message = message + " " + k.split('\n')[1].strip() + ","
@@ -660,7 +660,7 @@ def stripe_webhook():
             failed_invoice = event.data.object
             try:
                 message = "Invoice "+str(failed_invoice.id)+" for "+str(failed_invoice.customer_name)+" failed to pay."
-                SendMessagesToClients.sendSMS(to_number='9725847364', message=message, type='to_mo')
+                SendMessagesToClients.sendSMS(to_numbers='9725847364', message=message, type='to_mo')
                 logger.info(message)
             except Exception as e:
                 logger.error(e)
@@ -693,7 +693,7 @@ def stripe_webhook():
                 else:
                     try:
                         message = "Invoice " + str(finalized_invoice.id) + " for " + str(finalized_invoice.customer_name) + " failed to pay."
-                        SendMessagesToClients.sendSMS(to_number='9725847364', message=message, type='to_mo')
+                        SendMessagesToClients.sendSMS(to_numbers='9725847364', message=message, type='to_mo')
                         logger.debug(message)
                     except Exception as e:
                         logger.error(e)
@@ -747,9 +747,9 @@ def start_background_jobs_before_first_request():
                     if lead.get('lead_email'):
                         SendMessagesToClients.sendEmail(to_address=[lead.get('lead_email'), 'mo@prepwithmo.com'], message=[message, appointment_date_and_time, link_url], type='reminder_about_appointment',subject='Reminder About Your Appointment')
                     if lead.get('lead_phone_number'):
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[lead.get('lead_phone_number')], message=[message,appointment_date_and_time, link_url],type='reminder_about_appointment')
+                        SendMessagesToClients.sendSMS(to_numbers=[lead.get('lead_phone_number')], message=[message, appointment_date_and_time, link_url], type='reminder_about_appointment')
                     reminder_last_names = reminder_last_names+lead['lead_name']+", "
-            SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')
+            SendMessagesToClients.sendSMS(to_numbers='9725847364', message=reminder_last_names, type='to_mo')
 
         except Exception as e:
             logger.exception("Error in sending reminders")
@@ -761,9 +761,9 @@ def start_background_jobs_before_first_request():
             clientsToReceiveReminders = AppDBUtil.findClientsToReceiveReminders()
             for client in clientsToReceiveReminders:
                 SendMessagesToClients.sendEmail(to_address=client['email'], message=client['transaction_id'], type='reminder_to_make_payment')
-                SendMessagesToClients.sendSMS(to_number=client['phone_number'], message=client['transaction_id'],type='reminder_to_make_payment')
+                SendMessagesToClients.sendSMS(to_numbers=client['phone_number'], message=client['transaction_id'], type='reminder_to_make_payment')
                 reminder_last_names = reminder_last_names+client['last_name']+", "
-            SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')
+            SendMessagesToClients.sendSMS(to_numbers='9725847364', message=reminder_last_names, type='to_mo')
 
         except Exception as e:
             logger.exception("Error in sending reminders")
@@ -798,7 +798,7 @@ def start_background_jobs_before_first_request():
                         print("Invoice payment failed: ", invoice['last_name'])
                         invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
                         #don't send message here as stripe webhook event that is caught sends message
-                        #SendMessagesToClients.sendSMS(to_number='9725847364', message="Invoice payments failed for: " + invoice_name, type='to_mo')
+                        #SendMessagesToClients.sendSMS(to_numbers='9725847364', message="Invoice payments failed for: " + invoice_name, type='to_mo')
         except Exception as e:
             logger.exception("Error in finding invoices to pay")
 

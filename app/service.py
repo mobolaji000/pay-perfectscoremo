@@ -436,7 +436,7 @@ class SendMessagesToClients():
         cls.awsInstance.send_email(to_address=to_address, message=message, subject=subject, type=type, recipient_name=recipient_name)
 
     @classmethod
-    def sendSMS(cls,to_number='9725847364',type='',message='perfectscoremo',recipient_name=''):
+    def sendSMS(cls, to_numbers=None, type='', message='perfectscoremo', recipient_name=''):
 
         if type == 'create_transaction_new_client':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been created. Here are the payment/signup instructions/options (also sent to your email address):".format(recipient_name)
@@ -481,18 +481,18 @@ class SendMessagesToClients():
                            + """Regards,\n\n""" \
                            + """Mo\n\n"""
 
-        if type(to_number) == str:
-            logger.info("Single Recipeint SMS!")
+        if type(to_numbers) == str:
+            logger.info("Single Recipient SMS!")
             sent_message = cls.twilioClient.messages.create(
             body=text_message,
             from_='+19564771274',
-            to='+1'+to_number
+            to='+1' + to_numbers
             )
 
             logger.debug("text sent!")
             logger.debug(sent_message.sid)
             logger.debug(text_message)
-        elif type(to_number) is list:
+        elif type(to_numbers) is list:
             logger.debug("Multiple Recipient SMS!")
             conversations = cls.twilioClient.conversations.conversations.list(limit=50)
             for record in conversations:
@@ -509,13 +509,13 @@ class SendMessagesToClients():
             cls.twilioClient.conversations.conversations(conversation.sid).participants.create(
                 messaging_binding_address='+19725847364')
 
-            for recipient in to_number:
+            for recipient in to_numbers:
                 print("number to add is :", recipient)
                 cls.twilioClient.conversations.conversations(conversation.sid).participants.create(
                     messaging_binding_address='+1' + recipient)
 
             if type == 'welcome_new_student' or type == 'referral_request':
-                print("adding assitant's number")
+                print("adding assistant's number")
                 cls.twilioClient.conversations.conversations(conversation.sid).participants.create(
                     messaging_binding_address='+19725039573')
 
