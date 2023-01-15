@@ -591,21 +591,21 @@ class AppDBUtil():
         try:
             if search_query:
                 if search_query.startswith("l-"):
-                    lead_info_by_mo = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
+                    lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
                 elif "@" in search_query:
-                    lead_info_by_mo = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
+                    lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
                 else:
                     search = "%{}%".format(search_query)
-                    lead_info_by_mo = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
+                    lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
 
             elif searchStartDate and searchEndDate:
-                lead_info_by_mo = Lead.query.filter(Lead.date_created <= searchEndDate).filter(Lead.date_created >= searchStartDate).order_by(Lead.date_created.desc()).all()
-                #changed way of searching lead_info_by_mo because previous one was neither inclusive of start/end dates nor intuitive
-                #lead_info_by_mo = Lead.query.filter(Lead.date_created.between(searchStartDate, searchEndDate)).order_by(Lead.date_created.desc()).all()
+                lead_info = Lead.query.filter(Lead.date_created <= searchEndDate).filter(Lead.date_created >= searchStartDate).order_by(Lead.date_created.desc()).all()
+                #changed way of searching lead_info because previous one was neither inclusive of start/end dates nor intuitive
+                #lead_info = Lead.query.filter(Lead.date_created.between(searchStartDate, searchEndDate)).order_by(Lead.date_created.desc()).all()
 
 
             search_results = []
-            for info in lead_info_by_mo:
+            for info in lead_info:
 
                 lead = {}
                 lead['lead_id'] = info.lead_id
@@ -646,6 +646,11 @@ class AppDBUtil():
             transaction_ids.append(transaction.transaction_id)
         logger.debug("All trasaction ids are: {}".format(transaction_ids))
         return transaction_ids
+
+    @classmethod
+    def getAllLeads(cls):
+        allLeads = Lead.query.order_by(Lead.date_created.desc()).all()
+        return allLeads
 
 
     @classmethod

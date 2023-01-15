@@ -115,7 +115,19 @@ def failure():
 @server.route('/transaction_setup')
 @login_required
 def transaction_setup():
-    return render_template('transaction_setup.html')
+
+    leads = AppDBUtil.getAllLeads()
+    processed_leads = []
+    for lead in leads:
+        lead_as_dict = {}
+        lead_as_dict['lead_id'] = lead.lead_id
+        lead_as_dict['lead_name'] = lead.lead_name
+        lead_as_dict['lead_phone_number'] = lead.lead_phone_number
+        lead_as_dict['lead_email'] = lead.lead_email
+        processed_leads.append(lead_as_dict)
+
+    return render_template('transaction_setup.html', leads=json.dumps(processed_leads))
+
 
 #keep for when you need to send adhoc student info requests to parents
 @server.route('/client_info',defaults={'prospect_id': None}, methods=['GET','POST'])
