@@ -422,29 +422,29 @@ $(document).ready(function() {
 
 
      //change paste keyup
-            $('#lead_to_connect').on('input', function(event) {
+            $('#leadSearchInput').on('input', function(event) {
                 console.log(event.target.value);
                 let leadSearchValue = event.target.value;
                 //console.log(emailSearchValue);
                 let leadSearchResults = fuse.search(leadSearchValue);
-                $('#lead_to_connect').empty();
+                $('#leadSearchInput').empty();
 
-                var lead_to_connect_options = "";
+                var leadSearchInput_options = "";
 
                 for(var key in leadSearchResults) {
                     result = leadSearchResults[key];
 
-                    lead_to_connect_option_value = result.item['lead_id'];
-                    lead_to_connect_option_visible_content = result.item['lead_id']+" "+result.item['lead_name']+" (email: "+result.item['lead_email']+")"+" (phone_number: "+result.item['lead_phone_number']+")";
-                     lead_to_connect_options += '<option value="'+lead_to_connect_option_value+'">'+lead_to_connect_option_visible_content+'</option>';
+                    leadSearchInput_option_value = result.item['lead_id'];
+                    leadSearchInput_option_visible_content = result.item['lead_id']+" "+result.item['lead_name']+" (email: "+result.item['lead_email']+")"+" (phone_number: "+result.item['lead_phone_number']+")";
+                     leadSearchInput_options += '<option value="'+leadSearchInput_option_value+'">'+leadSearchInput_option_visible_content+'</option>';
 
                       console.log("result is: "+result);
-                     console.log("lead_to_connect_option_value is: "+lead_to_connect_option_value);
-                      console.log("lead_to_connect_option_visible_content is: "+lead_to_connect_option_visible_content);
+                     console.log("leadSearchInput_option_value is: "+leadSearchInput_option_value);
+                      console.log("leadSearchInput_option_visible_content is: "+leadSearchInput_option_visible_content);
 
                 }
 
-                 $('#lead_to_connect').append(lead_to_connect_options);
+                 $('#leadSearchInput').append(leadSearchInput_options);
 
             });
 
