@@ -102,6 +102,9 @@ class Prospect(db.Model):
     prospect_phone_number = db.Column(db.String(22),index=True,nullable=False, default='')
     how_did_they_hear_about_us = db.Column(db.String, index=True, nullable=False, default='')
     details_on_how_they_heard_about_us = db.Column(db.String, index=True, nullable=False, default='')
+
+    grade_level = db.Column(db.Enum('Middle School', '9th Grade', '10th Grade', '11th Grade', '12th Grade', 'Other', '',name='grade_level_options'), index=True, nullable=False, default='')
+    recent_test_score = db.Column(db.Integer, index=True, nullable=False, default=-1)
     #is_active = db.Column(db.Boolean, unique=False, nullable=False, server_default='True')
     #TODO add prospect salutation column
 

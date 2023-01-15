@@ -69,6 +69,8 @@ class AppDBUtil():
         prospect_email = prospectData.get('email', '')
         how_did_they_hear_about_us = prospectData.get('how_did_they_hear_about_us', '')
         details_on_how_they_heard_about_us = prospectData.get('details_on_how_they_heard_about_us', '')
+        recent_score = prospectData.get('recent_score', '')
+        grade_level = prospectData.get('grade_level', '')
 
         existing_prospect = db.session.query(Prospect).filter_by(prospect_phone_number=prospect_phone_number).first() or db.session.query(Prospect).filter_by(prospect_email=prospect_email).first()
 
@@ -76,7 +78,7 @@ class AppDBUtil():
             prospect = existing_prospect
         else:
             prospect = Prospect(prospect_id=prospect_id,prospect_first_name=prospect_first_name, prospect_last_name=prospect_last_name,prospect_phone_number=prospect_phone_number, prospect_email=prospect_email,
-                                how_did_they_hear_about_us=how_did_they_hear_about_us,details_on_how_they_heard_about_us=details_on_how_they_heard_about_us)
+                                how_did_they_hear_about_us=how_did_they_hear_about_us,details_on_how_they_heard_about_us=details_on_how_they_heard_about_us,recent_score=recent_score,grade_level=grade_level)
             db.session.add(prospect)
             cls.executeDBQuery()
         return prospect
@@ -387,6 +389,8 @@ class AppDBUtil():
             prospect_details = Prospect.query.filter_by(prospect_id=transaction.prospect_id).first()
             client['how_did_they_hear_about_us'] = prospect_details.how_did_they_hear_about_us
             client['details_on_how_they_heard_about_us'] = prospect_details.details_on_how_they_heard_about_us
+            client['recent_score'] = prospect_details.recent_score
+            client['grade_level'] = prospect_details.grade_level
 
 
             installment_details = InstallmentPlan.query.filter_by(transaction_id=transaction.transaction_id).first()
@@ -443,12 +447,14 @@ class AppDBUtil():
             parent_2_phone_number = studentData.get('parent_2_phone_number', '')
             parent_2_email = studentData.get('parent_2_email', '')
 
+            recent_score = studentData.get('recent_score', '')
+            grade_level = studentData.get('grade_level', '')
 
             statement = insert(Student).values(student_id=student_id,prospect_id=prospect_id,student_first_name=student_first_name,student_last_name=student_last_name,student_phone_number=student_phone_number,student_email=student_email,
-                               parent_1_salutation=parent_1_salutation,parent_1_first_name=parent_1_first_name,parent_1_last_name=parent_1_last_name,parent_1_phone_number=parent_1_phone_number,parent_1_email=parent_1_email,
+                               parent_1_salutation=parent_1_salutation,parent_1_first_name=parent_1_first_name,parent_1_last_name=parent_1_last_name,parent_1_phone_number=parent_1_phone_number,parent_1_email=parent_1_email,recent_score=recent_score,grade_level=grade_level,
                                parent_2_salutation=parent_2_salutation,parent_2_first_name=parent_2_first_name,parent_2_last_name=parent_2_last_name,parent_2_phone_number=parent_2_phone_number,parent_2_email=parent_2_email)
 
-            updated_content = dict(student_id=student_id,prospect_id=prospect_id,student_first_name=student_first_name,student_last_name=student_last_name,student_phone_number=student_phone_number,
+            updated_content = dict(student_id=student_id,prospect_id=prospect_id,student_first_name=student_first_name,student_last_name=student_last_name,student_phone_number=student_phone_number,recent_score=recent_score,grade_level=grade_level,
                                parent_1_salutation=parent_1_salutation,parent_1_first_name=parent_1_first_name,parent_1_last_name=parent_1_last_name,parent_1_phone_number=parent_1_phone_number,parent_1_email=parent_1_email,
                                parent_2_salutation=parent_2_salutation,parent_2_first_name=parent_2_first_name,parent_2_last_name=parent_2_last_name,parent_2_phone_number=parent_2_phone_number,parent_2_email=parent_2_email)
 

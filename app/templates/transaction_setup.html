@@ -120,9 +120,7 @@ function miscellanousValidation()
      function populateFieldsFromSearch(result)
      {
 		$('input[name="result"]').val(JSON.stringify(result));
-        //$('input[name="result"]').val(result);
-        //console.log(result);
-        //console.log($('input[name="result"]').val());
+
 
      //clear state of fields
      $('input[name="was_diagnostic_purchased"]').prop('checked', false);
@@ -180,6 +178,9 @@ function miscellanousValidation()
      $('select[name="how_did_they_hear_about_us"]').val(result.how_did_they_hear_about_us);
 	 $('textarea[name="details_on_how_they_heard_about_us"]').val(result.details_on_how_they_heard_about_us);
 	  $('input[name="prospect_id"]').val(result.prospect_id);
+
+	  $('select[name="grade_level"]').val(result.grade_level);
+	 $('input[name="recent_test_score"]').val(result.recent_test_score);
 
 	//
 
@@ -411,6 +412,11 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 		dataToModify['details_on_how_they_heard_about_us'] = $('textarea[name="details_on_how_they_heard_about_us"]').val();
 		dataToModify['prospect_id'] = $('input[name="prospect_id"]').val();
 
+		dataToModify['grade_level'] = $('select[name="grade_level"]').val();
+		dataToModify['recent_test_score'] = $('input[name="recent_test_score"]').val();
+
+
+
 		 for (let k = 1; k < dataToModify['installment_counter']+1; k++) {
   				date = 'date_'.concat(k)
 			  amount = 'amount_'.concat(k)
@@ -622,10 +628,32 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 
 						<div class="row">
 							<label for="details_on_how_they_heard_about_us">How did they hear about us (details)?</label>
-							<textarea  id="details_on_how_they_heard_about_us"  name="details_on_how_they_heard_about_us" class="form-control" rows="5"  placeholder="" ></textarea>
-						</div>
+							<textarea  id="details_on_how_they_heard_about_us"  name="details_on_how_they_heard_about_us" class="form-control" rows="2"  placeholder="" ></textarea>
+						</div><br><br>
 
-				<br><br><br>
+				<div class="row no-padding" >
+							<div class="row  col-md-6 " >
+							<label for="grade_level">Grade Level</label>
+							<select  id="grade_level"  name="grade_level" class="form-control">
+								<option value="" selected disabled hidden></option>
+								<option value='Middle School'>Middle School</option>
+								<option value='9th Grade'>9th Grade</option>
+								<option value='10th Grade'>10th Grade</option>
+								<option value='11th Grade'>11th Grade</option>
+								<option value='12th Grade'>12th Grade</option>
+								<option value='Other'>Other</option>
+							</select>
+						</div></div><br><br>
+
+					<div class="row no-padding">
+						<div class=" mb-3">
+							<label for="recent_test_score">SAT/ACT/P-SAT/P-ACT Score (if taken within the last 1 year)</label>
+							<input type="number" class="form-control" id="recent_test_score" name="recent_test_score" placeholder="" value="">
+							<div class="invalid-feedback">
+								Valid  number is required.
+							</div>
+						</div>
+					</div><br><br>
 
 				<h4 class="mb-3">Product Information</h4>
 
