@@ -31,7 +31,7 @@ class Transaction(db.Model):
     does_customer_payment_info_exist = db.Column(db.String(30), index=True, nullable=False, default='')
     #installment_date = db.Column(db.PickleType,  index=True, nullable=True, default='')
     #installment_amount = db.Column(db.PickleType, index=True, nullable=True, default='')
-    #what happens when you try to update pickle type? do you have to instantiate a new variable?
+    #what happens when you try to update pickle message_type? do you have to instantiate a new variable?
 
 
     def __repr__(self):

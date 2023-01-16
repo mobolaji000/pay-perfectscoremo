@@ -73,21 +73,21 @@ class AWSInstance():
         return secret
 
 
-    def send_email(self, to_address='mo@vensti.com', message='perfectscoremo', subject='perfectscoremo', type='',recipient_name=''):
+    def send_email(self, to_address='mo@vensti.com', message='perfectscoremo', subject='perfectscoremo', message_type='', recipient_name=''):
 
-        if type == 'create_transaction_new_client':
+        if message_type == 'create_transaction_new_client':
             created_or_modified_span = "<span>Your transaction has just been <strong>created</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
-        elif type == 'modify_transaction_new_client':
+        elif message_type == 'modify_transaction_new_client':
             created_or_modified_span = "<span>Your transaction has just been <strong>modified</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
-        elif type == 'reminder_to_make_payment':
+        elif message_type == 'reminder_to_make_payment':
             created_or_modified_span = "<span>This is an automated reminder that your transaction <strong>is due</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
-        elif type == 'create_transaction_existing_client':
+        elif message_type == 'create_transaction_existing_client':
             created_or_modified_span = "<span>Your new transaction has been created using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
-        elif type == 'modify_transaction_existing_client':
+        elif message_type == 'modify_transaction_existing_client':
             created_or_modified_span = "<span>Your transaction has just been modified using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
-        elif type == 'reminder_about_appointment':
+        elif message_type == 'reminder_about_appointment':
             created_or_modified_span = "<span>Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a reminder that your appointment is on  {}. If you have not already done so, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo</span><br><br>".format(message[0],message[1],message[2])
-        elif type == 'confirm_lead_appointment':
+        elif message_type == 'confirm_lead_appointment':
             created_or_modified_span = "<span>Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a confirmation that your appointment is on  {}. Ahead of your appointment, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo</span><br><br>".format(message[0],message[1],message[2])
 
 
@@ -101,7 +101,7 @@ class AWSInstance():
                      "AWS SDK for Python (Boto)."
                      )
 
-        if type == 'ask_for_student_info':
+        if message_type == 'ask_for_student_info':
             link_url = os.environ["url_to_start_reminder"]+"""client_info/"""+message
             BODY_HTML = """<html>
                 <head></head>
@@ -117,7 +117,7 @@ class AWSInstance():
                 </body>
                 </html>
                             """
-        elif type == 'welcome_message':
+        elif message_type == 'welcome_message':
             BODY_HTML = """<html>
                 <head></head>
                 <body>
@@ -131,7 +131,7 @@ class AWSInstance():
                 </body>
                 </html>
                             """
-        elif type == 'to_mo':
+        elif message_type == 'to_mo':
             BODY_HTML = """<html>
                     <head></head>
                     <body>
@@ -140,7 +140,7 @@ class AWSInstance():
                     </body>
                     </html>
                                 """
-        elif type in ['create_transaction_new_client','modify_transaction_new_client','create_transaction_existing_client','modify_transaction_existing_client','reminder_to_make_payment']:
+        elif message_type in ['create_transaction_new_client', 'modify_transaction_new_client', 'create_transaction_existing_client', 'modify_transaction_existing_client', 'reminder_to_make_payment']:
             BODY_HTML = """<html>
                             <head></head>
                             <body>
@@ -161,7 +161,7 @@ class AWSInstance():
                             </body>
                             </html>
                                         """
-        elif type in ['reminder_about_appointment','confirm_lead_appointment']:
+        elif message_type in ['reminder_about_appointment', 'confirm_lead_appointment']:
             BODY_HTML = """<html>
                     <head></head>
                     <body>
@@ -204,6 +204,6 @@ class AWSInstance():
         else:
             logger.debug("Email sent! Message ID:"),
             logger.debug(response['MessageId'])
-            logger.debug(("Email message type is: {}".format(type)))
+            logger.debug(("Email message message_type is: {}".format(message_type)))
             logger.debug(BODY_HTML)
 

@@ -432,44 +432,44 @@ class SendMessagesToClients():
         pass
 
     @classmethod
-    def sendEmail(cls, to_address='mo@vensti.com', message='perfectscoremo', subject='Payment Instructions/Options', type='', recipient_name=''):
-        cls.awsInstance.send_email(to_address=to_address, message=message, subject=subject, type=type, recipient_name=recipient_name)
+    def sendEmail(cls, to_address='mo@vensti.com', message='perfectscoremo', subject='Payment Instructions/Options', message_type='', recipient_name=''):
+        cls.awsInstance.send_email(to_address=to_address, message=message, subject=subject, message_type=message_type, recipient_name=recipient_name)
 
     @classmethod
-    def sendSMS(cls, to_numbers=None, type='', message='perfectscoremo', recipient_name=''):
+    def sendSMS(cls, to_numbers=None, message_type='', message='perfectscoremo', recipient_name=''):
 
-        if type == 'create_transaction_new_client':
+        if message_type == 'create_transaction_new_client':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been created. Here are the payment/signup instructions/options (also sent to your email address):".format(recipient_name)
-        elif type == 'modify_transaction_new_client':
+        elif message_type == 'modify_transaction_new_client':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified. Here are the payment/signup instructions/options (also sent to your email address):".format(recipient_name)
-        elif type == 'create_transaction_existing_client':
+        elif message_type == 'create_transaction_existing_client':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
-        elif type == 'modify_transaction_existing_client':
+        elif message_type == 'modify_transaction_existing_client':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
-        elif type == 'ask_for_student_info':
+        elif message_type == 'ask_for_student_info':
             link_url = os.environ["url_to_start_reminder"]+"client_info/"+message
             created_or_modified_span = "Dear {},\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. \n\n This will be used to setup text message and email updates on your student's regular progress.".format(recipient_name)
-        elif type == 'welcome_new_student':
+        elif message_type == 'welcome_new_student':
             created_or_modified_span = "Welcome " + message + "!\n\n" + "I am Mo's automated assistant, and I will be sending reports on your progress via this group chat. Mo (972-584-7364) and his personal assistant (972-503-9573) are on the chat as well to follow up with you on your daily homework/review sessions. If you need to speak with someone, though, please feel free to call Mo. We can't wait to see you succeeed!"
-        elif type == 'questions':
+        elif message_type == 'questions':
             created_or_modified_span = "I am happy to clarify any questions you might have!"
-        elif type == 'referral_request':
+        elif message_type == 'referral_request':
             created_or_modified_span = "Oh, and one more note to the family...if you have any friends/families looking to raise their SAT/ACT scores, have them check us out at prepwithmo.com or call us at 972-584-7364. We appreciate the referral!"
-        elif type == 'confirm_lead_appointment':
+        elif message_type == 'confirm_lead_appointment':
             link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
             created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a confirmation that your appointment is on  {}. Ahead of your appointment, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo".format(message[0], message[1], link_url)
-        elif type == 'reminder_about_appointment':
+        elif message_type == 'reminder_about_appointment':
             link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
             created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a reminder that your appointment is on  {}. If you have not already done so, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo".format(message[0], message[1], link_url)
-        elif type == 'reminder_to_make_payment':
+        elif message_type == 'reminder_to_make_payment':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):".format(recipient_name)
 
 
-        if type in ['to_mo']:
+        if message_type in ['to_mo']:
             text_message = created_or_modified_span
-        elif type in ['ask_for_student_info','welcome_new_student','questions', 'referral_request', 'confirm_lead_appointment','reminder_about_appointment','reminder_to_make_payment']:
+        elif message_type in ['ask_for_student_info', 'welcome_new_student', 'questions', 'referral_request', 'confirm_lead_appointment', 'reminder_about_appointment', 'reminder_to_make_payment']:
             text_message = created_or_modified_span
-        elif type in ['create_transaction_new_client', 'modify_transaction_new_client','create_transaction_existing_client', 'modify_transaction_existing_client']:
+        elif message_type in ['create_transaction_new_client', 'modify_transaction_new_client', 'create_transaction_existing_client', 'modify_transaction_existing_client']:
             text_message = "\n" + created_or_modified_span + "\n\n" \
                            + """1. Go to prepwithmo.com\n\n""" \
                            + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
@@ -483,7 +483,7 @@ class SendMessagesToClients():
                            + """Regards,\n\n""" \
                            + """Mo\n\n"""
 
-        if type(to_numbers) is str:
+        if message_type(to_numbers) is str:
             logger.info("Single Recipient SMS!")
             sent_message = cls.twilioClient.messages.create(
             body=text_message,
@@ -494,7 +494,7 @@ class SendMessagesToClients():
             logger.debug("text sent!")
             logger.debug(sent_message.sid)
             logger.debug(text_message)
-        elif type(to_numbers) is list:
+        elif message_type(to_numbers) is list:
             logger.debug("Multiple Recipient SMS!")
             conversations = cls.twilioClient.conversations.conversations.list(limit=50)
             for record in conversations:
@@ -516,7 +516,7 @@ class SendMessagesToClients():
                 cls.twilioClient.conversations.conversations(conversation.sid).participants.create(
                     messaging_binding_address='+1' + recipient)
 
-            if type == 'welcome_new_student' or type == 'referral_request':
+            if message_type == 'welcome_new_student' or message_type == 'referral_request':
                 print("adding assistant's number")
                 cls.twilioClient.conversations.conversations(conversation.sid).participants.create(
                     messaging_binding_address='+19725039573')
@@ -528,7 +528,7 @@ class SendMessagesToClients():
             raise Exception("Neither string not list was sent to sendSMS method!")
 
     @classmethod
-    def sendGroupSMS(cls, to_numbers=[], type='', message='',recipient_name=''):
+    def sendGroupSMS(cls, to_numbers=[], message_type='', message='', recipient_name=''):
         # cls.twilioClient.messaging.services('MGd37b2dce09791f42239043b6e949f96b').delete()
         conversations = cls.twilioClient.conversations.conversations.list(limit=50)
         for record in conversations:
@@ -546,32 +546,32 @@ class SendMessagesToClients():
             print("number to add is :",to_number)
             cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+1' + to_number)
 
-        if type == 'welcome_new_student' or type == 'referral_request':
+        if message_type == 'welcome_new_student' or message_type == 'referral_request':
             print("adding assitant's number")
             cls.twilioClient.conversations.conversations(conversation.sid).participants.create(messaging_binding_address='+19725039573')
 
 
-        if type == 'welcome_new_student':
+        if message_type == 'welcome_new_student':
             created_or_modified_span = "Welcome "+message+"!\n\n"+"I am Mo's automated assistant, and I will be sending reports on your progress via this group chat. Mo (972-584-7364) and his personal assistant (972-503-9573) are on the chat as well to follow up with you on your daily homework/review sessions. If you need to speak with someone, though, please feel free to call Mo. We can't wait to see you succeeed!"
-        elif type == 'create_transaction_existing_client':
+        elif message_type == 'create_transaction_existing_client':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
-        elif type == 'modify_transaction_existing_client':
+        elif message_type == 'modify_transaction_existing_client':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
-        elif type == 'questions':
+        elif message_type == 'questions':
             created_or_modified_span = "I am happy to clarify any questions you might have!"
-        elif type == 'referral_request':
+        elif message_type == 'referral_request':
             created_or_modified_span = "Oh, and one more note to the family...if you have any friends/families looking to raise their SAT/ACT scores, have them check us out at prepwithmo.com or call us at 972-584-7364. We appreciate the referral!"
-        elif type == 'confirm_lead_appointment':
+        elif message_type == 'confirm_lead_appointment':
             created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a confirmation that your appointment is on  {}. Ahead of your appointment, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo".format(message[0],message[1],message[2])
-        elif type == 'reminder_about_appointment':
+        elif message_type == 'reminder_about_appointment':
             created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a reminder that your appointment is on  {}. If you have not already done so, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo".format(message[0],message[1],message[2])
 
 
 
 
-        if type in ['welcome_new_student','referral_request','questions','confirm_lead_appointment','reminder_about_appointment']:
+        if message_type in ['welcome_new_student', 'referral_request', 'questions', 'confirm_lead_appointment', 'reminder_about_appointment']:
             text_message = created_or_modified_span
-        elif type in ['create_transaction_existing_client','modify_transaction_existing_client']:
+        elif message_type in ['create_transaction_existing_client', 'modify_transaction_existing_client']:
             text_message = "\n" + created_or_modified_span + "\n\n" \
                            + """1. Go to prepwithmo.com\n\n""" \
                            + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
