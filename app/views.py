@@ -208,19 +208,20 @@ def lead_info_by_mo():
             try:
                 leadInfo = {}
                 appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
-                leadInfo.update({'lead_id': "l-" + str(uuid.uuid4().int >> 64)[:6],'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
+                lead_id = "l-" + str(uuid.uuid4().int >> 64)[:6]
+                leadInfo.update({'lead_id': lead_id,'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
                                  'appointment_date_and_time': appointment_date_and_time,'what_services_are_they_interested_in': request.form.getlist('what_services_are_they_interested_in'), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
                                  'grade_level': lead_info_contents.get('grade_level',''),'recent_test_score': lead_info_contents.get('recent_test_score',-1),
                                  'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead','no')})
+
                 AppDBUtil.createLead(leadInfo)
 
                 if lead_info_contents.get('send_confirmation_to_lead', '') == 'yes':
-                    message = lead_info_contents.get('lead_salutation') + lead_info_contents.get(
-                        'lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
+                    message = lead_info_contents.get('lead_salutation') + lead_info_contents.get('lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
                     if lead_info_contents.get('lead_phone_number'):
-                        SendMessagesToClients.sendSMS(to_numbers=[lead_info_contents.get('lead_phone_number')], message=[message, lead_info_contents.get('appointment_date_and_time')], type='confirm_lead_appointment')
+                        SendMessagesToClients.sendSMS(to_numbers=[lead_info_contents.get('lead_phone_number')], message=[message, lead_info_contents.get('appointment_date_and_time'),lead_id], type='confirm_lead_appointment')
                     if lead_info_contents.get('lead_email'):
-                        SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'), 'mo@prepwithmo.com'],message=[message, lead_info_contents.get('appointment_date_and_time')],type='confirm_lead_appointment', subject='Confirming Your Appointment')
+                        SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'), 'mo@prepwithmo.com'],message=[message, lead_info_contents.get('appointment_date_and_time'),lead_id],type='confirm_lead_appointment', subject='Confirming Your Appointment')
 
                 flash('The lead info was created successfully.')
                 return render_template('lead_info_by_mo.html', action=action)

@@ -456,9 +456,11 @@ class SendMessagesToClients():
         elif type == 'referral_request':
             created_or_modified_span = "Oh, and one more note to the family...if you have any friends/families looking to raise their SAT/ACT scores, have them check us out at prepwithmo.com or call us at 972-584-7364. We appreciate the referral!"
         elif type == 'confirm_lead_appointment':
-            created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a confirmation that your appointment is on  {}. Ahead of your appointment, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo".format(message[0], message[1], message[2])
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
+            created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a confirmation that your appointment is on  {}. Ahead of your appointment, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo".format(message[0], message[1], link_url)
         elif type == 'reminder_about_appointment':
-            created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a reminder that your appointment is on  {}. If you have not already done so, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo".format(message[0], message[1], message[2])
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
+            created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a reminder that your appointment is on  {}. If you have not already done so, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo".format(message[0], message[1], link_url)
         elif type == 'reminder_to_make_payment':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):".format(recipient_name)
 
@@ -481,7 +483,7 @@ class SendMessagesToClients():
                            + """Regards,\n\n""" \
                            + """Mo\n\n"""
 
-        if type(to_numbers) == str:
+        if type(to_numbers) is str:
             logger.info("Single Recipient SMS!")
             sent_message = cls.twilioClient.messages.create(
             body=text_message,
