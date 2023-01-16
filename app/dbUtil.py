@@ -71,6 +71,7 @@ class AppDBUtil():
         details_on_how_they_heard_about_us = prospectData.get('details_on_how_they_heard_about_us', '')
         recent_score = prospectData.get('recent_score', '')
         grade_level = prospectData.get('grade_level', '')
+        lead_id = prospectData.get('leadSearchResults','')
 
         existing_prospect = db.session.query(Prospect).filter_by(prospect_phone_number=prospect_phone_number).first() or db.session.query(Prospect).filter_by(prospect_email=prospect_email).first()
 
@@ -78,7 +79,7 @@ class AppDBUtil():
             prospect = existing_prospect
         else:
             prospect = Prospect(prospect_id=prospect_id,prospect_first_name=prospect_first_name, prospect_last_name=prospect_last_name,prospect_phone_number=prospect_phone_number, prospect_email=prospect_email,
-                                how_did_they_hear_about_us=how_did_they_hear_about_us,details_on_how_they_heard_about_us=details_on_how_they_heard_about_us,recent_score=recent_score,grade_level=grade_level)
+                                how_did_they_hear_about_us=how_did_they_hear_about_us,details_on_how_they_heard_about_us=details_on_how_they_heard_about_us,recent_score=recent_score,grade_level=grade_level,lead_id=lead_id)
             db.session.add(prospect)
             cls.executeDBQuery()
         return prospect
@@ -391,6 +392,7 @@ class AppDBUtil():
             client['details_on_how_they_heard_about_us'] = prospect_details.details_on_how_they_heard_about_us
             client['recent_score'] = prospect_details.recent_score
             client['grade_level'] = prospect_details.grade_level
+            client['lead_id'] = prospect_details.lead_id
 
 
             installment_details = InstallmentPlan.query.filter_by(transaction_id=transaction.transaction_id).first()
@@ -401,6 +403,7 @@ class AppDBUtil():
                     installments.update({'date_' + str(k): installment_details.__dict__['date_' + str(k)].strftime("%m/%d/%Y"), 'amount_' + str(k): installment_details.__dict__['amount_' + str(k)]})
 
                 client['installment_details'] = installments
+
 
             search_results.append(client)
         print("search results are ",search_results)

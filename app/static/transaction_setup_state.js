@@ -427,24 +427,24 @@ $(document).ready(function() {
                 let leadSearchValue = event.target.value;
                 //console.log(emailSearchValue);
                 let leadSearchResults = fuse.search(leadSearchValue);
-                $('#leadSearchInput').empty();
+                $('#leadSearchResults').empty();
 
-                var leadSearchInput_options = "";
+                var lead_to_connect_options = "";
 
                 for(var key in leadSearchResults) {
                     result = leadSearchResults[key];
 
-                    leadSearchInput_option_value = result.item['lead_id'];
-                    leadSearchInput_option_visible_content = result.item['lead_id']+" "+result.item['lead_name']+" (email: "+result.item['lead_email']+")"+" (phone_number: "+result.item['lead_phone_number']+")";
-                     leadSearchInput_options += '<option value="'+leadSearchInput_option_value+'">'+leadSearchInput_option_visible_content+'</option>';
+                    lead_to_connect_option_value = result.item['lead_id'];
+                    lead_to_connect_option_visible_content = result.item['lead_id']+" "+result.item['lead_name']+" (email: "+result.item['lead_email']+")"+" (phone_number: "+result.item['lead_phone_number']+")";
+                     lead_to_connect_options += '<option value="'+lead_to_connect_option_value+'">'+lead_to_connect_option_visible_content+'</option>';
 
                       console.log("result is: "+result);
-                     console.log("leadSearchInput_option_value is: "+leadSearchInput_option_value);
-                      console.log("leadSearchInput_option_visible_content is: "+leadSearchInput_option_visible_content);
+                     console.log("lead_to_connect_option_value is: "+lead_to_connect_option_value);
+                      console.log("lead_to_connect_option_visible_content is: "+lead_to_connect_option_visible_content);
 
                 }
 
-                 $('#leadSearchInput').append(leadSearchInput_options);
+                 $('#leadSearchResults').append(lead_to_connect_options);
 
             });
 

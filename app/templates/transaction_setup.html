@@ -184,6 +184,8 @@ function miscellanousValidation()
 	  $('select[name="grade_level"]').val(result.grade_level);
 	 $('input[name="recent_test_score"]').val(result.recent_test_score);
 
+	 $('textarea[name="leadSearchInput"]').val(result.lead_id);
+
 	//
 
 	 if (result.ask_for_student_info == "yes")
@@ -612,7 +614,7 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 					<div class="invalid-feedback">
 						Please enter a valid phone number.
 					</div>
-				</div><br><br>
+				</div><br><br><br><br>
 
 				<div class="mb-3">
 					<div class="row  col-md-9 " >
@@ -635,8 +637,8 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 							<textarea  id="details_on_how_they_heard_about_us"  name="details_on_how_they_heard_about_us" class="form-control" rows="2"  placeholder="" ></textarea>
 						</div><br>
 
-				<div class="mb-3" >
-							<div class="row  col-md-9 " >
+						<div class="row">
+					<div class="col-md-6 mb-3">
 							<label for="grade_level">Grade Level</label>
 							<select  id="grade_level"  name="grade_level" class="form-control">
 								<option value="" selected disabled hidden></option>
@@ -647,28 +649,25 @@ $('input[name="installment_counter"]').val(result.installment_counter);
 								<option value='12th Grade'>12th Grade</option>
 								<option value='Other'>Other</option>
 							</select>
-						</div></div><br>
+					</div>
+					<div class="col-md-6 mb-3">
 
-					<div class="mb-3">
-						<div class="row  col-md-9 " >
-							<label for="recent_test_score">SAT/ACT/P-SAT/P-ACT Score (if taken within the last 1 year)</label>
+							<label for="recent_test_score">SAT/ACT/P-SAT/P-ACT Score</label>
 							<input type="number" class="form-control" id="recent_test_score" name="recent_test_score" placeholder="" value="">
 							<div class="invalid-feedback">
 								Valid  number is required.
 							</div><br>
-					</div><br>
+				</div></div></div><br>
 
-						<div class=" input-group mb-3">
-							<div class="row  col-md-9 " >
+							<div class="row input-group mb-3">
+							<div class="col-md-9 " >
+								<label for="leadSearchInput">Search for lead to connect</label>
 							<input id="leadSearchInput" name="leadSearchInput" type="text" class="form-control" placeholder="Input search term" >
-								<span class="input-group-text">Search</span>
 					</div></div><br>
 
-								<div class="mb-3 form-group">
-				<div class="row  col-md-9 " >
+								<div class="row mb-3 form-group">
 		 <label for="leadSearchResults">Search Results</label>
-    <select class="form-control" id="leadSearchResults" name="leadSearchResults" size="5"  multiple></select>
- </div>
+    <select class="form-control" id="leadSearchResults" name="leadSearchResults" size="5"></select>
   </div><br>
 
 

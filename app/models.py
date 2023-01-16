@@ -96,6 +96,7 @@ class InvoiceToBePaid(db.Model):
 
 class Prospect(db.Model):
     prospect_id = db.Column(db.String(8), unique=True, index=True, nullable=False, default='')
+    lead_id = db.Column(db.String(8), db.ForeignKey('lead.lead_id'), index=True, nullable=False, default='')
     prospect_first_name = db.Column(db.String(64), index=True,nullable=False, default='')
     prospect_last_name = db.Column(db.String(64), index=True,nullable=False, default='')
     prospect_email = db.Column(db.String(64), index=True, primary_key=True, nullable=False, default='')
