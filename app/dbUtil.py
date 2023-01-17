@@ -2,6 +2,7 @@ from app.models import Transaction,InstallmentPlan,InvoiceToBePaid,Prospect,Stud
 from app import db
 from app.config import stripe
 from datetime import datetime
+import re
 import math
 import uuid
 from dateutil.parser import parse
@@ -572,7 +573,7 @@ class AppDBUtil():
 
             search_results = []
             for info in lead_info:
-
+                logger.debug("info is {}".format(info))
                 lead = {}
                 lead['lead_id'] = info.lead_id
                 lead['lead_salutation'] = info.lead_salutation
