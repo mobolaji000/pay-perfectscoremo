@@ -45,6 +45,7 @@ migrate = Migrate(server, db)
 awsInstance = AWSInstance()
 stripeInstance = StripeInstance()
 plaidInstance = PlaidInstance()
+miscellanousUtilsInstance = MiscellanousUtils()
 
 
 @server.route("/")
@@ -228,7 +229,7 @@ def lead_info_by_mo():
 
                     if appointment_date_and_time:
                         appointment_date_and_time = datetime.datetime.strptime(appointment_date_and_time+':00', '%Y-%m-%dT%H:%M:%S')
-                        appointment_date_and_time = clean_up_date_and_time(appointment_date_and_time)
+                        appointment_date_and_time = miscellanousUtilsInstance.clean_up_date_and_time(appointment_date_and_time)
 
                     if lead_info_contents.get('lead_phone_number'):
                         SendMessagesToClients.sendSMS(to_numbers=lead_info_contents.get('lead_phone_number'), message=[message, appointment_date_and_time,lead_id], message_type='confirm_lead_appointment')
@@ -268,7 +269,7 @@ def lead_info_by_mo():
 
                     if appointment_date_and_time:
                         appointment_date_and_time = datetime.datetime.strptime((appointment_date_and_time+':00', '%Y-%m-%dT%H:%M:%S'))
-                        appointment_date_and_time = clean_up_date_and_time(appointment_date_and_time)
+                        appointment_date_and_time = miscellanousUtilsInstance.clean_up_date_and_time(appointment_date_and_time)
                     if lead_info_contents.get('lead_phone_number'):
                         SendMessagesToClients.sendSMS(to_numbers=lead_info_contents.get('lead_phone_number'),message=[message, appointment_date_and_time, lead_id],message_type='confirm_lead_appointment')
                     if lead_info_contents.get('lead_email'):
@@ -651,7 +652,7 @@ def enterClientInfo(payment_and_signup_data={}):
         #return render_template('error.html', error_message="Error in submitting student information and creating group messages for regular updates. Please contact Mo at 972-584-7364.")
 
 
-def clean_up_date_and_time(date_and_time=None):
+def miscellanousUtilsInstance.clean_up_date_and_time(date_and_time=None):
     date_and_time = date_and_time.strftime("%c %p")
 
     res = re.search(r'\s[0-9]{1,2}[:]',date_and_time)
@@ -799,7 +800,7 @@ def start_background_jobs_before_first_request():
             leadsToReceiveReminders = AppDBUtil.findLeadsToReceiveReminders()
             for lead in leadsToReceiveReminders:
                 number_of_days_until_appointment = (lead.get('appointment_date_and_time').date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
-                appointment_date_and_time = clean_up_date_and_time(lead.get('appointment_date_and_time'))
+                appointment_date_and_time = miscellanousUtilsInstance.clean_up_date_and_time(lead.get('appointment_date_and_time'))
 
                 if number_of_days_until_appointment in [0,1,3]:
                     message = lead.get('lead_salutation') + " " + lead.get('lead_name') if lead.get('lead_salutation') else 'Parent'
