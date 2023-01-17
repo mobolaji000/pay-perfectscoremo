@@ -1,5 +1,6 @@
 $(document).ready(function() {
 
+
     //find detials of hos this works here: https://bbbootstrap.com/snippets/multiselect-dropdown-list-83601849
     var choicesForWhatServiceLeadIsInterestedIn = new Choices('#what_services_are_they_interested_in', {
         removeItemButton: true,
@@ -9,6 +10,9 @@ $(document).ready(function() {
       });
 
     $('#what_services_are_they_interested_in').data('choices', choicesForWhatServiceLeadIsInterestedIn);
+
+    var today = new Date().toISOString().slice(0, 16);
+        document.getElementsByName("appointment_date_and_time" )[0].setAttribute('min', today);
 
 
  $('input[name="search_query"]').on('input', function() {
@@ -65,14 +69,5 @@ $(document).ready(function() {
             $(this).val("no");
         }
     });
-
-	// 	 $('select[name="what_services_are_they_interested_in"]').on('change', function() {
-   //     console.log($('#what_services_are_they_interested_in').val());
-	//    alert($('#what_services_are_they_interested_in').val());
-   // });
-
-
-
-
 
 });

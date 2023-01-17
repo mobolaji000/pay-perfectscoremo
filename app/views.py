@@ -16,11 +16,13 @@ import uuid
 from app.service import StripeInstance
 from app.service import PlaidInstance
 from app.service import SendMessagesToClients
+from app.service import MiscellaneousUtils
 import traceback
 from app.config import stripe
 from apscheduler.schedulers.background import BackgroundScheduler
 import datetime
-
+import re
+import pytz
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -44,6 +46,7 @@ migrate = Migrate(server, db)
 awsInstance = AWSInstance()
 stripeInstance = StripeInstance()
 plaidInstance = PlaidInstance()
+miscellaneousUtilsInstance = MiscellaneousUtils()
 
 
 @server.route("/")
@@ -111,10 +114,24 @@ def error(error_message):
 def failure():
     return render_template('failure.html')
 
+#@server.route('/transaction_setup',defaults={'search_results': None,'leads':None}, methods=['GET','POST'])
+#@server.route('/transaction_setup/<search_results>', methods=['POST'])
+# @server.route('/transaction_setup/<leads>', methods=['GET'])
 @server.route('/transaction_setup')
 @login_required
 def transaction_setup():
-    return render_template('transaction_setup.html')
+    leads = AppDBUtil.getAllLeads()
+    processed_leads = []
+    for lead in leads:
+        lead_as_dict = {}
+        lead_as_dict['lead_id'] = lead.lead_id
+        lead_as_dict['lead_name'] = lead.lead_name
+        lead_as_dict['lead_phone_number'] = lead.lead_phone_number
+        lead_as_dict['lead_email'] = lead.lead_email
+        processed_leads.append(lead_as_dict)
+
+    return render_template('transaction_setup.html', leads=json.dumps(processed_leads))
+
 
 #keep for when you need to send adhoc student info requests to parents
 @server.route('/client_info',defaults={'prospect_id': None}, methods=['GET','POST'])
@@ -130,11 +147,11 @@ def client_info(prospect_id):
             print("student data is",student_data)
             AppDBUtil.createStudentData(student_data)
             to_numbers = [number for number in [student_data['parent_1_phone_number'],student_data['parent_2_phone_number'],student_data['student_phone_number']] if number != '']
-            SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=student_data['student_first_name'], type='create_group_chat')
+            SendMessagesToClients.sendSMS(to_numbers=to_numbers, message=student_data['student_first_name'], message_type='welcome_new_student')
             time.sleep(5)
-            SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, type='referral_request')
+            SendMessagesToClients.sendSMS(to_numbers=to_numbers, message_type='referral_request')
             #hold off on sending group emails until you dedcide there is a value add
-            #SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+            #SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], message_type='welcome_message',subject='Setting Up Group Email')
             #flash("Student information submitted successfully and group messages (email and text) for regular updates created.")
             flash("Student information submitted successfully and text group message for regular updates created.")
         except Exception as e:
@@ -143,11 +160,47 @@ def client_info(prospect_id):
             flash("Error in submitting student information and creating group messages for regular updates created. Please contact Mo.")
         return render_template('client_info.html', prospect_id=student_data['prospect_id'])
 
-@server.route('/lead_info', methods=['GET','POST'])
-@login_required
-def lead_info():
+
+#keep for when you need to send adhoc student info requests to parents
+@server.route('/lead_info_by_lead',defaults={'lead_id': None}, methods=['GET','POST'])
+@server.route('/lead_info_by_lead/<lead_id>', methods=['GET','POST'])
+def lead_info_by_lead(lead_id):
     if request.method == 'GET':
-        return render_template('lead_info.html')
+        print("lead_id in get is ",lead_id)
+        return render_template('lead_info_by_lead.html',lead_id=lead_id)
+    elif request.method == 'POST':
+        try:
+            lead_info_contents = request.form.to_dict()
+            print("lead_id in post is ", lead_info_contents['lead_id'])
+            print("lead info contents is",lead_info_contents)
+
+            leadInfo = {}
+
+            leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''),'lead_salutation': lead_info_contents.get('lead_salutation', ''),'lead_email': lead_info_contents.get('lead_email', ''),
+                             'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'what_services_are_they_interested_in': request.form.getlist('what_services_are_you_interested_in'),
+                             'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_you_are_interested_in', ''),
+                             'grade_level': lead_info_contents.get('grade_level',''),'recent_test_score': lead_info_contents.get('recent_test_score',-1),'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),
+                             'how_did_they_hear_about_us': lead_info_contents.get('how_did_you_hear_about_us', ''),'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_you_heard_about_us', '')})
+
+            number_of_rows_modified = AppDBUtil.modifyLeadInfo(lead_info_contents.get('lead_id', ''), leadInfo)
+
+            if number_of_rows_modified > 1:
+                logger.error("Somehow ended up with and modified duplicate lead ids")
+                raise Exception
+
+            flash("Your information has been submitted successfully")
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
+            flash("Error in submitting your information. Please contact Mo.")
+        return render_template('lead_info_by_lead.html', lead_id=lead_info_contents['lead_id'])
+
+
+@server.route('/lead_info_by_mo', methods=['GET','POST'])
+@login_required
+def lead_info_by_mo():
+    if request.method == 'GET':
+        return render_template('lead_info_by_mo.html')
     elif request.method == 'POST':
         lead_info_contents = request.form.to_dict()
         what_services_are_they_interested_in = request.form.getlist('what_services_are_they_interested_in')
@@ -159,24 +212,45 @@ def lead_info():
             try:
                 leadInfo = {}
                 appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
-                leadInfo.update({'lead_id': "l-" + str(uuid.uuid4().int >> 64)[:6],'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
+                recent_test_score = -1 if lead_info_contents.get('recent_test_score','') == '' else lead_info_contents.get('recent_test_score')
+                lead_id = "l-" + str(uuid.uuid4().int >> 64)[:6]
+                leadInfo.update({'lead_id': lead_id,'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
                                  'appointment_date_and_time': appointment_date_and_time,'what_services_are_they_interested_in': request.form.getlist('what_services_are_they_interested_in'), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
+                                 'grade_level': lead_info_contents.get('grade_level',''),'recent_test_score': recent_test_score,
                                  'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead','no')})
+
                 AppDBUtil.createLead(leadInfo)
+
+                if lead_info_contents.get('send_confirmation_to_lead', '') == 'yes':
+                    message = lead_info_contents.get('lead_salutation') + ' ' + lead_info_contents.get('lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
+
+                    if appointment_date_and_time:
+                        appointment_date_and_time = datetime.datetime.strptime(appointment_date_and_time+':00', '%Y-%m-%dT%H:%M:%S')
+                        appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(appointment_date_and_time)
+
+                    if lead_info_contents.get('lead_phone_number'):
+                        SendMessagesToClients.sendSMS(to_numbers=lead_info_contents.get('lead_phone_number'), message=[message, appointment_date_and_time,lead_id], message_type='confirm_lead_appointment')
+                    if lead_info_contents.get('lead_email'):
+                        SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'), 'mo@prepwithmo.com'], message=[message, appointment_date_and_time,lead_id], message_type='confirm_lead_appointment', subject='Confirming Your Appointment')
+
                 flash('The lead info was created successfully.')
-                return render_template('lead_info.html', action=action)
+                return render_template('lead_info_by_mo.html', action=action)
             except Exception as e:
                 logger.exception(e)
                 flash('An error has occured during the creation.')
-                return render_template('lead_info.html', action=action)
+                return render_template('lead_info_by_mo.html', action=action)
 
         if action == 'Modify':
             try:
                 leadInfo = {}
                 appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
+                recent_test_score = -1 if lead_info_contents.get('recent_test_score','') == '' else lead_info_contents.get('recent_test_score')
+                lead_id = lead_info_contents.get('lead_id', '')
+
                 leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''),'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_email': lead_info_contents.get('lead_email', ''),
                                  'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'appointment_date_and_time': appointment_date_and_time,
                                  'what_services_are_they_interested_in': request.form.getlist('what_services_are_they_interested_in'), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
+                                 'grade_level': lead_info_contents.get('grade_level', ''),'recent_test_score': recent_test_score,
                                  'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead','no'),
                                  'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', '')})
 
@@ -184,15 +258,26 @@ def lead_info():
                 number_of_rows_modified = AppDBUtil.modifyLeadInfo(lead_info_contents.get('lead_id', ''),leadInfo)
 
                 if number_of_rows_modified > 1:
-                    print("Somehow ended up with and modified duplicate lead ids")
+                    logger.debug("Somehow ended up with and modified duplicate lead ids")
                     flash('Somehow ended up with and modified duplicate lead ids')
 
+                if lead_info_contents.get('send_confirmation_to_lead', '') == 'yes':
+                    message = lead_info_contents.get('lead_salutation') + ' ' + lead_info_contents.get('lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
+
+                    if appointment_date_and_time:
+                        appointment_date_and_time = datetime.datetime.strptime(appointment_date_and_time+':00', '%Y-%m-%dT%H:%M:%S')
+                        appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(appointment_date_and_time)
+                    if lead_info_contents.get('lead_phone_number'):
+                        SendMessagesToClients.sendSMS(to_numbers=lead_info_contents.get('lead_phone_number'),message=[message, appointment_date_and_time, lead_id],message_type='confirm_lead_appointment')
+                    if lead_info_contents.get('lead_email'):
+                        SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'), 'mo@prepwithmo.com'],message=[message, appointment_date_and_time, lead_id],message_type='confirm_lead_appointment', subject='Confirming Your Appointment')
+
                 flash('Lead sucessfully modified.')
-                return render_template('lead_info.html', action=action)
+                return render_template('lead_info_by_mo.html', action=action)
             except Exception as e:
                 logger.exception(e)
                 flash('An error occured while modifying the lead.')
-                return render_template('lead_info.html', action=action)
+                return render_template('lead_info_by_mo.html', action=action)
 
         if action == 'Search':
             try:
@@ -201,13 +286,13 @@ def lead_info():
             except Exception as e:
                 logger.exception(e)
                 flash('An error has occured during the search.')
-                render_template('lead_info.html', action=action)
+                render_template('lead_info_by_mo.html', action=action)
 
             if not search_results:
                 flash('No lead info has the detail you searched for.')
-                render_template('lead_info.html', action=action)
+                render_template('lead_info_by_mo.html', action=action)
 
-            return render_template('lead_info.html', search_results=search_results, action=action)
+            return render_template('lead_info_by_mo.html', search_results=search_results, action=action)
 
 
 
@@ -249,13 +334,13 @@ def create_transaction():
             if transaction_setup_data.get('send_text_and_email', '') == 'yes':
                 logger.debug('Send transaction text and email notification: ' + str(stripe_info['transaction_id']))
                 try:
-                    SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_id, type=message_type,recipient_name=transaction_setup_data['salutation']+' '+transaction_setup_data['first_name']+' '+transaction_setup_data['last_name'])
+                    SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
                     if message_type == 'create_transaction_existing_client':
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type=message_type,recipient_name=transaction_setup_data['salutation']+' '+transaction_setup_data['first_name']+' '+transaction_setup_data['last_name'])
+                        SendMessagesToClients.sendSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
                         time.sleep(5)
-                        SendMessagesToClients.sendGroupSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, type='questions')
+                        SendMessagesToClients.sendSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, message_type='questions')
                     else:
-                        SendMessagesToClients.sendSMS(to_number=transaction_setup_data['phone_number'], message=transaction_id, type=message_type,recipient_name=transaction_setup_data['salutation']+' '+transaction_setup_data['first_name']+' '+transaction_setup_data['last_name'])
+                        SendMessagesToClients.sendSMS(to_numbers=transaction_setup_data['phone_number'], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
                     flash('Transaction created and email/sms sent to client.')
                 except Exception as e:
                     traceback.print_exc()
@@ -263,8 +348,7 @@ def create_transaction():
         logger.debug('Created transaction: ' + str(stripe_info['transaction_id']))
         return render_template('generate_transaction_id.html',transaction_id=transaction_id,input_transaction_id_url=os.environ.get("url_to_start_reminder")+"input_transaction_id")
     except Exception as e:
-        print(e)
-        traceback.print_exc()
+        logger.exception(e)
         flash('An error occured while creating the transaction.')
         return redirect(url_for('transaction_setup'))
 
@@ -273,6 +357,16 @@ def create_transaction():
 def search_transaction():
     search_query = str(request.form['search_query'])
     try:
+        leads = AppDBUtil.getAllLeads()
+        processed_leads = []
+        for lead in leads:
+            lead_as_dict = {}
+            lead_as_dict['lead_id'] = lead.lead_id
+            lead_as_dict['lead_name'] = lead.lead_name
+            lead_as_dict['lead_phone_number'] = lead.lead_phone_number
+            lead_as_dict['lead_email'] = lead.lead_email
+            processed_leads.append(lead_as_dict)
+
         search_results = AppDBUtil.searchTransactions(search_query)
     except Exception as e:
         print(e)
@@ -285,7 +379,8 @@ def search_transaction():
         return redirect(url_for('transaction_setup'))
 
     logger.debug('Searched for: ' + str(search_query))
-    return render_template('transaction_setup.html',search_results=search_results)
+    #return redirect(url_for('transaction_setup',search_results=search_results))
+    return render_template('transaction_setup.html',search_results=search_results,leads=json.dumps(processed_leads))
 
 @server.route('/modify_transaction',methods=['POST'])
 @login_required
@@ -305,6 +400,7 @@ def modify_transaction():
         if number_of_rows_modified > 1:
             print("Somehow ended up with and modified duplicate transaction codes")
             flash('Somehow ended up with and modified duplicate transaction codes')
+            #return render_template('transaction_setup.html',leads=json.dumps(processed_leads))
             return redirect(url_for('transaction_setup'))
 
         if data_to_modify.get('mark_as_paid', '') == 'yes':
@@ -328,46 +424,47 @@ def modify_transaction():
         if data_to_modify.get('send_text_and_email','') == 'yes':
             logger.debug('Send modified transaction text and email notification: ' + str(stripe_info['transaction_id']))
             try:
-                SendMessagesToClients.sendEmail(to_address=data_to_modify['email'], message=transaction_id, type=message_type)
+                SendMessagesToClients.sendEmail(to_address=data_to_modify['email'], message=transaction_id, message_type=message_type)
                 if message_type == 'modify_transaction_existing_client':
-                    SendMessagesToClients.sendGroupSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, type=message_type)
+                    SendMessagesToClients.sendSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, message_type=message_type)
                     time.sleep(5)#
-                    SendMessagesToClients.sendGroupSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, type='questions')
+                    SendMessagesToClients.sendSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, message_type='questions')
                 else:
-                    SendMessagesToClients.sendSMS(to_number=data_to_modify['phone_number'], message=transaction_id, type=message_type)
+                    SendMessagesToClients.sendSMS(to_numbers=data_to_modify['phone_number'], message=transaction_id, message_type=message_type)
 
                 flash('Transaction modified and email/sms sent to client.')
             except Exception as e:
-                traceback.print_exc()
+                logger.exception(e)
                 flash('An error occured while sending an email/sms to the client after modifying the transaction.')
         else:
             flash('Transaction sucessfully modified.')
         logger.debug('Modified transaction: ' + str(stripe_info['transaction_id']))
+        #return render_template('transaction_setup.html',leads=json.dumps(processed_leads))
         return redirect(url_for('transaction_setup'))
     except Exception as e:
-        print(e)
-        traceback.print_exc()
+        logger.exception(e)
         flash('An error occured while modifying the transaction.')
+        #return render_template('transaction_setup.html',leads=json.dumps(processed_leads))
         return redirect(url_for('transaction_setup'))
 
-    return render_template('transaction_setup.html')
+    #return render_template('transaction_setup.html',leads=json.dumps(processed_leads))
+    return redirect(url_for('transaction_setup', leads=json.dumps(processed_leads)))
 
 @server.route('/delete_transaction',methods=['POST'])
 @login_required
 def delete_transaction():
     try:
         transaction_id_to_delete = str(request.form['transaction_id_to_delete'])
-        print(transaction_id_to_delete)
+        logger.debug(transaction_id_to_delete)
         AppDBUtil.deleteTransactionAndInstallmentPlan(transaction_id_to_delete)
         flash('Transaction sucessfully deleted.')
         return redirect(url_for('transaction_setup'))
     except Exception as e:
-        print(e)
-        traceback.print_exc()
+        logger.exception(e)
         flash('An error occured while deleting the transaction.')
         return redirect(url_for('transaction_setup'))
 
-    return render_template('transaction_setup.html')
+    #return render_template('transaction_setup.html')
 
 @server.route('/input_transaction_id',methods=['GET'])
 def input_transaction_id():
@@ -535,15 +632,15 @@ def enterClientInfo(payment_and_signup_data={}):
         print("student data is", payment_and_signup_data)
         AppDBUtil.createStudentData(payment_and_signup_data)
         to_numbers = [number for number in [payment_and_signup_data['parent_1_phone_number'], payment_and_signup_data['parent_2_phone_number'], payment_and_signup_data['student_phone_number']] if number != '']
-        SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], type='create_group_chat')
+        SendMessagesToClients.sendSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], message_type='welcome_new_student')
         time.sleep(5)
-        SendMessagesToClients.sendGroupSMS(to_numbers=to_numbers, type='referral_request')
+        SendMessagesToClients.sendSMS(to_numbers=to_numbers, message_type='referral_request')
         message = ""
         for k, v in ast.literal_eval(payment_and_signup_data['all_days_for_one_on_one']).items():
             message = message + " " + k.split('\n')[1].strip() + ","
-        SendMessagesToClients.sendEmail(message=message, subject="Suggested one-on-one days for " + str(payment_and_signup_data['student_first_name']) + " " + str(payment_and_signup_data['student_last_name']), type='to_mo')
+        SendMessagesToClients.sendEmail(message=message, subject="Suggested one-on-one days for " + str(payment_and_signup_data['student_first_name']) + " " + str(payment_and_signup_data['student_last_name']), message_type='to_mo')
         # hold off on sending group emails until you dedcide there is a value add
-        # SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], type='create_group_email',subject='Setting Up Group Email')
+        # SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], message_type='welcome_message',subject='Setting Up Group Email')
         return {'status': 'success'}
     except Exception as e:
         print(e)
@@ -576,7 +673,7 @@ def stripe_webhook():
         #return jsonify({'status': 400})
     try:
         #using this for successful card payments
-        if event.type == 'invoice.paid':
+        if event.message_type == 'invoice.paid':
             paid_invoice = event.data.object
             transaction_id = paid_invoice.metadata['transaction_id']
 
@@ -584,15 +681,15 @@ def stripe_webhook():
             # if paid_invoice.payment_intent:
             #     payment_intent = stripe.PaymentIntent.retrieve(paid_invoice.payment_intent,)
             #     payment_method = stripe.PaymentMethod.retrieve(str(payment_intent['payment_method']),)
-            #     payment_type = str(payment_method['type'])
+            #     payment_type = str(payment_method['message_type'])
             # consider replacing below with this if there are further errors
 
             payment_intent = stripe.PaymentIntent.retrieve(paid_invoice.payment_intent, ) if paid_invoice.payment_intent else None
             payment_method = stripe.PaymentMethod.retrieve(payment_intent['payment_method'], ) if payment_intent and payment_intent['payment_method'] else stripe.PaymentMethod.retrieve(payment_intent['source'], ) if payment_intent and payment_intent['source'] else None
-            payment_type = payment_method['type'] if payment_method else None
+            payment_type = payment_method['message_type'] if payment_method else None
 
             if not payment_type:
-                raise Exception('Somehow there is no payment intent, payment method, or payment type')
+                raise Exception('Somehow there is no payment intent, payment method, or payment message_type')
 
             if payment_type == 'card':
                 amount_paid = int(math.floor(paid_invoice.total / 103))
@@ -605,26 +702,26 @@ def stripe_webhook():
                 logger.info("paid transaction is {}".format(paid_invoice) )
                 logger.info("transaction id is {}".format( transaction_id))
             else:
-                raise Exception(f"Why is payment type not card for {transaction_id} ?")
+                raise Exception(f"Why is payment message_type not card for {transaction_id} ?")
 
         # using this for failed card payments and future failed ACH payments
-        elif event.type == 'invoice.payment_failed':
+        elif event.message_type == 'invoice.payment_failed':
             failed_invoice = event.data.object
             try:
                 message = "Invoice "+str(failed_invoice.id)+" for "+str(failed_invoice.customer_name)+" failed to pay."
-                SendMessagesToClients.sendSMS(to_number='9725847364', message=message, type='to_mo')
+                SendMessagesToClients.sendSMS(to_numbers='9725847364', message=message, message_type='to_mo')
                 logger.info(message)
             except Exception as e:
                 logger.error(e)
                 traceback.print_exc()
 
-        elif event.type == 'invoice.finalized':
+        elif event.message_type == 'invoice.finalized':
             finalized_invoice = event.data.object
             transaction_id = finalized_invoice.metadata['transaction_id']
 
             payment_intent = stripe.PaymentIntent.retrieve(finalized_invoice.payment_intent, ) if finalized_invoice.payment_intent else None
             payment_attempt_status = payment_intent['charges']['data'][0]['outcome']['network_status'] if payment_intent and payment_intent['charges']['data'][0]['outcome'] else None
-            payment_method_details = payment_intent['charges']['data'][0]['payment_method_details']['type'] if payment_intent['charges']['data'][0]['payment_method_details'] else None
+            payment_method_details = payment_intent['charges']['data'][0]['payment_method_details']['message_type'] if payment_intent['charges']['data'][0]['payment_method_details'] else None
 
             if not payment_method_details:
                 raise Exception('Somehow there is no payment intent or payment_method_details')
@@ -645,7 +742,7 @@ def stripe_webhook():
                 else:
                     try:
                         message = "Invoice " + str(finalized_invoice.id) + " for " + str(finalized_invoice.customer_name) + " failed to pay."
-                        SendMessagesToClients.sendSMS(to_number='9725847364', message=message, type='to_mo')
+                        SendMessagesToClients.sendSMS(to_numbers='9725847364', message=message, message_type='to_mo')
                         logger.debug(message)
                     except Exception as e:
                         logger.error(e)
@@ -654,12 +751,12 @@ def stripe_webhook():
                 raise Exception(f"Why is payment method detail not ach_debit for {transaction_id} ? Probably because there this is an instance of a credit card payment, which was already handled under invoice.paid and is now being sent to be finalized, which I do not care for since it has already been updated as paid the under invoice.paid i.e. I only care about updating ach payments through invoice.finalized.")
 
 
-        elif event.type == 'invoice.created':
+        elif event.message_type == 'invoice.created':
             created_invoice = event.data.object
             transaction_id = created_invoice.metadata['transaction_id']
             logger.info('Transaction {} created in Stripe'.format(transaction_id))
         else:
-            logger.info('Unhandled event type {}'.format(event.type))
+            logger.info('Unhandled event message_type {}'.format(event.message_type))
 
 
     except Exception as e:
@@ -674,76 +771,103 @@ def stripe_webhook():
 
 @server.before_first_request
 def start_background_jobs_before_first_request():
-    def reminders_background_job():
+    def remind_lead_about_appointment_background_job():
         try:
-            print("Reminders background job started")
-            reminder_last_names = ''
-            clientsToReceiveReminders = AppDBUtil.findClientsToReceiveReminders()
-            for client in clientsToReceiveReminders:
-                SendMessagesToClients.sendEmail(to_address=client['email'], message=client['transaction_id'], type='reminder_to_make_payment')
-                SendMessagesToClients.sendSMS(to_number=client['phone_number'], message=client['transaction_id'],type='reminder_to_make_payment')
-                reminder_last_names = reminder_last_names+client['last_name']+", "
-            SendMessagesToClients.sendSMS(to_number='9725847364', message=reminder_last_names, type='to_mo')
+            logger.info("remind_lead_about_appointment_background_job started")
+            reminder_last_names = 'remind_lead_about_appointment_background_job executed for: '
+            leadsToReceiveReminders = AppDBUtil.findLeadsToReceiveReminders()
+            for lead in leadsToReceiveReminders:
+                number_of_days_until_appointment = (lead.get('appointment_date_and_time').date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
+                appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(lead.get('appointment_date_and_time'))
+
+                if number_of_days_until_appointment in [0,1,3]:
+                    message = lead.get('lead_salutation') + " " + lead.get('lead_name') if lead.get('lead_salutation') else 'Parent'
+                    if lead.get('lead_email'):
+                        SendMessagesToClients.sendEmail(to_address=[lead.get('lead_email'), 'mo@prepwithmo.com'], message=[message, appointment_date_and_time, lead.get('lead_id')], message_type='reminder_about_appointment', subject='Reminder About Your Appointment')
+                    if lead.get('lead_phone_number'):
+                        SendMessagesToClients.sendSMS(to_numbers=lead.get('lead_phone_number'), message=[message, appointment_date_and_time, lead.get('lead_id')], message_type='reminder_about_appointment')
+                    reminder_last_names = reminder_last_names+lead['lead_name']+" ("+appointment_date_and_time+")"+", "
+            SendMessagesToClients.sendSMS(to_numbers='9725847364', message=reminder_last_names, message_type='to_mo')
 
         except Exception as e:
-            print("Error in sending reminders")
-            print(e)
-            traceback.print_exc()
+            logger.exception("Error in sending reminders")
 
-    def invoice_payment_background_job():
-        print("Invoice payment background job started")
+    def remind_client_about_invoice_background_job():
+        try:
+            logger.info("remind_client_about_invoice_background_job started")
+            reminder_last_names = 'remind_client_about_invoice_background_job started executed for: '
+            clientsToReceiveReminders = AppDBUtil.findClientsToReceiveReminders()
+            for client in clientsToReceiveReminders:
+                SendMessagesToClients.sendEmail(to_address=client['email'], message=client['transaction_id'], message_type='reminder_to_make_payment')
+                SendMessagesToClients.sendSMS(to_numbers=client['phone_number'], message=client['transaction_id'], message_type='reminder_to_make_payment')
+                reminder_last_names = reminder_last_names+client['last_name']+", "
+            SendMessagesToClients.sendSMS(to_numbers='9725847364', message=reminder_last_names, message_type='to_mo')
+
+        except Exception as e:
+            logger.exception("Error in sending reminders")
+
+    def pay_invoice_background_job():
+        logger.info("pay_invoice_background_job started")
         try:
             invoicesToPay = AppDBUtil.findInvoicesToPay()
-            print("Invoices to pay are: ",invoicesToPay)
+            logger.info("Invoices to pay are: {}".format(invoicesToPay))
 
             for invoice in invoicesToPay:
                 try:
                     invoice_payment_failed = True
 
                     stripe_invoice_ach_charge = stripe.Charge.retrieve(stripe.Invoice.retrieve(invoice['stripe_invoice_id']).charge)
-                    if stripe_invoice_ach_charge.status == 'pending' and stripe_invoice_ach_charge.payment_method_details.type == "ach_debit":
+                    if stripe_invoice_ach_charge.status == 'pending' and stripe_invoice_ach_charge.payment_method_details.message_type == "ach_debit":
                         logger.info("ACH payment already started for: {}".format(invoice['last_name']))
                         continue
 
                     stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
                     if stripe_invoice_object.paid or stripe_invoice_object.finalized:
                         #added finalized because ach payments finalize immediately but do not send 'paid' events for 14 days
-                        print("Invoice payment succeeded: ",invoice['last_name'])
+                        logger.info("Invoice payment succeeded: {}".format(invoice['last_name']))
                         #might need to come back and handle this via webhook
                         AppDBUtil.updateInvoiceAsPaid(stripe_invoice_id=invoice['stripe_invoice_id'])
                         invoice_payment_failed = False
 
                 except Exception as e:
-                    print("Error in attempting to pay invoices")
-                    print(e)
-                    traceback.print_exc()
+                    logger.exception("Error in attempting to pay invoices")
                 finally:
                     if invoice_payment_failed:
                         print("Invoice payment failed: ", invoice['last_name'])
                         invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
                         #don't send message here as stripe webhook event that is caught sends message
-                        #SendMessagesToClients.sendSMS(to_number='9725847364', message="Invoice payments failed for: " + invoice_name, type='to_mo')
+                        #SendMessagesToClients.sendSMS(to_numbers='9725847364', message="Invoice payments failed for: " + invoice_name, message_type='to_mo')
         except Exception as e:
-            print("Error in finding invoices to pay")
-            print(e)
-            traceback.print_exc()
+            logger.exception("Error in finding invoices to pay")
 
 
     scheduler = BackgroundScheduler(timezone='US/Central')
 
     if os.environ['DEPLOY_REGION'] != 'prod':
-    #if os.environ['DEPLOY_REGION'] != 'local':
+        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='19', minute='6')
         scheduler.add_job(lambda: print("dummy reminders job for local and dev"), 'cron', minute='55')
         scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
     else:
         #BE EXTREMELY CAREFULY WITH THE CRON JOB AND COPIOUSLY TEST. IF YOU GET IT WRONG, YOU CAN EASILY ANNOY A CUSTOMER BY SENDING A MESSAGE EVERY MINUTE OR EVERY SECOND
-        scheduler.add_job(reminders_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
-        #scheduler.add_job(reminders_background_job, 'cron', hour='16', minute='00')
-        # scheduler.add_job(reminders_background_job, 'cron', day_of_week='sun', hour='19', minute='45')
-        scheduler.add_job(invoice_payment_background_job, 'cron', hour='15',minute='55')
+        scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
+        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
+        scheduler.add_job(pay_invoice_background_job, 'cron', hour='15',minute='55')
 
-    print("Reminders background job added")
-    print("Invoice payment background job added")
+        #scheduler.add_job(remind_client_about_invoice_background_job, 'cron', hour='16', minute='00')
+        # scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='sun', hour='19', minute='45')
+
+    logger.info("remind_client_about_invoice_background_job added")
+    logger.info("remind_lead_about_appointment_background_job added")
+    logger.info("pay_invoice_background_job added")
+
+    # logger.debug('Current time with timezone is: {}'.format(datetime.datetime.now().astimezone()))
+    # day1 = datetime.datetime.now(pytz.timezone('US/Central'))
+    # day2 = datetime.datetime.now(pytz.timezone('US/Central')).date()
+    # day3 = pytz.timezone('US/Central').localize(datetime.datetime.now()).strftime('%Y-%m-%d---%H-%M')
+    # logger.debug('day1 is: {}'.format(day1))
+    # logger.debug('day2 is: {}'.format(day2))
+    # logger.debug('day3 is: {}'.format(day3))
+
 
     #THE KEY TO GETTING TIMEZONE RIGHT IS SETTING IT AS AN ENVIRONMENT VARIABLE ON DIGITAL OCEAN SERVER
     # import datetime,time

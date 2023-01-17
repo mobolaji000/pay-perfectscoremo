@@ -1,14 +1,18 @@
-from app.models import Transaction,InstallmentPlan,InvoiceToBePaid,Prospect,Student,Lead#,Test
+from app.models import Transaction,InstallmentPlan,InvoiceToBePaid,Prospect,Student,Lead
 from app import db
 from app.config import stripe
 from datetime import datetime
+import re
 import math
 import uuid
 from dateutil.parser import parse
 import logging
 import traceback
 from sqlalchemy.dialects.postgresql import insert
+
 #from app.service import SendMessagesToClients
+
+
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
@@ -20,46 +24,6 @@ class AppDBUtil():
     def __init__(self):
         pass
 
-    # @classmethod
-    # def test(cls):
-    #     try:
-    #         student_id = "s-" + str(uuid.uuid4().int >> 64)[:6]
-    #         student_first_name = 'a'
-    #         student_last_name = 'a'
-    #         student_phone_number = 'a'
-    #         student_email = 'a'
-    #         parent_1_salutation = 'a'
-    #         parent_1_first_name = 'a'
-    #         parent_1_last_name = 'a'
-    #         parent_1_phone_number = 'a'
-    #         parent_1_email = 'a'
-    #         parent_2_salutation = 'a'
-    #         parent_2_first_name = 'a'
-    #         parent_2_last_name = 'a'
-    #         parent_2_phone_number = 'a'
-    #         parent_2_email = 'a'
-    #
-    #         statement = insert(Test).values(student_id=student_id,  student_first_name=student_first_name, student_last_name=student_last_name, student_phone_number=student_phone_number, student_email=student_email,
-    #                                            parent_1_salutation=parent_1_salutation, parent_1_first_name=parent_1_first_name, parent_1_last_name=parent_1_last_name, parent_1_phone_number=parent_1_phone_number, parent_1_email=parent_1_email,
-    #                                            parent_2_salutation=parent_2_salutation, parent_2_first_name=parent_2_first_name, parent_2_last_name=parent_2_last_name, parent_2_phone_number=parent_2_phone_number, parent_2_email=parent_2_email)
-    #
-    #         updated_content = dict(student_id=student_id, student_first_name=student_first_name, student_last_name=student_last_name, student_phone_number=student_phone_number,
-    #                                parent_1_salutation=parent_1_salutation, parent_1_first_name=parent_1_first_name, parent_1_last_name=parent_1_last_name, parent_1_phone_number=parent_1_phone_number, parent_1_email=parent_1_email,
-    #                                parent_2_salutation=parent_2_salutation, parent_2_first_name=parent_2_first_name, parent_2_last_name=parent_2_last_name, parent_2_phone_number=parent_2_phone_number, parent_2_email=parent_2_email)
-    #
-    #         statement = statement.on_conflict_do_update(
-    #             index_elements=['student_email'],
-    #             set_=updated_content
-    #         )
-    #
-    #         db.session.execute(statement)
-    #         cls.executeDBQuery()
-    #
-    #     except Exception as e:
-    #         print(e)
-    #         print(traceback.print_exc())
-    #         raise e
-
     @classmethod
     def createProspect(cls, prospectData={}):
         prospect_id = "p-"+str(uuid.uuid4().int >> 64)[:6]
@@ -69,6 +33,9 @@ class AppDBUtil():
         prospect_email = prospectData.get('email', '')
         how_did_they_hear_about_us = prospectData.get('how_did_they_hear_about_us', '')
         details_on_how_they_heard_about_us = prospectData.get('details_on_how_they_heard_about_us', '')
+        recent_test_score = -1 if prospectData.get('recent_test_score', '') == '' else prospectData.get('recent_test_score')
+        grade_level = prospectData.get('grade_level', '')
+        lead_id = prospectData.get('leadSearchResults','')
 
         existing_prospect = db.session.query(Prospect).filter_by(prospect_phone_number=prospect_phone_number).first() or db.session.query(Prospect).filter_by(prospect_email=prospect_email).first()
 
@@ -76,9 +43,13 @@ class AppDBUtil():
             prospect = existing_prospect
         else:
             prospect = Prospect(prospect_id=prospect_id,prospect_first_name=prospect_first_name, prospect_last_name=prospect_last_name,prospect_phone_number=prospect_phone_number, prospect_email=prospect_email,
-                                how_did_they_hear_about_us=how_did_they_hear_about_us,details_on_how_they_heard_about_us=details_on_how_they_heard_about_us)
+                                how_did_they_hear_about_us=how_did_they_hear_about_us,details_on_how_they_heard_about_us=details_on_how_they_heard_about_us,recent_test_score=recent_test_score,grade_level=grade_level,lead_id=lead_id)
             db.session.add(prospect)
             cls.executeDBQuery()
+
+        if lead_id != '':
+            cls.modifyLeadInfo(lead_id, {'completed_appointment': True})
+
         return prospect
 
     @classmethod
@@ -280,6 +251,33 @@ class AppDBUtil():
             db.session.close()
 
     @classmethod
+    def findLeadsToReceiveReminders(cls):
+        try:
+            leadsToReceiveReminders = Lead.query.filter((Lead.completed_appointment == False) & (Lead.appointment_date_and_time != None)).all()
+
+            logger.debug("Leads to receive reminders are: {}".format(leadsToReceiveReminders))
+            search_results = []
+            for lead in leadsToReceiveReminders:
+                logger.debug("Individual lead is: {}".format(lead))
+                lead_details = {}
+                lead_details['lead_id'] = lead.lead_id
+                lead_details['lead_salutation'] = lead.lead_salutation
+                lead_details['lead_name'] = lead.lead_name
+                lead_details['lead_phone_number'] = lead.lead_phone_number
+                lead_details['lead_email'] = lead.lead_email
+                lead_details['appointment_date_and_time'] = lead.appointment_date_and_time
+                search_results.append(lead_details)
+
+            return search_results
+        except Exception as e:
+            # if any kind of exception occurs, rollback lead
+            db.session.rollback()
+            traceback.print_exc()
+        finally:
+            db.session.close()
+
+
+    @classmethod
     def findClientsToReceiveReminders(cls):
         try:
             transaction_details = Transaction.query.filter_by(payment_started=False).all()
@@ -360,6 +358,9 @@ class AppDBUtil():
             prospect_details = Prospect.query.filter_by(prospect_id=transaction.prospect_id).first()
             client['how_did_they_hear_about_us'] = prospect_details.how_did_they_hear_about_us
             client['details_on_how_they_heard_about_us'] = prospect_details.details_on_how_they_heard_about_us
+            client['recent_test_score'] = prospect_details.recent_test_score
+            client['grade_level'] = prospect_details.grade_level
+            client['lead_id'] = prospect_details.lead_id
 
 
             installment_details = InstallmentPlan.query.filter_by(transaction_id=transaction.transaction_id).first()
@@ -370,6 +371,7 @@ class AppDBUtil():
                     installments.update({'date_' + str(k): installment_details.__dict__['date_' + str(k)].strftime("%m/%d/%Y"), 'amount_' + str(k): installment_details.__dict__['amount_' + str(k)]})
 
                 client['installment_details'] = installments
+
 
             search_results.append(client)
         print("search results are ",search_results)
@@ -416,12 +418,14 @@ class AppDBUtil():
             parent_2_phone_number = studentData.get('parent_2_phone_number', '')
             parent_2_email = studentData.get('parent_2_email', '')
 
+            recent_score = studentData.get('recent_score', '')
+            grade_level = studentData.get('grade_level', '')
 
             statement = insert(Student).values(student_id=student_id,prospect_id=prospect_id,student_first_name=student_first_name,student_last_name=student_last_name,student_phone_number=student_phone_number,student_email=student_email,
-                               parent_1_salutation=parent_1_salutation,parent_1_first_name=parent_1_first_name,parent_1_last_name=parent_1_last_name,parent_1_phone_number=parent_1_phone_number,parent_1_email=parent_1_email,
+                               parent_1_salutation=parent_1_salutation,parent_1_first_name=parent_1_first_name,parent_1_last_name=parent_1_last_name,parent_1_phone_number=parent_1_phone_number,parent_1_email=parent_1_email,recent_score=recent_score,grade_level=grade_level,
                                parent_2_salutation=parent_2_salutation,parent_2_first_name=parent_2_first_name,parent_2_last_name=parent_2_last_name,parent_2_phone_number=parent_2_phone_number,parent_2_email=parent_2_email)
 
-            updated_content = dict(student_id=student_id,prospect_id=prospect_id,student_first_name=student_first_name,student_last_name=student_last_name,student_phone_number=student_phone_number,
+            updated_content = dict(student_id=student_id,prospect_id=prospect_id,student_first_name=student_first_name,student_last_name=student_last_name,student_phone_number=student_phone_number,recent_score=recent_score,grade_level=grade_level,
                                parent_1_salutation=parent_1_salutation,parent_1_first_name=parent_1_first_name,parent_1_last_name=parent_1_last_name,parent_1_phone_number=parent_1_phone_number,parent_1_email=parent_1_email,
                                parent_2_salutation=parent_2_salutation,parent_2_first_name=parent_2_first_name,parent_2_last_name=parent_2_last_name,parent_2_phone_number=parent_2_phone_number,parent_2_email=parent_2_email)
 
@@ -539,11 +543,11 @@ class AppDBUtil():
     @classmethod
     def createLead(cls, leadInfo):
         try:
-            lead_info = Lead(lead_id=leadInfo['lead_id'], lead_salutation=leadInfo['lead_salutation'],lead_name=leadInfo['lead_name'], lead_email=leadInfo['lead_email'], lead_phone_number=leadInfo['lead_phone_number'],appointment_date_and_time=leadInfo['appointment_date_and_time'],
+            lead_info_by_mo = Lead(lead_id=leadInfo['lead_id'], lead_salutation=leadInfo['lead_salutation'],lead_name=leadInfo['lead_name'], lead_email=leadInfo['lead_email'], lead_phone_number=leadInfo['lead_phone_number'],appointment_date_and_time=leadInfo['appointment_date_and_time'],
                              what_services_are_they_interested_in=leadInfo['what_services_are_they_interested_in'], details_on_what_service_they_are_interested_in=leadInfo['details_on_what_service_they_are_interested_in'],send_confirmation_to_lead=leadInfo['send_confirmation_to_lead'],
                              miscellaneous_notes=leadInfo['miscellaneous_notes'], how_did_they_hear_about_us=leadInfo['how_did_they_hear_about_us'],details_on_how_they_heard_about_us=leadInfo['details_on_how_they_heard_about_us'])
 
-            db.session.add(lead_info)
+            db.session.add(lead_info_by_mo)
             cls.executeDBQuery()
             create_lead_info_message = "Lead Info created successfully."
 
@@ -573,7 +577,8 @@ class AppDBUtil():
 
             search_results = []
             for info in lead_info:
-
+                logger.debug("info is {}".format(info.appointment_date_and_time))
+                logger.debug("type info is {}".format(type(info.appointment_date_and_time)))
                 lead = {}
                 lead['lead_id'] = info.lead_id
                 lead['lead_salutation'] = info.lead_salutation
@@ -585,15 +590,37 @@ class AppDBUtil():
                 lead['miscellaneous_notes'] = info.miscellaneous_notes
                 lead['how_did_they_hear_about_us'] = info.how_did_they_hear_about_us
                 lead['details_on_how_they_heard_about_us'] = info.details_on_how_they_heard_about_us
-                lead['appointment_date_and_time'] = info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S") if info.appointment_date_and_time else 'null'
+                lead['appointment_date_and_time'] = cls.clean_up_date_and_time(info.appointment_date_and_time) if info.appointment_date_and_time else 'null' #info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S")
                 lead['send_confirmation_to_lead'] = info.send_confirmation_to_lead
                 lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
+                lead['completed_appointment'] = info.completed_appointment
 
                 search_results.append(lead)
             logger.info("search results are {}".format(search_results))
             return search_results
         except Exception as e:
             raise e
+
+    #TODO repeating method that exists in service class to avoid ciruclar import error. Think about cleaner way of accomplishing
+    @classmethod
+    def clean_up_date_and_time(cls,date_and_time=None):
+        date_and_time = date_and_time.strftime("%c %p")
+
+        res = re.search(r'\s[0-9]{1,2}[:]', date_and_time)
+        start = res.start()
+        end = res.end()
+
+        hour_as_24 = date_and_time[start:end].split()[0].split(':')[0]
+        hour_as_24 = '0' + str(int(hour_as_24) % 12) if int(hour_as_24) % 12 < 10 else str(int(hour_as_24) % 12)
+        # logger.debug("2. " + hour_as_24)
+        date_and_time = date_and_time[:start] + ' ' + hour_as_24 + ':' + date_and_time[start + 4:]
+        date_and_time = date_and_time[:16] + " " + date_and_time[24:] + ' CST'
+
+        # logger.debug("3. " + date_and_time[:15])
+        # logger.debug("4. " + date_and_time[24:])
+        logger.debug("5. " + date_and_time)
+
+        return date_and_time
 
     @classmethod
     def modifyLeadInfo(cls, lead_id, lead_info):
@@ -613,6 +640,11 @@ class AppDBUtil():
             transaction_ids.append(transaction.transaction_id)
         logger.debug("All trasaction ids are: {}".format(transaction_ids))
         return transaction_ids
+
+    @classmethod
+    def getAllLeads(cls):
+        allLeads = Lead.query.order_by(Lead.date_created.desc()).all()
+        return allLeads
 
 
     @classmethod

@@ -31,7 +31,7 @@ class Transaction(db.Model):
     does_customer_payment_info_exist = db.Column(db.String(30), index=True, nullable=False, default='')
     #installment_date = db.Column(db.PickleType,  index=True, nullable=True, default='')
     #installment_amount = db.Column(db.PickleType, index=True, nullable=True, default='')
-    #what happens when you try to update pickle type? do you have to instantiate a new variable?
+    #what happens when you try to update pickle message_type? do you have to instantiate a new variable?
 
 
     def __repr__(self):
@@ -96,12 +96,16 @@ class InvoiceToBePaid(db.Model):
 
 class Prospect(db.Model):
     prospect_id = db.Column(db.String(8), unique=True, index=True, nullable=False, default='')
+    lead_id = db.Column(db.String(8), db.ForeignKey('lead.lead_id'), index=True, nullable=False, default='')
     prospect_first_name = db.Column(db.String(64), index=True,nullable=False, default='')
     prospect_last_name = db.Column(db.String(64), index=True,nullable=False, default='')
     prospect_email = db.Column(db.String(64), index=True, primary_key=True, nullable=False, default='')
     prospect_phone_number = db.Column(db.String(22),index=True,nullable=False, default='')
     how_did_they_hear_about_us = db.Column(db.String, index=True, nullable=False, default='')
     details_on_how_they_heard_about_us = db.Column(db.String, index=True, nullable=False, default='')
+
+    grade_level = db.Column(db.Enum('Middle School', '9th Grade', '10th Grade', '11th Grade', '12th Grade', 'Other', '',name='grade_level_options'), index=True, nullable=False, default='')
+    recent_test_score = db.Column(db.Integer, index=True, nullable=False, default=-1)
     #is_active = db.Column(db.Boolean, unique=False, nullable=False, server_default='True')
     #TODO add prospect salutation column
 
@@ -117,6 +121,8 @@ class Lead(db.Model):
 
     what_services_are_they_interested_in = db.Column(db.String, index=True, nullable=False, default='')
     details_on_what_service_they_are_interested_in = db.Column(db.String, index=True, nullable=False, default='')
+    grade_level = db.Column(db.Enum('Middle School', '9th Grade', '10th Grade', '11th Grade', '12th Grade', 'Other','', name='grade_level_options'), index=True, nullable=False, default='')
+    recent_test_score = db.Column(db.Integer, index=True,nullable=False,  default=-1)
     appointment_date_and_time = db.Column(db.DateTime(timezone=True), index=True, nullable=True)
     miscellaneous_notes = db.Column(db.String, index=True, nullable=False, default='')
     how_did_they_hear_about_us = db.Column(db.String, index=True, nullable=False, default='')
@@ -124,7 +130,7 @@ class Lead(db.Model):
 
     send_confirmation_to_lead = db.Column(db.String(4), index=True,nullable=False, default='')
     date_created = db.Column(db.DateTime(timezone=True), index=True, server_default=db.func.now())
-    #is_active = db.Column(db.Boolean, unique=False, nullable=False, server_default='True')
+    completed_appointment = db.Column(db.Boolean, unique=False, nullable=False, server_default='False')
 
 
     def __repr__(self):

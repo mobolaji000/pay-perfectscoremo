@@ -73,31 +73,37 @@ class AWSInstance():
         return secret
 
 
-    def send_email(self, to_address='mo@vensti.com', message='perfectscoremo', subject='perfectscoremo', type='',recipient_name=''):
+    def send_email(self, to_address='mo@vensti.com', message='perfectscoremo', subject='perfectscoremo', message_type='', recipient_name=''):
 
-        if type == 'create_transaction_new_client':
+        if message_type == 'create_transaction_new_client':
             created_or_modified_span = "<span>Your transaction has just been <strong>created</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
-        elif type == 'modify_transaction_new_client':
+        elif message_type == 'modify_transaction_new_client':
             created_or_modified_span = "<span>Your transaction has just been <strong>modified</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
-        elif type == 'reminder_to_make_payment':
+        elif message_type == 'reminder_to_make_payment':
             created_or_modified_span = "<span>This is an automated reminder that your transaction <strong>is due</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
-        elif type == 'create_transaction_existing_client':
+        elif message_type == 'create_transaction_existing_client':
             created_or_modified_span = "<span>Your new transaction has been created using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
-        elif type == 'modify_transaction_existing_client':
+        elif message_type == 'modify_transaction_existing_client':
             created_or_modified_span = "<span>Your transaction has just been modified using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
+        elif message_type == 'reminder_about_appointment':
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
+            created_or_modified_span = "<span>Dear {},</span><br><br><span>Thank you for signing up for a diagnostic/consultation at PrepWithMo. This is a reminder that your appointment is on  {}. </span><br><br><span> If you have not already done so, please go to {} (also sent to your phone number) to fill out/confirm some basic information. </span><br><br><span>We look forward to meeting you.</span><br><br><span>Regards,</span><br><span>Mo</span><br><br>".format(message[0],message[1],link_url)
+        elif message_type == 'confirm_lead_appointment':
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
+            created_or_modified_span = "<span>Dear {},</span><br><br><span>Thank you for signing up for a diagnostic/consultation at PrepWithMo. This is a confirmation that your appointment is on  {}. </span><br><br><span> Ahead of your appointment, please go to {} (also sent to your phone number) to fill out/confirm some basic information. </span><br><br><span>We look forward to meeting you.</span><br><br><span>Regards,</span><br><span>Mo</span><br><br>".format(message[0],message[1],link_url)
 
 
-        SENDER = "Perfect Score Mo <mo@info.perfectscoremo.com>"
+        SENDER = "PrepWithMo <mo@info.perfectscoremo.com>"
         RECIPIENT = [to_address] if isinstance(to_address, str) else to_address
         SUBJECT = subject
 
         # The email body for recipients with non-HTML email clients.
         BODY_TEXT = ("Amazon SES Test (Python)\r\n"
                      "This email was sent with Amazon SES using the "
-                     "AWS SDK for Python (Boto). "+message
+                     "AWS SDK for Python (Boto)."
                      )
 
-        if type == 'student_info':
+        if message_type == 'ask_for_student_info':
             link_url = os.environ["url_to_start_reminder"]+"""client_info/"""+message
             BODY_HTML = """<html>
                 <head></head>
@@ -113,7 +119,7 @@ class AWSInstance():
                 </body>
                 </html>
                             """
-        elif type == 'create_group_email':
+        elif message_type == 'welcome_message':
             BODY_HTML = """<html>
                 <head></head>
                 <body>
@@ -127,7 +133,7 @@ class AWSInstance():
                 </body>
                 </html>
                             """
-        elif type == 'to_mo':
+        elif message_type == 'to_mo':
             BODY_HTML = """<html>
                     <head></head>
                     <body>
@@ -136,7 +142,7 @@ class AWSInstance():
                     </body>
                     </html>
                                 """
-        else:
+        elif message_type in ['create_transaction_new_client', 'modify_transaction_new_client', 'create_transaction_existing_client', 'modify_transaction_existing_client', 'reminder_to_make_payment']:
             BODY_HTML = """<html>
                             <head></head>
                             <body>
@@ -157,6 +163,14 @@ class AWSInstance():
                             </body>
                             </html>
                                         """
+        elif message_type in ['reminder_about_appointment', 'confirm_lead_appointment']:
+            BODY_HTML = """<html>
+                    <head></head>
+                    <body>
+                       """ + created_or_modified_span + """
+                    </body>
+                    </html>
+                                """
 
 
         CHARSET = "UTF-8"
@@ -192,6 +206,6 @@ class AWSInstance():
         else:
             logger.debug("Email sent! Message ID:"),
             logger.debug(response['MessageId'])
-            logger.debug(("Email message type is: {}".format(type)))
+            logger.debug(("Email message message_type is: {}".format(message_type)))
             logger.debug(BODY_HTML)
 
