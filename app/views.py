@@ -250,7 +250,7 @@ def lead_info_by_mo():
                 leadInfo = {}
                 appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
                 recent_test_score = -1 if lead_info_contents.get('recent_test_score','') == '' else lead_info_contents.get('recent_test_score')
-
+                lead_id = lead_info_contents.get('lead_id', '')
 
                 leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''),'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_email': lead_info_contents.get('lead_email', ''),
                                  'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'appointment_date_and_time': appointment_date_and_time,
