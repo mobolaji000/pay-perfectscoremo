@@ -1,4 +1,4 @@
-from app.models import Transaction,InstallmentPlan,InvoiceToBePaid,Prospect,Student,Lead#,Test
+from app.models import Transaction,InstallmentPlan,InvoiceToBePaid,Prospect,Student,Lead
 from app import db
 from app.config import stripe
 from datetime import datetime
@@ -8,10 +8,10 @@ from dateutil.parser import parse
 import logging
 import traceback
 from sqlalchemy.dialects.postgresql import insert
-from app.service import MiscellaneousUtils
+
 #from app.service import SendMessagesToClients
 
-miscellaneousUtilsInstance = MiscellaneousUtils()
+
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
@@ -584,7 +584,7 @@ class AppDBUtil():
                 lead['miscellaneous_notes'] = info.miscellaneous_notes
                 lead['how_did_they_hear_about_us'] = info.how_did_they_hear_about_us
                 lead['details_on_how_they_heard_about_us'] = info.details_on_how_they_heard_about_us
-                lead['appointment_date_and_time'] = miscellaneousUtilsInstance.clean_up_date_and_time(info.appointment_date_and_time) if info.appointment_date_and_time else 'null' #info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S")
+                lead['appointment_date_and_time'] = cls.clean_up_date_and_time(info.appointment_date_and_time) if info.appointment_date_and_time else 'null' #info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S")
                 lead['send_confirmation_to_lead'] = info.send_confirmation_to_lead
                 lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
 
@@ -593,6 +593,27 @@ class AppDBUtil():
             return search_results
         except Exception as e:
             raise e
+
+    #TODO repeating method that exists in service class to avoid ciruclar import error. Think about cleaner way of accomplishing
+    @classmethod
+    def clean_up_date_and_time(date_and_time=None):
+        date_and_time = date_and_time.strftime("%c %p")
+
+        res = re.search(r'\s[0-9]{1,2}[:]', date_and_time)
+        start = res.start()
+        end = res.end()
+
+        hour_as_24 = date_and_time[start:end].split()[0].split(':')[0]
+        hour_as_24 = '0' + str(int(hour_as_24) % 12) if int(hour_as_24) % 12 < 10 else str(int(hour_as_24) % 12)
+        # logger.debug("2. " + hour_as_24)
+        date_and_time = date_and_time[:start] + ' ' + hour_as_24 + ':' + date_and_time[start + 4:]
+        date_and_time = date_and_time[:16] + " " + date_and_time[24:] + ' CST'
+
+        # logger.debug("3. " + date_and_time[:15])
+        # logger.debug("4. " + date_and_time[24:])
+        logger.debug("5. " + date_and_time)
+
+        return date_and_time
 
     @classmethod
     def modifyLeadInfo(cls, lead_id, lead_info):
