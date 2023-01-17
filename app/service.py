@@ -594,7 +594,7 @@ class MiscellaneousUtils():
         pass
 
     @classmethod
-    def clean_up_date_and_time(date_and_time=None):
+    def clean_up_date_and_time(cls,date_and_time=None):
         date_and_time = date_and_time.strftime("%c %p")
 
         res = re.search(r'\s[0-9]{1,2}[:]', date_and_time)
