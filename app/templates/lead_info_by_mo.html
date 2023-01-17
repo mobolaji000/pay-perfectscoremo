@@ -125,19 +125,31 @@
 	 $('input[name="recent_test_score"]').val(result.recent_test_score);
 
 
-	 // find details of hos this works here: https://github.com/Choices-js/Choices
-		 {#TODO when search result clicked, figure out how to populate choicesforwhataerviestheyareinterestdin  #}
+	 // find details of how this works here: https://github.com/Choices-js/Choices
 
-    // var choicesForWhatServiceLeadIsInterestedIn = new Choices('#what_services_are_they_interested_in', {
-    //     removeItemButton: true,
-    //   });
-	// choicesForWhatServiceLeadIsInterestedIn.clearChoices();
+		var services_they_are_interested_in = result.what_services_are_they_interested_in;
+		// you will have to remember to change the list above anytime you make a change to the items in the "what_services_are_they_interested_in" select
+		var all_services = ["PSAT/PACT","SAT/ACT","College Admissions Counselling","General Tutoring","Other"];
 
+		 var new_choices = [];
 
+		 for (let k = 0; k < all_services.length; k++) {
+			 if(services_they_are_interested_in.includes(all_services[k])){
+				 new_choices[k] = { value: all_services[k], label: all_services[k], disabled: false, selected: true };
+			 }
+			 else
+			 {
+				 new_choices[k] = { value: all_services[k], label: all_services[k], disabled: false, selected: false };
+			 }
+		}
 
-     $('textarea[name="what_services_are_they_interested_in"]').val(result.what_services_are_they_interested_in);
+		 var choicesForWhatServiceLeadIsInterestedIn = $('#what_services_are_they_interested_in').data('choices');
 
+		 console.log(services_they_are_interested_in);
 
+		 choicesForWhatServiceLeadIsInterestedIn.removeActiveItems();
+		 choicesForWhatServiceLeadIsInterestedIn.clearChoices();
+		 choicesForWhatServiceLeadIsInterestedIn.setChoices(new_choices, 'value', 'label', true,);
 
           $('textarea[name="details_on_what_service_they_are_interested_in"]').val(result.details_on_what_service_they_are_interested_in);
      $('textarea[name="miscellaneous_notes"]').val(result.miscellaneous_notes);
@@ -352,10 +364,10 @@
 <!--					find detials of hos this works here: https://bbbootstrap.com/snippets/multiselect-dropdown-list-83601849-->
 					<div class="row no-padding" >
     <div class="col-md-7" style="padding-left: 0px !important; padding-left: 0px !important;padding-right: 0px !important;">
-		<label for="what_services_are_they_interested_in">What service are they interested in?</label>
-		<select id="what_services_are_they_interested_in" name="what_services_are_they_interested_in" class="form-control" placeholder="" multiple >
+		<label for="what_services_are_they_interested_in">What services are they interested in?</label>
+		<select id="what_services_are_they_interested_in" name="what_services_are_they_interested_in" class="form-control" placeholder=""  multiple >
 <!--            <option value="" selected disabled hidden></option>-->
-								<option value='PSAT'>PSAT</option>
+								<option value='PSAT/PACT'>PSAT/PACT</option>
 								<option value='SAT/ACT'>SAT/ACT</option>
 								<option value='College Admissions Counselling'>College Admissions Counselling</option>
 								<option value='General Tutoring'>General Tutoring</option>
