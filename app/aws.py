@@ -86,9 +86,11 @@ class AWSInstance():
         elif message_type == 'modify_transaction_existing_client':
             created_or_modified_span = "<span>Your transaction has just been modified using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
         elif message_type == 'reminder_about_appointment':
-            created_or_modified_span = "<span>Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a reminder that your appointment is on  {}. If you have not already done so, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo</span><br><br>".format(message[0],message[1],message[2])
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
+            created_or_modified_span = "<span>Dear {},</span><br><br><span>Thank you for signing up for a diagnostic/consultation at PrepWithMo. This is a reminder that your appointment is on  {}. </span><br><br><span> If you have not already done so, please go to {} (also sent to your phone number) to fill out/confirm some basic information. </span><br><br><span>We look forward to meeting you.</span><br><br><span>Regards,</span><br><span>Mo</span><br><br>".format(message[0],message[1],link_url)
         elif message_type == 'confirm_lead_appointment':
-            created_or_modified_span = "<span>Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a confirmation that your appointment is on  {}. Ahead of your appointment, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo</span><br><br>".format(message[0],message[1],message[2])
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
+            created_or_modified_span = "<span>Dear {},</span><br><br><span>Thank you for signing up for a diagnostic/consultation at PrepWithMo. This is a confirmation that your appointment is on  {}. </span><br><br><span> Ahead of your appointment, please go to {} (also sent to your phone number) to fill out/confirm some basic information. </span><br><br><span>We look forward to meeting you.</span><br><br><span>Regards,</span><br><span>Mo</span><br><br>".format(message[0],message[1],link_url)
 
 
         SENDER = "PrepWithMo <mo@info.perfectscoremo.com>"

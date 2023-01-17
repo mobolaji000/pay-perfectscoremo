@@ -175,9 +175,10 @@
             $('select[name="grade_level"]').val(result.grade_level);
             $('input[name="recent_test_score"]').val(result.recent_test_score);
 
-            $('textarea[name="leadSearchInput"]').val(result.lead_id);
+            $('input[name="leadSearchInput"]').val(result.lead_id);
+            $('input[name="leadSearchInput"]').trigger( 'input' );
 
-            //
+            //console.log("result is: "+JSON.stringify(result));
 
             if (result.ask_for_student_info == "yes") {
                 //document.getElementById("ask_for_student_info").click();

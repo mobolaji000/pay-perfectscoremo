@@ -16,10 +16,9 @@ $(document).ready(function() {
     $('input[name="adjustment_explanation"]').prop('readonly', true);
     $('input[name="transaction_total"]').attr('disabled', true);
 
-    const leads = JSON.parse($("#leads").attr("data-leads"));
-
-    console.log("leads are: "+JSON.stringify(leads));
-        const fuse = new Fuse(leads, {keys: ['lead_id','lead_name', 'lead_email', 'lead_phone_number']});
+   const leads = JSON.parse($("#leads").attr("data-leads"));
+    //console.log("leads are: "+JSON.stringify(leads));
+    const fuse = new Fuse(leads, {keys: ['lead_id','lead_name', 'lead_email', 'lead_phone_number']});
 
 
     function addDays(numberOfDaysToAdd) {
@@ -423,7 +422,6 @@ $(document).ready(function() {
 
      //change paste keyup
             $('#leadSearchInput').on('input', function(event) {
-                console.log(event.target.value);
                 let leadSearchValue = event.target.value;
                 //console.log(emailSearchValue);
                 let leadSearchResults = fuse.search(leadSearchValue);
@@ -435,12 +433,12 @@ $(document).ready(function() {
                     result = leadSearchResults[key];
 
                     lead_to_connect_option_value = result.item['lead_id'];
-                    lead_to_connect_option_visible_content = result.item['lead_id']+" "+result.item['lead_name']+" (email: "+result.item['lead_email']+")"+" (phone_number: "+result.item['lead_phone_number']+")";
+                    lead_to_connect_option_visible_content = result.item['lead_id']+", "+result.item['lead_name']+", "+result.item['lead_email']+", "+result.item['lead_phone_number'];
                      lead_to_connect_options += '<option value="'+lead_to_connect_option_value+'">'+lead_to_connect_option_visible_content+'</option>';
 
-                      console.log("result is: "+result);
-                     console.log("lead_to_connect_option_value is: "+lead_to_connect_option_value);
-                      console.log("lead_to_connect_option_visible_content is: "+lead_to_connect_option_visible_content);
+                     //  console.log("result is: "+result);
+                     // console.log("lead_to_connect_option_value is: "+lead_to_connect_option_value);
+                     //  console.log("lead_to_connect_option_visible_content is: "+lead_to_connect_option_visible_content);
 
                 }
 

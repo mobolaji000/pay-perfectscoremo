@@ -457,16 +457,16 @@ class SendMessagesToClients():
             created_or_modified_span = "Oh, and one more note to the family...if you have any friends/families looking to raise their SAT/ACT scores, have them check us out at prepwithmo.com or call us at 972-584-7364. We appreciate the referral!"
         elif message_type == 'confirm_lead_appointment':
             link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
-            created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a confirmation that your appointment is on  {}. Ahead of your appointment, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo".format(message[0], message[1], link_url)
+            created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a confirmation that your appointment is on  {}. Ahead of your appointment, please go to {} (also sent to your email address) to fill out/confirm some basic information. We look forward to meeting you.\n\nRegards,\n\nMo".format(message[0], message[1], link_url)
         elif message_type == 'reminder_about_appointment':
             link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
-            created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a reminder that your appointment is on  {}. If you have not already done so, please go to {} (also sent to your email address) to fill out or confirm some basic information. We look forward to meeting you\n\nRegards,\n\nMo".format(message[0], message[1], link_url)
+            created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a reminder that your appointment is on  {}. If you have not already done so, please go to {} (also sent to your email address) to fill out/confirm some basic information. We look forward to meeting you.\n\nRegards,\n\nMo".format(message[0], message[1], link_url)
         elif message_type == 'reminder_to_make_payment':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):".format(recipient_name)
 
 
         if message_type in ['to_mo']:
-            text_message = created_or_modified_span
+            text_message = message
         elif message_type in ['ask_for_student_info', 'welcome_new_student', 'questions', 'referral_request', 'confirm_lead_appointment', 'reminder_about_appointment', 'reminder_to_make_payment']:
             text_message = created_or_modified_span
         elif message_type in ['create_transaction_new_client', 'modify_transaction_new_client', 'create_transaction_existing_client', 'modify_transaction_existing_client']:
@@ -483,7 +483,7 @@ class SendMessagesToClients():
                            + """Regards,\n\n""" \
                            + """Mo\n\n"""
 
-        if message_type(to_numbers) is str:
+        if type(to_numbers) is str:
             logger.info("Single Recipient SMS!")
             sent_message = cls.twilioClient.messages.create(
             body=text_message,
@@ -494,7 +494,7 @@ class SendMessagesToClients():
             logger.debug("text sent!")
             logger.debug(sent_message.sid)
             logger.debug(text_message)
-        elif message_type(to_numbers) is list:
+        elif type(to_numbers) is list:
             logger.debug("Multiple Recipient SMS!")
             conversations = cls.twilioClient.conversations.conversations.list(limit=50)
             for record in conversations:
@@ -521,8 +521,7 @@ class SendMessagesToClients():
                 cls.twilioClient.conversations.conversations(conversation.sid).participants.create(
                     messaging_binding_address='+19725039573')
 
-            cls.twilioClient.conversations.conversations(conversation.sid).messages.create(body=text_message,
-                                                                                           author='+19564771274')
+            cls.twilioClient.conversations.conversations(conversation.sid).messages.create(body=text_message,author='+19564771274')
             logger.debug("group chat created!")
         else:
             raise Exception("Neither string not list was sent to sendSMS method!")
