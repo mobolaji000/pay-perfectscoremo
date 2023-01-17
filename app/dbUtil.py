@@ -586,7 +586,6 @@ class AppDBUtil():
                 lead['miscellaneous_notes'] = info.miscellaneous_notes
                 lead['how_did_they_hear_about_us'] = info.how_did_they_hear_about_us
                 lead['details_on_how_they_heard_about_us'] = info.details_on_how_they_heard_about_us
-                #lead['appointment_date_and_time'] = cls.clean_up_date_and_time(datetime.strptime(info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S"),"%Y-%m-%dT%H:%M:%S")) if info.appointment_date_and_time else 'null' #info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S")
                 lead['appointment_date_and_time'] = cls.clean_up_date_and_time(info.appointment_date_and_time) if info.appointment_date_and_time else 'null' #info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S")
                 lead['send_confirmation_to_lead'] = info.send_confirmation_to_lead
                 lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
