@@ -589,26 +589,26 @@ class SendMessagesToClients():
         cls.twilioClient.conversations.conversations(conversation.sid).messages.create(body=text_message, author='+19564771274')
         logger.debug("group chat created!")
 
-    class MiscellanousUtils():
-        def __init__(self):
-            pass
+class MiscellaneousUtils():
+    def __init__(self):
+        pass
 
-        @classmethod
-        def clean_up_date_and_time(date_and_time=None):
-            date_and_time = date_and_time.strftime("%c %p")
+    @classmethod
+    def clean_up_date_and_time(date_and_time=None):
+        date_and_time = date_and_time.strftime("%c %p")
 
-            res = re.search(r'\s[0-9]{1,2}[:]', date_and_time)
-            start = res.start()
-            end = res.end()
+        res = re.search(r'\s[0-9]{1,2}[:]', date_and_time)
+        start = res.start()
+        end = res.end()
 
-            hour_as_24 = date_and_time[start:end].split()[0].split(':')[0]
-            hour_as_24 = '0' + str(int(hour_as_24) % 12) if int(hour_as_24) % 12 < 10 else str(int(hour_as_24) % 12)
-            # logger.debug("2. " + hour_as_24)
-            date_and_time = date_and_time[:start] + ' ' + hour_as_24 + ':' + date_and_time[start + 4:]
-            date_and_time = date_and_time[:16] + " " + date_and_time[24:] + ' CST'
+        hour_as_24 = date_and_time[start:end].split()[0].split(':')[0]
+        hour_as_24 = '0' + str(int(hour_as_24) % 12) if int(hour_as_24) % 12 < 10 else str(int(hour_as_24) % 12)
+        # logger.debug("2. " + hour_as_24)
+        date_and_time = date_and_time[:start] + ' ' + hour_as_24 + ':' + date_and_time[start + 4:]
+        date_and_time = date_and_time[:16] + " " + date_and_time[24:] + ' CST'
 
-            # logger.debug("3. " + date_and_time[:15])
-            # logger.debug("4. " + date_and_time[24:])
-            logger.debug("5. " + date_and_time)
+        # logger.debug("3. " + date_and_time[:15])
+        # logger.debug("4. " + date_and_time[24:])
+        logger.debug("5. " + date_and_time)
 
-            return date_and_time
+        return date_and_time
