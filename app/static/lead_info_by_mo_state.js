@@ -11,6 +11,9 @@ $(document).ready(function() {
 
     $('#what_services_are_they_interested_in').data('choices', choicesForWhatServiceLeadIsInterestedIn);
 
+    var today = new Date().toISOString().slice(0, 16);
+        document.getElementsByName("appointment_date_and_time" )[0].setAttribute('min', today);
+
 
  $('input[name="search_query"]').on('input', function() {
 	//alert($(this).val());

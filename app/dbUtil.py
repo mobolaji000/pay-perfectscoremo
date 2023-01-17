@@ -33,7 +33,7 @@ class AppDBUtil():
         prospect_email = prospectData.get('email', '')
         how_did_they_hear_about_us = prospectData.get('how_did_they_hear_about_us', '')
         details_on_how_they_heard_about_us = prospectData.get('details_on_how_they_heard_about_us', '')
-        recent_test_score = prospectData.get('recent_test_score', '')
+        recent_test_score = -1 if prospectData.get('recent_test_score', '') == '' else prospectData.get('recent_test_score')
         grade_level = prospectData.get('grade_level', '')
         lead_id = prospectData.get('leadSearchResults','')
 
@@ -46,6 +46,10 @@ class AppDBUtil():
                                 how_did_they_hear_about_us=how_did_they_hear_about_us,details_on_how_they_heard_about_us=details_on_how_they_heard_about_us,recent_test_score=recent_test_score,grade_level=grade_level,lead_id=lead_id)
             db.session.add(prospect)
             cls.executeDBQuery()
+
+        if lead_id != '':
+            cls.modifyLeadInfo(lead_id, {'completed_appointment': True})
+
         return prospect
 
     @classmethod

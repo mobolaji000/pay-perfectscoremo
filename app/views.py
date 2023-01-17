@@ -120,8 +120,6 @@ def failure():
 @server.route('/transaction_setup')
 @login_required
 def transaction_setup():
-    print("in transcatino stup")
-    #if not leads:
     leads = AppDBUtil.getAllLeads()
     processed_leads = []
     for lead in leads:
@@ -131,9 +129,6 @@ def transaction_setup():
         lead_as_dict['lead_phone_number'] = lead.lead_phone_number
         lead_as_dict['lead_email'] = lead.lead_email
         processed_leads.append(lead_as_dict)
-
-    # if search_results:
-    #     return render_template('transaction_setup.html', search_results=search_results, leads=json.dumps(processed_leads))
 
     return render_template('transaction_setup.html', leads=json.dumps(processed_leads))
 

@@ -65,7 +65,7 @@
 	}
 	else
 	{
-		if ($('input[name="send_confirmation_to_lead"]').val() == 'yes' && $('input[name="appointment_date_and_time"]').val() == ''){
+		if ($('input[name="send_confirmation_to_lead"]').val() == 'yes' && ($('input[name="appointment_date_and_time"]').val() == '') || $('input[name="appointment_date_and_time"]').val() < new Date().toISOString().slice(0, 16) ){
 			document.getElementById("appointment_date_and_time-checker").hidden=false;
 			document.getElementById("send_confirmation_to_lead-checker").hidden=false;
 		event.preventDefault();
@@ -86,7 +86,7 @@
 	}
 	else
 	{
-           if ($('input[name="send_confirmation_to_lead"]').val() == 'yes' && $('input[name="appointment_date_and_time"]').val() == ''){
+           if ($('input[name="send_confirmation_to_lead"]').val() == 'yes' && ($('input[name="appointment_date_and_time"]').val() == '') || $('input[name="appointment_date_and_time"]').val() < new Date().toISOString().slice(0, 16) ){
 			document.getElementById("appointment_date_and_time-checker").hidden=false;
 			document.getElementById("send_confirmation_to_lead-checker").hidden=false;
 		event.preventDefault();
@@ -410,7 +410,7 @@
 							<label for="appointment_date_and_time">Appointment Date/Time</label>
 							<input type="datetime-local" class="form-control" id="appointment_date_and_time" name="appointment_date_and_time" >
 						  </div>
-								<div id="appointment_date_and_time-checker" class="text-danger" hidden>You can't send a confirmation if the appointment date and time is empty</div>
+								<div id="appointment_date_and_time-checker" class="text-danger" hidden>You can't send a confirmation if the appointment date and time is empty and you can't submit a lead if the appointment date and time is in the past</div>
 							</div><br><br><br>
 
 						<div class="row no-padding" >
