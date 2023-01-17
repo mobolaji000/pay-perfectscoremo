@@ -574,7 +574,6 @@ class AppDBUtil():
             search_results = []
             for info in lead_info:
                 logger.debug("info is {}".format(info.appointment_date_and_time))
-                logger.debug("len info is {}".format(len(info.appointment_date_and_time)))
                 logger.debug("type info is {}".format(type(info.appointment_date_and_time)))
                 lead = {}
                 lead['lead_id'] = info.lead_id
