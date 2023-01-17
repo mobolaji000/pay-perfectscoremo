@@ -593,6 +593,7 @@ class AppDBUtil():
                 lead['appointment_date_and_time'] = cls.clean_up_date_and_time(info.appointment_date_and_time) if info.appointment_date_and_time else 'null' #info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S")
                 lead['send_confirmation_to_lead'] = info.send_confirmation_to_lead
                 lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
+                lead['completed_appointment'] = info.completed_appointment
 
                 search_results.append(lead)
             logger.info("search results are {}".format(search_results))

@@ -261,10 +261,20 @@
 								{% else %}
 								{% set appointment_date_and_time = result.appointment_date_and_time %}
 					{% endif %}
-							<a name="search_link" href="javascript:populateFieldsFromSearch({{ result }});">
+
+							{% if result.completed_appointment == true %}
+					<a name="search_link" href="javascript:populateFieldsFromSearch({{ result }});" style="color:green">
 
 								{{ result.lead_salutation+" "+result.lead_name+" "+result.lead_email+" "+result.lead_phone_number+" "+appointment_date_and_time}}
 							</a>
+								{% else %}
+								<a name="search_link" href="javascript:populateFieldsFromSearch({{ result }});" style="color:red">
+
+								{{ result.lead_salutation+" "+result.lead_name+" "+result.lead_email+" "+result.lead_phone_number+" "+appointment_date_and_time}}
+							</a>
+					{% endif %}
+
+
 							<br><br><br>
 							{% endfor %}
 
