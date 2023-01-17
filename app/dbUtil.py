@@ -8,7 +8,10 @@ from dateutil.parser import parse
 import logging
 import traceback
 from sqlalchemy.dialects.postgresql import insert
+from app.service import MiscellaneousUtils
 #from app.service import SendMessagesToClients
+
+miscellaneousUtilsInstance = MiscellaneousUtils()
 
 logger = logging.getLogger(__name__)
 ch = logging.StreamHandler()
@@ -581,7 +584,7 @@ class AppDBUtil():
                 lead['miscellaneous_notes'] = info.miscellaneous_notes
                 lead['how_did_they_hear_about_us'] = info.how_did_they_hear_about_us
                 lead['details_on_how_they_heard_about_us'] = info.details_on_how_they_heard_about_us
-                lead['appointment_date_and_time'] = info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S") if info.appointment_date_and_time else 'null'
+                lead['appointment_date_and_time'] = miscellaneousUtilsInstance.clean_up_date_and_time(info.appointment_date_and_time) if info.appointment_date_and_time else 'null' #info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S")
                 lead['send_confirmation_to_lead'] = info.send_confirmation_to_lead
                 lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
 
