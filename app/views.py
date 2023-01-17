@@ -653,8 +653,6 @@ def enterClientInfo(payment_and_signup_data={}):
 
 def clean_up_date_and_time(date_and_time=None):
     date_and_time = date_and_time.strftime("%c %p")
-    logger.debug("1. "+date_and_time)
-
 
     res = re.search(r'\s[0-9]{1,2}[:]',date_and_time)
     start = res.start()
@@ -662,9 +660,9 @@ def clean_up_date_and_time(date_and_time=None):
 
     hour_as_24 = date_and_time[start:end].split()[0].split(':')[0]
     hour_as_24 = '0'+str(int(hour_as_24) % 12) if int(hour_as_24) % 12 < 10 else str(int(hour_as_24) % 12)
-    logger.debug("2. " + hour_as_24)
+    #logger.debug("2. " + hour_as_24)
     date_and_time = date_and_time[:start] + ' ' + hour_as_24 + ':' + date_and_time[start + 4:]
-    date_and_time = date_and_time[:15] + " " + date_and_time[24:] + ' CST'
+    date_and_time = date_and_time[:16] + " " + date_and_time[24:] + ' CST'
 
     # logger.debug("3. " + date_and_time[:15])
     # logger.debug("4. " + date_and_time[24:])
@@ -867,7 +865,7 @@ def start_background_jobs_before_first_request():
     scheduler = BackgroundScheduler(timezone='US/Central')
 
     if os.environ['DEPLOY_REGION'] != 'prod':
-        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='17', minute='3')
+        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='19', minute='6')
         scheduler.add_job(lambda: print("dummy reminders job for local and dev"), 'cron', minute='55')
         scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
     else:
