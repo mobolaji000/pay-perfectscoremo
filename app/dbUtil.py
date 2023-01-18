@@ -561,8 +561,10 @@ class AppDBUtil():
     def getLeadInfo(cls, search_query=None,searchStartDate=None,searchEndDate=None):
         try:
             if search_query:
-                if search_query.startswith("l-"):
+                if search_query.isdigit():
                     lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
+                elif search_query.startswith("l-"):
+                    lead_info = Lead.query.filter_by(lead_id=search_query).order_by(Lead.date_created.desc()).all()
                 elif "@" in search_query:
                     lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
                 else:
