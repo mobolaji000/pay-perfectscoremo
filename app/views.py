@@ -826,7 +826,8 @@ def start_background_jobs_before_first_request():
                 SendMessagesToClients.sendEmail(to_address=client['email'], message=client['transaction_id'], message_type='reminder_to_make_payment')
                 SendMessagesToClients.sendSMS(to_numbers=client['phone_number'], message=client['transaction_id'], message_type='reminder_to_make_payment')
                 reminder_last_names = reminder_last_names+client['last_name']+", "
-            SendMessagesToClients.sendSMS(to_numbers='9725847364', message=reminder_last_names, message_type='to_mo')
+            if clientsToReceiveReminders:
+                SendMessagesToClients.sendSMS(to_numbers='9725847364', message=reminder_last_names, message_type='to_mo')
 
         except Exception as e:
             logger.exception("Error in sending reminders")
