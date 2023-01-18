@@ -558,7 +558,7 @@ class AppDBUtil():
         #     return create_lead_info_message
 
     @classmethod
-    def getLeadInfo(cls, search_query,searchStartDate,searchEndDate):
+    def getLeadInfo(cls, search_query=None,searchStartDate=None,searchEndDate=None):
         try:
             if search_query:
                 if search_query.startswith("l-"):
