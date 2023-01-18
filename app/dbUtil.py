@@ -418,14 +418,14 @@ class AppDBUtil():
             parent_2_phone_number = studentData.get('parent_2_phone_number', '')
             parent_2_email = studentData.get('parent_2_email', '')
 
-            recent_score = studentData.get('recent_score', '')
+            recent_test_score = -1 if studentData.get('recent_test_score', '') == '' else studentData.get('recent_test_score')
             grade_level = studentData.get('grade_level', '')
 
             statement = insert(Student).values(student_id=student_id,prospect_id=prospect_id,student_first_name=student_first_name,student_last_name=student_last_name,student_phone_number=student_phone_number,student_email=student_email,
-                               parent_1_salutation=parent_1_salutation,parent_1_first_name=parent_1_first_name,parent_1_last_name=parent_1_last_name,parent_1_phone_number=parent_1_phone_number,parent_1_email=parent_1_email,recent_score=recent_score,grade_level=grade_level,
+                               parent_1_salutation=parent_1_salutation,parent_1_first_name=parent_1_first_name,parent_1_last_name=parent_1_last_name,parent_1_phone_number=parent_1_phone_number,parent_1_email=parent_1_email,recent_test_score=recent_test_score,grade_level=grade_level,
                                parent_2_salutation=parent_2_salutation,parent_2_first_name=parent_2_first_name,parent_2_last_name=parent_2_last_name,parent_2_phone_number=parent_2_phone_number,parent_2_email=parent_2_email)
 
-            updated_content = dict(student_id=student_id,prospect_id=prospect_id,student_first_name=student_first_name,student_last_name=student_last_name,student_phone_number=student_phone_number,recent_score=recent_score,grade_level=grade_level,
+            updated_content = dict(student_id=student_id,prospect_id=prospect_id,student_first_name=student_first_name,student_last_name=student_last_name,student_phone_number=student_phone_number,recent_test_score=recent_test_score,grade_level=grade_level,
                                parent_1_salutation=parent_1_salutation,parent_1_first_name=parent_1_first_name,parent_1_last_name=parent_1_last_name,parent_1_phone_number=parent_1_phone_number,parent_1_email=parent_1_email,
                                parent_2_salutation=parent_2_salutation,parent_2_first_name=parent_2_first_name,parent_2_last_name=parent_2_last_name,parent_2_phone_number=parent_2_phone_number,parent_2_email=parent_2_email)
 

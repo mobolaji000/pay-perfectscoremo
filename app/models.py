@@ -153,6 +153,9 @@ class Student(db.Model):
     parent_2_last_name = db.Column(db.String(64), index=True, nullable=False, default='')
     parent_2_email = db.Column(db.String(64), index=True, nullable=False, default='')
     parent_2_phone_number = db.Column(db.String(22),index=True,nullable=False, default='')
+    grade_level = db.Column(db.Enum('Middle School', '9th Grade', '10th Grade', '11th Grade', '12th Grade', 'Other', '',name='grade_level_options'), index=True, nullable=False, default='')
+    recent_test_score = db.Column(db.Integer, index=True, nullable=False, default=-1)
+    date_created = db.Column(db.DateTime(timezone=True), index=True, server_default=db.func.now())
     is_active = db.Column(db.Boolean, unique=False,nullable=False, server_default='True')
 
 
