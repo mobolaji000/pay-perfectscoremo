@@ -62,7 +62,11 @@ var details_on_how_you_heard_about_us = $("#lead").attr("data-details_on_how_you
 		 choicesForWhatServiceLeadIsInterestedIn.setChoices(new_choices, 'value', 'label', true,);
 
           $('textarea[name="details_on_what_service_you_are_interested_in"]').val(details_on_what_service_you_are_interested_in);
-     $('textarea[name="miscellaneous_notes"]').val(miscellaneous_notes);
+
+		  //NO, DON'T SHOW miscellaneous_notes!!! This is where you keep your private thoughts about the lead
+		  //$('textarea[name="miscellaneous_notes"]').val(miscellaneous_notes);
+
+
      $('select[name="how_did_you_hear_about_us"]').val(how_did_you_hear_about_us);
           $('textarea[name="details_on_how_you_heard_about_us"]').val(details_on_how_you_heard_about_us);
 
