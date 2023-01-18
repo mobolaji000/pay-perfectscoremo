@@ -166,13 +166,35 @@ def client_info(prospect_id):
 @server.route('/lead_info_by_lead/<lead_id>', methods=['GET','POST'])
 def lead_info_by_lead(lead_id):
     if request.method == 'GET':
-        print("lead_id in get is ",lead_id)
-        return render_template('lead_info_by_lead.html',lead_id=lead_id)
+        try:
+            lead_info_contents = AppDBUtil.getLeadInfo(lead_id)
+            logger.debug("lead_id in get is: {}".format(lead_id))
+            return render_template('lead_info_by_lead.html',
+                                   lead_id=lead_info_contents['lead_id'],
+                                   xxx=lead_info_contents,
+                                   lead_name=lead_info_contents['lead_name'],
+                                   lead_salutation=lead_info_contents['lead_salutation'],
+                                   lead_email=lead_info_contents['lead_email'],
+                                   lead_phone_number=lead_info_contents['lead_phone_number'],
+                                   what_services_are_you_interested_in=lead_info_contents['what_services_are_they_interested_in'],
+                                   details_on_what_service_you_are_interested_in=lead_info_contents['details_on_what_service_they_are_interested_in'],
+                                   grade_level=lead_info_contents['grade_level'],
+                                   recent_test_score=lead_info_contents['recent_test_score'],
+                                   miscellaneous_notes=lead_info_contents['miscellaneous_notes'],
+                                   how_did_you_hear_about_us=lead_info_contents['how_did_they_hear_about_us'],
+                                   details_on_how_you_heard_about_us=lead_info_contents['details_on_how_they_heard_about_us'],
+                                   )
+        except Exception as e:
+            logger.exception(e)
+            flash('Error in getting your information. Please contact Mo.')
+            render_template('lead_info_by_lead.html', lead_id=lead_id)
+
+
     elif request.method == 'POST':
         try:
             lead_info_contents = request.form.to_dict()
-            print("lead_id in post is ", lead_info_contents['lead_id'])
-            print("lead info contents is",lead_info_contents)
+            print("lead_id in post is: {}".format(lead_info_contents['lead_id']) )
+            print("lead info contents is: {}".format(lead_info_contents))
 
             leadInfo = {}
 
@@ -193,8 +215,8 @@ def lead_info_by_lead(lead_id):
             print(e)
             traceback.print_exc()
             flash("Error in submitting your information. Please contact Mo.")
-        return render_template('lead_info_by_lead.html', lead_id=lead_info_contents['lead_id'],
-                               xxx = lead_info_contents,)
+
+        render_template('lead_info_by_lead.html', lead_id=lead_id)
 
 
 @server.route('/lead_info_by_mo', methods=['GET','POST'])
