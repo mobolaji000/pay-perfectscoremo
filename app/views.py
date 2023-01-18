@@ -880,9 +880,9 @@ def start_background_jobs_before_first_request():
     else:
         #BE EXTREMELY CAREFULY WITH THE CRON JOB AND COPIOUSLY TEST. IF YOU GET IT WRONG, YOU CAN EASILY ANNOY A CUSTOMER BY SENDING A MESSAGE EVERY MINUTE OR EVERY SECOND
         scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
-        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='16')
+        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='25')
         # scheduler.add_job(pay_invoice_background_job, 'cron', hour='15',minute='55')
-        scheduler.add_job(pay_invoice_background_job, 'cron', hour='22', minute='8')#
+        scheduler.add_job(pay_invoice_background_job, 'cron', hour='22', minute='25')#
 
 
         #scheduler.add_job(remind_client_about_invoice_background_job, 'cron', hour='16', minute='00')
