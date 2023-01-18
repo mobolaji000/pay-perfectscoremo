@@ -698,7 +698,7 @@ def stripe_webhook():
         #return jsonify({'status': 400})
     try:
         #using this for successful card payments
-        if event.message_type == 'invoice.paid':
+        if event.type == 'invoice.paid':
             paid_invoice = event.data.object
             transaction_id = paid_invoice.metadata['transaction_id']
 
@@ -706,15 +706,15 @@ def stripe_webhook():
             # if paid_invoice.payment_intent:
             #     payment_intent = stripe.PaymentIntent.retrieve(paid_invoice.payment_intent,)
             #     payment_method = stripe.PaymentMethod.retrieve(str(payment_intent['payment_method']),)
-            #     payment_type = str(payment_method['message_type'])
+            #     payment_type = str(payment_method['type'])
             # consider replacing below with this if there are further errors
 
             payment_intent = stripe.PaymentIntent.retrieve(paid_invoice.payment_intent, ) if paid_invoice.payment_intent else None
             payment_method = stripe.PaymentMethod.retrieve(payment_intent['payment_method'], ) if payment_intent and payment_intent['payment_method'] else stripe.PaymentMethod.retrieve(payment_intent['source'], ) if payment_intent and payment_intent['source'] else None
-            payment_type = payment_method['message_type'] if payment_method else None
+            payment_type = payment_method['type'] if payment_method else None
 
             if not payment_type:
-                raise Exception('Somehow there is no payment intent, payment method, or payment message_type')
+                raise Exception('Somehow there is no payment intent, payment method, or payment type')
 
             if payment_type == 'card':
                 amount_paid = int(math.floor(paid_invoice.total / 103))
@@ -727,10 +727,10 @@ def stripe_webhook():
                 logger.info("paid transaction is {}".format(paid_invoice) )
                 logger.info("transaction id is {}".format( transaction_id))
             else:
-                raise Exception(f"Why is payment message_type not card for {transaction_id} ?")
+                raise Exception(f"Why is payment type not card for {transaction_id} ?")
 
         # using this for failed card payments and future failed ACH payments
-        elif event.message_type == 'invoice.payment_failed':
+        elif event.type == 'invoice.payment_failed':
             failed_invoice = event.data.object
             try:
                 message = "Invoice "+str(failed_invoice.id)+" for "+str(failed_invoice.customer_name)+" failed to pay."
@@ -740,13 +740,13 @@ def stripe_webhook():
                 logger.error(e)
                 traceback.print_exc()
 
-        elif event.message_type == 'invoice.finalized':
+        elif event.type == 'invoice.finalized':
             finalized_invoice = event.data.object
             transaction_id = finalized_invoice.metadata['transaction_id']
 
             payment_intent = stripe.PaymentIntent.retrieve(finalized_invoice.payment_intent, ) if finalized_invoice.payment_intent else None
             payment_attempt_status = payment_intent['charges']['data'][0]['outcome']['network_status'] if payment_intent and payment_intent['charges']['data'][0]['outcome'] else None
-            payment_method_details = payment_intent['charges']['data'][0]['payment_method_details']['message_type'] if payment_intent['charges']['data'][0]['payment_method_details'] else None
+            payment_method_details = payment_intent['charges']['data'][0]['payment_method_details']['type'] if payment_intent['charges']['data'][0]['payment_method_details'] else None
 
             if not payment_method_details:
                 raise Exception('Somehow there is no payment intent or payment_method_details')
@@ -776,12 +776,12 @@ def stripe_webhook():
                 raise Exception(f"Why is payment method detail not ach_debit for {transaction_id} ? Probably because there this is an instance of a credit card payment, which was already handled under invoice.paid and is now being sent to be finalized, which I do not care for since it has already been updated as paid the under invoice.paid i.e. I only care about updating ach payments through invoice.finalized.")
 
 
-        elif event.message_type == 'invoice.created':
+        elif event.type == 'invoice.created':
             created_invoice = event.data.object
             transaction_id = created_invoice.metadata['transaction_id']
             logger.info('Transaction {} created in Stripe'.format(transaction_id))
         else:
-            logger.info('Unhandled event message_type {}'.format(event.message_type))
+            logger.info('Unhandled event type {}'.format(event.type))
 
 
     except Exception as e:
@@ -845,7 +845,7 @@ def start_background_jobs_before_first_request():
                     stripe_invoice_ach_charge = stripe.Invoice.retrieve(invoice['stripe_invoice_id']).charge
                     if stripe_invoice_ach_charge:
                         stripe_invoice_ach_charge = stripe.Charge.retrieve(stripe_invoice_ach_charge)
-                        if stripe_invoice_ach_charge.status == 'pending' and stripe_invoice_ach_charge.payment_method_details.message_type == "ach_debit":
+                        if stripe_invoice_ach_charge.status == 'pending' and stripe_invoice_ach_charge.payment_method_details.type == "ach_debit":
                             logger.info("ACH payment already started for: {}".format(invoice['last_name']))
                             continue
 
@@ -881,7 +881,7 @@ def start_background_jobs_before_first_request():
         scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
         scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
         # scheduler.add_job(pay_invoice_background_job, 'cron', hour='15',minute='55')
-        scheduler.add_job(pay_invoice_background_job, 'cron', hour='21', minute='50')#
+        scheduler.add_job(pay_invoice_background_job, 'cron', hour='22', minute='8')#
 
 
         #scheduler.add_job(remind_client_about_invoice_background_job, 'cron', hour='16', minute='00')
