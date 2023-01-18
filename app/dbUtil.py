@@ -596,6 +596,8 @@ class AppDBUtil():
                 lead['send_confirmation_to_lead'] = info.send_confirmation_to_lead
                 lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
                 lead['completed_appointment'] = info.completed_appointment
+                lead['grade_level'] = info.grade_level
+                lead['recent_scores'] = info.recent_scores
 
                 search_results.append(lead)
             logger.info("search results are {}".format(search_results))
