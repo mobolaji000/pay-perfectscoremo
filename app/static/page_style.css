@@ -15,6 +15,8 @@
     margin: 0;
 }
 
+label span { color: red; }
+
 /* Firefox */
 #tp_total, #college_apps_total, #adjust_total, #transaction_id, #diag_units, .installment_amounts {
     -moz-appearance: textfield;
