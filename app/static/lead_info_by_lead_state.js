@@ -10,10 +10,6 @@ $(document).ready(function() {
 
     $('#what_services_are_you_interested_in').data('choices', choicesForWhatServiceLeadIsInterestedIn);
 
-	var xxx = $("#lead").attr("data-xxx");
-	console.log(xxx);
-	console.log(JSON.stringify(xxx));
-
 
 var lead_salutation = $("#lead").attr("data-lead_salutation");
 var lead_name = $("#lead").attr("data-lead_name");

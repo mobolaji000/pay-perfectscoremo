@@ -72,6 +72,8 @@ class InstallmentPlan(db.Model):
     amount_11 = db.Column(db.Integer, index=True,nullable=True, default=-1)
     amount_12 = db.Column(db.Integer, index=True,nullable=True, default=-1)
 
+    date_created = db.Column(db.DateTime(timezone=True), index=True, server_default=db.func.now())
+
 
     def __repr__(self):
         return '<InstallmentPlan created for {}>'.format(self.transaction_id)
@@ -91,12 +93,15 @@ class InvoiceToBePaid(db.Model):
     stripe_invoice_id = db.Column(db.String(64), index=True,nullable=False, default='')
     payment_made = db.Column(db.Boolean, unique=False, nullable=False, default=False)
 
+    date_created = db.Column(db.DateTime(timezone=True), index=True, server_default=db.func.now())
+
     def __repr__(self):
         return '<InvoiceToBePaid created for {}>'.format(self.last_name)
 
 class Prospect(db.Model):
     prospect_id = db.Column(db.String(8), unique=True, index=True, nullable=False, default='')
     lead_id = db.Column(db.String(8), db.ForeignKey('lead.lead_id'), index=True, nullable=False, default='')
+    prospect_salutation = db.Column(db.Enum('Mr.', 'Ms.', '', name='salutation_type'), index=True, nullable=False,default='')
     prospect_first_name = db.Column(db.String(64), index=True,nullable=False, default='')
     prospect_last_name = db.Column(db.String(64), index=True,nullable=False, default='')
     prospect_email = db.Column(db.String(64), index=True, primary_key=True, nullable=False, default='')
@@ -106,7 +111,7 @@ class Prospect(db.Model):
 
     grade_level = db.Column(db.Enum('Middle School', '9th Grade', '10th Grade', '11th Grade', '12th Grade', 'Other', '',name='grade_level_options'), index=True, nullable=False, default='')
     recent_test_score = db.Column(db.Integer, index=True, nullable=False, default=-1)
-    #is_active = db.Column(db.Boolean, unique=False, nullable=False, server_default='True')
+    date_created = db.Column(db.DateTime(timezone=True), index=True, server_default=db.func.now())
     #TODO add prospect salutation column
 
     def __repr__(self):
@@ -161,29 +166,6 @@ class Student(db.Model):
 
     def __repr__(self):
         return '<Student {} created with student_id {}>'.format(self.parent_1_last_name, self.student_id)
-
-
-# class Test(db.Model):
-#     student_id = db.Column(db.String(8), unique=True, index=True, nullable=False, default='')
-#     student_first_name = db.Column(db.String(64), index=True, nullable=False, default='')
-#     student_last_name = db.Column(db.String(64), index=True, nullable=False, default='')
-#     student_email = db.Column(db.String(64), index=True,primary_key=True,unique=True,nullable=False, default='')
-#     student_phone_number = db.Column(db.String(22),index=True,nullable=False, default='')
-#     parent_1_salutation = db.Column(db.String(6), index=True, nullable=False, default='')
-#     parent_1_first_name = db.Column(db.String(64), index=True, nullable=False, default='')
-#     parent_1_last_name = db.Column(db.String(64), index=True, nullable=False, default='')
-#     parent_1_email = db.Column(db.String(64), index=True, nullable=False, default='')
-#     parent_1_phone_number = db.Column(db.String(22),index=True,nullable=False, default='')
-#     parent_2_salutation = db.Column(db.String(6), index=True, nullable=False, default='')
-#     parent_2_first_name = db.Column(db.String(64), index=True, nullable=False, default='')
-#     parent_2_last_name = db.Column(db.String(64), index=True, nullable=False, default='')
-#     parent_2_email = db.Column(db.String(64), index=True, nullable=False, default='')
-#     parent_2_phone_number = db.Column(db.String(22),index=True,nullable=False, default='')
-#     is_active = db.Column(db.Boolean, unique=False,nullable=False, server_default='True')
-#
-#
-#     def __repr__(self):
-#         return '<Student {} created with student_id {}>'.format(self.parent_1_last_name, self.student_id)
 
 
 db.create_all()

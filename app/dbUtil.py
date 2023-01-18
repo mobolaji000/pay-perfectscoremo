@@ -27,6 +27,7 @@ class AppDBUtil():
     @classmethod
     def createProspect(cls, prospectData={}):
         prospect_id = "p-"+str(uuid.uuid4().int >> 64)[:6]
+        prospect_salutation = prospectData.get('salutation', '')
         prospect_first_name = prospectData.get('first_name', '')
         prospect_last_name = prospectData.get('last_name', '')
         prospect_phone_number = prospectData.get('phone_number', '999')
@@ -42,7 +43,7 @@ class AppDBUtil():
         if existing_prospect:
             prospect = existing_prospect
         else:
-            prospect = Prospect(prospect_id=prospect_id,prospect_first_name=prospect_first_name, prospect_last_name=prospect_last_name,prospect_phone_number=prospect_phone_number, prospect_email=prospect_email,
+            prospect = Prospect(prospect_id=prospect_id,prospect_salutation=prospect_salutation,prospect_first_name=prospect_first_name, prospect_last_name=prospect_last_name,prospect_phone_number=prospect_phone_number, prospect_email=prospect_email,
                                 how_did_they_hear_about_us=how_did_they_hear_about_us,details_on_how_they_heard_about_us=details_on_how_they_heard_about_us,recent_test_score=recent_test_score,grade_level=grade_level,lead_id=lead_id)
             db.session.add(prospect)
             cls.executeDBQuery()
