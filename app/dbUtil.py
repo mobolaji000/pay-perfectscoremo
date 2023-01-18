@@ -358,7 +358,7 @@ class AppDBUtil():
             prospect_details = Prospect.query.filter_by(prospect_id=transaction.prospect_id).first()
             client['how_did_they_hear_about_us'] = prospect_details.how_did_they_hear_about_us
             client['details_on_how_they_heard_about_us'] = prospect_details.details_on_how_they_heard_about_us
-            client['recent_test_score'] = prospect_details.recent_test_score
+            client['recent_test_score'] = '' if prospect_details.recent_test_score == -1 else prospect_details.recent_test_score
             client['grade_level'] = prospect_details.grade_level
             client['lead_id'] = prospect_details.lead_id
 
