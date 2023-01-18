@@ -621,7 +621,6 @@ class AppDBUtil():
 
         # logger.debug("3. " + date_and_time[:15])
         # logger.debug("4. " + date_and_time[24:])
-        logger.debug("5. " + date_and_time)
 
         return date_and_time
 
