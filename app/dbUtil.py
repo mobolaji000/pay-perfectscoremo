@@ -596,7 +596,7 @@ class AppDBUtil():
                 lead['appointment_date_and_time'] = cls.clean_up_date_and_time(info.appointment_date_and_time) if info.appointment_date_and_time else 'null' #info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S")
                 lead['send_confirmation_to_lead'] = info.send_confirmation_to_lead
                 lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
-                lead['completed_appointment'] = info.completed_appointment
+                lead['completed_appointment'] = 'true' if info.completed_appointment else 'false'
                 lead['grade_level'] = info.grade_level
                 lead['recent_test_score'] = '' if info.recent_test_score == -1 else info.recent_test_score
 
