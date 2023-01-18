@@ -49,8 +49,8 @@
     var pressed_button_val = document.getElementById(event.srcElement.id).value
     document.getElementById("action").value = pressed_button_val
 
-		var lead_id = $("#lead_id").attr("data-lead_id");
-	$('input[name="lead_id"]').val(lead_id);
+		var lead_id = $("#lead").attr("data-lead_id");
+	$('input[name="lead"]').val(lead_id);
 
 	if (pressed_button_val == "Update")
 	{
@@ -229,7 +229,22 @@
 							<input id="update_lead_info" name="submitButton" class="btn btn-primary btn- btn-block" type="submit"   style="display:inline-block; width:50%; margin-left: 25%;"  value="Update" onclick="finalCheckBeforeSubmit()"></input>
 						</div>
 
-						<input id="lead_id" name="lead_id" hidden  data-lead_id="{{ lead_id }}">
+						<input id="lead" name="lead" hidden  data-lead_id="{{ lead_id }}"
+							   data-lead_salutation="{{ lead_salutation }}"
+							   data-lead_name="{{ lead_name }}"
+							   data-lead_email="{{ lead_email }}"
+							   data-lead_phone_number="{{ lead_phone_number }}"
+							   data-grade_level="{{ grade_level }}"
+							   data-recent_test_score="{{ recent_test_score }}"
+							   data-what_services_are_you_interested_in="{{ what_services_are_you_interested_in }}"
+							   data-details_on_what_service_you_are_interested_in="{{ details_on_what_service_you_are_interested_in }}"
+							   data-miscellaneous_notes="{{ miscellaneous_notes }}"
+							   data-how_did_you_hear_about_us="{{ how_did_you_hear_about_us }}"
+							   data-details_on_how_you_heard_about_us="{{ details_on_how_you_heard_about_us }}"
+							   data-xxx = {{xxx}}
+						>
+
+
 						<input id="action" name="action" hidden>
 					</div></div>
 			</form>

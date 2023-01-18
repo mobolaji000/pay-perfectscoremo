@@ -193,7 +193,8 @@ def lead_info_by_lead(lead_id):
             print(e)
             traceback.print_exc()
             flash("Error in submitting your information. Please contact Mo.")
-        return render_template('lead_info_by_lead.html', lead_id=lead_info_contents['lead_id'])
+        return render_template('lead_info_by_lead.html', lead_id=lead_info_contents['lead_id'],
+                               xxx = lead_info_contents,)
 
 
 @server.route('/lead_info_by_mo', methods=['GET','POST'])
