@@ -842,10 +842,12 @@ def start_background_jobs_before_first_request():
                 try:
                     invoice_payment_failed = True
 
-                    stripe_invoice_ach_charge = stripe.Charge.retrieve(stripe.Invoice.retrieve(invoice['stripe_invoice_id']).charge)
-                    if stripe_invoice_ach_charge.status == 'pending' and stripe_invoice_ach_charge.payment_method_details.message_type == "ach_debit":
-                        logger.info("ACH payment already started for: {}".format(invoice['last_name']))
-                        continue
+                    stripe_invoice_ach_charge = stripe.Invoice.retrieve(invoice['stripe_invoice_id']).charge
+                    if stripe_invoice_ach_charge:
+                        stripe_invoice_ach_charge = stripe.Charge.retrieve(stripe_invoice_ach_charge)
+                        if stripe_invoice_ach_charge.status == 'pending' and stripe_invoice_ach_charge.payment_method_details.message_type == "ach_debit":
+                            logger.info("ACH payment already started for: {}".format(invoice['last_name']))
+                            continue
 
                     stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
                     if stripe_invoice_object.paid or stripe_invoice_object.finalized:
@@ -857,12 +859,13 @@ def start_background_jobs_before_first_request():
 
                 except Exception as e:
                     logger.exception("Error in attempting to pay invoices")
+                    invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
+                    SendMessagesToClients.sendSMS(to_numbers='9725847364', message="Exception:Invoice payments failed for: " + invoice_name + '. Go check the logs!', message_type='to_mo')
                 finally:
                     if invoice_payment_failed:
-                        print("Invoice payment failed: ", invoice['last_name'])
+                        logger.debug("Invoice payment failed: ", invoice['last_name'])
                         invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
-                        #don't send message here as stripe webhook event that is caught sends message
-                        #SendMessagesToClients.sendSMS(to_numbers='9725847364', message="Invoice payments failed for: " + invoice_name, message_type='to_mo')
+
         except Exception as e:
             logger.exception("Error in finding invoices to pay")
 
@@ -878,7 +881,7 @@ def start_background_jobs_before_first_request():
         scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
         scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
         # scheduler.add_job(pay_invoice_background_job, 'cron', hour='15',minute='55')
-        scheduler.add_job(pay_invoice_background_job, 'cron', hour='21', minute='33')#
+        scheduler.add_job(pay_invoice_background_job, 'cron', hour='21', minute='50')#
 
 
         #scheduler.add_job(remind_client_about_invoice_background_job, 'cron', hour='16', minute='00')
