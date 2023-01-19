@@ -212,6 +212,7 @@ def lead_info_by_lead(lead_id):
                 raise Exception
 
             flash("Your information has been submitted successfully")
+            SendMessagesToClients.sendSMS(to_numbers='9725847364', message="New update submitted by lead {} with lead-id {}. Go check it out.".format(lead_info_contents.get('lead_salutation', '')+ ' '+lead_info_contents.get('lead_name', ''),lead_info_contents['lead_id']), message_type='to_mo')
             return render_template('lead_info_by_lead.html', lead_id=lead_id)
         except Exception as e:
             logger.exception(e)
