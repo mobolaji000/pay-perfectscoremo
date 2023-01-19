@@ -176,7 +176,7 @@
             $('input[name="recent_test_score"]').val(result.recent_test_score);
 
             $('input[name="leadSearchInput"]').val(result.lead_id);
-            $('input[name="leadSearchInput"]').trigger( 'input' );
+            $('input[name="leadSearchInput"]').trigger('input');
 
             //console.log("result is: "+JSON.stringify(result));
 
@@ -664,7 +664,7 @@
 
                     <div class="d-block my-3">
                         <div container>
-                            <p class="lead">Initial Diagnostic/Consultation</p>
+                            <p>Initial Diagnostic/Consultation</p>
 
                             <div class="checkbox mb-3" style="text-align:center;">
 
@@ -709,7 +709,7 @@
 
                     <div class="d-block my-3">
                         <div container>
-                            <p class="lead">Test Prep</p>
+                            <p>Test Prep</p>
 
                             <div class="checkbox mb-3">
                                 <label>
@@ -828,7 +828,7 @@
 
                     <div class="d-block my-3">
                         <div container>
-                            <p class="lead">Essays</p>
+                            <p>Essays</p>
 
                             <div class="checkbox mb-3">
                                 <label>
@@ -918,7 +918,7 @@
 
                     <div class="d-block my-3">
                         <div container>
-                            <p class="lead">Transaction Adjustments</p>
+                            <p>Transaction Adjustments</p>
                             <br>
 
                         </div>
@@ -975,7 +975,7 @@
 
                             <div class="container">
 
-                                <p class="lead">Installments</p>
+                                <p>Installments</p>
                                 <br>
 
                                 <input id="installment_counter" name="installment_counter" value="1" hidden>
@@ -1005,108 +1005,6 @@
 
                             <br>
 
-<!--                            <div class="checkbox mb-3">-->
-<!--                                <label>-->
-<!--                                    <input type="checkbox" id="mark_as_paid" name="mark_as_paid" value=""> Mark as paid-->
-<!--                                </label>-->
-<!--                                <br>-->
-<!--                                <label>-->
-<!--                                    <input type="checkbox" id="send_text_and_email" name="send_text_and_email" value="">-->
-<!--                                    Send text and email-->
-<!--                                </label>-->
-<!--                                <br><br><br>-->
-<!--                                <label>-->
-<!--                                    <input type="checkbox" id="ask_for_student_info" name="ask_for_student_info"-->
-<!--                                        value=""> Ask for student info-->
-<!--                                </label>-->
-<!--                            </div>-->
-
-                            <br> <br> <br> <br> <br>
-
-                             <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-                            <div class="d-block my-3">
-                        <div container>
-                             <div class="row">
-                                <div class="col-md-4 checkbox mb-3">
-                                        <label>
-                                    <input type="checkbox" id="mark_as_paid" name="mark_as_paid" value=""> Mark as paid
-                                </label>
-                                        <br>
-                                </div>
-
-                            </div>
-                        </div>
-                                </div><br><br>
-
- <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-                        <div class="d-block my-3">
-                            <div container>
-                             <div class="row">
-                                 <div class="col-md-4 checkbox mb-3">
-                                        <label>
-                                    <input type="checkbox" id="send_text_and_email" name="send_text_and_email" value=""> Send text and email
-                                </label>
-                                        <br>
-                                </div>
-                                 <div class="col-md-4 checkbox mb-3">
-                                        <label>
-                                    <input type="checkbox" id="ask_for_student_info" name="ask_for_student_info" value=""> Ask for student info
-                                </label>
-                                        <br>
-                                </div>
-
-                            </div>
-                        </div>
-                            </div><br><br>
-
-                            <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-                        <div class="d-block my-3">
-                            <div container>
-
-                            <div class="row">
-                                <div class="col-md-2 mb-3">
-                                        <label>
-                                    <input type="checkbox" id="make_recurring" name="make_recurring" value=""> Make recurring
-                                </label>
-                                        <br>
-                                </div>
-                                 <div class="col-md-5 mb-3">
-                                      <label for="recurring_payment_start_date">Recurring payment start date</label>
-                                     <input id="recurring_payment_start_date" name="recurring_payment_start_date" type="date" class="form-control" disabled>
-                                        <br>
-                                </div>
-                                 <div class="col-md-5 mb-3">
-                                     <label for="recurring_payment_frequency">Recurring payment frequency</label>
-                                     <input id="recurring_payment_frequency" name="recurring_payment_frequency" type="number" class="form-control" min="1" disabled>
-                                        <br>
-                                </div>
-
-                            </div>
-                        </div>
-                            </div><br><br>
-
-
-    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-                            <div class="d-block my-3">
-                        <div container>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                        <label>
-                                    <input type="checkbox" id="pause_payment" name="pause_payment" value=""> Pause payment
-                                </label>
-                                        <br>
-                                </div>
-                                 <div class="col-md-6 mb-3">
-                                      <label for="date_to_resume_paused_payment">Date to resume paused payment</label>
-                                     <input id="date_to_resume_paused_payment" name="date_to_resume_paused_payment" type="date" class="form-control" disabled>
-                                        <br>
-                                </div>
-                            </div>
-                        </div>
-                                </div><br><br>
-
-
-
                         </div>
 
                     </div>
@@ -1127,15 +1025,146 @@
 
                     </div>
 
-                    <br><br>
+                    <br> <br> <br> <br> <br>
+
+                    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+                    <div class="d-block my-3">
+                        <div container>
+                            <p>Transaction Adjustments</p>
+                            <br>
+
+                        </div>
+
+                    </div>
+
+                    <div class="d-block my-3">
+                        <div container>
+                            <div class="row">
+                                <div class="col-md-4 checkbox mb-3">
+                                    <label>
+                                        <input type="checkbox" id="mark_as_paid" name="mark_as_paid" value=""> Mark as
+                                        paid
+                                    </label>
+                                    <br>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div><br><br>
+
+                    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+                    <div class="d-block my-3">
+                        <div container>
+                            <p>Transaction Adjustments</p>
+                            <br>
+
+                        </div>
+
+                    </div>
+
+                    <div class="d-block my-3">
+                        <div container>
+                            <div class="row">
+                                <div class="col-md-4 checkbox mb-3">
+                                    <label>
+                                        <input type="checkbox" id="send_text_and_email" name="send_text_and_email"
+                                            value=""> Send text and
+                                        email
+                                    </label>
+                                    <br>
+                                </div>
+                                <div class="col-md-4 checkbox mb-3">
+                                    <label>
+                                        <input type="checkbox" id="ask_for_student_info" name="ask_for_student_info"
+                                            value=""> Ask for
+                                        student info
+                                    </label>
+                                    <br>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div><br><br>
+
+                    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+                    <div class="d-block my-3">
+                        <div container>
+                            <p>Transaction Adjustments</p>
+                            <br>
+
+                        </div>
+
+                    </div>
+
+                    <div class="d-block my-3">
+                        <div container>
+
+                            <div class="row">
+                                <div class="col-md-2 mb-3">
+                                    <label>
+                                        <input type="checkbox" id="make_recurring" name="make_recurring" value=""> Make
+                                        recurring
+                                    </label>
+                                    <br>
+                                </div>
+                                <div class="col-md-5 mb-3">
+                                    <label for="recurring_payment_start_date">Recurring payment start date</label>
+                                    <input id="recurring_payment_start_date" name="recurring_payment_start_date"
+                                        type="date" class="form-control" disabled>
+                                    <br>
+                                </div>
+                                <div class="col-md-5 mb-3">
+                                    <label for="recurring_payment_frequency">Recurring payment frequency</label>
+                                    <input id="recurring_payment_frequency" name="recurring_payment_frequency"
+                                        type="number" class="form-control" min="1" disabled>
+                                    <br>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div><br><br>
+
+
+                    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+                    <div class="d-block my-3">
+                        <div container>
+                            <p>Transaction Adjustments</p>
+                            <br>
+
+                        </div>
+
+                    </div>
+
+                    <div class="d-block my-3">
+                        <div container>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>
+                                        <input type="checkbox" id="pause_payment" name="pause_payment" value=""> Pause
+                                        payment
+                                    </label>
+                                    <br>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="date_to_resume_paused_payment">Date to resume paused payment</label>
+                                    <input id="date_to_resume_paused_payment" name="date_to_resume_paused_payment"
+                                        type="date" class="form-control" disabled>
+                                    <br>
+                                </div>
+                            </div>
+                        </div>
+                    </div><br><br>
+
 
                     <input id="leads" name="leads" hidden data-leads="{{ leads }}">
-
 
                     <div class="row justify-content-center"><input id="create_transaction_button"
                             name="create_transaction_button" class="btn btn-primary btn-lg btn-block w-50 p-3"
                             type="submit" value="Create Transaction" onclick="finalCheckBeforeSubmit(event)"></input>
                     </div>
+
+
+
                 </form>
             </div>
         </div>
