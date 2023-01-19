@@ -165,15 +165,12 @@ def client_info(prospect_id):
 @server.route('/lead_info_by_lead',defaults={'lead_id': None}, methods=['GET','POST'])
 @server.route('/lead_info_by_lead/<lead_id>', methods=['GET','POST'])
 def lead_info_by_lead(lead_id):
-    logger.debug("lead_id is: {}".format(lead_id))
-    logger.debug("lead_info_by_lead method is: {}".format(request.method))
     if request.method == 'GET':
         try:
             lead_info_contents = AppDBUtil.getLeadInfo(lead_id)[0]
             logger.debug("lead_id in get is: {}".format(lead_id))
             return render_template('lead_info_by_lead.html',
                                    lead_id=lead_info_contents['lead_id'],
-                                   xxx=lead_info_contents,
                                    lead_name=lead_info_contents['lead_name'],
                                    lead_salutation=lead_info_contents['lead_salutation'],
                                    lead_email=lead_info_contents['lead_email'],
