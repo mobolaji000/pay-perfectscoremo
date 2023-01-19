@@ -39,7 +39,7 @@ var details_on_how_you_heard_about_us = $("#lead").attr("data-details_on_how_you
 
 		var services_you_are_interested_in = what_services_are_you_interested_in;
 		// you will have to remember to change the list above anytime you make a change to the items in the "what_services_are_you_interested_in" select
-		var all_services = ["PSAT/PACT","SAT/ACT","College Admissions Counselling","General Tutoring","Other"];
+		var all_services = ["PSAT/PACT","SAT/ACT","College Admissions Counselling","College Application Essays","General Tutoring","Other"];
 
 		 var new_choices = [];
 
