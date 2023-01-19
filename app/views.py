@@ -800,21 +800,23 @@ def start_background_jobs_before_first_request():
     def remind_lead_about_appointment_background_job():
         try:
             logger.info("remind_lead_about_appointment_background_job started")
-            reminder_last_names = 'remind_lead_about_appointment_background_job executed for: '
+            reminder_last_names = 'The following leads were sent reminders about an upcoming appointment: '
             leadsToReceiveReminders = AppDBUtil.findLeadsToReceiveReminders()
             logger.debug("leadsToReceiveReminders are: {}".format(leadsToReceiveReminders))
+            leads_eligible_for_reminders = False
             for lead in leadsToReceiveReminders:
                 number_of_days_until_appointment = (lead.get('appointment_date_and_time').date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
                 appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(lead.get('appointment_date_and_time'))
 
                 if number_of_days_until_appointment in [0,1,3]:
+                    leads_eligible_for_reminders = True
                     message = lead.get('lead_salutation') + " " + lead.get('lead_name') if lead.get('lead_salutation') else 'Parent'
                     if lead.get('lead_email'):
                         SendMessagesToClients.sendEmail(to_address=[lead.get('lead_email'), 'mo@prepwithmo.com'], message=[message, appointment_date_and_time, lead.get('lead_id')], message_type='reminder_about_appointment', subject='Reminder About Your Appointment')
                     if lead.get('lead_phone_number'):
                         SendMessagesToClients.sendSMS(to_numbers=lead.get('lead_phone_number'), message=[message, appointment_date_and_time, lead.get('lead_id')], message_type='reminder_about_appointment')
                     reminder_last_names = reminder_last_names+lead['lead_name']+" ("+appointment_date_and_time+")"+", "
-            if reminder_last_names != 'remind_lead_about_appointment_background_job executed for: ':
+            if leads_eligible_for_reminders:
                 SendMessagesToClients.sendSMS(to_numbers='9725847364', message=reminder_last_names, message_type='to_mo')
 
         except Exception as e:
@@ -823,7 +825,7 @@ def start_background_jobs_before_first_request():
     def remind_client_about_invoice_background_job():
         try:
             logger.info("remind_client_about_invoice_background_job started")
-            reminder_last_names = 'remind_client_about_invoice_background_job started executed for: '
+            reminder_last_names = 'The following clients were sent reminders about an unaddressed transaction: '
             clientsToReceiveReminders = AppDBUtil.findClientsToReceiveReminders()
 
             for client in clientsToReceiveReminders:
