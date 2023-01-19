@@ -186,7 +186,7 @@ def lead_info_by_lead(lead_id):
         except Exception as e:
             logger.exception(e)
             flash('Error in getting your information. Please contact Mo.')
-            render_template('lead_info_by_lead.html', lead_id=lead_id)
+            return render_template('lead_info_by_lead.html', lead_id=lead_id)
 
 
     elif request.method == 'POST':
@@ -212,12 +212,12 @@ def lead_info_by_lead(lead_id):
                 raise Exception
 
             flash("Your information has been submitted successfully")
-            render_template('lead_info_by_lead.html', lead_id=lead_id)
+            return render_template('lead_info_by_lead.html', lead_id=lead_id)
         except Exception as e:
-            print(e)
-            traceback.print_exc()
+            logger.exception(e)
             flash("Error in submitting your information. Please contact Mo.")
-            render_template('lead_info_by_lead.html', lead_id=lead_id)
+            return render_template('lead_info_by_lead.html', lead_id=lead_id)
+
 
 
 
