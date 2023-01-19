@@ -197,10 +197,12 @@ def lead_info_by_lead(lead_id):
 
             leadInfo = {}
 
+            recent_test_score = -1 if lead_info_contents.get('recent_test_score', '') == '' else lead_info_contents.get('recent_test_score')
+
             leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''),'lead_salutation': lead_info_contents.get('lead_salutation', ''),'lead_email': lead_info_contents.get('lead_email', ''),
                              'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'what_services_are_they_interested_in': request.form.getlist('what_services_are_you_interested_in'),
                              'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_you_are_interested_in', ''),
-                             'grade_level': lead_info_contents.get('grade_level',''),'recent_test_score': lead_info_contents.get('recent_test_score',-1),'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),
+                             'grade_level': lead_info_contents.get('grade_level',''),'recent_test_score': recent_test_score,'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),
                              'how_did_they_hear_about_us': lead_info_contents.get('how_did_you_hear_about_us', ''),'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_you_heard_about_us', '')})
 
             number_of_rows_modified = AppDBUtil.modifyLeadInfo(lead_info_contents.get('lead_id', ''), leadInfo)
