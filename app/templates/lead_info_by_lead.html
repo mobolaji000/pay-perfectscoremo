@@ -49,8 +49,8 @@
     var pressed_button_val = document.getElementById(event.srcElement.id).value
     document.getElementById("action").value = pressed_button_val
 
-		var lead_id = $("#lead").attr("data-lead_id");
-	$('input[name="lead"]').val(lead_id);
+		var lead_id = $("#lead_id").attr("data-lead_id");
+	$('input[name="lead_id"]').val(lead_id);
 
 	if (pressed_button_val == "Update")
 	{
@@ -229,7 +229,8 @@
 							<input id="update_lead_info" name="submitButton" class="btn btn-primary btn- btn-block" type="submit"   style="display:inline-block; width:50%; margin-left: 25%;"  value="Update" onclick="finalCheckBeforeSubmit()"></input>
 						</div>
 
-						<input id="lead" name="lead" hidden  data-lead_id="{{ lead_id }}"
+						<input id="lead" name="lead" hidden
+							   data-lead_id="{{ lead_id }}"
 							   data-lead_salutation="{{ lead_salutation }}"
 							   data-lead_name="{{ lead_name }}"
 							   data-lead_email="{{ lead_email }}"
@@ -242,6 +243,8 @@
 							   data-how_did_you_hear_about_us="{{ how_did_you_hear_about_us }}"
 							   data-details_on_how_you_heard_about_us="{{ details_on_how_you_heard_about_us }}"
 						>
+
+						<input id="lead_id" name="lead_id" hidden>
 
 
 						<input id="action" name="action" hidden>
