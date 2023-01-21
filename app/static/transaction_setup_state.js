@@ -303,6 +303,14 @@ $(document).ready(function() {
         }
     });
 
+     $('input[name="ask_for_student_availability"]').on('click', function() {
+        if ($(this).val() == "") {
+            $(this).val("yes");
+        } else {
+            $(this).val("");
+        }
+    });
+
 
 // add and delete rows
 

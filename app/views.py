@@ -519,6 +519,7 @@ def parseDataForStripe(client_info):
     stripe_info['transaction_id'] = client_info.get('transaction_id', '')
     stripe_info['installment_counter'] = client_info.get('installment_counter', '')
     stripe_info['ask_for_student_info'] = client_info.get('ask_for_student_info', '')
+    stripe_info['ask_for_student_availability'] = client_info.get('ask_for_student_availability', '')
     stripe_info['does_customer_payment_info_exist'] = client_info.get('does_customer_payment_info_exist', '')
     stripe_info['prospect_id'] = client_info.get('prospect_id', '')
 
@@ -592,7 +593,12 @@ def execute_card_payment():
                 if result['status'] != 'success':
                     logger.error('Attempt to create family information failed. Contact Mo.')
                     return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
-                    #flash('Attempt to create family information failed. Contact Mo.')
+
+            if payment_and_signup_data.get('ask_for_student_availability', '') == 'yes':
+                result = notifyOneOnOneInfo(payment_and_signup_data)
+                if result['status'] != 'success':
+                    logger.error('Attempt to notify one-on-one info failed. Contact Mo.')
+                    return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
 
         logger.debug("Result from execute_card_payment is {}".format(jsonify(result)))
         return jsonify(result)
@@ -652,11 +658,8 @@ def exchange_plaid_for_stripe():
         print(e)
         traceback.print_exc()
 
-def enterClientInfo(payment_and_signup_data={}):
+def notifyOneOnOneInfo(payment_and_signup_data={}):
     try:
-        print("prospect_id in post is ", payment_and_signup_data['prospect_id'])
-        print("student data is", payment_and_signup_data)
-        AppDBUtil.createStudentData(payment_and_signup_data)
         to_numbers = [number for number in [payment_and_signup_data['parent_1_phone_number'], payment_and_signup_data['parent_2_phone_number'], payment_and_signup_data['student_phone_number']] if number != '']
         SendMessagesToClients.sendSMS(to_numbers=to_numbers, message=payment_and_signup_data['student_first_name'], message_type='welcome_new_student')
         time.sleep(5)
@@ -669,8 +672,19 @@ def enterClientInfo(payment_and_signup_data={}):
         # SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], message_type='welcome_message',subject='Setting Up Group Email')
         return {'status': 'success'}
     except Exception as e:
-        print(e)
-        traceback.print_exc()
+        logger.exception(e)
+        return {'status': 'failure'}
+        #return render_template('error.html', error_message="Error in submitting student information and creating group messages for regular updates. Please contact Mo at 972-584-7364.")
+
+
+def enterClientInfo(payment_and_signup_data={}):
+    try:
+        print("prospect_id in post is ", payment_and_signup_data['prospect_id'])
+        print("student data is", payment_and_signup_data)
+        AppDBUtil.createStudentData(payment_and_signup_data)
+        return {'status': 'success'}
+    except Exception as e:
+        logger.exception(e)
         return {'status': 'failure'}
         #return render_template('error.html', error_message="Error in submitting student information and creating group messages for regular updates. Please contact Mo at 972-584-7364.")
 
@@ -943,7 +957,7 @@ def complete_signup():
         return redirect(url_for('input_transaction_id'))
 
     stripe_info = parseDataForStripe(client_info)
-    response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info',''),prospect_id=client_info.get('prospect_id','')))
+    response = make_response(render_template('complete_signup.html', stripe_info=stripe_info, client_info=client_info,products_info=products_info,showACHOverride=showACHOverride,askForStudentInfo=client_info.get('ask_for_student_info',''),askForStudentAvailability=client_info.get('ask_for_student_availability',''),prospect_id=client_info.get('prospect_id','')))
 
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"  # HTTP 1.1.
     response.headers["Pragma"] = "no-cache"  # HTTP 1.0.

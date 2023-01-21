@@ -44,6 +44,9 @@
         var ask_for_student_info = $("#ask_for_student_info").attr("data-ask_for_student_info");
 		$('input[name="ask_for_student_info"]').val(ask_for_student_info);
 
+		var ask_for_student_availability = $("#ask_for_student_availability").attr("data-ask_for_student_availability");
+		$('input[name="ask_for_student_availability"]').val(ask_for_student_availability);
+
 		 var prospect_id = $("#prospect_id").attr("data-prospect_id");
 		$('input[name="prospect_id"]').val(prospect_id);
     }
@@ -215,6 +218,10 @@
 
 		</div>
 	</div>
+
+				{% endif %}
+
+				 {% if askForStudentAvailability == 'yes' %}
 
 
 				<div class="container">
@@ -588,6 +595,7 @@
 
 				<input id="stripe_info" type="hidden"  data-stripe_info="{{ stripe_info }}">
 			<input id="ask_for_student_info" name="ask_for_student_info" type="hidden"  data-ask_for_student_info="{{ askForStudentInfo }}">
+			<input id="ask_for_student_availability" name="ask_for_student_availability" type="hidden"  data-ask_for_student_availability="{{ askForStudentAvailability }}">
 				<input id="show_ach_override" name="show_ach_override" type="hidden"  data-show_ach_override="{{ showACHOverride }}">
 
 
