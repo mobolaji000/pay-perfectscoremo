@@ -725,8 +725,8 @@ def stripe_webhook():
                 AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id, amount_paid)
                 AppDBUtil.updateTransactionPaymentStarted(transaction_id)
 
-                logger.info("paid transaction is {}".format(paid_invoice) )
-                logger.info("transaction id is {}".format( transaction_id))
+                logger.info("Stripe invoice id of paid invoice is {}".format(paid_invoice.id) )
+                logger.info("Transaction id of paid invice is {}".format( transaction_id))
             else:
                 raise Exception(f"Why is payment type not card for {transaction_id} ?")
 
@@ -774,7 +774,8 @@ def stripe_webhook():
                         logger.error(e)
                         traceback.print_exc()
             else:
-                raise Exception(f"Why is payment method detail not ach_debit for {transaction_id} ? Probably because there this is an instance of a credit card payment, which was already handled under invoice.paid and is now being sent to be finalized, which I do not care for since it has already been updated as paid the under invoice.paid i.e. I only care about updating ach payments through invoice.finalized.")
+                logger.warning("Why is payment method detail not ach_debit for {} ? Probably because there this is an instance of a credit card payment, which was already handled under invoice.paid and is now being sent to be finalized, which I do not care for since it has already been updated as paid the under invoice.paid i.e. I only care about updating ach payments through invoice.finalized.".format(transaction_id))
+                #raise Exception("Why is payment method detail not ach_debit for {} ? Probably because there this is an instance of a credit card payment, which was already handled under invoice.paid and is now being sent to be finalized, which I do not care for since it has already been updated as paid the under invoice.paid i.e. I only care about updating ach payments through invoice.finalized.".format(transaction_id))
 
 
         elif event.type == 'invoice.created':
@@ -786,9 +787,7 @@ def stripe_webhook():
 
 
     except Exception as e:
-        logger.error("500 error from calling webhook. Check code and logs.")
-        logger.error(e)
-        traceback.print_exc()
+        logger.exception("500 error from calling webhook. Check code and logs.\n"+str(e))
         return json.dumps({'success': False}), 500, {'ContentType': 'application/json'}
         #return jsonify({'status': 500})
 

@@ -464,7 +464,7 @@
                             </a>
                             <br><br><br>
                             {% endfor %}
-                            <input id="result" name="result" hidden>
+                            <input id="result" name="result" value="" hidden>
                             {% if search_results %}
                             <div style="display: flex; justify-content: space-around;margin-right:50px">
 
@@ -1025,12 +1025,12 @@
 
                     </div>
 
-                    <br> <br> <br> <br> <br>
+                    <br>
 
                     <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
                     <div class="d-block my-3">
                         <div container>
-                            <p>Transaction Adjustments</p>
+                            <p>Mark as Paid</p>
                             <br>
 
                         </div>
@@ -1050,12 +1050,12 @@
 
                             </div>
                         </div>
-                    </div><br><br>
+                    </div><br>
 
                     <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
                     <div class="d-block my-3">
                         <div container>
-                            <p>Transaction Adjustments</p>
+                            <p>Extra Notifications</p>
                             <br>
 
                         </div>
@@ -1084,12 +1084,12 @@
 
                             </div>
                         </div>
-                    </div><br><br>
+                    </div><br>
 
                     <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
                     <div class="d-block my-3">
                         <div container>
-                            <p>Transaction Adjustments</p>
+                            <p>Recurring Payments</p>
                             <br>
 
                         </div>
@@ -1102,7 +1102,7 @@
                             <div class="row">
                                 <div class="col-md-2 mb-3">
                                     <label>
-                                        <input type="checkbox" id="make_recurring" name="make_recurring" value=""> Make
+                                        <input type="checkbox" id="make_payment_recurring" name="make_payment_recurring" value="no"> Make
                                         recurring
                                     </label>
                                     <br>
@@ -1122,13 +1122,13 @@
 
                             </div>
                         </div>
-                    </div><br><br>
+                    </div><br>
 
 
                     <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
                     <div class="d-block my-3">
                         <div container>
-                            <p>Transaction Adjustments</p>
+                            <p>Pause Transaction</p>
                             <br>
 
                         </div>
@@ -1140,20 +1140,20 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label>
-                                        <input type="checkbox" id="pause_payment" name="pause_payment" value=""> Pause
+                                        <input type="checkbox" id="pause_payment" name="pause_payment" value="no"> Pause
                                         payment
                                     </label>
                                     <br>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="date_to_resume_paused_payment">Date to resume paused payment</label>
-                                    <input id="date_to_resume_paused_payment" name="date_to_resume_paused_payment"
+                                    <label for="paused_payment_resumption_date">Paused payment resumption date</label>
+                                    <input id="paused_payment_resumption_date" name="paused_payment_resumption_date"
                                         type="date" class="form-control" disabled>
                                     <br>
                                 </div>
                             </div>
                         </div>
-                    </div><br><br>
+                    </div><br>
 
 
                     <input id="leads" name="leads" hidden data-leads="{{ leads }}">
