@@ -29,9 +29,11 @@ class Transaction(db.Model):
     amount_from_transaction_paid_so_far = db.Column(db.Integer, index=True, nullable=False, default=0)
     ask_for_student_info = db.Column(db.String(4), index=True,nullable=False, default='')
     does_customer_payment_info_exist = db.Column(db.String(30), index=True, nullable=False, default='')
-    #installment_date = db.Column(db.PickleType,  index=True, nullable=True, default='')
-    #installment_amount = db.Column(db.PickleType, index=True, nullable=True, default='')
-    #what happens when you try to update pickle message_type? do you have to instantiate a new variable?
+    recurring_payment_frequency = db.Column(db.Integer, index=True, nullable=True, default=-1)
+    make_payment_recurring = db.Column(db.Enum('yes', 'no',name='yes_no_options'), index=True, nullable=False, default='no')
+    pause_payment = db.Column(db.Enum('yes', 'no',name='yes_no_options'), index=True, nullable=False, default='no')
+    paused_payment_resumption_date = db.Column(db.Date, index=True, nullable=True)
+    recurring_payment_start_date = db.Column(db.Date, index=True, nullable=True)
 
 
     def __repr__(self):

@@ -1,2 +1,2 @@
 # pay-perfectscoremo
-A project for making payments to perfectscoremo
+A project for making payments to prepwithmo

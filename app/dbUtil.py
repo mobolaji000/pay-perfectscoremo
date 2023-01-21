@@ -640,7 +640,6 @@ class AppDBUtil():
         transaction_ids = []
         for transaction in transactions:
             transaction_ids.append(transaction.transaction_id)
-        logger.debug("All trasaction ids are: {}".format(transaction_ids))
         return transaction_ids
 
     @classmethod

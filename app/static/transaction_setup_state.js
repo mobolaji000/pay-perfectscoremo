@@ -48,9 +48,9 @@ $(document).ready(function() {
             default_tp_date = "";
         }
 
-        if ($('input[name="turn_on_installments"]').val() != "") {
-            setDefaultInstallmentDate();
-        }
+        // if ($('input[name="turn_on_installments"]').val() != "") {
+        //     setDefaultInstallmentDate();
+        // }
 
     });
 
@@ -62,9 +62,9 @@ $(document).ready(function() {
             default_college_apps_date = "";
         }
 
-        if ($('input[name="turn_on_installments"]').val() != "") {
-            setDefaultInstallmentDate();
-        }
+        // if ($('input[name="turn_on_installments"]').val() != "") {
+        //     setDefaultInstallmentDate();
+        // }
     });
 
 
@@ -247,19 +247,19 @@ $(document).ready(function() {
     }
 
 
-    $('input[name="turn_on_installments"]').on('click', function() {
-
-        if ($(this).val() == "") {
-            setDefaultInstallmentDate();
-            $('input[name="mark_as_paid"]').prop('checked', false);
-            $('input[name="mark_as_paid"]').val("");
-
-            $(this).val("yes");
-        } else {
-
-            $(this).val("");
-        }
-    });
+    // $('input[name="turn_on_installments"]').on('click', function() {
+    //
+    //     if ($(this).val() == "") {
+    //         setDefaultInstallmentDate();
+    //         $('input[name="mark_as_paid"]').prop('checked', false);
+    //         $('input[name="mark_as_paid"]').val("");
+    //
+    //         $(this).val("yes");
+    //     } else {
+    //
+    //         $(this).val("");
+    //     }
+    // });
 
 
     $('input[name="mark_as_paid"]').on('click', function() {
@@ -267,7 +267,7 @@ $(document).ready(function() {
 
         if ($(this).val() == "") {
 
-            $('input[name="turn_on_installments"]').prop('checked', false);
+            // $('input[name="turn_on_installments"]').prop('checked', false);
 
             $('input[name="send_text_and_email"]').prop('checked', false);
             $('input[name="send_text_and_email"]').val("");
@@ -310,9 +310,22 @@ $(document).ready(function() {
 
     $("#addrow").on("click", function () {
 
-    var counter = $('input[name="installment_counter"]').val();
+         var counter = $('input[name="installment_counter"]').val();
 
-    //alert(counter);
+        if (Number(counter) > 0)
+{
+
+    $('input[name="make_payment_recurring"]').attr('disabled', true);
+    // $('input[name="make_payment_recurring"]').prop('checked', false);
+}
+
+        if ($('input[name="make_payment_recurring"]').val() == "yes")
+            {
+                 document.getElementById("no_recurring_payments_with_installments_message_1").hidden=false;
+                 document.getElementById("no_recurring_payments_with_installments_message_2").hidden=false;
+            }
+        else
+        {
 
     if (Number(counter) < 13)
 {
@@ -340,11 +353,14 @@ $(document).ready(function() {
         document.getElementById("more_than_12_installments_message").hidden=false;
 
         }
+        }
 
     });
 
     $("table.order-list").on("click", ".ibtnDel", function (event) {
     var counter = $('input[name="installment_counter"]').val();
+
+
 
         $(this).closest("tr").remove();
         counter--;
@@ -352,16 +368,18 @@ $(document).ready(function() {
 
         if (Number(counter) == 1)
         {
+             $('input[name="create_transaction_button"]').attr('disabled', false);
+            $('input[name="make_payment_recurring"]').attr('disabled', false);
         document.getElementById("installment_not_equal_total_message_create").hidden=true;
         document.getElementById("installment_not_equal_total_message_modify").hidden=true;
-            $('input[name="create_transaction_button"]').attr('disabled', false);
-             //$('input[name="modify_transaction_button"]').attr('disabled', false);
+
         }
 
     if (Number(counter) < 13)
         {
         document.getElementById("more_than_12_installments_message").hidden=true;
         document.getElementById("addrow").hidden=false;
+        $('input[name="make_payment_recurring"]').attr('disabled', true);
         }
     else
         {
@@ -375,15 +393,12 @@ $(document).ready(function() {
      var installment_total = 0;
      var amount = '';
       var counter = $('input[name="installment_counter"]').val();
-      //console.log(counter);
 
      for (let k = 1; k < counter; k++) {
 
      amount = 'amount_'.concat(k);
      	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
 		}
-
-    // if(typeof job_ui_state['ids_of_attached_files_if_any'] !== "undefined")
 
         if (counter > 1)
         {
@@ -404,8 +419,8 @@ $(document).ready(function() {
                //only enable modifcation if this is an exisitn invoice with a payment that has not been started
 
                  if (typeof $('input[name="result"]').val() != "undefined" && JSON.parse(result).payment_started == "False")
+                 //if (typeof $('input[name="result"]').val() != "undefined" && result != '' && JSON.parse(result).payment_started == "False")
                  {
-                     console.log("allowed to enable modify");
                        $('input[name="modify_transaction_button"]').attr('disabled', false);
                  }
         }
@@ -419,9 +434,7 @@ $(document).ready(function() {
 
      $("#transaction_total").on('change', doesInstallmentEqualTotal);
 
-
-     //change paste keyup
-            $('#leadSearchInput').on('input', function(event) {
+      $('#leadSearchInput').on('input', function(event) {
                 let leadSearchValue = event.target.value;
                 //console.log(emailSearchValue);
                 let leadSearchResults = fuse.search(leadSearchValue);
@@ -436,14 +449,32 @@ $(document).ready(function() {
                     lead_to_connect_option_visible_content = result.item['lead_id']+", "+result.item['lead_name']+", "+result.item['lead_email']+", "+result.item['lead_phone_number'];
                      lead_to_connect_options += '<option value="'+lead_to_connect_option_value+'">'+lead_to_connect_option_visible_content+'</option>';
 
-                     //  console.log("result is: "+result);
-                     // console.log("lead_to_connect_option_value is: "+lead_to_connect_option_value);
-                     //  console.log("lead_to_connect_option_visible_content is: "+lead_to_connect_option_visible_content);
-
                 }
 
                  $('#leadSearchResults').append(lead_to_connect_options);
 
             });
+
+
+       $('input[name="make_payment_recurring"]').on('click', function() {
+        if ($(this).val() == "no") {
+
+            document.getElementById("addrow").hidden=true;
+            $(this).val("yes");
+            $('input[name="recurring_payment_start_date"]').attr('disabled', false);
+             $('input[name="recurring_payment_frequency"]').attr('disabled', false);
+             $('input[name="recurring_payment_start_date"]').prop('required', true);
+             $('input[name="recurring_payment_frequency"]').prop('required', true);
+
+        } else if ($(this).val() == "yes") {
+
+            $(this).val("no");
+            document.getElementById("addrow").hidden=false;
+            $('input[name="recurring_payment_start_date"]').attr('disabled', true);
+             $('input[name="recurring_payment_frequency"]').attr('disabled', true);
+             $('input[name="recurring_payment_start_date"]').prop('required', false);
+             $('input[name="recurring_payment_frequency"]').prop('required', false);
+        }
+    });
 
 });
