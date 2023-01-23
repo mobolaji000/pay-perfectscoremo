@@ -673,7 +673,7 @@ def notifyOneOnOneInfo(payment_and_signup_data={}):
         message = ""
         for k, v in ast.literal_eval(payment_and_signup_data['all_days_for_one_on_one']).items():
             message = message + " " + k.split('\n')[1].strip() + ","
-        SendMessagesToClients.sendEmail(message=message, subject="Suggested one-on-one days for " + str(payment_and_signup_data['student_first_name']) + " " + str(payment_and_signup_data['student_last_name']), message_type='to_mo')
+        SendMessagesToClients.sendEmail(message=message, subject="Suggested one-on-one days for " + str(payment_and_signup_data['student_first_name']) + " " + str(payment_and_signup_data['student_last_name']), message_type='notify_mo_about_suggested_one_on_one_days')
         # hold off on sending group emails until you dedcide there is a value add
         # SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], message_type='welcome_message',subject='Setting Up Group Email')
         return {'status': 'success'}
@@ -849,7 +849,7 @@ def start_background_jobs_before_first_request():
             leadsWithAppointmentsInTheLastHour = AppDBUtil.findLeadsWithAppointmentsInTheLastHour()
 
             for lead in leadsWithAppointmentsInTheLastHour:
-                SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com', message=[lead['lead_salutation'],lead['lead_name'],miscellaneousUtilsInstance.clean_up_date_and_time(lead['appointment_date_and_time']),lead['lead_id']],message_type='modify_lead_appointment_completion_status')
+                SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com', message=[lead['lead_salutation'],lead['lead_name'],miscellaneousUtilsInstance.clean_up_date_and_time(lead['appointment_date_and_time']),lead['lead_id']],message_type='notify_mo_to_modify_lead_appointment_completion_status')
                 #link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
                 #reminder_last_names = reminder_last_names+lead['lead_salutation']+' '+lead['lead_name']+' '+lead['appointment_date_and_time']+' '+''+", ".format(lead['lead_id'])
             # if clientsToReceiveReminders:

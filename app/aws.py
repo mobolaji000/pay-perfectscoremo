@@ -91,9 +91,13 @@ class AWSInstance():
         elif message_type == 'confirm_lead_appointment':
             link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
             created_or_modified_span = "<span>Dear {},</span><br><br><span>Thank you for signing up for a diagnostic/consultation at PrepWithMo. This is a confirmation that your appointment is on  {}. </span><br><br><span> Ahead of your appointment, please go to {} (also sent to your phone number) to fill out/confirm some basic information. If you have any questions, please respond to this email or call 972-584-7364.</span><br><br><span>We look forward to meeting you.</span><br><br><span>Regards,</span><br><span>Mo</span><br><br>".format(message[0],message[1],link_url)
-        elif message_type == 'modify_lead_appointment_completion_status':
+        elif message_type == 'notify_mo_to_modify_lead_appointment_completion_status':
             link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
             created_or_modified_span = "<span>Use the below URLs to modify the appointment completion status of leads in the last hour : </span><br><br><span>{} {} {} {}</span>".format(message[0],message[1],message[2],link_url)
+        elif message_type == 'notify_mo_about_suggested_one_on_one_days':
+            created_or_modified_span = "<span>{}</span><br><br>".format(message)
+        else:
+            created_or_modified_span = message
 
 
         SENDER = "PrepWithMo <mo@info.perfectscoremo.com>"
@@ -136,15 +140,7 @@ class AWSInstance():
                 </body>
                 </html>
                             """
-        elif message_type == 'to_mo':
-            BODY_HTML = """<html>
-                    <head></head>
-                    <body>
-                      <span>Logging message: """ + message + """!</span><br><br>""" \
-                        + """
-                    </body>
-                    </html>
-                                """
+
         elif message_type in ['create_transaction_new_client', 'modify_transaction_new_client', 'create_transaction_existing_client', 'modify_transaction_existing_client', 'reminder_to_make_payment']:
             BODY_HTML = """<html>
                             <head></head>
@@ -166,7 +162,7 @@ class AWSInstance():
                             </body>
                             </html>
                                         """
-        elif message_type in ['reminder_about_appointment', 'confirm_lead_appointment','modify_lead_appointment_completion_status']:
+        elif message_type in ['reminder_about_appointment', 'confirm_lead_appointment','notify_mo_to_modify_lead_appointment_completion_status','notify_mo_about_suggested_one_on_one_days']:
             BODY_HTML = """<html>
                     <head></head>
                     <body>
