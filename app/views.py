@@ -523,6 +523,12 @@ def parseDataForStripe(client_info):
     stripe_info['does_customer_payment_info_exist'] = client_info.get('does_customer_payment_info_exist', '')
     stripe_info['prospect_id'] = client_info.get('prospect_id', '')
 
+    stripe_info['make_payment_recurring'] = client_info.get('make_payment_recurring', '')
+    stripe_info['recurring_payment_frequency'] = client_info.get('recurring_payment_frequency', 0)
+    stripe_info['recurring_payment_start_date'] = client_info.get('recurring_payment_start_date', None)
+    stripe_info['pause_payment'] = client_info.get('pause_payment', '')
+    stripe_info['paused_payment_resumption_date'] = client_info.get('paused_payment_resumption_date', None)
+
     if client_info.get('installments','') != '':
         for index,installment in enumerate(client_info.get('installments','')):
             stripe_info["date"+"_"+str(index+1)] = int(time.mktime(installment["date"].timetuple()))

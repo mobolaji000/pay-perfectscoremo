@@ -86,10 +86,16 @@ class AppDBUtil():
         adjustment_explanation = clientData.get('adjustment_explanation','')
         transaction_total = 0 if clientData.get('transaction_total','') == '' else clientData.get('transaction_total','')
         installment_counter = 0 if clientData.get('installment_counter','') == '' else int(clientData.get('installment_counter',''))#-1
+        # client-side counter is always one more; get the actual number here
         ask_for_student_info = clientData.get('ask_for_student_info','')
         ask_for_student_availability = clientData.get('ask_for_student_availability', '')
+        make_payment_recurring = clientData.get('make_payment_recurring','')
+        recurring_payment_frequency = 0 if clientData.get('recurring_payment_frequency','') == '' else clientData.get('recurring_payment_frequency','')
+        recurring_payment_start_date = clientData.get('recurring_payment_start_date',None)
+        pause_payment = clientData.get('pause_payment','')
+        paused_payment_resumption_date = clientData.get('paused_payment_resumption_date',None)
         does_customer_payment_info_exist = 'yes' if clientData.get('does_customer_payment_info_exist',None) else 'no'
-        # client-side counter is always one more; get the actual number here
+
 
 
 
@@ -101,7 +107,9 @@ class AppDBUtil():
                                   diag_total=diag_total, was_test_prep_purchased=was_test_prep_purchased, tp_product=tp_product, tp_units=tp_units,
                                   tp_total=tp_total, was_college_apps_purchased=was_college_apps_purchased, college_apps_product=college_apps_product,
                                   college_apps_units=college_apps_units, college_apps_total=college_apps_total,adjust_total=adjust_total, adjustment_explanation=adjustment_explanation,
-                                transaction_total=transaction_total, installment_counter=installment_counter,ask_for_student_info=ask_for_student_info,ask_for_student_availability=ask_for_student_availability,does_customer_payment_info_exist=does_customer_payment_info_exist)
+                                transaction_total=transaction_total, installment_counter=installment_counter,ask_for_student_info=ask_for_student_info,ask_for_student_availability=ask_for_student_availability,
+                                      does_customer_payment_info_exist=does_customer_payment_info_exist,make_payment_recurring=make_payment_recurring,recurring_payment_frequency=recurring_payment_frequency,
+                                      recurring_payment_start_date=recurring_payment_start_date,pause_payment=pause_payment,paused_payment_resumption_date=paused_payment_resumption_date)
 
 
             db.session.add(transaction)
@@ -115,7 +123,8 @@ class AppDBUtil():
                         "was_college_apps_purchased": was_college_apps_purchased,"college_apps_product": college_apps_product,"college_apps_units": college_apps_units,
                         "college_apps_total": college_apps_total,"adjust_total": adjust_total,"adjustment_explanation": adjustment_explanation,
                   "transaction_total": transaction_total, "installment_counter":installment_counter, "does_customer_payment_info_exist":does_customer_payment_info_exist,
-                  "ask_for_student_info":ask_for_student_info,"ask_for_student_availability":ask_for_student_availability})
+                  "ask_for_student_info":ask_for_student_info,"ask_for_student_availability":ask_for_student_availability,"make_payment_recurring":make_payment_recurring,"recurring_payment_frequency":recurring_payment_frequency,
+                  "recurring_payment_start_date":recurring_payment_start_date,"pause_payment":pause_payment,"paused_payment_resumption_date":paused_payment_resumption_date})
 
             print("number of transaction rows modified is: ",number_of_rows_modified) #printing of rows modified to logs to help with auditing
 
@@ -180,11 +189,7 @@ class AppDBUtil():
             parse(string_date, fuzzy=fuzzy)
             return True
 
-        # except Exception as e:
-        #     return False
         except ValueError as v:
-            #logger.error(v)
-            #traceback.print_exc()
             return False
 
     @classmethod
@@ -283,10 +288,10 @@ class AppDBUtil():
     def findLeadsWithAppointmentsInTheLastHour(cls):
         try:
             searchEndDate = datetime.now(pytz.timezone('US/Central'))
-            logger.debug(searchEndDate.strftime('%Y-%m-%dT%H:%M:%S'))
+            logger.debug("searchEndDate: ".format(searchEndDate.strftime('%Y-%m-%dT%H:%M:%S')))
             searchStartDate = datetime.now(pytz.timezone('US/Central')) - timedelta(hours=1)
-            logger.debug(searchStartDate.strftime('%Y-%m-%dT%H:%M:%S'))
-            leadsWithAppointmentsInTheLastHour = Lead.query.filter(Lead.completed_appointment == False).filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
+            logger.debug("searchStartDate: ".format(searchStartDate.strftime('%Y-%m-%dT%H:%M:%S')))
+            leadsWithAppointmentsInTheLastHour = Lead.query.filter(Lead.completed_appointment == False).all()#.filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
 
             logger.debug("Leads with appointments in the last hour are: {}".format(leadsWithAppointmentsInTheLastHour))
             search_results = []
@@ -386,6 +391,12 @@ class AppDBUtil():
             client['prospect_id'] = str(transaction.prospect_id)
             client['ask_for_student_info'] = transaction.ask_for_student_info
             client['ask_for_student_availability'] = transaction.ask_for_student_availability
+
+            client['make_payment_recurring'] = transaction.make_payment_recurring
+            client['recurring_payment_frequency'] = transaction.recurring_payment_frequency
+            client['recurring_payment_start_date'] = transaction.recurring_payment_start_date
+            client['pause_payment'] = transaction.pause_payment
+            client['paused_payment_resumption_date'] = transaction.paused_payment_resumption_date
 
             prospect_details = Prospect.query.filter_by(prospect_id=transaction.prospect_id).first()
             client['how_did_they_hear_about_us'] = prospect_details.how_did_they_hear_about_us
@@ -650,6 +661,7 @@ class AppDBUtil():
         # logger.debug("2. " + hour_as_24)
         date_and_time = date_and_time[:start] + ' ' + hour_as_24 + ':' + date_and_time[start + 4:]
         date_and_time = date_and_time[:16] + " " + date_and_time[24:] + ' CST'
+        date_and_time = date_and_time.replace("00:00", "00:00")
 
         # logger.debug("3. " + date_and_time[:15])
         # logger.debug("4. " + date_and_time[24:])

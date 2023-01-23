@@ -485,4 +485,20 @@ $(document).ready(function() {
         }
     });
 
+
+       $('input[name="pause_payment"]').on('click', function() {
+        if ($(this).val() == "no") {
+            document.getElementById("addrow").hidden=true;
+            $(this).val("yes");
+            $('input[name="paused_payment_resumption_date"]').attr('disabled', false);
+             $('input[name="paused_payment_resumption_date"]').prop('required', true);
+
+        } else if ($(this).val() == "yes") {
+
+            $(this).val("no");
+            $('input[name="paused_payment_resumption_date"]').attr('disabled', true);
+             $('input[name="paused_payment_resumption_date"]').prop('required', false);
+        }
+    });
+
 });

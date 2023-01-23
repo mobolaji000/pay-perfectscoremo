@@ -166,7 +166,7 @@ class AWSInstance():
                             </body>
                             </html>
                                         """
-        elif message_type in ['reminder_about_appointment', 'confirm_lead_appointment']:
+        elif message_type in ['reminder_about_appointment', 'confirm_lead_appointment','modify_lead_appointment_completion_status']:
             BODY_HTML = """<html>
                     <head></head>
                     <body>
