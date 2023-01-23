@@ -73,7 +73,7 @@ class AWSInstance():
         return secret
 
 
-    def send_email(self, to_address='mo@vensti.com', message='perfectscoremo', subject='perfectscoremo', message_type='', recipient_name=''):
+    def send_email(self, to_address='mo@prepwithmo.com', message='PrepWithMo', subject='PrepWithMo', message_type='', recipient_name=''):
 
         if message_type == 'create_transaction_new_client':
             created_or_modified_span = "<span>Your transaction has just been <strong>created</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
@@ -87,10 +87,13 @@ class AWSInstance():
             created_or_modified_span = "<span>Your transaction has just been modified using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
         elif message_type == 'reminder_about_appointment':
             link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
-            created_or_modified_span = "<span>Dear {},</span><br><br><span>Thank you for signing up for a diagnostic/consultation at PrepWithMo. This is a reminder that your appointment is on  {}. </span><br><br><span> If you have not already done so, please go to {} (also sent to your phone number) to fill out/confirm some basic information. </span><br><br><span>We look forward to meeting you.</span><br><br><span>Regards,</span><br><span>Mo</span><br><br>".format(message[0],message[1],link_url)
+            created_or_modified_span = "<span>Dear {},</span><br><br><span>Thank you for signing up for a diagnostic/consultation at PrepWithMo. This is a reminder that your appointment is on  {}. </span><br><br><span> If you have not already done so, please go to {} (also sent to your phone number) to fill out/confirm some basic information. If you have any questions, please respond to this email or call 972-584-7364.</span><br><br><span>We look forward to meeting you.</span><br><br><span>Regards,</span><br><span>Mo</span><br><br>".format(message[0],message[1],link_url)
         elif message_type == 'confirm_lead_appointment':
             link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
-            created_or_modified_span = "<span>Dear {},</span><br><br><span>Thank you for signing up for a diagnostic/consultation at PrepWithMo. This is a confirmation that your appointment is on  {}. </span><br><br><span> Ahead of your appointment, please go to {} (also sent to your phone number) to fill out/confirm some basic information. </span><br><br><span>We look forward to meeting you.</span><br><br><span>Regards,</span><br><span>Mo</span><br><br>".format(message[0],message[1],link_url)
+            created_or_modified_span = "<span>Dear {},</span><br><br><span>Thank you for signing up for a diagnostic/consultation at PrepWithMo. This is a confirmation that your appointment is on  {}. </span><br><br><span> Ahead of your appointment, please go to {} (also sent to your phone number) to fill out/confirm some basic information. If you have any questions, please respond to this email or call 972-584-7364.</span><br><br><span>We look forward to meeting you.</span><br><br><span>Regards,</span><br><span>Mo</span><br><br>".format(message[0],message[1],link_url)
+        elif message_type == 'modify_lead_appointment_completion_status':
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
+            created_or_modified_span = "<span>Use the below URLs to modify the appointment completion status of leads in the last hour : </span><br><br><span>{} {} {} {}</span>".format(message[0],message[1],message[2],link_url)
 
 
         SENDER = "PrepWithMo <mo@info.perfectscoremo.com>"

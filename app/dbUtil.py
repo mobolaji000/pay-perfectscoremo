@@ -1,9 +1,9 @@
 from app.models import Transaction,InstallmentPlan,InvoiceToBePaid,Prospect,Student,Lead
 from app import db
 from app.config import stripe
-from datetime import datetime
+from datetime import datetime,timedelta
 import re
-import math
+import pytz
 import uuid
 from dateutil.parser import parse
 import logging
@@ -87,6 +87,7 @@ class AppDBUtil():
         transaction_total = 0 if clientData.get('transaction_total','') == '' else clientData.get('transaction_total','')
         installment_counter = 0 if clientData.get('installment_counter','') == '' else int(clientData.get('installment_counter',''))#-1
         ask_for_student_info = clientData.get('ask_for_student_info','')
+        ask_for_student_availability = clientData.get('ask_for_student_availability', '')
         does_customer_payment_info_exist = 'yes' if clientData.get('does_customer_payment_info_exist',None) else 'no'
         # client-side counter is always one more; get the actual number here
 
@@ -100,7 +101,7 @@ class AppDBUtil():
                                   diag_total=diag_total, was_test_prep_purchased=was_test_prep_purchased, tp_product=tp_product, tp_units=tp_units,
                                   tp_total=tp_total, was_college_apps_purchased=was_college_apps_purchased, college_apps_product=college_apps_product,
                                   college_apps_units=college_apps_units, college_apps_total=college_apps_total,adjust_total=adjust_total, adjustment_explanation=adjustment_explanation,
-                                transaction_total=transaction_total, installment_counter=installment_counter,ask_for_student_info=ask_for_student_info,does_customer_payment_info_exist=does_customer_payment_info_exist)
+                                transaction_total=transaction_total, installment_counter=installment_counter,ask_for_student_info=ask_for_student_info,ask_for_student_availability=ask_for_student_availability,does_customer_payment_info_exist=does_customer_payment_info_exist)
 
 
             db.session.add(transaction)
@@ -113,7 +114,8 @@ class AppDBUtil():
                         "was_test_prep_purchased": was_test_prep_purchased,"tp_product": tp_product,"tp_units": tp_units,"tp_total": tp_total,
                         "was_college_apps_purchased": was_college_apps_purchased,"college_apps_product": college_apps_product,"college_apps_units": college_apps_units,
                         "college_apps_total": college_apps_total,"adjust_total": adjust_total,"adjustment_explanation": adjustment_explanation,
-                  "transaction_total": transaction_total, "installment_counter":installment_counter, "does_customer_payment_info_exist":does_customer_payment_info_exist,"ask_for_student_info":ask_for_student_info})
+                  "transaction_total": transaction_total, "installment_counter":installment_counter, "does_customer_payment_info_exist":does_customer_payment_info_exist,
+                  "ask_for_student_info":ask_for_student_info,"ask_for_student_availability":ask_for_student_availability})
 
             print("number of transaction rows modified is: ",number_of_rows_modified) #printing of rows modified to logs to help with auditing
 
@@ -277,6 +279,34 @@ class AppDBUtil():
         finally:
             db.session.close()
 
+    @classmethod
+    def findLeadsWithAppointmentsInTheLastHour(cls):
+        try:
+            searchEndDate = datetime.now(pytz.timezone('US/Central'))
+            logger.debug(searchEndDate.strftime('%Y-%m-%dT%H:%M:%S'))
+            searchStartDate = datetime.now(pytz.timezone('US/Central')) - timedelta(hours=1)
+            logger.debug(searchStartDate.strftime('%Y-%m-%dT%H:%M:%S'))
+            leadsWithAppointmentsInTheLastHour = Lead.query.filter(Lead.completed_appointment == False).filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
+
+            logger.debug("Leads with appointments in the last hour are: {}".format(leadsWithAppointmentsInTheLastHour))
+            search_results = []
+            for lead in leadsWithAppointmentsInTheLastHour:
+                logger.debug("Individual lead is: {}".format(lead))
+                lead_details = {}
+                lead_details['lead_id'] = lead.lead_id
+                lead_details['lead_salutation'] = lead.lead_salutation
+                lead_details['lead_name'] = lead.lead_name
+                lead_details['appointment_date_and_time'] = lead.appointment_date_and_time
+                search_results.append(lead_details)
+
+            return search_results
+        except Exception as e:
+            # if any kind of exception occurs, rollback lead
+            db.session.rollback()
+            traceback.print_exc()
+        finally:
+            db.session.close()
+
 
     @classmethod
     def findClientsToReceiveReminders(cls):
@@ -355,6 +385,7 @@ class AppDBUtil():
             client['payment_started'] = str(transaction.payment_started)
             client['prospect_id'] = str(transaction.prospect_id)
             client['ask_for_student_info'] = transaction.ask_for_student_info
+            client['ask_for_student_availability'] = transaction.ask_for_student_availability
 
             prospect_details = Prospect.query.filter_by(prospect_id=transaction.prospect_id).first()
             client['how_did_they_hear_about_us'] = prospect_details.how_did_they_hear_about_us
@@ -464,6 +495,7 @@ class AppDBUtil():
             client_info['payment_started'] = admin_transaction_details.payment_started
             client_info['installment_counter'] = admin_transaction_details.installment_counter
             client_info['ask_for_student_info'] = admin_transaction_details.ask_for_student_info
+            client_info['ask_for_student_availability'] = admin_transaction_details.ask_for_student_availability
             client_info['showACHOverride'] = str(showACHOverride)
             client_info['does_customer_payment_info_exist'] = admin_transaction_details.does_customer_payment_info_exist
 

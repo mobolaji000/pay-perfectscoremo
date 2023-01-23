@@ -144,6 +144,8 @@
             $('select[name="how_did_they_hear_about_us"]').val('');
             $('textarea[name="details_on_how_they_heard_about_us"]').val('');
             $('input[name="ask_for_student_info"]').prop('checked', false);
+            $('input[name="ask_for_student_availability"]').prop('checked', false);
+
 
 
 
@@ -182,8 +184,8 @@
 
             if (result.ask_for_student_info == "yes") {
                 //document.getElementById("ask_for_student_info").click();
-                //document.getElementById("ask_for_student_info").checked = true;
-                //$('input[name="ask_for_student_info"]').prop('checked', true);
+                $('input[name="ask_for_student_info"]').val("yes");
+                $('input[name="ask_for_student_info"]').prop('checked', true);
 
 
                 //while it is good to have this here, I dont beleive I need it because
@@ -191,8 +193,17 @@
                 //besides, dont want a situation where I edit an exisitng invoice and by default
                 //ask for the student info again
 
+                //or maybe not?
+
                 //$('input[name="ask_for_student_info"]').attr('checked', true);
                 //$('input[name="ask_for_student_info"]').val("yes");
+            }
+
+            if (result.ask_for_student_availability == "yes") {
+                //document.getElementById("ask_for_student_availability").click();
+                 $('input[name="ask_for_student_availability"]').val("yes");
+                $('input[name="ask_for_student_availability"]').prop('checked', true);
+
             }
 
             //
@@ -380,6 +391,7 @@
             dataToModify['mark_as_paid'] = $('input[name="mark_as_paid"]').val();
             dataToModify['installment_counter'] = $('input[name="installment_counter"]').val();
             dataToModify['ask_for_student_info'] = $('input[name="ask_for_student_info"]').val();
+            dataToModify['ask_for_student_availability'] = $('input[name="ask_for_student_availability"]').val();
             dataToModify['how_did_they_hear_about_us'] = $('select[name="how_did_they_hear_about_us"]').val();
             dataToModify['salutation'] = $('select[name="salutation"]').val();
             dataToModify['details_on_how_they_heard_about_us'] = $('textarea[name="details_on_how_they_heard_about_us"]').val();

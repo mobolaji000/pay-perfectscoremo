@@ -835,6 +835,23 @@ def start_background_jobs_before_first_request():
         except Exception as e:
             logger.exception("Error in sending reminders")
 
+
+    def notify_mo_to_modify_lead_appointment_completion_status_background_job():
+        try:
+            logger.info("notify_mo_to_modify_lead_appointment_completion_status started")
+            #reminder_last_names = 'Use the below URLs to modify the appointment completion status of leads in the last hour : '
+            leadsWithAppointmentsInTheLastHour = AppDBUtil.findLeadsWithAppointmentsInTheLastHour()
+
+            for lead in leadsWithAppointmentsInTheLastHour:
+                SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com', message=[lead['lead_salutation'],lead['lead_name'],miscellaneousUtilsInstance.clean_up_date_and_time(lead['appointment_date_and_time']),lead['lead_id']],message_type='modify_lead_appointment_completion_status')
+                #link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
+                #reminder_last_names = reminder_last_names+lead['lead_salutation']+' '+lead['lead_name']+' '+lead['appointment_date_and_time']+' '+''+", ".format(lead['lead_id'])
+            # if clientsToReceiveReminders:
+            #     SendMessagesToClients.sendSMS(to_numbers='9725847364', message=reminder_last_names, message_type='to_mo')
+
+        except Exception as e:
+            logger.exception("Error in sending reminders")
+
     def remind_client_about_invoice_background_job():
         try:
             logger.info("remind_client_about_invoice_background_job started")
@@ -896,11 +913,13 @@ def start_background_jobs_before_first_request():
         scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='19', minute='6')
         scheduler.add_job(lambda: print("dummy reminders job for local and dev"), 'cron', minute='55')
         scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
+        scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'interval', minutes=5)
     else:
         #BE EXTREMELY CAREFULY WITH THE CRON JOB AND COPIOUSLY TEST. IF YOU GET IT WRONG, YOU CAN EASILY ANNOY A CUSTOMER BY SENDING A MESSAGE EVERY MINUTE OR EVERY SECOND
         scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
         scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
         scheduler.add_job(pay_invoice_background_job, 'cron', hour='15',minute='55')
+        #scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'cron', hour='15', minute='55')
 
 
 
