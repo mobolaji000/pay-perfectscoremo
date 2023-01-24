@@ -266,7 +266,6 @@ class AppDBUtil():
             logger.debug("Leads to receive reminders are: {}".format(leadsToReceiveReminders))
             search_results = []
             for lead in leadsToReceiveReminders:
-                logger.debug("Individual lead is: {}".format(lead))
                 lead_details = {}
                 lead_details['lead_id'] = lead.lead_id
                 lead_details['lead_salutation'] = lead.lead_salutation
@@ -275,6 +274,7 @@ class AppDBUtil():
                 lead_details['lead_email'] = lead.lead_email
                 lead_details['appointment_date_and_time'] = lead.appointment_date_and_time
                 search_results.append(lead_details)
+                logger.debug("Individual lead is: {}".format(lead_details))
 
             return search_results
         except Exception as e:
@@ -293,16 +293,41 @@ class AppDBUtil():
             logger.debug("searchStartDate: ".format(searchStartDate.strftime('%Y-%m-%dT%H:%M:%S')))
             leadsWithAppointmentsInTheLastHour = Lead.query.filter(Lead.completed_appointment == False).all()#.filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
 
+
+            # zurich = pytz.timezone('US/Central')
+            # dt = datetime.datetime.utcnow()
+            # utc_offset = zurich.utcoffset(dt).seconds / 3600
+            #
+            # t = datetime.time(13, 0, tzinfo=pytz.utc)
+            # t
+            # datetime.time(13, 0, tzinfo= < UTC >)
+            #
+            # t = t.replace(tzinfo=None)
+            # t
+            # datetime.time(13, 0)
+            #
+            # zurich_t = t.replace(hour=t.hour + int(utc_offset))
+            #
+            # zurich_t
+            # datetime.time(15, 0)
+            #
+            # zurich_t.hour
+            # 15
+
+
+
+
+
             logger.debug("Leads with appointments in the last hour are: {}".format(leadsWithAppointmentsInTheLastHour))
             search_results = []
             for lead in leadsWithAppointmentsInTheLastHour:
-                logger.debug("Individual lead is: {}".format(lead))
                 lead_details = {}
                 lead_details['lead_id'] = lead.lead_id
                 lead_details['lead_salutation'] = lead.lead_salutation
                 lead_details['lead_name'] = lead.lead_name
                 lead_details['appointment_date_and_time'] = lead.appointment_date_and_time
                 search_results.append(lead_details)
+                logger.debug("Individual lead is: {}".format(lead_details))
 
             return search_results
         except Exception as e:
@@ -509,6 +534,13 @@ class AppDBUtil():
             client_info['ask_for_student_availability'] = admin_transaction_details.ask_for_student_availability
             client_info['showACHOverride'] = str(showACHOverride)
             client_info['does_customer_payment_info_exist'] = admin_transaction_details.does_customer_payment_info_exist
+
+            client_info['make_payment_recurring'] = admin_transaction_details.make_payment_recurring
+            client_info['recurring_payment_frequency'] = admin_transaction_details.recurring_payment_frequency
+            client_info['recurring_payment_start_date'] = admin_transaction_details.recurring_payment_start_date
+            client_info['pause_payment'] = admin_transaction_details.pause_payment
+            client_info['paused_payment_resumption_date'] = admin_transaction_details.paused_payment_resumption_date
+
 
             #added to get data fro not charging clients for credit card payment for diagnostics
             client_info['diag_total'] = admin_transaction_details.diag_total

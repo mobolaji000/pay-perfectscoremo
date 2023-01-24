@@ -209,7 +209,7 @@ def lead_info_by_lead(lead_id):
 
             if number_of_rows_modified > 1:
                 logger.error("Somehow ended up with and modified duplicate lead ids")
-                raise Exception
+                raise Exception("Somehow ended up with and modified duplicate lead ids")
 
             flash("Your information has been submitted successfully")
             SendMessagesToClients.sendSMS(to_numbers='9725847364', message="New update submitted by lead {} with lead-id {}. Go check it out.".format(lead_info_contents.get('lead_salutation', '')+ ' '+lead_info_contents.get('lead_name', ''),lead_info_contents['lead_id']), message_type='to_mo')
@@ -237,7 +237,7 @@ def lead_info_by_mo():
         if action == 'Create':
             try:
                 leadInfo = {}
-                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
+                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else pytz.timezone('US/Central').localize(datetime.datetime.strptime(lead_info_contents.get('appointment_date_and_time'),'%Y-%m-%dT%H:%M'))#lead_info_contents.get('appointment_date_and_time')
                 recent_test_score = -1 if lead_info_contents.get('recent_test_score','') == '' else lead_info_contents.get('recent_test_score')
                 lead_id = "l-" + str(uuid.uuid4().int >> 64)[:6]
                 leadInfo.update({'lead_id': lead_id,'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
@@ -590,7 +590,7 @@ def execute_card_payment():
         result = stripeInstance.chargeCustomerViaCard(stripe_info=stripe_info, chosen_mode_of_payment=chosen_mode_of_payment, payment_id=payment_id,existing_customer=does_customer_payment_info_exist)
         if result['status'] != 'success':
             logger.error("Stripe card payment failed")
-            flash('Payment failed. Enter a valid credit/debit card number. Or contact Mo.')
+            flash('Payment failed. Enter a valid credit/debit card number or check why your bank is blocking your card. Or contact Mo.')
         else:
             AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
             payment_and_signup_data = ast.literal_eval(request.form['payment_and_signup_data'])
@@ -609,9 +609,9 @@ def execute_card_payment():
         logger.debug("Result from execute_card_payment is {}".format(jsonify(result)))
         return jsonify(result)
     except Exception as e:
-        logger.error("Error  in /execute_card_payment")
-        print(e)
-        traceback.print_exc()
+        logger.exception("Error  in /execute_card_payment")
+        flash('Unexpected error. contact Mo.')
+        return jsonify(result)
 
 @server.route("/get_link_token", methods=['POST'])
 def get_link_token():
@@ -645,8 +645,8 @@ def exchange_plaid_for_stripe():
         result = stripeInstance.chargeCustomerViaACH(stripe_info=stripe_info,bank_account_token=bank_account_token,chosen_mode_of_payment=chosen_mode_of_payment,existing_customer=does_customer_payment_info_exist)
 
         if result['status'] != 'success':
-            print("Attempt to pay via ACH failed. Try again or contact Mo.")
-            flash('Attempt to pay via ACH failed. Try again or contact Mo.')
+            logger.debug("Attempt to pay via ACH failed. Try again, check with your bank on any errors, or contact Mo.")
+            flash('Attempt to pay via ACH failed. Try again, check with your bank on any errors, or contact Mo.')
         else:
             AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
 
@@ -660,9 +660,9 @@ def exchange_plaid_for_stripe():
 
         return jsonify(result)
     except Exception as e:
-        logger.error("Error  in /exchange_plaid_for_stripe")
-        print(e)
-        traceback.print_exc()
+        logger.exception("Error  in /exchange_plaid_for_stripe")
+        flash('Unexpected error. contact Mo.')
+        return jsonify(result)
 
 def notifyOneOnOneInfo(payment_and_signup_data={}):
     try:
@@ -756,10 +756,9 @@ def stripe_webhook():
             try:
                 message = "Invoice "+str(failed_invoice.id)+" for "+str(failed_invoice.customer_name)+" failed to pay."
                 SendMessagesToClients.sendSMS(to_numbers='9725847364', message=message, message_type='to_mo')
-                logger.info(message)
+                logger.error(message)
             except Exception as e:
-                logger.error(e)
-                traceback.print_exc()
+                logger.exception(e)
 
         elif event.type == 'invoice.finalized':
             finalized_invoice = event.data.object
@@ -767,7 +766,11 @@ def stripe_webhook():
 
             payment_intent = stripe.PaymentIntent.retrieve(finalized_invoice.payment_intent, ) if finalized_invoice.payment_intent else None
             payment_attempt_status = payment_intent['charges']['data'][0]['outcome']['network_status'] if payment_intent and payment_intent['charges']['data'][0]['outcome'] else None
-            payment_method_details = payment_intent['charges']['data'][0]['payment_method_details']['type'] if payment_intent['charges']['data'][0]['payment_method_details'] else None
+            logger.debug("Payment intent for {} is {} and payment status is {}".format(transaction_id,payment_intent,payment_attempt_status))
+            #payment_method_details = payment_intent['charges']['data'][0]['payment_method_details']['type'] if payment_intent['charges']['data'][0]['payment_method_details'] else None
+            #TODO consider reverting to the above if the below fails
+            payment_method_details = payment_intent['charges']['data'][0]['payment_method_details']['type'] if payment_intent['charges']['data'] else None
+
 
             if not payment_method_details:
                 raise Exception('Somehow there is no payment intent or payment_method_details')
@@ -789,10 +792,9 @@ def stripe_webhook():
                     try:
                         message = "Invoice " + str(finalized_invoice.id) + " for " + str(finalized_invoice.customer_name) + " failed to pay."
                         SendMessagesToClients.sendSMS(to_numbers='9725847364', message=message, message_type='to_mo')
-                        logger.debug(message)
+                        logger.error(message)
                     except Exception as e:
-                        logger.error(e)
-                        traceback.print_exc()
+                        logger.exception(e)
             else:
                 logger.warning("Why is payment method detail not ach_debit for {} ? Probably because there this is an instance of a credit card payment, which was already handled under invoice.paid and is now being sent to be finalized, which I do not care for since it has already been updated as paid the under invoice.paid i.e. I only care about updating ach payments through invoice.finalized.".format(transaction_id))
                 #raise Exception("Why is payment method detail not ach_debit for {} ? Probably because there this is an instance of a credit card payment, which was already handled under invoice.paid and is now being sent to be finalized, which I do not care for since it has already been updated as paid the under invoice.paid i.e. I only care about updating ach payments through invoice.finalized.".format(transaction_id))
@@ -849,7 +851,7 @@ def start_background_jobs_before_first_request():
             leadsWithAppointmentsInTheLastHour = AppDBUtil.findLeadsWithAppointmentsInTheLastHour()
 
             for lead in leadsWithAppointmentsInTheLastHour:
-                SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com', message=[lead['lead_salutation'],lead['lead_name'],miscellaneousUtilsInstance.clean_up_date_and_time(lead['appointment_date_and_time']),lead['lead_id']],message_type='notify_mo_to_modify_lead_appointment_completion_status')
+                SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com',subject='Update Lead Appointment Completion Status', message=[lead['lead_salutation'],lead['lead_name'],miscellaneousUtilsInstance.clean_up_date_and_time(lead['appointment_date_and_time']),lead['lead_id']],message_type='notify_mo_to_modify_lead_appointment_completion_status')
                 #link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
                 #reminder_last_names = reminder_last_names+lead['lead_salutation']+' '+lead['lead_name']+' '+lead['appointment_date_and_time']+' '+''+", ".format(lead['lead_id'])
             # if clientsToReceiveReminders:
