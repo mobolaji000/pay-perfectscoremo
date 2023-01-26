@@ -278,7 +278,7 @@ class AppDBUtil():
                 lead_details['lead_name'] = lead.lead_name
                 lead_details['lead_phone_number'] = lead.lead_phone_number
                 lead_details['lead_email'] = lead.lead_email
-                lead_details['appointment_date_and_time'] = lead.appointment_date_and_time
+                lead_details['appointment_date_and_time'] = lead.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))
                 search_results.append(lead_details)
 
 
