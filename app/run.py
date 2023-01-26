@@ -18,6 +18,8 @@ def start_runner():
             logger.info('In start loop')
             time.sleep(3)
             try:
+                #temprosry for local as opposed todocker run
+                os.environ["url_to_start_reminder"] = "http://127.0.0.1:5002/"
                 url_to_start_reminder = os.environ.get("url_to_start_reminder")
                 r = requests.get(url_to_start_reminder)
                 if r.status_code != 500:

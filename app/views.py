@@ -3,6 +3,7 @@ from werkzeug.urls import url_parse
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from app.config import Config
+from app import server
 from app.forms import PaymentForm
 from app.service import ValidateLogin
 from app.service import User
@@ -24,14 +25,19 @@ import datetime
 import re
 import pytz
 import logging
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-# handler = logging.StreamHandler()
-# formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-# handler.setFormatter(formatter)
-# logger.addHandler(handler)
+handler = logging.StreamHandler()
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
-from app import server
+#ADDED TO TURN DOUBLE FLASK LOGGING OFF FLASK LOCAL
+from flask.logging import default_handler
+server.logger.removeHandler(default_handler)
+server.logger.handlers.clear()
+
 from app.aws import AWSInstance
 from app.dbUtil import AppDBUtil
 from flask_login import LoginManager
@@ -229,15 +235,15 @@ def lead_info_by_mo():
         return render_template('lead_info_by_mo.html')
     elif request.method == 'POST':
         lead_info_contents = request.form.to_dict()
-        what_services_are_they_interested_in = request.form.getlist('what_services_are_they_interested_in')
-        print(what_services_are_they_interested_in)
-        print(lead_info_contents)
+        logger.debug("lead_info_contents are: {}".format(lead_info_contents))
         action = lead_info_contents['action']
 
         if action == 'Create':
             try:
                 leadInfo = {}
-                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else pytz.timezone('US/Central').localize(datetime.datetime.strptime(lead_info_contents.get('appointment_date_and_time'),'%Y-%m-%dT%H:%M'))#lead_info_contents.get('appointment_date_and_time')
+                #appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else pytz.timezone('US/Central').localize(datetime.datetime.strptime(lead_info_contents.get('appointment_date_and_time'),'%Y-%m-%dT%H:%M'))#lead_info_contents.get('appointment_date_and_time')
+                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
+                logger.debug(appointment_date_and_time)
                 recent_test_score = -1 if lead_info_contents.get('recent_test_score','') == '' else lead_info_contents.get('recent_test_score')
                 lead_id = "l-" + str(uuid.uuid4().int >> 64)[:6]
                 leadInfo.update({'lead_id': lead_id,'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
@@ -829,7 +835,7 @@ def start_background_jobs_before_first_request():
                 number_of_days_until_appointment = (lead.get('appointment_date_and_time').date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
                 appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(lead.get('appointment_date_and_time'))
 
-                if number_of_days_until_appointment in [0,1,3]:
+                if True:#number_of_days_until_appointment in [0,1,3]:
                     leads_eligible_for_reminders = True
                     message = lead.get('lead_salutation') + " " + lead.get('lead_name') if lead.get('lead_salutation') else 'Parent'
                     if lead.get('lead_email'):
@@ -851,6 +857,7 @@ def start_background_jobs_before_first_request():
             leadsWithAppointmentsInTheLastHour = AppDBUtil.findLeadsWithAppointmentsInTheLastHour()
 
             for lead in leadsWithAppointmentsInTheLastHour:
+                #pass
                 SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com',subject='Update Lead Appointment Completion Status', message=[lead['lead_salutation'],lead['lead_name'],miscellaneousUtilsInstance.clean_up_date_and_time(lead['appointment_date_and_time']),lead['lead_id']],message_type='notify_mo_to_modify_lead_appointment_completion_status')
                 #link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
                 #reminder_last_names = reminder_last_names+lead['lead_salutation']+' '+lead['lead_name']+' '+lead['appointment_date_and_time']+' '+''+", ".format(lead['lead_id'])
@@ -918,16 +925,16 @@ def start_background_jobs_before_first_request():
     scheduler = BackgroundScheduler(timezone='US/Central')
 
     if os.environ['DEPLOY_REGION'] != 'prod':
-        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='19', minute='6')
+        #scheduler.add_job(remind_lead_about_appointment_background_job, 'interval', minutes=1)
         scheduler.add_job(lambda: print("dummy reminders job for local and dev"), 'cron', minute='55')
         scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
-        scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'interval', minutes=5)
+        scheduler.add_job(lambda: print("dummy notify_mo_to_modify_lead_appointment_completion_status_background_job run for local or dev"), 'interval', hours=1)
     else:
         #BE EXTREMELY CAREFULY WITH THE CRON JOB AND COPIOUSLY TEST. IF YOU GET IT WRONG, YOU CAN EASILY ANNOY A CUSTOMER BY SENDING A MESSAGE EVERY MINUTE OR EVERY SECOND
         scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
         scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
         scheduler.add_job(pay_invoice_background_job, 'cron', hour='15',minute='55')
-        #scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'cron', hour='15', minute='55')
+        scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'interval', hours=1)
 
 
 

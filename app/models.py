@@ -170,7 +170,6 @@ class Student(db.Model):
     def __repr__(self):
         return '<Student {} created with student_id {}>'.format(self.parent_1_last_name, self.student_id)
 
-
 db.create_all()
 try:
     db.session.commit()

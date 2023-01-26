@@ -17,6 +17,8 @@ awsInstance = AWSInstance()
 class Config(object):
     try:
         if os.environ['DEPLOY_REGION'] == 'local':
+            import time
+            #time.sleep(12345)
 
             os.environ["stripe_pk"] = 'pk_test_51Hlgy6DbpRMio7qjWV9YNuBPiQIgD6PrBwO7oek37OEafhZiRjkfs42owvLto0eO8c6CCaiSAOUrXn0uPEJdai6Z00DUYXi551'
             os.environ["price"] = "price_1KDfOQDbpRMio7qjiBfLpZ9g"
@@ -26,7 +28,9 @@ class Config(object):
             SECRET_KEY = os.environ.get('flask_secret_key')
             dbUserName = os.environ.get('dbUserNameLocal')
             dbPassword = os.environ.get('dbPasswordLocal')
-            SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://'+str(dbUserName)+':'+str(dbPassword)+'@host/mobolajioo'
+
+            SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://' + str(dbUserName) + ':' + str(dbPassword) + '@192.168.1.134/mobolajioo'
+            #SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://'+str(dbUserName)+':'+str(dbPassword)+'@host/mobolajioo'
             SQLALCHEMY_TRACK_MODIFICATIONS = False
             stripe.api_key = os.environ.get('stripe_api_key_test')
             plaid_client_id = os.environ.get('dev_plaid_client_id')

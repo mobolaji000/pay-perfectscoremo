@@ -12,12 +12,18 @@ from sqlalchemy.dialects.postgresql import insert
 
 #from app.service import SendMessagesToClients
 
-
-
 logger = logging.getLogger(__name__)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-logger.addHandler(ch)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+#ADDED TO TURN DOUBLE FLASK LOGGING OFF FLASK LOCAL
+from app import server
+from flask.logging import default_handler
+server.logger.removeHandler(default_handler)
+server.logger.handlers.clear()
 
 
 class AppDBUtil():
@@ -287,11 +293,11 @@ class AppDBUtil():
     @classmethod
     def findLeadsWithAppointmentsInTheLastHour(cls):
         try:
-            searchEndDate = datetime.now(pytz.timezone('US/Central'))
-            logger.debug("searchEndDate: ".format(searchEndDate.strftime('%Y-%m-%dT%H:%M:%S')))
-            searchStartDate = datetime.now(pytz.timezone('US/Central')) - timedelta(hours=1)
-            logger.debug("searchStartDate: ".format(searchStartDate.strftime('%Y-%m-%dT%H:%M:%S')))
-            leadsWithAppointmentsInTheLastHour = Lead.query.filter(Lead.completed_appointment == False).all()#.filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
+            searchEndDate = datetime.now()#datetime.now(pytz.timezone('US/Central'))
+            logger.debug("searchEndDate: {}".format(searchEndDate.strftime('%Y-%m-%dT%H:%M:%S')))
+            searchStartDate = datetime.now() - timedelta(hours=1)#datetime.now(pytz.timezone('US/Central')) - timedelta(hours=1)
+            logger.debug("searchStartDate: {}".format(searchStartDate.strftime('%Y-%m-%dT%H:%M:%S')))
+            leadsWithAppointmentsInTheLastHour = Lead.query.filter(Lead.completed_appointment == False).filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
 
 
             # zurich = pytz.timezone('US/Central')
@@ -333,7 +339,7 @@ class AppDBUtil():
         except Exception as e:
             # if any kind of exception occurs, rollback lead
             db.session.rollback()
-            traceback.print_exc()
+            logger.exception(e)
         finally:
             db.session.close()
 
