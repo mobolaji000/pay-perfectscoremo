@@ -17,7 +17,7 @@ awsInstance = AWSInstance()
 class Config(object):
     try:
         if os.environ['DEPLOY_REGION'] == 'local':
-            import time
+            #import time
             #time.sleep(12345)
 
             os.environ["stripe_pk"] = 'pk_test_51Hlgy6DbpRMio7qjWV9YNuBPiQIgD6PrBwO7oek37OEafhZiRjkfs42owvLto0eO8c6CCaiSAOUrXn0uPEJdai6Z00DUYXi551'

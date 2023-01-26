@@ -19,8 +19,8 @@ def start_runner():
             time.sleep(3)
             try:
                 #temprosry for local as opposed todocker run
-                os.environ["url_to_start_reminder"] = "http://127.0.0.1:5002/"
-                url_to_start_reminder = os.environ.get("url_to_start_reminder")
+                #os.environ["url_to_start_reminder"] = "http://127.0.0.1:5002/"
+
                 r = requests.get(url_to_start_reminder)
                 if r.status_code != 500:
                     logger.info('Server started, quiting start_loop')
@@ -37,6 +37,7 @@ def start_runner():
     thread.start()
 
 # running the flask db option breaks this multithreading code to ping url_to_start_reminder
+url_to_start_reminder = os.environ.get("url_to_start_reminder")
 start_runner()
 from app import server
 
