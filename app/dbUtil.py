@@ -283,7 +283,7 @@ class AppDBUtil():
 
 
                 logger.debug("Time before conversion is: {}".format(lead.appointment_date_and_time))
-                logger.debug("Time after conversion is: {}".format(lead.appointment_date_and_time.astimezone('US/Central')))
+                logger.debug("Time after conversion is: {}".format(lead.appointment_date_and_time.astimezone(pytz.timezone('US/Central''US/Central''US/Central'))))
 
             return search_results
         except Exception as e:
