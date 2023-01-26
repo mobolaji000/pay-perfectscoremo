@@ -65,10 +65,17 @@
 	}
 	else
 	{
-		alert("here");
-		console.log("send_confirmation_to_lead: "+$('input[name="send_confirmation_to_lead"]').val());
-		console.log("appointment_date_and_time: "+$('input[name="appointment_date_and_time"]').val());
-		if ($('input[name="send_confirmation_to_lead"]').val() == 'yes' && ( $('input[name="appointment_date_and_time"]').val() == '' || $('input[name="appointment_date_and_time"]').val() < new Date().toISOString().slice(0, 16) )){
+		//alert("here");
+
+		var current_time = $("#current_time").attr("data-current_time");
+		//$('input[name="current_time"]').val(current_time);
+
+		//console.log("time from server is: "+current_time);
+		//console.log("send_confirmation_to_lead: "+$('input[name="send_confirmation_to_lead"]').val());
+		//console.log("appointment_date_and_time: "+$('input[name="appointment_date_and_time"]').val());
+		//console.log("now is: " +new Date().toISOString().slice(0, 16));
+
+		if ($('input[name="send_confirmation_to_lead"]').val() == 'yes' && ( $('input[name="appointment_date_and_time"]').val() == '' || $('input[name="appointment_date_and_time"]').val() < current_time )){
 			document.getElementById("appointment_date_and_time-checker").hidden=false;
 			document.getElementById("send_confirmation_to_lead-checker").hidden=false;
 		event.preventDefault();
@@ -172,6 +179,19 @@
 
      }
 
+     if (result.appointment_completed == "yes")
+     {
+     	$('input[name="mark_appointment_as_completed"]').prop('checked', true);
+     	 $('input[name="mark_appointment_as_completed"]').val("yes");
+
+     }
+     else
+     {
+     $('input[name="mark_appointment_as_completed"]').prop('checked', false);
+     	 $('input[name="mark_appointment_as_completed"]').val("no");
+
+     }
+
 	 if (result.appointment_date_and_time != 'null')
 	 {
 
@@ -265,7 +285,7 @@
 								{% set appointment_date_and_time = result.appointment_date_and_time %}
 					{% endif %}
 
-							{% if result.completed_appointment == true %}
+							{% if result.appointment_completed == 'yes' %}
 					<a name="search_link" href="javascript:populateFieldsFromSearch({{ result }});" style="color:green">
 
 								{{ result.lead_salutation+" "+result.lead_name+" "+result.lead_email+" "+result.lead_phone_number+" "+appointment_date_and_time}}
@@ -441,15 +461,29 @@
 							<textarea  id="details_on_how_they_heard_about_us"  name="details_on_how_they_heard_about_us" class="form-control" rows="2"  placeholder="" ></textarea>
 						</div></div><br><br><br>
 
-					<div class="row no-padding" >
-						<div class="row  col-md-6 " >
-							<label>
+					<div class="d-block my-3">
+                        <div container>
+                            <div class="row">
+                                <div class="col-md-4 checkbox mb-3">
+
+                                    <label>
 								<input type="checkbox" id="send_confirmation_to_lead"
 									   name="send_confirmation_to_lead" value=""> Send confirmation to lead
 							</label>
-						</div>
-						<div id="send_confirmation_to_lead-checker" class="text-danger" hidden>You can't send a confirmation if the appointment date and time is empty</div>
-					</div><br><br><br>
+                                    <br>
+                                </div>
+                                <div class="col-md-4 checkbox mb-3">
+                                    <label>
+                                        <input type="checkbox" id="mark_appointment_as_completed" name="mark_appointment_as_completed"
+                                            value=""> Mark appointment as completed
+                                    </label>
+                                    <br>
+                                </div>
+                            </div>
+
+						<div id="send_confirmation_to_lead-checker" class="row text-danger" hidden>You can't send a confirmation if the appointment date and time is empty</div>
+                            </div>
+                        </div><br><br><br>
 
 
 
@@ -476,6 +510,7 @@
 						</div>
 						<input id="lead_id" name="lead_id" hidden>
 						<input id="action" name="action" hidden>
+						<input id="current_time" name="current_time" hidden  data-current_time="{{ current_time }}">
 					</div></div>
 			</form>
 		</div>

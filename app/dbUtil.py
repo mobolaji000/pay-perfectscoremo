@@ -55,7 +55,7 @@ class AppDBUtil():
             cls.executeDBQuery()
 
         if lead_id != '':
-            cls.modifyLeadInfo(lead_id, {'completed_appointment': True})
+            cls.modifyLeadInfo(lead_id, {'appointment_completed': 'yes'})
 
         return prospect
 
@@ -267,7 +267,7 @@ class AppDBUtil():
     @classmethod
     def findLeadsToReceiveReminders(cls):
         try:
-            leadsToReceiveReminders = Lead.query.filter((Lead.completed_appointment == False) & (Lead.appointment_date_and_time != None)).all()
+            leadsToReceiveReminders = Lead.query.filter((Lead.appointment_completed != 'yes') & (Lead.appointment_date_and_time != None)).all()
 
             logger.debug("Leads to receive reminders are: {}".format(leadsToReceiveReminders))
             search_results = []
@@ -300,7 +300,7 @@ class AppDBUtil():
             logger.debug("searchEndDate: {}".format(searchEndDate.strftime('%Y-%m-%dT%H:%M:%S')))
             searchStartDate = datetime.now() - timedelta(hours=1)#datetime.now(pytz.timezone('US/Central')) - timedelta(hours=1)
             logger.debug("searchStartDate: {}".format(searchStartDate.strftime('%Y-%m-%dT%H:%M:%S')))
-            leadsWithAppointmentsInTheLastHour = Lead.query.filter(Lead.completed_appointment == False).filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
+            leadsWithAppointmentsInTheLastHour = Lead.query.filter(Lead.appointment_completed != 'yes').filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
 
 
             # zurich = pytz.timezone('US/Central')
@@ -678,9 +678,11 @@ class AppDBUtil():
                 lead['appointment_date_and_time'] = cls.clean_up_date_and_time(info.appointment_date_and_time) if info.appointment_date_and_time else 'null' #info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S")
                 lead['send_confirmation_to_lead'] = info.send_confirmation_to_lead
                 lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
-                lead['completed_appointment'] = 'true' if info.completed_appointment else 'false'
+                #lead['completed_appointment'] = 'true' if info.completed_appointment else 'false'
+                lead['appointment_completed'] = info.mark_appointment_as_completed
                 lead['grade_level'] = info.grade_level
                 lead['recent_test_score'] = '' if info.recent_test_score == -1 else info.recent_test_score
+                #'mark_appointment_as_completed':lead_info_contents.get('mark_appointment_as_completed','no'),
 
                 search_results.append(lead)
             logger.info("search results are {}".format(search_results))

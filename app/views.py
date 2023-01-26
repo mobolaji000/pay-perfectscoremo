@@ -232,7 +232,7 @@ def lead_info_by_lead(lead_id):
 @login_required
 def lead_info_by_mo():
     if request.method == 'GET':
-        return render_template('lead_info_by_mo.html')
+        return render_template('lead_info_by_mo.html',current_time=datetime.datetime.now(pytz.timezone('US/Central')))
     elif request.method == 'POST':
         lead_info_contents = request.form.to_dict()
         logger.debug("lead_info_contents are: {}".format(lead_info_contents))
@@ -248,7 +248,7 @@ def lead_info_by_mo():
                 lead_id = "l-" + str(uuid.uuid4().int >> 64)[:6]
                 leadInfo.update({'lead_id': lead_id,'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
                                  'appointment_date_and_time': appointment_date_and_time,'what_services_are_they_interested_in': request.form.getlist('what_services_are_they_interested_in'), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
-                                 'grade_level': lead_info_contents.get('grade_level',''),'recent_test_score': recent_test_score,
+                                 'grade_level': lead_info_contents.get('grade_level',''),'recent_test_score': recent_test_score,'mark_appointment_as_completed':lead_info_contents.get('mark_appointment_as_completed','no'),
                                  'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead','no')})
 
                 AppDBUtil.createLead(leadInfo)
@@ -266,11 +266,11 @@ def lead_info_by_mo():
                         SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'), 'mo@prepwithmo.com'], message=[message, appointment_date_and_time,lead_id], message_type='confirm_lead_appointment', subject='Confirming Your Appointment')
 
                 flash('The lead info was created successfully.')
-                return render_template('lead_info_by_mo.html', action=action)
+                return render_template('lead_info_by_mo.html', action=action,current_time=datetime.datetime.now(pytz.timezone('US/Central')))
             except Exception as e:
                 logger.exception(e)
                 flash('An error has occured during the creation.')
-                return render_template('lead_info_by_mo.html', action=action)
+                return render_template('lead_info_by_mo.html', action=action,current_time=datetime.datetime.now(pytz.timezone('US/Central')))
 
         if action == 'Modify':
             try:
@@ -282,7 +282,7 @@ def lead_info_by_mo():
                 leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''),'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_email': lead_info_contents.get('lead_email', ''),
                                  'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'appointment_date_and_time': appointment_date_and_time,
                                  'what_services_are_they_interested_in': request.form.getlist('what_services_are_they_interested_in'), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
-                                 'grade_level': lead_info_contents.get('grade_level', ''),'recent_test_score': recent_test_score,
+                                 'grade_level': lead_info_contents.get('grade_level', ''),'recent_test_score': recent_test_score,'mark_appointment_as_completed':lead_info_contents.get('mark_appointment_as_completed','no'),
                                  'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead','no'),
                                  'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', '')})
 
@@ -305,11 +305,11 @@ def lead_info_by_mo():
                         SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'), 'mo@prepwithmo.com'],message=[message, appointment_date_and_time, lead_id],message_type='confirm_lead_appointment', subject='Confirming Your Appointment')
 
                 flash('Lead sucessfully modified.')
-                return render_template('lead_info_by_mo.html', action=action)
+                return render_template('lead_info_by_mo.html', action=action,current_time=datetime.datetime.now(pytz.timezone('US/Central')))
             except Exception as e:
                 logger.exception(e)
                 flash('An error occured while modifying the lead.')
-                return render_template('lead_info_by_mo.html', action=action)
+                return render_template('lead_info_by_mo.html', action=action,current_time=datetime.datetime.now(pytz.timezone('US/Central')))
 
         if action == 'Search':
             try:
@@ -322,9 +322,9 @@ def lead_info_by_mo():
 
             if not search_results:
                 flash('No lead info has the detail you searched for.')
-                render_template('lead_info_by_mo.html', action=action)
+                render_template('lead_info_by_mo.html', action=action,current_time=datetime.datetime.now(pytz.timezone('US/Central')))
 
-            return render_template('lead_info_by_mo.html', search_results=search_results, action=action)
+            return render_template('lead_info_by_mo.html', search_results=search_results, action=action,current_time=datetime.datetime.now(pytz.timezone('US/Central')))
 
 
 
@@ -832,7 +832,7 @@ def start_background_jobs_before_first_request():
             logger.debug("leadsToReceiveReminders are: {}".format(leadsToReceiveReminders))
             leads_eligible_for_reminders = False
             for lead in leadsToReceiveReminders:
-                number_of_days_until_appointment = (lead.get('appointment_date_and_time').date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
+                number_of_days_until_appointment = (lead.get('appointment_date_and_time').astimezone(pytz.timezone('US/Central')).date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
                 appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(lead.get('appointment_date_and_time'))
 
                 if number_of_days_until_appointment in [0,1,3]:

@@ -20,4 +20,5 @@ create table public.lead
 );
 
 
-
+alter table lead drop COLUMN completed_appointment;
+alter table lead add column appointment_completed varchar(4) NOT NULL CONSTRAINT appointment_completed_constraint DEFAULT('');

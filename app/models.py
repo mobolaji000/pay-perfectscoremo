@@ -138,7 +138,7 @@ class Lead(db.Model):
 
     send_confirmation_to_lead = db.Column(db.String(4), index=True,nullable=False, default='')
     date_created = db.Column(db.DateTime(timezone=True), index=True, server_default=db.func.now())
-    completed_appointment = db.Column(db.Boolean, unique=False, nullable=False, server_default='False')
+    appointment_completed = db.Column(db.String(4), index=True,nullable=False, default='')
 
 
     def __repr__(self):
