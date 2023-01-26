@@ -280,7 +280,10 @@ class AppDBUtil():
                 lead_details['lead_email'] = lead.lead_email
                 lead_details['appointment_date_and_time'] = lead.appointment_date_and_time
                 search_results.append(lead_details)
-                logger.debug("Individual lead is: {}".format(lead_details))
+
+
+                logger.debug("Time before conversion is: {}".format(lead.appointment_date_and_time))
+                logger.debug("Time after conversion is: {}".format(pytz.timezone('US/Central').localize(lead.appointment_date_and_time)))
 
             return search_results
         except Exception as e:
