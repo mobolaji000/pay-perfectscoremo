@@ -835,7 +835,7 @@ def start_background_jobs_before_first_request():
                 number_of_days_until_appointment = (lead.get('appointment_date_and_time').date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
                 appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(lead.get('appointment_date_and_time'))
 
-                if True:#number_of_days_until_appointment in [0,1,3]:
+                if number_of_days_until_appointment in [0,1,3]:
                     leads_eligible_for_reminders = True
                     message = lead.get('lead_salutation') + " " + lead.get('lead_name') if lead.get('lead_salutation') else 'Parent'
                     if lead.get('lead_email'):
