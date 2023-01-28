@@ -144,8 +144,17 @@
             $('select[name="how_did_they_hear_about_us"]').val('');
             $('textarea[name="details_on_how_they_heard_about_us"]').val('');
             $('input[name="ask_for_student_info"]').prop('checked', false);
+            $('input[name="ask_for_student_info"]').val('');
             $('input[name="ask_for_student_availability"]').prop('checked', false);
+            $('input[name="ask_for_student_availability"]').val('');
 
+            $('input[name="recurring_payment_frequency"]').val('');
+            $('input[name="make_payment_recurring"]').prop('checked', false);
+            $('input[name="make_payment_recurring"]').val('');
+            $('input[name="pause_payment"]').prop('checked', false);
+             $('input[name="pause_payment"]').val('');
+            $('input[name="paused_payment_resumption_date"]').val('');
+            $('input[name="recurring_payment_start_date"]').val('');
 
 
 
@@ -179,6 +188,27 @@
 
             $('input[name="leadSearchInput"]').val(result.lead_id);
             $('input[name="leadSearchInput"]').trigger('input');
+
+
+            if (result.make_payment_recurring == "yes")
+     {
+     	$('input[name="make_payment_recurring"]').prop('checked', true);
+     	 $('input[name="make_payment_recurring"]').val("yes");
+
+     }
+
+
+      if (result.pause_payment == "yes")
+     {
+     	$('input[name="pause_payment"]').prop('checked', true);
+     	 $('input[name="pause_payment"]').val("yes");
+
+     }
+
+     $('input[name="recurring_payment_frequency"]').val(result.recurring_payment_frequency);
+            $('input[name="paused_payment_resumption_date"]').val(result.paused_payment_resumption_date);
+            $('input[name="recurring_payment_start_date"]').val(result.recurring_payment_start_date);
+
 
             //console.log("result is: "+JSON.stringify(result));
 
@@ -1094,7 +1124,7 @@
                                 <div class="col-md-4 checkbox mb-3">
                                     <label>
                                         <input type="checkbox" id="ask_for_student_availability" name="ask_for_student_availability"
-                                            value="no"> Ask for student availability
+                                            value=""> Ask for student availability
                                     </label>
                                     <br>
                                 </div>
