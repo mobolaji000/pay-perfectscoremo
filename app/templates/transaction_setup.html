@@ -149,12 +149,16 @@
             $('input[name="ask_for_student_availability"]').val('');
 
             $('input[name="recurring_payment_frequency"]').val('');
+     	 $('input[name="recurring_payment_frequency"]').attr('disabled', true);
             $('input[name="make_payment_recurring"]').prop('checked', false);
             $('input[name="make_payment_recurring"]').val('');
             $('input[name="pause_payment"]').prop('checked', false);
              $('input[name="pause_payment"]').val('');
             $('input[name="paused_payment_resumption_date"]').val('');
+             $('input[name="recurring_payment_start_date"]').attr('disabled', true);
             $('input[name="recurring_payment_start_date"]').val('');
+            $('input[name="recurring_payment_start_date"]').attr('disabled', true);
+
 
 
 
@@ -195,6 +199,10 @@
      	$('input[name="make_payment_recurring"]').prop('checked', true);
      	 $('input[name="make_payment_recurring"]').val("yes");
 
+     	 $('input[name="recurring_payment_start_date"]').attr('disabled', false);
+     	 $('input[name="recurring_payment_frequency"]').attr('disabled', false);
+
+
      }
 
 
@@ -202,6 +210,7 @@
      {
      	$('input[name="pause_payment"]').prop('checked', true);
      	 $('input[name="pause_payment"]').val("yes");
+     	  $('input[name="paused_payment_resumption_date"]').attr('disabled', false);
 
      }
 
