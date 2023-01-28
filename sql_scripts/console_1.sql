@@ -22,3 +22,4 @@ create table public.lead
 
 alter table lead drop COLUMN completed_appointment;
 alter table lead add column appointment_completed varchar(4) NOT NULL CONSTRAINT appointment_completed_constraint DEFAULT('');
+alter table transaction add column ask_for_student_availability varchar(4) NOT NULL CONSTRAINT ask_for_student_availability_constraint DEFAULT('');
