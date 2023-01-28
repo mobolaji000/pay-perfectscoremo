@@ -395,7 +395,7 @@
 				{% else %}
 
 			{% if client_info.make_payment_recurring == 'yes' %}
-							<div><span class="badge badge-danger">Testing position of recurring payment.</span></div>
+							<div><span class="badge badge-danger">This payment starts on {{client_info.recurring_payment_start_date}} and recurs every {{recurring_payment_frequency}} days.</span></div>
 
 									<div id="recurring-payment-div" class="d-block my-3" >
 					<div container>
