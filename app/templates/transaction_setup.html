@@ -202,6 +202,9 @@
      	 $('input[name="recurring_payment_start_date"]').attr('disabled', false);
      	 $('input[name="recurring_payment_frequency"]').attr('disabled', false);
 
+     	     $('input[name="recurring_payment_frequency"]').val(result.recurring_payment_frequency);
+            $('input[name="recurring_payment_start_date"]').val(result.recurring_payment_start_date);
+
 
      }
 
@@ -211,12 +214,9 @@
      	$('input[name="pause_payment"]').prop('checked', true);
      	 $('input[name="pause_payment"]').val("yes");
      	  $('input[name="paused_payment_resumption_date"]').attr('disabled', false);
+     	   $('input[name="paused_payment_resumption_date"]').val(result.paused_payment_resumption_date);
 
      }
-
-     $('input[name="recurring_payment_frequency"]').val(result.recurring_payment_frequency);
-            $('input[name="paused_payment_resumption_date"]').val(result.paused_payment_resumption_date);
-            $('input[name="recurring_payment_start_date"]').val(result.recurring_payment_start_date);
 
 
             //console.log("result is: "+JSON.stringify(result));
@@ -438,6 +438,12 @@
 
             dataToModify['grade_level'] = $('select[name="grade_level"]').val();
             dataToModify['recent_test_score'] = $('input[name="recent_test_score"]').val();
+
+            dataToModify['recurring_payment_frequency'] = $('input[name="recurring_payment_frequency"]').val();
+            dataToModify['make_payment_recurring'] = $('input[name="make_payment_recurring"]').val();
+            dataToModify['recurring_payment_start_date'] = $('input[name="recurring_payment_start_date"]').val();
+            dataToModify['pause_payment'] = $('input[name="pause_payment"]').val();
+            dataToModify['paused_payment_resumption_date'] = $('input[name="paused_payment_resumption_date"]').val();
 
 
 
