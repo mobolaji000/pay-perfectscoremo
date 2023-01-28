@@ -705,7 +705,7 @@ class AppDBUtil():
         return transaction_ids
 
     @classmethod
-    def getAllLeads(cls):#
+    def getAllLeads(cls):
         allLeads = Lead.query.order_by(Lead.date_created.desc()).all()
         return allLeads
 
