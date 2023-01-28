@@ -395,7 +395,16 @@
 				{% else %}
 
 			{% if client_info.make_payment_recurring == 'yes' %}
-							<div><span class="badge badge-danger">This payment starts on {{client_info.recurring_payment_start_date}} and recurs every {{recurring_payment_frequency}} days.</span></div>
+
+			{% if client_info.recurring_payment_frequency == 'null' %}
+					{% set recurring_payment_frequency = "###Error: Don't make a payment. Contact Mo###" %}
+								{% else %}
+								{% set recurring_payment_frequency = client_info.recurring_payment_frequency %}
+					{% endif %}
+
+
+
+							<div><span class="badge badge-danger">This payment starts on {{client_info.recurring_payment_start_date}} and recurs every {{recurring_payment_frequency}} day(s).</span></div>
 
 									<div id="recurring-payment-div" class="d-block my-3" >
 					<div container>
