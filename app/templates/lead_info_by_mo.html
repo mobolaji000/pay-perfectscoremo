@@ -181,14 +181,14 @@
 
      if (result.appointment_completed == "yes")
      {
-     	$('input[name="mark_appointment_as_completed"]').prop('checked', true);
-     	 $('input[name="mark_appointment_as_completed"]').val("yes");
+     	$('input[name="appointment_completed"]').prop('checked', true);
+     	 $('input[name="appointment_completed"]').val("yes");
 
      }
      else
      {
-     $('input[name="mark_appointment_as_completed"]').prop('checked', false);
-     	 $('input[name="mark_appointment_as_completed"]').val("no");
+     $('input[name="appointment_completed"]').prop('checked', false);
+     	 $('input[name="appointment_completed"]').val("no");
 
      }
 
@@ -474,7 +474,7 @@
                                 </div>
                                 <div class="col-md-4 checkbox mb-3">
                                     <label>
-                                        <input type="checkbox" id="mark_appointment_as_completed" name="mark_appointment_as_completed"
+                                        <input type="checkbox" id="appointment_completed" name="appointment_completed"
                                             value=""> Mark appointment as completed
                                     </label>
                                     <br>

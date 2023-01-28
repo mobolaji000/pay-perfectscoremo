@@ -303,30 +303,6 @@ class AppDBUtil():
             leadsWithAppointmentsInTheLastHour = Lead.query.filter(Lead.appointment_completed != 'yes').filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
 
 
-            # zurich = pytz.timezone('US/Central')
-            # dt = datetime.datetime.utcnow()
-            # utc_offset = zurich.utcoffset(dt).seconds / 3600
-            #
-            # t = datetime.time(13, 0, tzinfo=pytz.utc)
-            # t
-            # datetime.time(13, 0, tzinfo= < UTC >)
-            #
-            # t = t.replace(tzinfo=None)
-            # t
-            # datetime.time(13, 0)
-            #
-            # zurich_t = t.replace(hour=t.hour + int(utc_offset))
-            #
-            # zurich_t
-            # datetime.time(15, 0)
-            #
-            # zurich_t.hour
-            # 15
-
-
-
-
-
             logger.debug("Leads with appointments in the last hour are: {}".format(leadsWithAppointmentsInTheLastHour))
             search_results = []
             for lead in leadsWithAppointmentsInTheLastHour:
@@ -334,7 +310,7 @@ class AppDBUtil():
                 lead_details['lead_id'] = lead.lead_id
                 lead_details['lead_salutation'] = lead.lead_salutation
                 lead_details['lead_name'] = lead.lead_name
-                lead_details['appointment_date_and_time'] = lead.appointment_date_and_time
+                lead_details['appointment_date_and_time'] = lead.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))
                 search_results.append(lead_details)
                 logger.debug("Individual lead is: {}".format(lead_details))
 
@@ -630,7 +606,7 @@ class AppDBUtil():
         try:
             lead_info_by_mo = Lead(lead_id=leadInfo['lead_id'], lead_salutation=leadInfo['lead_salutation'],lead_name=leadInfo['lead_name'], lead_email=leadInfo['lead_email'], lead_phone_number=leadInfo['lead_phone_number'],appointment_date_and_time=leadInfo['appointment_date_and_time'],
                              what_services_are_they_interested_in=leadInfo['what_services_are_they_interested_in'], details_on_what_service_they_are_interested_in=leadInfo['details_on_what_service_they_are_interested_in'],send_confirmation_to_lead=leadInfo['send_confirmation_to_lead'],
-                             miscellaneous_notes=leadInfo['miscellaneous_notes'], how_did_they_hear_about_us=leadInfo['how_did_they_hear_about_us'],details_on_how_they_heard_about_us=leadInfo['details_on_how_they_heard_about_us'])
+                             miscellaneous_notes=leadInfo['miscellaneous_notes'], how_did_they_hear_about_us=leadInfo['how_did_they_hear_about_us'],details_on_how_they_heard_about_us=leadInfo['details_on_how_they_heard_about_us'],appointment_completed=leadInfo['appointment_completed'])
 
             db.session.add(lead_info_by_mo)
             cls.executeDBQuery()
@@ -674,15 +650,14 @@ class AppDBUtil():
                 lead['details_on_what_service_they_are_interested_in'] = info.details_on_what_service_they_are_interested_in
                 lead['miscellaneous_notes'] = info.miscellaneous_notes
                 lead['how_did_they_hear_about_us'] = info.how_did_they_hear_about_us
-                lead['details_on_how_they_heard_about_us'] = info.details_on_how_they_heard_about_us
-                lead['appointment_date_and_time'] = cls.clean_up_date_and_time(info.appointment_date_and_time) if info.appointment_date_and_time else 'null' #info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S")
+                lead['appointment_date_and_time'] = cls.clean_up_date_and_time(info.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))) if info.appointment_date_and_time else 'null'
                 lead['send_confirmation_to_lead'] = info.send_confirmation_to_lead
                 lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
                 #lead['completed_appointment'] = 'true' if info.completed_appointment else 'false'
-                lead['appointment_completed'] = info.mark_appointment_as_completed
+                lead['appointment_completed'] = info.appointment_completed
                 lead['grade_level'] = info.grade_level
                 lead['recent_test_score'] = '' if info.recent_test_score == -1 else info.recent_test_score
-                #'mark_appointment_as_completed':lead_info_contents.get('mark_appointment_as_completed','no'),
+                #'appointment_completed':lead_info_contents.get('appointment_completed','no'),
 
                 search_results.append(lead)
             logger.info("search results are {}".format(search_results))

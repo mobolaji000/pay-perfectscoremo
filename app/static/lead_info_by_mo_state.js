@@ -70,7 +70,7 @@ $(document).ready(function() {
         }
     });
 
-    $('input[name="mark_appointment_as_completed"]').on('click', function() {
+    $('input[name="appointment_completed"]').on('click', function() {
         if ($(this).val() == "" || $(this).val() == "no") {
             $(this).val("yes")
         } else {

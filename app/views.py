@@ -218,6 +218,7 @@ def lead_info_by_lead(lead_id):
                 raise Exception("Somehow ended up with and modified duplicate lead ids")
 
             flash("Your information has been submitted successfully")
+            SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com', message="New update submitted by lead {} with lead-id {}. Go check it out.".format(lead_info_contents.get('lead_salutation', '')+ ' '+lead_info_contents.get('lead_name', ''),lead_info_contents['lead_id']), message_type='to_mo', subject='New Update Submitted By Lead')
             SendMessagesToClients.sendSMS(to_numbers='9725847364', message="New update submitted by lead {} with lead-id {}. Go check it out.".format(lead_info_contents.get('lead_salutation', '')+ ' '+lead_info_contents.get('lead_name', ''),lead_info_contents['lead_id']), message_type='to_mo')
             return render_template('lead_info_by_lead.html', lead_id=lead_id)
         except Exception as e:
@@ -248,7 +249,7 @@ def lead_info_by_mo():
                 lead_id = "l-" + str(uuid.uuid4().int >> 64)[:6]
                 leadInfo.update({'lead_id': lead_id,'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
                                  'appointment_date_and_time': appointment_date_and_time,'what_services_are_they_interested_in': request.form.getlist('what_services_are_they_interested_in'), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
-                                 'grade_level': lead_info_contents.get('grade_level',''),'recent_test_score': recent_test_score,'mark_appointment_as_completed':lead_info_contents.get('mark_appointment_as_completed','no'),
+                                 'grade_level': lead_info_contents.get('grade_level',''),'recent_test_score': recent_test_score,'appointment_completed':lead_info_contents.get('appointment_completed','no'),
                                  'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead','no')})
 
                 AppDBUtil.createLead(leadInfo)
@@ -282,7 +283,7 @@ def lead_info_by_mo():
                 leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''),'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_email': lead_info_contents.get('lead_email', ''),
                                  'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'appointment_date_and_time': appointment_date_and_time,
                                  'what_services_are_they_interested_in': request.form.getlist('what_services_are_they_interested_in'), 'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_they_are_interested_in', ''),
-                                 'grade_level': lead_info_contents.get('grade_level', ''),'recent_test_score': recent_test_score,'mark_appointment_as_completed':lead_info_contents.get('mark_appointment_as_completed','no'),
+                                 'grade_level': lead_info_contents.get('grade_level', ''),'recent_test_score': recent_test_score,'appointment_completed':lead_info_contents.get('appointment_completed','no'),
                                  'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),'send_confirmation_to_lead':lead_info_contents.get('send_confirmation_to_lead','no'),
                                  'how_did_they_hear_about_us': lead_info_contents.get('how_did_they_hear_about_us', ''), 'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_they_heard_about_us', '')})
 
@@ -885,6 +886,45 @@ def start_background_jobs_before_first_request():
 
     def pay_invoice_background_job():
         logger.info("pay_invoice_background_job started")
+        try:
+            invoicesToPay = AppDBUtil.findInvoicesToPay()
+            logger.info("Invoices to pay are: {}".format(invoicesToPay))
+
+            for invoice in invoicesToPay:
+                try:
+                    invoice_payment_failed = True
+
+                    stripe_invoice_ach_charge = stripe.Invoice.retrieve(invoice['stripe_invoice_id']).charge
+                    if stripe_invoice_ach_charge:
+                        stripe_invoice_ach_charge = stripe.Charge.retrieve(stripe_invoice_ach_charge)
+                        if stripe_invoice_ach_charge.status == 'pending' and stripe_invoice_ach_charge.payment_method_details.type == "ach_debit":
+                            logger.info("ACH payment already started for: {}".format(invoice['last_name']))
+                            continue
+
+                    stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
+                    if stripe_invoice_object.paid or stripe_invoice_object.finalized:
+                        #added finalized because ach payments finalize immediately but do not send 'paid' events for 14 days
+                        logger.info("Invoice payment succeeded: {}".format(invoice['last_name']))
+                        #might need to come back and handle this via webhook
+                        AppDBUtil.updateInvoiceAsPaid(stripe_invoice_id=invoice['stripe_invoice_id'])
+                        invoice_payment_failed = False
+
+                except Exception as e:
+                    invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
+                    logger.exception("Invoice payment failed for: ".format(invoice_name))
+                    #SendMessagesToClients.sendSMS(to_numbers='9725847364', message="Exception: Invoice payments failed for: " + invoice_name + '. Go check the logs!', message_type='to_mo')
+                finally:
+                    if invoice_payment_failed:
+                        pass
+                        #logger.error("Invoice payment failed: ".format(invoice['last_name']))
+                        #invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
+
+        except Exception as e:
+            logger.exception("Error in finding invoices to pay")
+
+    def setup_recurring_payments_due_today_background_job():
+        StripeInstance.setupRecurringPaymentsDueToday()
+        logger.info("setup_recurring_payments_due_today_background_job started")
         try:
             invoicesToPay = AppDBUtil.findInvoicesToPay()
             logger.info("Invoices to pay are: {}".format(invoicesToPay))
