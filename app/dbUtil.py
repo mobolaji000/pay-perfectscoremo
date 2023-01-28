@@ -97,10 +97,12 @@ class AppDBUtil():
         ask_for_student_availability = clientData.get('ask_for_student_availability', '')
         make_payment_recurring = 'yes' if clientData.get('make_payment_recurring',None) else 'no'
         recurring_payment_frequency = 0 if clientData.get('recurring_payment_frequency','') == '' else clientData.get('recurring_payment_frequency','')
-        recurring_payment_start_date = clientData.get('recurring_payment_start_date',None)
+        recurring_payment_start_date = None if clientData.get('recurring_payment_start_date', '') == '' else clientData.get('recurring_payment_start_date')
         pause_payment = 'yes' if clientData.get('pause_payment',None) else 'no'
-        paused_payment_resumption_date = clientData.get('paused_payment_resumption_date',None)
+        paused_payment_resumption_date = None if clientData.get('paused_payment_resumption_date', '') == '' else clientData.get('paused_payment_resumption_date')
         does_customer_payment_info_exist = 'yes' if clientData.get('does_customer_payment_info_exist',None) else 'no'
+
+
 
 
 
