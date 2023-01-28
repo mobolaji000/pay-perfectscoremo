@@ -923,48 +923,17 @@ def start_background_jobs_before_first_request():
             logger.exception("Error in finding invoices to pay")
 
     def setup_recurring_payments_due_today_background_job():
-        StripeInstance.setupRecurringPaymentsDueToday()
         logger.info("setup_recurring_payments_due_today_background_job started")
         try:
-            invoicesToPay = AppDBUtil.findInvoicesToPay()
-            logger.info("Invoices to pay are: {}".format(invoicesToPay))
-
-            for invoice in invoicesToPay:
-                try:
-                    invoice_payment_failed = True
-
-                    stripe_invoice_ach_charge = stripe.Invoice.retrieve(invoice['stripe_invoice_id']).charge
-                    if stripe_invoice_ach_charge:
-                        stripe_invoice_ach_charge = stripe.Charge.retrieve(stripe_invoice_ach_charge)
-                        if stripe_invoice_ach_charge.status == 'pending' and stripe_invoice_ach_charge.payment_method_details.type == "ach_debit":
-                            logger.info("ACH payment already started for: {}".format(invoice['last_name']))
-                            continue
-
-                    stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
-                    if stripe_invoice_object.paid or stripe_invoice_object.finalized:
-                        #added finalized because ach payments finalize immediately but do not send 'paid' events for 14 days
-                        logger.info("Invoice payment succeeded: {}".format(invoice['last_name']))
-                        #might need to come back and handle this via webhook
-                        AppDBUtil.updateInvoiceAsPaid(stripe_invoice_id=invoice['stripe_invoice_id'])
-                        invoice_payment_failed = False
-
-                except Exception as e:
-                    invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
-                    logger.exception("Invoice payment failed for: ".format(invoice_name))
-                    #SendMessagesToClients.sendSMS(to_numbers='9725847364', message="Exception: Invoice payments failed for: " + invoice_name + '. Go check the logs!', message_type='to_mo')
-                finally:
-                    if invoice_payment_failed:
-                        pass
-                        #logger.error("Invoice payment failed: ".format(invoice['last_name']))
-                        #invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
-
+            StripeInstance.setupRecurringPaymentsDueToday()
         except Exception as e:
-            logger.exception("Error in finding invoices to pay")
+            logger.exception("Error in setting up recurring payments")
 
 
     scheduler = BackgroundScheduler(timezone='US/Central')
 
     if os.environ['DEPLOY_REGION'] == 'local':
+        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'interval', minutes=5)
         scheduler.add_job(remind_lead_about_appointment_background_job, 'interval', hours=1)
         scheduler.add_job(lambda: print("dummy reminders job for local"), 'cron', minute='55')
         scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
