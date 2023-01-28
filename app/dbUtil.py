@@ -404,9 +404,9 @@ class AppDBUtil():
 
             client['make_payment_recurring'] = transaction.make_payment_recurring
             client['recurring_payment_frequency'] = transaction.recurring_payment_frequency
-            client['recurring_payment_start_date'] = transaction.recurring_payment_start_date
+            client['recurring_payment_start_date'] = transaction.recurring_payment_start_date.strftime("%m/%d/%Y") if transaction.recurring_payment_start_date else None
             client['pause_payment'] = transaction.pause_payment
-            client['paused_payment_resumption_date'] = transaction.paused_payment_resumption_date
+            client['paused_payment_resumption_date'] = transaction.paused_payment_resumption_date.strftime("%m/%d/%Y") if transaction.paused_payment_resumption_date else None
 
             prospect_details = Prospect.query.filter_by(prospect_id=transaction.prospect_id).first()
             client['how_did_they_hear_about_us'] = prospect_details.how_did_they_hear_about_us
