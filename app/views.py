@@ -335,6 +335,7 @@ def create_transaction():
     try:
 
         transaction_setup_data = request.form.to_dict()
+        logger.debug("transaction_setup_data is {}".format(transaction_setup_data))
         prospect = AppDBUtil.createProspect(transaction_setup_data)
 
         customer,does_customer_payment_info_exist = stripeInstance.createCustomer(transaction_setup_data)
