@@ -925,7 +925,7 @@ def start_background_jobs_before_first_request():
     def setup_recurring_payments_due_today_background_job():
         logger.info("setup_recurring_payments_due_today_background_job started")
         try:
-            StripeInstance.setupRecurringPaymentsDueToday()
+            stripeInstance.setupRecurringPaymentsDueToday()
         except Exception as e:
             logger.exception("Error in setting up recurring payments")
 
