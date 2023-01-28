@@ -54,8 +54,8 @@ class AppDBUtil():
             db.session.add(prospect)
             cls.executeDBQuery()
 
-        if lead_id != '':
-            cls.modifyLeadInfo(lead_id, {'appointment_completed': 'yes'})
+        # if lead_id != '':
+        #     cls.modifyLeadInfo(lead_id, {'appointment_completed': 'yes'})
 
         return prospect
 
@@ -705,7 +705,7 @@ class AppDBUtil():
         return transaction_ids
 
     @classmethod
-    def getAllLeads(cls):
+    def getAllLeads(cls):#
         allLeads = Lead.query.order_by(Lead.date_created.desc()).all()
         return allLeads
 
