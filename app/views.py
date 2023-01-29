@@ -942,7 +942,7 @@ def start_background_jobs_before_first_request():
         scheduler.add_job(lambda: print("dummy notify_mo_to_modify_lead_appointment_completion_status_background_job run for local or dev"), 'interval', hours=1)
 
     elif os.environ['DEPLOY_REGION'] == 'dev':
-        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'interval', minutes=5)
+        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'interval', minutes=1)
         #scheduler.add_job(remind_lead_about_appointment_background_job, 'interval', minutes=1)
         scheduler.add_job(lambda: print("dummy reminders job for dev"), 'cron', minute='55')
         scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now() + datetime.timedelta(days=1), '%Y-%m-%d'))
