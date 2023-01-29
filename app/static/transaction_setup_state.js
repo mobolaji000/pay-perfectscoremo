@@ -411,7 +411,7 @@ $(document).ready(function() {
      amount = 'amount_'.concat(k);
      	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
 		}
-
+        alert(counter);
         if (counter > 1)
         {
             if (installment_total != transactionTotal()) {
