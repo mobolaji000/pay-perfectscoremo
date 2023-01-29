@@ -420,7 +420,7 @@ def search_transaction():
 @login_required
 def modify_transaction():
     try:
-        logger.debug(request.form['data_to_modify'])
+        #logger.debug(request.form['data_to_modify'])
         data_to_modify = ast.literal_eval(request.form['data_to_modify'])
         logger.debug("data_to_modify is {}".format(data_to_modify))
         transaction_id = data_to_modify['transaction_id']
