@@ -338,7 +338,7 @@ class StripeInstance():
                 # ensures that you always keep 48? hours to change method of payment promise to exisiting clients
                 amount = stripe_info['transaction_total']
                 payment_date = stripe_info['recurring_payment_start_date']
-                #(client_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics
+                #(client_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics#
                 client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
                 transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
 
