@@ -324,7 +324,7 @@ $(document).ready(function() {
 {
 
     $('input[name="make_payment_recurring"]').attr('disabled', true);
-    // $('input[name="make_payment_recurring"]').prop('checked', false);
+     //$('input[name="make_payment_recurring"]').prop('checked', false);
 }
 
         if ($('input[name="make_payment_recurring"]').val() == "yes")
@@ -374,6 +374,19 @@ $(document).ready(function() {
         counter--;
         $('input[name="installment_counter"]').val(counter);
 
+
+    if (Number(counter) < 13)
+        {
+        document.getElementById("more_than_12_installments_message").hidden=true;
+        document.getElementById("addrow").hidden=false;
+        $('input[name="make_payment_recurring"]').attr('disabled', true);
+        }
+    else
+        {
+        document.getElementById("more_than_12_installments_message").hidden=false;
+        }
+        //client-side counter is always one more; actual number has been set server-side
+
         alert("counter values is: "+counter);
 
         if (Number(counter) == 1)
@@ -388,17 +401,6 @@ $(document).ready(function() {
 
         }
 
-    if (Number(counter) < 13)
-        {
-        document.getElementById("more_than_12_installments_message").hidden=true;
-        document.getElementById("addrow").hidden=false;
-        $('input[name="make_payment_recurring"]').attr('disabled', true);
-        }
-    else
-        {
-        document.getElementById("more_than_12_installments_message").hidden=false;
-        }
-        //client-side counter is always one more; actual number has been set server-side
     });
 
     doesInstallmentEqualTotal = function(event) {
