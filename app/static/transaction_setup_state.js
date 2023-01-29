@@ -397,11 +397,9 @@ $(document).ready(function() {
         document.getElementById("installment_not_equal_total_message_modify").hidden=true;
 
         var result = $('input[name="result"]').val();
-               alert(result);
                //only enable modifcation if this is an exisitn invoice with a payment that has not been started
 
                  if (typeof result != "undefined" && JSON.parse(result).payment_started == "False")
-                 //if (typeof $('input[name="result"]').val() != "undefined" && result != '' && JSON.parse(result).payment_started == "False")
                  {
                        $('input[name="modify_transaction_button"]').attr('disabled', false);
                  }
@@ -421,7 +419,6 @@ $(document).ready(function() {
      amount = 'amount_'.concat(k);
      	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
 		}
-        alert(counter);
         if (counter > 1)
         {
             if (installment_total != transactionTotal()) {
@@ -438,7 +435,6 @@ $(document).ready(function() {
              $('div[name="installment_not_equal_total_message_modify"]').attr('hidden', true);
 
                var result = $('input[name="result"]').val();
-               alert(result);
                //only enable modifcation if this is an exisitn invoice with a payment that has not been started
 
                  if (typeof result != "undefined" && JSON.parse(result).payment_started == "False")
