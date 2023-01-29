@@ -378,6 +378,9 @@ $(document).ready(function() {
 
         if (Number(counter) == 1)
         {
+
+        alert("inside counter value 1");
+
              $('input[name="create_transaction_button"]').attr('disabled', false);
             $('input[name="make_payment_recurring"]').attr('disabled', false);
         document.getElementById("installment_not_equal_total_message_create").hidden=true;
