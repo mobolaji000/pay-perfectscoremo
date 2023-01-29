@@ -396,7 +396,15 @@ $(document).ready(function() {
         document.getElementById("installment_not_equal_total_message_create").hidden=true;
         document.getElementById("installment_not_equal_total_message_modify").hidden=true;
 
-         $('input[name="modify_transaction_button"]').attr('disabled', false);
+        var result = $('input[name="result"]').val();
+               alert(result);
+               //only enable modifcation if this is an exisitn invoice with a payment that has not been started
+
+                 if (typeof result != "undefined" && JSON.parse(result).payment_started == "False")
+                 //if (typeof $('input[name="result"]').val() != "undefined" && result != '' && JSON.parse(result).payment_started == "False")
+                 {
+                       $('input[name="modify_transaction_button"]').attr('disabled', false);
+                 }
 
         }
 
