@@ -523,7 +523,7 @@ def parseDataForStripe(client_info):
     stripe_info['email'] = client_info['email']
     stripe_info['stripe_customer_id'] = client_info['stripe_customer_id']
     stripe_info['transaction_total'] = client_info['transaction_total']
-    stripe_info['deposit'] = client_info.get('deposit','')
+    #stripe_info['deposit'] = client_info.get('deposit','')
     stripe_info['transaction_id'] = client_info.get('transaction_id', '')
     stripe_info['installment_counter'] = client_info.get('installment_counter', '')
     stripe_info['ask_for_student_info'] = client_info.get('ask_for_student_info', '')
@@ -533,9 +533,10 @@ def parseDataForStripe(client_info):
 
     stripe_info['make_payment_recurring'] = client_info.get('make_payment_recurring', '')
     stripe_info['recurring_payment_frequency'] = client_info.get('recurring_payment_frequency', 0)
-    stripe_info['recurring_payment_start_date'] = client_info.get('recurring_payment_start_date', None)
+    stripe_info['recurring_payment_start_date'] = client_info.get('recurring_payment_start_date', None).strftime("%Y-%m-%d") if client_info.get('recurring_payment_start_date', None) else ''
     stripe_info['pause_payment'] = client_info.get('pause_payment', '')
-    stripe_info['paused_payment_resumption_date'] = client_info.get('paused_payment_resumption_date', None)
+    stripe_info['paused_payment_resumption_date'] = client_info.get('paused_payment_resumption_date', None).strftime("%Y-%m-%d") if client_info.get('paused_payment_resumption_date', None) else ''
+
 
     if client_info.get('installments','') != '':
         for index,installment in enumerate(client_info.get('installments','')):
