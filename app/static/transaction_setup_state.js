@@ -374,6 +374,8 @@ $(document).ready(function() {
         counter--;
         $('input[name="installment_counter"]').val(counter);
 
+        alert("counter values is: "+counter);
+
         if (Number(counter) == 1)
         {
              $('input[name="create_transaction_button"]').attr('disabled', false);
