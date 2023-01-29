@@ -989,6 +989,7 @@ def start_background_jobs_before_first_request():
 @server.route('/post_signup_checkout',methods=['POST'])
 def post_signup_checkout():
     payment_and_signup_data = request.form.to_dict()
+
     chosen_mode_of_payment = payment_and_signup_data.get('installment-payment', '') if payment_and_signup_data.get('installment-payment', '') != '' else payment_and_signup_data.get('full-payment', '') if payment_and_signup_data.get('full-payment', '') != '' else payment_and_signup_data.get('payment-options', '') if payment_and_signup_data.get('payment-options', '') != '' else ''
     logger.debug("payment_and_signup_data[stripe_info] is {}".format(payment_and_signup_data['stripe_info']))
     stripe_info = ast.literal_eval(payment_and_signup_data['stripe_info'])

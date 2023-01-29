@@ -478,6 +478,10 @@ $(document).ready(function() {
 
             $(this).val("no");
             document.getElementById("addrow").hidden=false;
+            //alert($('input[name="recurring_payment_start_date"]').val());
+            $('input[name="recurring_payment_start_date"]').val('');
+            //alert($('input[name="recurring_payment_start_date"]').val());
+            $('input[name="recurring_payment_frequency"]').val('');
             $('input[name="recurring_payment_start_date"]').attr('disabled', true);
              $('input[name="recurring_payment_frequency"]').attr('disabled', true);
              $('input[name="recurring_payment_start_date"]').prop('required', false);
@@ -496,6 +500,7 @@ $(document).ready(function() {
         } else if ($(this).val() == "yes") {
 
             $(this).val("no");
+            $('input[name="paused_payment_resumption_date"]').val('');
             $('input[name="paused_payment_resumption_date"]').attr('disabled', true);
              $('input[name="paused_payment_resumption_date"]').prop('required', false);
         }
