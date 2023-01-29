@@ -396,6 +396,8 @@ $(document).ready(function() {
         document.getElementById("installment_not_equal_total_message_create").hidden=true;
         document.getElementById("installment_not_equal_total_message_modify").hidden=true;
 
+         $('input[name="modify_transaction_button"]').attr('disabled', false);
+
         }
 
     });
