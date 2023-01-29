@@ -26,7 +26,6 @@ def start_runner():
                     logger.info("Status code from starting server is {}".format(r.status_code))
                     logger.info('Server started, quiting start_loop')
                     not_started = False
-                print(r.status_code)
             except Exception as e:
                 #print(e)
                 #traceback.print_exc()
