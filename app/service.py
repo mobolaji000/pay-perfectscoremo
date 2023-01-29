@@ -371,7 +371,8 @@ class StripeInstance():
             client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
             print("client_info is: {}".format(client_info))
             logger.debug("client_info is: {}".format(client_info))
-            if client_info['pause_payment'] != 'yes':
+
+            if client_info['make_payment_recurring'] == 'yes' and client_info['pause_payment'] == 'no':
                 customer = stripe.Customer.retrieve(client_info['stripe_customer_id'])
                 default_card = customer.invoice_settings.default_payment_method
                 default_ach = customer.default_source
