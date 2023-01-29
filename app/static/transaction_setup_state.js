@@ -428,9 +428,10 @@ $(document).ready(function() {
              $('div[name="installment_not_equal_total_message_modify"]').attr('hidden', true);
 
                var result = $('input[name="result"]').val();
+               alert(result);
                //only enable modifcation if this is an exisitn invoice with a payment that has not been started
 
-                 if (typeof $('input[name="result"]').val() != "undefined" && JSON.parse(result).payment_started == "False")
+                 if (typeof result != "undefined" && JSON.parse(result).payment_started == "False")
                  //if (typeof $('input[name="result"]').val() != "undefined" && result != '' && JSON.parse(result).payment_started == "False")
                  {
                        $('input[name="modify_transaction_button"]').attr('disabled', false);
