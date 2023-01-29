@@ -387,12 +387,9 @@ $(document).ready(function() {
         }
         //client-side counter is always one more; actual number has been set server-side
 
-        alert("counter values is: "+counter);
 
         if (Number(counter) == 1)
         {
-
-        alert("inside counter value 1");
 
              $('input[name="create_transaction_button"]').attr('disabled', false);
             $('input[name="make_payment_recurring"]').attr('disabled', false);
