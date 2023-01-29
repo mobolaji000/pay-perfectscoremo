@@ -375,7 +375,7 @@ class StripeInstance():
                 default_ach = customer.default_source
 
                 if default_card:
-                    logger.debug('Recurring payment credit card: ' + str(client_info['transaction_id']) + ' ' + str(client_info['name']))
+                    logger.debug('Recurring payment credit card: ' + str(client_info['transaction_id']) + ' ' + str(client_info['first_name'])+ " " + str(client_info['last_name']))
 
                     amount = client_info['transaction_total']
                     payment_date = client_info['recurring_payment_start_date']
