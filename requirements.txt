@@ -12,7 +12,7 @@ termcolor==1.1.0
 plaid-python==7.2.0
 psycopg2-binary==2.8.6
 python-http-client==3.3.2
-#starkbank-ecdsa==1.1.0
+#starkbank-ecdsa==1.1.0#
 PyJWT==2.0.0
 twilio==7.9.0
 APScheduler==3.7.0
