@@ -407,12 +407,12 @@ class StripeInstance():
                                                                 transaction_id=client_info['transaction_id'], stripe_customer_id=client_info['stripe_customer_id'],
                                                                 payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
 
-            elif default_ach:
-                    pass
+                elif default_ach:
+                        pass
 
-            else:
-                logger.error("weird: neither ach nor card was retrieved as default method of payment")
-                raise ValueError('weird: neither ach nor card was retrieved as default method of payment')
+                else:
+                    logger.error("weird: neither ach nor card was retrieved as default method of payment")
+                    raise ValueError('weird: neither ach nor card was retrieved as default method of payment')
 
 
 
