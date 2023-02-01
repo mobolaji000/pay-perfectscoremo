@@ -402,7 +402,7 @@ class StripeInstance():
                             auto_advance=False,
                             metadata={'transaction_id': client_info['transaction_id']},
                         )
-                        AppDBUtil.createOrModifyInvoiceToBePaid(first_name=client_info['name'].split()[0], last_name=client_info['name'].split()[1],
+                        AppDBUtil.createOrModifyInvoiceToBePaid(first_name=client_info['first_name'], last_name=client_info['last_name'],
                                                                 phone_number=client_info['phone_number'], email=client_info['email'],
                                                                 transaction_id=client_info['transaction_id'], stripe_customer_id=client_info['stripe_customer_id'],
                                                                 payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
