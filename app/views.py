@@ -850,7 +850,7 @@ def start_background_jobs_before_first_request():
                 SendMessagesToClients.sendSMS(to_numbers='9725847364', message=reminder_last_names, message_type='to_mo')
 
         except Exception as e:
-            logger.exception("Error in sending reminders")
+            logger.exception("Error in sending reminders: {}".format(e))
 
 
     def notify_mo_to_modify_lead_appointment_completion_status_background_job():
@@ -868,7 +868,7 @@ def start_background_jobs_before_first_request():
             #     SendMessagesToClients.sendSMS(to_numbers='9725847364', message=reminder_last_names, message_type='to_mo')
 
         except Exception as e:
-            logger.exception("Error in sending reminders")
+            logger.exception("Error in sending reminders: {}".format(e))
 
     def remind_client_about_invoice_background_job():
         try:
@@ -884,7 +884,7 @@ def start_background_jobs_before_first_request():
                 SendMessagesToClients.sendSMS(to_numbers='9725847364', message=reminder_last_names, message_type='to_mo')
 
         except Exception as e:
-            logger.exception("Error in sending reminders")
+            logger.exception("Error in sending reminders: {}".format(e))
 
     def pay_invoice_background_job():
         logger.info("pay_invoice_background_job started")
@@ -922,14 +922,14 @@ def start_background_jobs_before_first_request():
                         #invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
 
         except Exception as e:
-            logger.exception("Error in finding invoices to pay")
+            logger.exception("Error in finding invoices to pay: {}".format(e))
 
     def setup_recurring_payments_due_today_background_job():
         logger.info("setup_recurring_payments_due_today_background_job started")
         try:
             stripeInstance.setupRecurringPaymentsDueToday()
         except Exception as e:
-            logger.exception("Error in setting up recurring payments")
+            logger.exception("Error in setting up recurring payments: {}".format(e))
 
 
     scheduler = BackgroundScheduler(timezone='US/Central')
@@ -940,6 +940,7 @@ def start_background_jobs_before_first_request():
         scheduler.add_job(lambda: print("dummy reminders job for local"), 'cron', minute='55')
         scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
         scheduler.add_job(lambda: print("dummy notify_mo_to_modify_lead_appointment_completion_status_background_job run for local or dev"), 'interval', hours=1)
+        logger.info("all local background jobs added")
 
     elif os.environ['DEPLOY_REGION'] == 'dev':
         scheduler.add_job(setup_recurring_payments_due_today_background_job, 'interval', minutes=11)
@@ -947,6 +948,7 @@ def start_background_jobs_before_first_request():
         scheduler.add_job(lambda: print("dummy reminders job for dev"), 'cron', minute='55')
         scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now() + datetime.timedelta(days=1), '%Y-%m-%d'))
         scheduler.add_job(lambda: print("dummy notify_mo_to_modify_lead_appointment_completion_status_background_job run for local or dev"), 'interval', hours=1)
+        logger.info("all dev background jobs added")
 
 
     elif os.environ['DEPLOY_REGION'] == 'prod':
@@ -955,15 +957,16 @@ def start_background_jobs_before_first_request():
         scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
         scheduler.add_job(pay_invoice_background_job, 'cron', hour='15',minute='55')
         scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'interval', hours=1)
+        logger.info("all prod background jobs added")
 
 
 
         #scheduler.add_job(remind_client_about_invoice_background_job, 'cron', hour='16', minute='00')
         # scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='sun', hour='19', minute='45')
 
-    logger.info("remind_client_about_invoice_background_job added")
-    logger.info("remind_lead_about_appointment_background_job added")
-    logger.info("pay_invoice_background_job added")
+    # logger.info("remind_client_about_invoice_background_job added")
+    # logger.info("remind_lead_about_appointment_background_job added")
+    # logger.info("pay_invoice_background_job added")
 
     # logger.debug('Current time with timezone is: {}'.format(datetime.datetime.now().astimezone()))
     # day1 = datetime.datetime.now(pytz.timezone('US/Central'))
