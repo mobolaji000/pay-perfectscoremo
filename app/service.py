@@ -190,7 +190,8 @@ class StripeInstance():
                                                             phone_number=stripe_info['phone_number'], email=stripe_info['email'],
                                                             transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
                                                             payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
-            else:
+
+            elif chosen_mode_of_payment == 'full-payment-ach':
                 if existing_customer:
                     logger.debug('Full payment ACH for existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
                     amount = stripe_info['transaction_total']
@@ -231,6 +232,35 @@ class StripeInstance():
                         metadata={'transaction_id': stripe_info['transaction_id']},
                     )
                     stripe.Invoice.pay(transaction.id)
+
+            elif chosen_mode_of_payment == 'recurring-payment-ach':
+                logger.debug('Recurring payment ach: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
+
+
+                if existing_customer:
+                    # ensures that you always keep 24 hours to change method of payment promise to exisiting clients
+                    payment_date = stripe_info['recurring_payment_start_date'] + datetime.timedelta(days=1)
+                else:
+                    payment_date = stripe_info['recurring_payment_start_date']
+
+                client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
+                transaction_total = int(stripe_info['transaction_total'])
+
+                stripe.InvoiceItem.create(
+                    customer=stripe_info['stripe_customer_id'],
+                    quantity=transaction_total,
+                    price=os.environ.get('price'),
+                )
+                stripe_invoice_object = stripe.Invoice.create(
+                    customer=stripe_info['stripe_customer_id'],
+                    default_source=customer_default_source,
+                    auto_advance=False,
+                    metadata={'transaction_id': stripe_info['transaction_id']},
+                )
+                AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
+                                                        phone_number=stripe_info['phone_number'], email=stripe_info['email'],
+                                                        transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
+                                                        payment_date=payment_date, payment_amount=transaction_total, stripe_invoice_id=stripe_invoice_object['id'])
 
             return {'status': 'success'}
         except Exception as e:
@@ -335,12 +365,16 @@ class StripeInstance():
 
             elif chosen_mode_of_payment == 'recurring-payment-credit-card':
                 logger.debug('Recurring payment credit card: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
-                # ensures that you always keep 48? hours to change method of payment promise to exisiting clients
-                amount = stripe_info['transaction_total']
-                payment_date = stripe_info['recurring_payment_start_date']
-                #(client_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics#
+
+
+                if existing_customer:
+                    # ensures that you always keep 24 hours to change method of payment promise to exisiting clients
+                    payment_date = stripe_info['recurring_payment_start_date'] + datetime.timedelta(days=1)
+                else:
+                    payment_date = stripe_info['recurring_payment_start_date']
+
                 client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
-                transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
+                transaction_total = math.ceil(client_info['transaction_total'] * 1.03)
 
                 stripe.InvoiceItem.create(
                     customer=stripe_info['stripe_customer_id'],
@@ -356,7 +390,7 @@ class StripeInstance():
                 AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
                                                         phone_number=stripe_info['phone_number'], email=stripe_info['email'],
                                                         transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
-                                                        payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
+                                                        payment_date=payment_date, payment_amount=transaction_total, stripe_invoice_id=stripe_invoice_object['id'])
 
 
 
@@ -385,31 +419,30 @@ class StripeInstance():
 
                 if number_of_days_from_start_of_recurring_payment % recurring_payment_frequency == 0:
 
-                    customer = stripe.Customer.retrieve('cus_NBR3bAgoV8UfFZ')
+                    customer = stripe.Customer.retrieve(client_info['stripe_customer_id'])
                     default_card = customer.invoice_settings.default_payment_method
                     default_ach = customer.default_source
-                    default_card = True
 
                     if default_card:
                         logger.debug('Recurring payment credit card: ' + str(client_info['transaction_id']) + ' ' + str(client_info['first_name'])+ " " + str(client_info['last_name']))
 
                         transaction_total = math.ceil(client_info['transaction_total'] * 1.03)
 
-                        # stripe.InvoiceItem.create(
-                        #     customer=client_info['stripe_customer_id'],
-                        #     quantity=transaction_total,
-                        #     price=os.environ.get('price'),
-                        # )
-                        # stripe_invoice_object = stripe.Invoice.create(
-                        #     customer=client_info['stripe_customer_id'],
-                        #     default_payment_method=default_card,
-                        #     auto_advance=False,
-                        #     metadata={'transaction_id': client_info['transaction_id']},
-                        # )
+                        stripe.InvoiceItem.create(
+                            customer=client_info['stripe_customer_id'],
+                            quantity=transaction_total,
+                            price=os.environ.get('price'),
+                        )
+                        stripe_invoice_object = stripe.Invoice.create(
+                            customer=client_info['stripe_customer_id'],
+                            default_payment_method=default_card,
+                            auto_advance=False,
+                            metadata={'transaction_id': client_info['transaction_id']},
+                        )
                         AppDBUtil.createOrModifyInvoiceToBePaid(first_name=client_info['first_name'], last_name=client_info['last_name'],
                                                                 phone_number=client_info['phone_number'], email=client_info['email'],
-                                                                transaction_id=client_info['transaction_id'], stripe_customer_id='xxx',
-                                                                payment_date=payment_date, payment_amount=amount, stripe_invoice_id='xxx')
+                                                                transaction_id=client_info['transaction_id'], stripe_customer_id=client_info['stripe_customer_id'],
+                                                                payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
 
                     elif default_ach:
                         logger.debug('Recurring payment ACH: ' + str(client_info['transaction_id']) + ' ' + str(client_info['first_name']) + " " + str(client_info['last_name']))
