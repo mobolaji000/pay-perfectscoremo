@@ -369,7 +369,6 @@ class StripeInstance():
         all_transaction_ids = AppDBUtil.getAllTransactionIds()
         for transaction_id in all_transaction_ids:
             client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
-            print("client_info is: {}".format(client_info))
             logger.debug("client_info is: {}".format(client_info))
 
             if client_info['make_payment_recurring'] == 'yes' and client_info['pause_payment'] == 'no':
