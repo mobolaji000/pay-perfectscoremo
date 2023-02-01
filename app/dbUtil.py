@@ -95,10 +95,10 @@ class AppDBUtil():
         # client-side counter is always one more; get the actual number here
         ask_for_student_info = clientData.get('ask_for_student_info','')
         ask_for_student_availability = clientData.get('ask_for_student_availability', '')
-        make_payment_recurring = clientData.get('make_payment_recurring','')
+        make_payment_recurring = clientData.get('make_payment_recurring')
         recurring_payment_frequency = 0 if clientData.get('recurring_payment_frequency','') == '' else clientData.get('recurring_payment_frequency','')
         recurring_payment_start_date = None if clientData.get('recurring_payment_start_date', '') == '' else clientData.get('recurring_payment_start_date')
-        pause_payment = clientData.get('pause_payment','')
+        pause_payment = clientData.get('pause_payment')
         paused_payment_resumption_date = None if clientData.get('paused_payment_resumption_date', '') == '' else clientData.get('paused_payment_resumption_date')
         does_customer_payment_info_exist = 'yes' if clientData.get('does_customer_payment_info_exist',None) else 'no'
 
