@@ -103,10 +103,6 @@ class AppDBUtil():
         does_customer_payment_info_exist = 'yes' if clientData.get('does_customer_payment_info_exist',None) else 'no'
 
 
-
-
-
-
         number_of_rows_modified = None
         if action=='create':
 

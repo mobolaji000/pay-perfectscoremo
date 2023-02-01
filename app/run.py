@@ -38,5 +38,6 @@ def start_runner():
 url_to_start_reminder = os.environ.get("url_to_start_reminder")
 start_runner()
 logger.info("deploy region is: {}".format(os.environ.get("DEPLOY_REGION")))
+from app import server
 
 
