@@ -384,7 +384,7 @@ class StripeInstance():
                     payment_date = client_info['recurring_payment_start_date']
                     recurring_payment_frequency = client_info['recurring_payment_frequency']
 
-                    number_of_days_from_start_of_recurring_payment = (payment_date.astimezone(pytz.timezone('US/Central')).date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
+                    number_of_days_from_start_of_recurring_payment = (payment_date - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
 
                     if number_of_days_from_start_of_recurring_payment%recurring_payment_frequency == 0:
 
