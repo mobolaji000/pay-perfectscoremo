@@ -242,18 +242,34 @@ class AppDBUtil():
     @classmethod
     def findInvoicesToPay(cls):
         try:
-            invoices_to_pay = db.session.query(InvoiceToBePaid).filter((InvoiceToBePaid.payment_made == False) & (InvoiceToBePaid.payment_date <= datetime.today())).all()
-            print("invoices_to_pay are: ",invoices_to_pay)
+
+
+            invoices_to_pay = db.session.query(
+                InvoiceToBePaid
+            ).join(
+                Transaction, InvoiceToBePaid.transaction_id == Transaction.transaction_id
+            ).filter(
+                (Transaction.pause_payment == "no" ) & (InvoiceToBePaid.payment_made == False) & (InvoiceToBePaid.payment_date <= datetime.today())
+            ).all()
+
+            #invoices_to_pay = db.session.query(InvoiceToBePaid).filter((InvoiceToBePaid.payment_made == False) & (InvoiceToBePaid.payment_date <= datetime.today())).all()
+
+            # for transaction in result:
+            #     logger.debug("results are: {}".format(result))
+            #     logger.info("eligible transactions for automatic invoice payment are: {}".format(transaction))
+            # for invoices_to_pay in result:
+            logger.info("invoices_to_pay are: {}".format(invoices_to_pay))
             search_results = []
-            for invoice in invoices_to_pay:
-                invoice_details = {}
-                invoice_details['first_name'] = invoice.first_name
-                invoice_details['last_name'] = invoice.last_name
-                invoice_details['payment_amount'] = invoice.payment_amount
-                invoice_details['stripe_invoice_id'] = invoice.stripe_invoice_id
-                print(invoice_details)
-                print(" ")
-                search_results.append(invoice_details)
+            if invoices_to_pay:
+                for invoice in invoices_to_pay:
+                    invoice_details = {}
+                    invoice_details['first_name'] = invoice.first_name
+                    invoice_details['last_name'] = invoice.last_name
+                    invoice_details['payment_amount'] = invoice.payment_amount
+                    invoice_details['stripe_invoice_id'] = invoice.stripe_invoice_id
+                    print(invoice_details)
+                    print(" ")
+                    search_results.append(invoice_details)
             return search_results
         except Exception as e:
             # if any kind of exception occurs, rollback transaction

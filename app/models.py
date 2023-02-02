@@ -99,7 +99,7 @@ class InvoiceToBePaid(db.Model):
     date_created = db.Column(db.DateTime(timezone=True), index=True, server_default=db.func.now())
 
     def __repr__(self):
-        return '<InvoiceToBePaid created for {}>'.format(self.last_name)
+        return '<InvoiceToBePaid created for {}>'.format(self.transaction_id)
 
 class Prospect(db.Model):
     prospect_id = db.Column(db.String(8), unique=True, index=True, nullable=False, default='')

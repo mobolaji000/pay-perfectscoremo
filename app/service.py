@@ -243,7 +243,6 @@ class StripeInstance():
                 else:
                     payment_date = stripe_info['recurring_payment_start_date']
 
-                client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
                 transaction_total = int(stripe_info['transaction_total'])
 
                 stripe.InvoiceItem.create(
@@ -269,6 +268,8 @@ class StripeInstance():
 
     def chargeCustomerViaCard(self, stripe_info, chosen_mode_of_payment, payment_id,existing_customer=None):
         try:
+            client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
+
             # deleting exisiting invoices seems to account for a situation where we have created an invoice for exsiting customer
             # which is set to be autopayed. If customer then attempts to pay via another methiod, or if we modifgy the invoice,
             # we dont want to double-charge
@@ -329,7 +330,7 @@ class StripeInstance():
                     amount = stripe_info['transaction_total']
                     payment_date = datetime.datetime.today() + datetime.timedelta(days=1)
                     #(client_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics
-                    client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
+
                     transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
                     stripe.InvoiceItem.create(
                         customer=stripe_info['stripe_customer_id'],
@@ -349,7 +350,7 @@ class StripeInstance():
                 else:
                     logger.debug('Full payment credit card new customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
                     # (client_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics
-                    client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
+
                     transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
                     stripe.InvoiceItem.create(
                         customer=stripe_info['stripe_customer_id'],
@@ -373,7 +374,6 @@ class StripeInstance():
                 else:
                     payment_date = stripe_info['recurring_payment_start_date']
 
-                client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
                 transaction_total = math.ceil(client_info['transaction_total'] * 1.03)
 
                 stripe.InvoiceItem.create(
