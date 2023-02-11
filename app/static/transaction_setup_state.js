@@ -266,7 +266,6 @@ $(document).ready(function() {
 
 
         if ($(this).val() == "") {
-        alert("here1");
 
             // $('input[name="turn_on_installments"]').prop('checked', false);
             document.getElementById("addrow").hidden=true;
@@ -282,11 +281,9 @@ $(document).ready(function() {
             $(this).val("yes");
         } else {
 
-        alert("here2");
 
             setDefaultInstallmentDate();
             document.getElementById("addrow").hidden=false;
-            document.getElementById("addrow").hidden=true;
 
             $('input[name="make_payment_recurring"]').attr('disabled', false);
             $('input[name="recurring_payment_start_date"]').attr('disabled', false);
