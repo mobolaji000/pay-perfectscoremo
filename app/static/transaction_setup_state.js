@@ -330,6 +330,7 @@ $(document).ready(function() {
 else
         {
         document.getElementById("pause_payment_wrap_around_div").hidden=true;
+        document.getElementById("mark_as_paid").hidden=true;
         }
 
 
@@ -390,6 +391,7 @@ else
         document.getElementById("more_than_12_installments_message").hidden=true;
         document.getElementById("addrow").hidden=false;
         $('input[name="make_payment_recurring"]').attr('disabled', true);
+
         }
     else
         {
@@ -402,6 +404,8 @@ else
         {
 
         document.getElementById("pause_payment_wrap_around_div").hidden=true;
+        document.getElementById("mark_as_paid").hidden=false;
+
 
 
              $('input[name="create_transaction_button"]').attr('disabled', false);
@@ -421,6 +425,7 @@ else
         else
         {
         document.getElementById("pause_payment_wrap_around_div").hidden=false;
+        document.getElementById("mark_as_paid").hidden=true;
         }
 
     });
@@ -508,7 +513,7 @@ else
 
 
         document.getElementById("pause_payment_wrap_around_div").hidden=false;
-
+            document.getElementById("mark_as_paid").hidden=true;
             document.getElementById("addrow").hidden=true;
 
             $(this).val("yes");
@@ -522,7 +527,7 @@ else
 
 
         document.getElementById("pause_payment_wrap_around_div").hidden=true;
-
+document.getElementById("mark_as_paid").hidden=false;
 
             $(this).val("no");
             document.getElementById("addrow").hidden=false;
