@@ -268,14 +268,26 @@ $(document).ready(function() {
         if ($(this).val() == "") {
 
             // $('input[name="turn_on_installments"]').prop('checked', false);
-
+            document.getElementById("addrow").hidden=true;
             $('input[name="send_text_and_email"]').prop('checked', false);
             $('input[name="send_text_and_email"]').val("");
+
+            $('input[name="recurring_payment_start_date"]').attr('disabled', true);
+             $('input[name="recurring_payment_frequency"]').attr('disabled', true);
+             $('input[name="recurring_payment_start_date"]').prop('required', false);
+             $('input[name="recurring_payment_frequency"]').prop('required', false);
 
             $(this).val("yes");
         } else {
 
             setDefaultInstallmentDate();
+            document.getElementById("addrow").hidden=false;
+            document.getElementById("addrow").hidden=true;
+
+            $('input[name="recurring_payment_start_date"]').attr('disabled', false);
+             $('input[name="recurring_payment_frequency"]').attr('disabled', false);
+             $('input[name="recurring_payment_start_date"]').prop('required', true);
+             $('input[name="recurring_payment_frequency"]').prop('required', true);
 
             $(this).val("");
         }
