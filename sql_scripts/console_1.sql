@@ -28,3 +28,13 @@ alter table transaction add column ask_for_student_availability varchar(4) NOT N
 alter table invoice_to_be_paid drop column date_created;
 alter table invoice_to_be_paid ADD COLUMN date_created TIMESTAMP WITH TIME ZONE  ;
 ALTER TABLE invoice_to_be_paid ALTER COLUMN date_created SET DEFAULT now();
+
+
+ALTER TABLE transaction ALTER COLUMN date_created SET DEFAULT now();
+ALTER TABLE installment_plan ALTER COLUMN date_created SET DEFAULT now();
+ALTER TABLE invoice_to_be_paid ALTER COLUMN date_created SET DEFAULT now();
+ALTER TABLE prospect ALTER COLUMN date_created SET DEFAULT now();
+ALTER TABLE lead ALTER COLUMN date_created SET DEFAULT now();
+alter table student ADD COLUMN date_created TIMESTAMP WITH TIME ZONE  ;
+ALTER TABLE student ALTER COLUMN date_created SET DEFAULT now();
+

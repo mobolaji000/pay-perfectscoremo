@@ -233,6 +233,14 @@ class AppDBUtil():
         return transaction
 
     @classmethod
+    def updatePausePaymentStatus(cls, transaction_id, pause_payment, paused_payment_resumption_date):
+        transaction = Transaction.query.filter_by(transaction_id=transaction_id).first()
+        transaction.pause_payment = pause_payment
+        transaction. paused_payment_resumption_date =  paused_payment_resumption_date
+        cls.executeDBQuery()
+        return transaction
+
+    @classmethod
     def updateInvoiceAsPaid(cls, stripe_invoice_id=None):
         invoice = InvoiceToBePaid.query.filter_by(stripe_invoice_id=stripe_invoice_id).first()
         if invoice:
@@ -243,13 +251,12 @@ class AppDBUtil():
     def findInvoicesToPay(cls):
         try:
 
-
             invoices_to_pay = db.session.query(
                 InvoiceToBePaid
             ).join(
                 Transaction, InvoiceToBePaid.transaction_id == Transaction.transaction_id
             ).filter(
-                (Transaction.pause_payment == "no" ) & (InvoiceToBePaid.payment_made == False) & (InvoiceToBePaid.payment_date <= datetime.today())
+                ((Transaction.pause_payment == "no" ) & (InvoiceToBePaid.payment_made == False) & (InvoiceToBePaid.payment_date <= datetime.today()))
             ).all()
 
             #invoices_to_pay = db.session.query(InvoiceToBePaid).filter((InvoiceToBePaid.payment_made == False) & (InvoiceToBePaid.payment_date <= datetime.today())).all()
@@ -296,8 +303,8 @@ class AppDBUtil():
                 search_results.append(lead_details)
 
 
-                logger.debug("Time before conversion is: {}".format(lead.appointment_date_and_time))
-                logger.debug("Time after conversion is: {}".format(lead.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))))
+                # logger.debug("Time before conversion is: {}".format(lead.appointment_date_and_time))
+                # logger.debug("Time after conversion is: {}".format(lead.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))))
 
             return search_results
         except Exception as e:
@@ -664,6 +671,7 @@ class AppDBUtil():
                 lead['details_on_what_service_they_are_interested_in'] = info.details_on_what_service_they_are_interested_in
                 lead['miscellaneous_notes'] = info.miscellaneous_notes
                 lead['how_did_they_hear_about_us'] = info.how_did_they_hear_about_us
+                lead['details_on_how_they_heard_about_us'] = info.details_on_how_they_heard_about_us
                 lead['appointment_date_and_time'] = cls.clean_up_date_and_time(info.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))) if info.appointment_date_and_time else 'null'
                 lead['send_confirmation_to_lead'] = info.send_confirmation_to_lead
                 lead['date_created'] = info.date_created.strftime("%m/%d/%Y")

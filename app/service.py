@@ -9,7 +9,6 @@ import re
 import datetime
 from sqlalchemy.sql import func
 import math
-import traceback
 
 from twilio.rest import Client as TwilioClient
 import os
@@ -273,7 +272,10 @@ class StripeInstance():
             # deleting exisiting invoices seems to account for a situation where we have created an invoice for exsiting customer
             # which is set to be autopayed. If customer then attempts to pay via another methiod, or if we modifgy the invoice,
             # we dont want to double-charge
+
             existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=stripe_info['transaction_id']).all()
+
+
             for existing_invoice in existing_invoices:
                 AppDBUtil.deleteInvoiceToBePaid(existing_invoice.transaction_id, existing_invoice.stripe_invoice_id)
 
@@ -410,8 +412,7 @@ class StripeInstance():
             pause_payment = client_info['pause_payment']
 
 
-
-            if make_payment_recurring == 'yes' and pause_payment == 'no':
+            if (make_payment_recurring == 'yes' and pause_payment == 'no'):
 
                 payment_date = client_info['recurring_payment_start_date']
                 recurring_payment_frequency = client_info['recurring_payment_frequency']
@@ -470,7 +471,18 @@ class StripeInstance():
                             logger.error("weird: neither ach nor card was retrieved as default method of payment")
                             raise ValueError('weird: neither ach nor card was retrieved as default method of payment')
 
+    def restartPausedPayments(self):
+        all_transaction_ids = AppDBUtil.getAllTransactionIds()
+        for transaction_id in all_transaction_ids:
+            client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
+            logger.debug("client_info is: {}".format(client_info))
 
+            pause_payment = client_info['pause_payment']
+            paused_payment_resumption_date = client_info['paused_payment_resumption_date']
+
+
+            if (pause_payment == 'yes' and paused_payment_resumption_date <= datetime.today()):
+                AppDBUtil.updatePausePaymentStatus('no',paused_payment_resumption_date)
 
     def setupAutoPaymentForExistingCustomer(self, stripe_info):
         logger.debug('Inside setupAutoPaymentForExistingCustomer() for ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
@@ -564,10 +576,10 @@ class SendMessagesToClients():
         elif message_type == 'referral_request':
             created_or_modified_span = "Oh, and one more note to the family...if you have any friends/families looking to raise their SAT/ACT scores or write compelling college application essays, have them check us out at prepwithmo.com or call us at 972-584-7364. We appreciate the referral!"
         elif message_type == 'confirm_lead_appointment':
-            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/lead/" + message[2]
             created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a confirmation that your appointment is on  {}. Ahead of your appointment, please go to {} (also sent to your email address) to fill out/confirm some basic information. If you have any questions, please call 972-584-7364. We look forward to meeting you.\n\nRegards,\n\nMo".format(message[0], message[1], link_url)
         elif message_type == 'reminder_about_appointment':
-            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/lead/" + message[2]
             created_or_modified_span = "Dear {},\n\nThank you for signing up for a diagnostic/consultation at PrepWithMo.\n\nThis is a reminder that your appointment is on  {}. If you have not already done so, please go to {} (also sent to your email address) to fill out/confirm some basic information. If you have any questions, please call 972-584-7364. We look forward to meeting you.\n\nRegards,\n\nMo".format(message[0], message[1], link_url)
         elif message_type == 'reminder_to_make_payment':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):".format(recipient_name)

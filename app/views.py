@@ -168,21 +168,32 @@ def client_info(prospect_id):
 
 
 #keep for when you need to send adhoc student info requests to parents
-@server.route('/lead_info_by_lead',defaults={'lead_id': None}, methods=['GET','POST'])
-@server.route('/lead_info_by_lead/<lead_id>', methods=['GET','POST'])
-def lead_info_by_lead(lead_id):
+@server.route('/lead_info_by_lead',defaults={'lead_id': None,'is_admin':None}, methods=['GET','POST'])
+#@server.route('/lead_info_by_lead/<lead_id>', methods=['GET','POST'])
+@server.route('/lead_info_by_lead/<is_admin>/<lead_id>', methods=['GET','POST'])
+def lead_info_by_lead(lead_id,is_admin):
+
     if request.method == 'GET':
         try:
             lead_info_contents = AppDBUtil.getLeadInfo(lead_id)[0]
+            logger.debug("lead_info_contents in get is: {}".format(lead_info_contents))
             logger.debug("lead_id in get is: {}".format(lead_id))
+
+            if is_admin == 'mo':
+                what_services_are_you_interested_in=lead_info_contents['what_services_are_they_interested_in']
+                details_on_what_service_you_are_interested_in=lead_info_contents['details_on_what_service_they_are_interested_in']
+            else:
+                what_services_are_you_interested_in= '{}'
+                details_on_what_service_you_are_interested_in=''
+
             return render_template('lead_info_by_lead.html',
                                    lead_id=lead_info_contents['lead_id'],
                                    lead_name=lead_info_contents['lead_name'],
                                    lead_salutation=lead_info_contents['lead_salutation'],
                                    lead_email=lead_info_contents['lead_email'],
                                    lead_phone_number=lead_info_contents['lead_phone_number'],
-                                   what_services_are_you_interested_in=lead_info_contents['what_services_are_they_interested_in'],
-                                   details_on_what_service_you_are_interested_in=lead_info_contents['details_on_what_service_they_are_interested_in'],
+                                   what_services_are_you_interested_in=what_services_are_you_interested_in,
+                                   details_on_what_service_you_are_interested_in=details_on_what_service_you_are_interested_in,
                                    grade_level=lead_info_contents['grade_level'],
                                    recent_test_score=lead_info_contents['recent_test_score'],
                                    miscellaneous_notes=lead_info_contents['miscellaneous_notes'],
@@ -206,10 +217,18 @@ def lead_info_by_lead(lead_id):
             recent_test_score = -1 if lead_info_contents.get('recent_test_score', '') == '' else lead_info_contents.get('recent_test_score')
 
             leadInfo.update({'lead_name': lead_info_contents.get('lead_name', ''),'lead_salutation': lead_info_contents.get('lead_salutation', ''),'lead_email': lead_info_contents.get('lead_email', ''),
-                             'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),'what_services_are_they_interested_in': request.form.getlist('what_services_are_you_interested_in'),
-                             'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_you_are_interested_in', ''),
+                             'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
                              'grade_level': lead_info_contents.get('grade_level',''),'recent_test_score': recent_test_score,'miscellaneous_notes': lead_info_contents.get('miscellaneous_notes', ''),
                              'how_did_they_hear_about_us': lead_info_contents.get('how_did_you_hear_about_us', ''),'details_on_how_they_heard_about_us': lead_info_contents.get('details_on_how_you_heard_about_us', '')})
+
+            #only update if the lead adds new information; otherwise,leave what you put there before
+            if lead_info_contents.get('details_on_what_service_you_are_interested_in'):
+                leadInfo.update({'details_on_what_service_they_are_interested_in': lead_info_contents.get('details_on_what_service_you_are_interested_in', '')})
+
+            # only update if the lead adds new information; otherwise,leave what you put there before
+            if request.form.getlist('what_services_are_you_interested_in'):
+                leadInfo.update({'what_services_are_they_interested_in': request.form.getlist('what_services_are_you_interested_in'),})
+
 
             number_of_rows_modified = AppDBUtil.modifyLeadInfo(lead_info_contents.get('lead_id', ''), leadInfo)
 
@@ -217,9 +236,9 @@ def lead_info_by_lead(lead_id):
                 logger.error("Somehow ended up with and modified duplicate lead ids")
                 raise Exception("Somehow ended up with and modified duplicate lead ids")
 
+            SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com', message=[lead_info_contents.get('lead_salutation', '')+ ' '+lead_info_contents.get('lead_name', ''),lead_info_contents['lead_id']], message_type='notify_mo_that_lead_has_updated_lead_info', subject='New Update Submitted By Lead')
+            #SendMessagesToClients.sendSMS(to_numbers='9725847364', message="New update submitted by lead {} with lead-id {}. Go check it out.".format(lead_info_contents.get('lead_salutation', '')+ ' '+lead_info_contents.get('lead_name', ''),lead_info_contents['lead_id']), message_type='to_mo')
             flash("Your information has been submitted successfully")
-            SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com', message="New update submitted by lead {} with lead-id {}. Go check it out.".format(lead_info_contents.get('lead_salutation', '')+ ' '+lead_info_contents.get('lead_name', ''),lead_info_contents['lead_id']), message_type='to_mo', subject='New Update Submitted By Lead')
-            SendMessagesToClients.sendSMS(to_numbers='9725847364', message="New update submitted by lead {} with lead-id {}. Go check it out.".format(lead_info_contents.get('lead_salutation', '')+ ' '+lead_info_contents.get('lead_name', ''),lead_info_contents['lead_id']), message_type='to_mo')
             return render_template('lead_info_by_lead.html', lead_id=lead_id)
         except Exception as e:
             logger.exception(e)
@@ -931,10 +950,18 @@ def start_background_jobs_before_first_request():
         except Exception as e:
             logger.exception("Error in setting up recurring payments: {}".format(e))
 
+    def restart_paused_payments_background_job():
+        logger.info("restart_paused_payments_background_job started")
+        try:
+            stripeInstance.restartPausedPayments()
+        except Exception as e:
+            logger.exception("Error in restarting paused payments: {}".format(e))
+
 
     scheduler = BackgroundScheduler(timezone='US/Central')
 
     if os.environ['DEPLOY_REGION'] == 'local':
+        scheduler.add_job(restart_paused_payments_background_job, 'interval', minutes=111)
         scheduler.add_job(setup_recurring_payments_due_today_background_job, 'interval', minutes=111)
         scheduler.add_job(pay_invoice_background_job, 'interval', minutes=111)
         scheduler.add_job(remind_lead_about_appointment_background_job, 'interval', hours=1)

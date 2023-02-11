@@ -86,14 +86,17 @@ class AWSInstance():
         elif message_type == 'modify_transaction_existing_client':
             created_or_modified_span = "<span>Your transaction has just been modified using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
         elif message_type == 'reminder_about_appointment':
-            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/lead/" + message[2]
             created_or_modified_span = "<span>Dear {},</span><br><br><span>Thank you for signing up for a diagnostic/consultation at PrepWithMo. This is a reminder that your appointment is on  {}. </span><br><br><span> If you have not already done so, please go to {} (also sent to your phone number) to fill out/confirm some basic information. If you have any questions, please respond to this email or call 972-584-7364.</span><br><br><span>We look forward to meeting you.</span><br><br><span>Regards,</span><br><span>Mo</span><br><br>".format(message[0],message[1],link_url)
         elif message_type == 'confirm_lead_appointment':
-            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/lead/" + message[2]
             created_or_modified_span = "<span>Dear {},</span><br><br><span>Thank you for signing up for a diagnostic/consultation at PrepWithMo. This is a confirmation that your appointment is on  {}. </span><br><br><span> Ahead of your appointment, please go to {} (also sent to your phone number) to fill out/confirm some basic information. If you have any questions, please respond to this email or call 972-584-7364.</span><br><br><span>We look forward to meeting you.</span><br><br><span>Regards,</span><br><span>Mo</span><br><br>".format(message[0],message[1],link_url)
         elif message_type == 'notify_mo_to_modify_lead_appointment_completion_status':
-            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[3]
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/mo/" + message[3]
             created_or_modified_span = "<span>Use the below URL to modify the appointment completion status of a lead from the last hour : </span><br><br><span>{} {} {} {}</span>".format(message[0],message[1],message[2],link_url)
+        elif message_type == 'notify_mo_that_lead_has_updated_lead_info':
+            link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/mo/" + message[1]
+            created_or_modified_span = "<span>New update submitted by lead {}. Go check it out here: </span><br><br><span>{}</span>".format(message[0], link_url)
         elif message_type == 'notify_mo_about_suggested_one_on_one_days':
             created_or_modified_span = "<span>{}</span><br><br>".format(message)
         else:
@@ -162,7 +165,7 @@ class AWSInstance():
                             </body>
                             </html>
                                         """
-        elif message_type in ['reminder_about_appointment', 'confirm_lead_appointment','notify_mo_to_modify_lead_appointment_completion_status','notify_mo_about_suggested_one_on_one_days']:
+        elif message_type in ['reminder_about_appointment', 'confirm_lead_appointment','notify_mo_to_modify_lead_appointment_completion_status','notify_mo_about_suggested_one_on_one_days','notify_mo_that_lead_has_updated_lead_info']:
             BODY_HTML = """<html>
                     <head></head>
                     <body>

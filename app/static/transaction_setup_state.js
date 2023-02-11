@@ -324,20 +324,29 @@ $(document).ready(function() {
 {
 
     $('input[name="make_payment_recurring"]').attr('disabled', true);
-     //$('input[name="make_payment_recurring"]').prop('checked', false);
+      document.getElementById("pause_payment_wrap_around_div").hidden=false;
 }
 
-        if ($('input[name="make_payment_recurring"]').val() == "yes")
-            {
-                 document.getElementById("no_recurring_payments_with_installments_message_1").hidden=false;
-                 document.getElementById("no_recurring_payments_with_installments_message_2").hidden=false;
-            }
-        else
+else
         {
+        document.getElementById("pause_payment_wrap_around_div").hidden=true;
+        }
+
+
+
+//        if false//($('input[name="make_payment_recurring"]').val() == "yes")
+//            {
+//                 document.getElementById("no_recurring_payments_with_installments_message_1").hidden=false;
+//                 document.getElementById("no_recurring_payments_with_installments_message_2").hidden=false;
+//            }
+//        else
+//        {
 
     if (Number(counter) < 13)
 {
         document.getElementById("more_than_12_installments_message").hidden=true;
+
+        //document.getElementById("pause_payment_wrap_around_div").hidden=true;
 
         var newRow = $("<tr>");
         var cols = "";
@@ -355,13 +364,14 @@ $(document).ready(function() {
         $('input[name="installment_counter"]').val(counter);
         //client-side counter is always one more; actual number has been set server-side
         }
+
         if (Number(counter) == 13)
         {
         document.getElementById("addrow").hidden=true;
         document.getElementById("more_than_12_installments_message").hidden=false;
 
         }
-        }
+        //}
 
     });
 
@@ -391,6 +401,9 @@ $(document).ready(function() {
         if (Number(counter) == 1)
         {
 
+        document.getElementById("pause_payment_wrap_around_div").hidden=true;
+
+
              $('input[name="create_transaction_button"]').attr('disabled', false);
             $('input[name="make_payment_recurring"]').attr('disabled', false);
         document.getElementById("installment_not_equal_total_message_create").hidden=true;
@@ -404,6 +417,10 @@ $(document).ready(function() {
                        $('input[name="modify_transaction_button"]').attr('disabled', false);
                  }
 
+        }
+        else
+        {
+        document.getElementById("pause_payment_wrap_around_div").hidden=false;
         }
 
     });
@@ -476,9 +493,24 @@ $(document).ready(function() {
 
 
        $('input[name="make_payment_recurring"]').on('click', function() {
+
+               var counter = $('input[name="installment_counter"]').val();
+
+
+
         if ($(this).val() == "no") {
 
+//                if (Number(counter) > 0)
+//{
+//
+//    document.getElementById("pause_payment_wrap_around_div").hidden=false;
+//}
+
+
+        document.getElementById("pause_payment_wrap_around_div").hidden=false;
+
             document.getElementById("addrow").hidden=true;
+
             $(this).val("yes");
             $('input[name="recurring_payment_start_date"]').attr('disabled', false);
              $('input[name="recurring_payment_frequency"]').attr('disabled', false);
@@ -487,11 +519,15 @@ $(document).ready(function() {
 
         } else if ($(this).val() == "yes") {
 
+
+
+        document.getElementById("pause_payment_wrap_around_div").hidden=true;
+
+
             $(this).val("no");
             document.getElementById("addrow").hidden=false;
-            //alert($('input[name="recurring_payment_start_date"]').val());
+
             $('input[name="recurring_payment_start_date"]').val('');
-            //alert($('input[name="recurring_payment_start_date"]').val());
             $('input[name="recurring_payment_frequency"]').val('');
             $('input[name="recurring_payment_start_date"]').attr('disabled', true);
              $('input[name="recurring_payment_frequency"]').attr('disabled', true);
@@ -503,7 +539,7 @@ $(document).ready(function() {
 
        $('input[name="pause_payment"]').on('click', function() {
         if ($(this).val() == "no") {
-            document.getElementById("addrow").hidden=true;
+
             $(this).val("yes");
             $('input[name="paused_payment_resumption_date"]').attr('disabled', false);
              $('input[name="paused_payment_resumption_date"]').prop('required', true);
