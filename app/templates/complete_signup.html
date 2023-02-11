@@ -397,7 +397,7 @@
 					{% set paused_payment_resumption_date = "###Error: Don't make a payment. Contact Mo###" %}
 								{% else %}
 								{% set paused_payment_resumption_date = client_info.paused_payment_resumption_date %}
-			<div><span class="badge badge-danger">This payment was paused and will restart on {{client_info.paused_payment_resumption_date}}</span></div>
+			<div class="py-5"><span class="badge badge-danger">This payment was paused and will restart on {{client_info.paused_payment_resumption_date}}</span></div>
 					{% endif %}
 			{% endif %}
 
@@ -405,7 +405,7 @@
 
 
 				{% if client_info.payment_started %}
-				<div><span class="badge badge-danger">You previously started a payment for this transaction code. Contact Mo for a different transaction code.</span></div>
+				<div class="py-5"><span class="badge badge-danger">You previously started a payment for this transaction code. Contact Mo for a different transaction code.</span></div>
 				{% else %}
 
 			{% if client_info.make_payment_recurring == 'yes' %}
@@ -418,7 +418,7 @@
 
 
 
-							<div><span class="badge badge-danger">This payment starts on {{client_info.recurring_payment_start_date}} and repeats every {{recurring_payment_frequency}} day(s).</span></div>
+							<div class="py-5"><span class="badge badge-danger">This payment starts on {{client_info.recurring_payment_start_date}} and repeats every {{recurring_payment_frequency}} day(s).</span></div>
 
 									<div id="recurring-payment-div" class="d-block my-3" >
 					<div container>
@@ -561,7 +561,7 @@
 
     </div>-->
 							<br>
-							      <div class="col-sm">
+							      <div class="col-sm py-5">
 <span class="badge badge-danger"> Installments are withdrawn automatically.</span>
 
     </div>
@@ -666,7 +666,7 @@
 
 
 	<div class="checkbox mb-3" style="text-align:center;">
-												<div><span class="badge badge-danger"></span></div>
+												<div class="py-5"><span class="badge badge-danger"></span></div>
 
 
 							<input id="terms_and_conditions" name="terms_and_conditions" value="" type="checkbox" onclick="showPayButton();"
