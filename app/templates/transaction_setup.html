@@ -212,6 +212,7 @@
       if (result.pause_payment == "yes")
      {
      alert("here1");
+      document.getElementById("pause_payment_wrap_around_div").hidden=false;
      	$('input[name="pause_payment"]').prop('checked', true);
      	 $('input[name="pause_payment"]').val("yes");
      	  $('input[name="paused_payment_resumption_date"]').attr('disabled', false);
