@@ -961,21 +961,21 @@ def start_background_jobs_before_first_request():
     scheduler = BackgroundScheduler(timezone='US/Central')
 
     if os.environ['DEPLOY_REGION'] == 'local':
-        scheduler.add_job(restart_paused_payments_background_job, 'interval', minutes=111)
-        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'interval', minutes=111)
-        scheduler.add_job(pay_invoice_background_job, 'interval', minutes=111)
-        scheduler.add_job(remind_lead_about_appointment_background_job, 'interval', hours=1)
-        scheduler.add_job(lambda: print("dummy reminders job for local"), 'cron', minute='55')
-        scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(),'%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
-        scheduler.add_job(lambda: print("dummy notify_mo_to_modify_lead_appointment_completion_status_background_job run for local or dev"), 'interval', hours=1)
+        scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55', start_date=datetime.datetime.strftime(datetime.datetime.now() + datetime.timedelta(days=1), '%Y-%m-%d'))
+        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
+        scheduler.add_job(restart_paused_payments_background_job, 'cron', hour='13', minute='55')
+        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'cron', hour='14', minute='55')
+        scheduler.add_job(pay_invoice_background_job, 'cron', hour='15', minute='55')
+        scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'interval', hours=1)
         logger.info("all local background jobs added")
 
     elif os.environ['DEPLOY_REGION'] == 'dev':
-        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'interval', minutes=111)
-        #scheduler.add_job(remind_lead_about_appointment_background_job, 'interval', minutes=1) #test
-        scheduler.add_job(lambda: print("dummy reminders job for dev"), 'cron', minute='55')
-        scheduler.add_job(lambda: print("testing cron job in local and dev {}".format(datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S'))), 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now() + datetime.timedelta(days=1), '%Y-%m-%d'))
-        scheduler.add_job(lambda: print("dummy notify_mo_to_modify_lead_appointment_completion_status_background_job run for local or dev"), 'interval', hours=1)
+        scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55', start_date=datetime.datetime.strftime(datetime.datetime.now() + datetime.timedelta(days=1), '%Y-%m-%d'))
+        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
+        scheduler.add_job(restart_paused_payments_background_job, 'interval', minutes=1)
+        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'interval', minutes=3)
+        scheduler.add_job(pay_invoice_background_job,'interval', miuntes=5)
+        scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'interval', hours=1)
         logger.info("all dev background jobs added")
 
 
@@ -983,7 +983,9 @@ def start_background_jobs_before_first_request():
         #BE EXTREMELY CAREFULY WITH THE CRON JOB AND COPIOUSLY TEST. IF YOU GET IT WRONG, YOU CAN EASILY ANNOY A CUSTOMER BY SENDING A MESSAGE EVERY MINUTE OR EVERY SECOND
         scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55',start_date=datetime.datetime.strftime(datetime.datetime.now()+datetime.timedelta(days=1),'%Y-%m-%d'))
         scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
-        scheduler.add_job(pay_invoice_background_job, 'cron', hour='15',minute='55')
+        scheduler.add_job(restart_paused_payments_background_job, 'cron', hour='13', minute='55')
+        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'cron', hour='14', minute='55')
+        scheduler.add_job(pay_invoice_background_job, 'cron', hour='15', minute='55')
         scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'interval', hours=1)
         logger.info("all prod background jobs added")
 
