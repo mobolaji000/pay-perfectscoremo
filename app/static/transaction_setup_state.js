@@ -325,6 +325,7 @@ $(document).ready(function() {
 
     $('input[name="make_payment_recurring"]').attr('disabled', true);
       document.getElementById("pause_payment_wrap_around_div").hidden=false;
+      document.getElementById("mark_as_paid").hidden=false;
 }
 
 else
