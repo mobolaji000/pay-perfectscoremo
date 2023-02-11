@@ -325,13 +325,13 @@ $(document).ready(function() {
 
     $('input[name="make_payment_recurring"]').attr('disabled', true);
       document.getElementById("pause_payment_wrap_around_div").hidden=false;
-      document.getElementById("mark_as_paid").hidden=true;
+      document.getElementById("mark_as_paid_wrap_around_div").hidden=true;
 }
 
 else
         {
         document.getElementById("pause_payment_wrap_around_div").hidden=true;
-        document.getElementById("mark_as_paid").hidden=false;
+        document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
         }
 
 
@@ -405,7 +405,7 @@ else
         {
 
         document.getElementById("pause_payment_wrap_around_div").hidden=true;
-        document.getElementById("mark_as_paid").hidden=false;
+        document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
 
 
 
@@ -426,7 +426,7 @@ else
         else
         {
         document.getElementById("pause_payment_wrap_around_div").hidden=false;
-        document.getElementById("mark_as_paid").hidden=true;
+        document.getElementById("mark_as_paid_wrap_around_div").hidden=true;
         }
 
     });
@@ -514,7 +514,7 @@ else
 
 
         document.getElementById("pause_payment_wrap_around_div").hidden=false;
-            document.getElementById("mark_as_paid").hidden=true;
+            document.getElementById("mark_as_paid_wrap_around_div").hidden=true;
             document.getElementById("addrow").hidden=true;
 
             $(this).val("yes");
@@ -528,7 +528,7 @@ else
 
 
         document.getElementById("pause_payment_wrap_around_div").hidden=true;
-document.getElementById("mark_as_paid").hidden=false;
+document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
 
             $(this).val("no");
             document.getElementById("addrow").hidden=false;
