@@ -17,7 +17,6 @@ $(document).ready(function() {
     $('input[name="transaction_total"]').attr('disabled', true);
 
    const leads = JSON.parse($("#leads").attr("data-leads"));
-    //console.log("leads are: "+JSON.stringify(leads));
     const fuse = new Fuse(leads, {keys: ['lead_id','lead_name', 'lead_email', 'lead_phone_number']});
 
 
@@ -456,17 +455,11 @@ else
      amount = 'amount_'.concat(k);
      amount_val = $("input[name="+amount+"]").val();
 
-     console.log("k is: "+k);
-     console.log("input name val is: "+amount_val);
-
-
      if (typeof amount_val !== 'undefined' )
      {
           	installment_total = Number(installment_total) +  Number(amount_val);
      }
 		}
-
-		console.log("installment total is "+installment_total+" and transaction total is "+transactionTotal());
 
         if (counter > 1)
         {
@@ -504,7 +497,6 @@ else
 
       $('#leadSearchInput').on('input', function(event) {
                 let leadSearchValue = event.target.value;
-                //console.log(emailSearchValue);
                 let leadSearchResults = fuse.search(leadSearchValue);
                 $('#leadSearchResults').empty();
 
