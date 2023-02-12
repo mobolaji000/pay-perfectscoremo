@@ -454,9 +454,16 @@ else
      for (let k = 1; k < counter; k++) {
 
      amount = 'amount_'.concat(k);
+     amount_val = $("input[name="+amount+"]").val();
+
      console.log("k is: "+k);
-     console.log("input name val is: "+$("input[name="+amount+"]").val());
-     	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
+     console.log("input name val is: "+amount_val);
+
+
+     if (typeof amount_val !== 'undefined' )
+     {
+          	installment_total = Number(installment_total) +  Number(amount_val);
+     }
 		}
 
 		console.log("installment total is "+installment_total+" and transaction total is "+transactionTotal());
