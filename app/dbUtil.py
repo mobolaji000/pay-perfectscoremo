@@ -167,7 +167,10 @@ class AppDBUtil():
             cls.executeDBQuery()
 
             installments = {}
-            print("number of installments is " + str(int(clientData['installment_counter']) - 1))
+            logger.info(f"number of installments is {int(clientData['installment_counter']) - 1}")
+
+            logger.debug(f"type of clientData is {type(clientData)}")
+            logger.debug(f"clientData is {clientData}")
 
             for k in range(1, int(clientData['installment_counter'])):
                 print("current installment being updated is " + str(k))
