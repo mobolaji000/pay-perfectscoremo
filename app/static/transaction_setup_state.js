@@ -451,7 +451,7 @@ else
      var amount = '';
       var counter = $('input[name="installment_counter"]').val();
 
-     for (let k = 1; k < counter; k++) {
+     for (let k = 1; k < counter+1; k++) {
 
      amount = 'amount_'.concat(k);
      amount_val = $("input[name="+amount+"]").val();
