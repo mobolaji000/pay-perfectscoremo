@@ -454,6 +454,7 @@ else
      for (let k = 1; k < counter; k++) {
 
      amount = 'amount_'.concat(k);
+     console.log("input name val is: "+$("input[name="+amount+"]").val());
      	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
 		}
 
