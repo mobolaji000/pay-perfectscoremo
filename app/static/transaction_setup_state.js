@@ -457,7 +457,7 @@ else
      	installment_total = Number(installment_total) +  Number($("input[name="+amount+"]").val());
 		}
 
-		console.log("installment total is "+installment_total" and transaction total is "+transactionTotal())
+		console.log("installment total is "+installment_total+" and transaction total is "+transactionTotal());
 
         if (counter > 1)
         {
