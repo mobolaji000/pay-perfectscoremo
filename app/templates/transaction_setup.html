@@ -398,6 +398,7 @@
 
                     $("input[name=" + date + "]").val(someFormattedDate);
                     $("input[name=" + amount + "]").val(result.installment_details[amount]);
+                    console.log("result.installment_details[amount] is "+result.installment_details[amount]);
                 }
 
                 $('input[name="installment_counter"]').val(result.installment_counter);
