@@ -443,6 +443,7 @@ class AppDBUtil():
             installment_details = InstallmentPlan.query.filter_by(transaction_id=transaction.transaction_id).first()
 
             if installment_details:
+                logger.debug(f"installment_details.__dict__ is {installment_details.__dict__}")
                 installments = {}
                 for k in range(1, int(transaction.installment_counter)):
                     installments.update({'date_' + str(k): installment_details.__dict__['date_' + str(k)].strftime("%m/%d/%Y"), 'amount_' + str(k): installment_details.__dict__['amount_' + str(k)]})
