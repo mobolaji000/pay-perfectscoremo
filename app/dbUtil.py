@@ -177,7 +177,7 @@ class AppDBUtil():
             for k in range(1, 13):
                 print("current installment being updated is " + str(k))
                 if 'date_' + str(k) in clientData:
-                    installments.update({'date_' + str(date_and_amount_index): clientData['date_' + str(date_and_amount_index)], 'amount_' + str(date_and_amount_index): clientData['amount_' + str(date_and_amount_index)]})
+                    installments.update({'date_' + str(date_and_amount_index): clientData['date_' + k], 'amount_' + str(date_and_amount_index): clientData['amount_' + k]})
                     date_and_amount_index = date_and_amount_index + 1
 
             installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id)
