@@ -559,6 +559,7 @@ def parseDataForStripe(client_info):
 
     if client_info.get('installments','') != '':
         for index,installment in enumerate(client_info.get('installments','')):
+            logger.debug(f"index {index} and installment {installment}")
             stripe_info["date"+"_"+str(index+1)] = int(time.mktime(installment["date"].timetuple()))
             stripe_info["amount" + "_" + str(index+1)] = installment["amount"]
 

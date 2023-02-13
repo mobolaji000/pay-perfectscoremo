@@ -177,16 +177,16 @@ class AppDBUtil():
             for k in range(1, 13):
                 print("current installment being updated is " + str(k))
                 if 'date_' + str(k) in clientData:
-                    installments.update({'date_' + str(k): clientData['date_' + str(k)], 'amount_' + str(k): clientData['amount_' + str(k)]})
+                    installments.update({'date_' + str(date_and_amount_index): clientData['date_' + str(date_and_amount_index)], 'amount_' + str(date_and_amount_index): clientData['amount_' + str(date_and_amount_index)]})
                     date_and_amount_index = date_and_amount_index + 1
 
             installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id)
             number_of_rows_modified = installment_plan.update(installments)
-            print("number of installment rows added or modified is: ", number_of_rows_modified)
+            logger.info(f"number of installment rows added or modified is: {number_of_rows_modified}")
             cls.executeDBQuery()
 
         else:
-            print("No installment dates created/modified")
+            logger.info("No installment dates created/modified")
 
     @classmethod
     def is_date(cls,string_date, fuzzy=False):
