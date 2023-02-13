@@ -172,9 +172,13 @@ class AppDBUtil():
             logger.debug(f"type of clientData is {type(clientData)}")
             logger.debug(f"clientData is {clientData}")
 
-            for k in range(1, int(clientData['installment_counter'])):
+
+            date_and_amount_index = 1
+            for k in range(1, 13):
                 print("current installment being updated is " + str(k))
-                installments.update({'date_' + str(k): clientData['date_' + str(k)], 'amount_' + str(k): clientData['amount_' + str(k)]})
+                if 'date_' + str(k) in clientData:
+                    installments.update({'date_' + str(k): clientData['date_' + str(k)], 'amount_' + str(k): clientData['amount_' + str(k)]})
+                    date_and_amount_index = date_and_amount_index + 1
 
             installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id)
             number_of_rows_modified = installment_plan.update(installments)
