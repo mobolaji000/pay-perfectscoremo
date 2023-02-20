@@ -202,7 +202,7 @@ class AppDBUtil():
 
                     for k in range(1, 13):
                         if f'date_{k}' in clientData:
-                            installments.update({f'date_{k}': installment_dates_to_update[k-1].strftime('%Y-%m-%d'),f'amount_{k}': clientData[f'amount_{k}']})
+                            installments.update({f'date_{k}': datetime.strftime(installment_dates_to_update[k-1],'%Y-%m-%d'),f'amount_{k}': clientData[f'amount_{k}']})
             else:
                 for k in range(1, int(clientData['installment_counter'])):
                     print("current installment being updated is " + str(k))
