@@ -197,7 +197,7 @@ class AppDBUtil():
                             if k == 1:
                                 installment_dates_to_update[k-1] = clientData['paused_payment_resumption_date']
                             else:
-                                difference_between_this_installment_date_and_previous_installment_date = (datetime.strptime(clientData[f'date_{k}'],'%Y-%m-%') - datetime.strptime(clientData[f'date_{k-1}'],'%Y-%m-%')).date().days
+                                difference_between_this_installment_date_and_previous_installment_date = (datetime.strptime(clientData[f'date_{k}'],'%Y-%m-%d') - datetime.strptime(clientData[f'date_{k-1}'],'%Y-%m-%d')).date().days
                                 installment_dates_to_update[k-1] = installment_dates_to_update[k - 1] + timedelta(days=difference_between_this_installment_date_and_previous_installment_date)
 
                     for k in range(1, 13):
