@@ -152,7 +152,7 @@ class AppDBUtil():
 
         if (int(clientData['installment_counter']) > 1):
             cls.pauseInstallmentPaymentInvoices(transaction_id, pause_payment, paused_payment_resumption_date)
-        elif (clientData['recurring_payment_start_date']):
+        elif (clientData.get('recurring_payment_start_date')):
             cls.pauseRecurringPayment(transaction_id, pause_payment, paused_payment_resumption_date, recurring_payment_start_date)
 
     @classmethod
