@@ -187,8 +187,8 @@ class AppDBUtil():
             logger.info(f"clientData is {clientData}")
 
 
-            if clientData['pause_payment'] == 'yes':
-                if clientData['paused_payment_resumption_date']:
+            if clientData.get('pause_payment') == 'yes':
+                if clientData.get('paused_payment_resumption_date'):
 
                     installment_dates_to_update = [None] * 12
 
