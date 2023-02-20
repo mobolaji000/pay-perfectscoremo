@@ -204,6 +204,11 @@ class AppDBUtil():
                     for k in range(1, 13):
                         if f'date_{k}' in clientData:
                             installments.update({f'date_{k}': datetime.strftime(installment_dates_to_update[k-1],'%Y-%m-%d'),f'amount_{k}': clientData[f'amount_{k}']})
+
+                else:
+                    for k in range(1, int(clientData['installment_counter'])):
+                        print("current installment being updated is " + str(k))
+                        installments.update({f'date_{k}': clientData[f'date_{k}'], f'amount_{k}': clientData[f'amount_{k}']})
             else:
                 for k in range(1, int(clientData['installment_counter'])):
                     print("current installment being updated is " + str(k))
@@ -217,11 +222,11 @@ class AppDBUtil():
             #         installments.update({'date_' + str(date_and_amount_index): clientData[f'date_{k}'] + timedelta(days=difference_in_installment_dates_due_to_pause), 'amount_' + str(date_and_amount_index): clientData[f'amount_{k}']})
             #         date_and_amount_index = date_and_amount_index + 1
 
-            if installments:
-                installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id)
-                number_of_rows_modified = installment_plan.update(installments)
-                logger.info(f"number of installment rows added or modified is: {number_of_rows_modified}")
-                cls.executeDBQuery()
+            #if installments:
+            installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id)
+            number_of_rows_modified = installment_plan.update(installments)
+            logger.info(f"number of installment rows added or modified is: {number_of_rows_modified}")
+            cls.executeDBQuery()
 
         else:
             logger.info("No installment dates created/modified")
