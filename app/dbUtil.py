@@ -197,7 +197,7 @@ class AppDBUtil():
                             if k == 1:
                                 installment_dates_to_update[k-1] = clientData['paused_payment_resumption_date']
                             else:
-                                difference_between_this_installment_date_and_previous_installment_date = (datetime.strptime(clientData[f'date_{k}'],'%Y-%m-%d') - datetime.strptime(clientData[f'date_{k-1}'],'%Y-%m-%d')).date().days
+                                difference_between_this_installment_date_and_previous_installment_date = (datetime.strptime(clientData[f'date_{k}'],'%Y-%m-%d') - datetime.strptime(clientData[f'date_{k-1}'],'%Y-%m-%d')).days
                                 installment_dates_to_update[k-1] = installment_dates_to_update[k - 1] + timedelta(days=difference_between_this_installment_date_and_previous_installment_date)
 
                     for k in range(1, 13):
@@ -558,7 +558,7 @@ class AppDBUtil():
                             if index_of_earliest_unpaid_invoice == i:
                                 invoice_dates_to_update[i] = paused_payment_resumption_date
                             else:
-                                difference_between_this_payment_date_and_previous_payment_date = (existing_invoices[i].payment_date - existing_invoices[i-1].payment_date).date().days
+                                difference_between_this_payment_date_and_previous_payment_date = (existing_invoices[i].payment_date - existing_invoices[i-1].payment_date).days
                                 invoice_dates_to_update[i] = invoice_dates_to_update[i-1] + timedelta(days=difference_between_this_payment_date_and_previous_payment_date)
                         else:
                             invoice_dates_to_update[i] = e.payment_date
