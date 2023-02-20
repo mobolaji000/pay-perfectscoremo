@@ -397,7 +397,7 @@
 					{% set paused_payment_resumption_date = "###Error: Don't make a payment. Contact Mo###" %}
 								{% else %}
 								{% set paused_payment_resumption_date = client_info.paused_payment_resumption_date %}
-			<div class="py-3"><span class="badge badge-danger">This payment was paused and will restart on {{client_info.paused_payment_resumption_date}}</span></div>
+			<div class="py-3"><span class="badge badge-danger">This payment is paused and will restart on {{client_info.paused_payment_resumption_date}}</span></div>
 					{% endif %}
 			{% endif %}
 

@@ -455,24 +455,24 @@ def modify_transaction():
             flash('Somehow ended up with and modified duplicate transaction codes')
             #return render_template('transaction_setup.html',leads=json.dumps(processed_leads))
             return redirect(url_for('transaction_setup'))
-
-        if data_to_modify.get('mark_as_paid', '') == 'yes':
-            client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
-            stripe_info = parseDataForStripe(client_info)
-            stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info,action='modify')
-            AppDBUtil.updateTransactionPaymentStarted(transaction_id)
-            logger.info("marked transaction as paid")
-        else:
-            customer, does_customer_payment_info_exist = stripeInstance.createCustomer(data_to_modify)
-            client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
-            stripe_info = parseDataForStripe(client_info)
-            message_type = ''
-            if does_customer_payment_info_exist:
-                message_type = 'modify_transaction_existing_client'
-                logger.debug('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
-                stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
+        if not AppDBUtil.isTransactionPaymentStarted(transaction_id):
+            if data_to_modify.get('mark_as_paid', '') == 'yes':
+                client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
+                stripe_info = parseDataForStripe(client_info)
+                stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info,action='modify')
+                AppDBUtil.updateTransactionPaymentStarted(transaction_id)
+                logger.info("marked transaction as paid")
             else:
-                message_type = 'modify_transaction_new_client'
+                customer, does_customer_payment_info_exist = stripeInstance.createCustomer(data_to_modify)
+                client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
+                stripe_info = parseDataForStripe(client_info)
+                message_type = ''
+                if does_customer_payment_info_exist:
+                    message_type = 'modify_transaction_existing_client'
+                    logger.debug('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
+                    stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
+                else:
+                    message_type = 'modify_transaction_new_client'
 
         if data_to_modify.get('send_text_and_email','') == 'yes':
             logger.debug('Send modified transaction text and email notification: ' + str(stripe_info['transaction_id']))

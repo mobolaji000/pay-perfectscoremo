@@ -47,10 +47,6 @@ $(document).ready(function() {
             default_tp_date = "";
         }
 
-        // if ($('input[name="turn_on_installments"]').val() != "") {
-        //     setDefaultInstallmentDate();
-        // }
-
     });
 
     $('input[name="college_apps_product"]').on('click', function() {
@@ -245,22 +241,6 @@ $(document).ready(function() {
         default_installment_date = (default_tp_date > default_college_apps_date) ? default_tp_date : default_college_apps_date
     }
 
-
-    // $('input[name="turn_on_installments"]').on('click', function() {
-    //
-    //     if ($(this).val() == "") {
-    //         setDefaultInstallmentDate();
-    //         $('input[name="mark_as_paid"]').prop('checked', false);
-    //         $('input[name="mark_as_paid"]').val("");
-    //
-    //         $(this).val("yes");
-    //     } else {
-    //
-    //         $(this).val("");
-    //     }
-    // });
-
-
     $('input[name="mark_as_paid"]').on('click', function() {
 
 
@@ -337,31 +317,20 @@ $(document).ready(function() {
 {
 
     $('input[name="make_payment_recurring"]').attr('disabled', true);
-      document.getElementById("pause_payment_wrap_around_div").hidden=false;
+      //document.getElementById("pause_payment_wrap_around_div").hidden=false;
       document.getElementById("mark_as_paid_wrap_around_div").hidden=true;
 }
 
 else
         {
-        document.getElementById("pause_payment_wrap_around_div").hidden=true;
+        //document.getElementById("pause_payment_wrap_around_div").hidden=true;
         document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
         }
 
 
-
-//        if false//($('input[name="make_payment_recurring"]').val() == "yes")
-//            {
-//                 document.getElementById("no_recurring_payments_with_installments_message_1").hidden=false;
-//                 document.getElementById("no_recurring_payments_with_installments_message_2").hidden=false;
-//            }
-//        else
-//        {
-
     if (Number(counter) < 13)
 {
         document.getElementById("more_than_12_installments_message").hidden=true;
-
-        //document.getElementById("pause_payment_wrap_around_div").hidden=true;
 
         var newRow = $("<tr>");
         var cols = "";
@@ -417,7 +386,7 @@ else
         if (Number(counter) == 1)
         {
 
-        document.getElementById("pause_payment_wrap_around_div").hidden=true;
+        //document.getElementById("pause_payment_wrap_around_div").hidden=true;
         document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
 
 
@@ -438,7 +407,7 @@ else
         }
         else
         {
-        document.getElementById("pause_payment_wrap_around_div").hidden=false;
+        //document.getElementById("pause_payment_wrap_around_div").hidden=false;
         document.getElementById("mark_as_paid_wrap_around_div").hidden=true;
         }
 
@@ -519,19 +488,9 @@ else
        $('input[name="make_payment_recurring"]').on('click', function() {
 
                var counter = $('input[name="installment_counter"]').val();
-
-
-
         if ($(this).val() == "no") {
 
-//                if (Number(counter) > 0)
-//{
-//
-//    document.getElementById("pause_payment_wrap_around_div").hidden=false;
-//}
-
-
-        document.getElementById("pause_payment_wrap_around_div").hidden=false;
+        //document.getElementById("pause_payment_wrap_around_div").hidden=false;
             document.getElementById("mark_as_paid_wrap_around_div").hidden=true;
             document.getElementById("addrow").hidden=true;
 
@@ -543,9 +502,7 @@ else
 
         } else if ($(this).val() == "yes") {
 
-
-
-        document.getElementById("pause_payment_wrap_around_div").hidden=true;
+        //document.getElementById("pause_payment_wrap_around_div").hidden=true;
 document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
 
             $(this).val("no");
@@ -566,14 +523,14 @@ document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
 
             $(this).val("yes");
             $('input[name="paused_payment_resumption_date"]').attr('disabled', false);
-             $('input[name="paused_payment_resumption_date"]').prop('required', true);
+             //$('input[name="paused_payment_resumption_date"]').prop('required', true);
 
         } else if ($(this).val() == "yes") {
 
             $(this).val("no");
             $('input[name="paused_payment_resumption_date"]').val('');
             $('input[name="paused_payment_resumption_date"]').attr('disabled', true);
-             $('input[name="paused_payment_resumption_date"]').prop('required', false);
+             //$('input[name="paused_payment_resumption_date"]').prop('required', false);
         }
     });
 

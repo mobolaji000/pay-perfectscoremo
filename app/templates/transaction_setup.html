@@ -217,7 +217,7 @@
 
       if (result.pause_payment == "yes")
      {
-      document.getElementById("pause_payment_wrap_around_div").hidden=false;
+      //document.getElementById("pause_payment_wrap_around_div").hidden=false;
      	$('input[name="pause_payment"]').prop('checked', true);
      	 $('input[name="pause_payment"]').val("yes");
      	  $('input[name="paused_payment_resumption_date"]').attr('disabled', false);
@@ -369,19 +369,40 @@
             //idea is it should not be easy to modify or delete a payment that has started
             //this is consistent with Stripe where an transaction that is paid cant be deleted
             //if push comes to shove, make the necessary changes in stripe and after that go manually delete in the DB
-            if (result.payment_started == "True") {
+            if (result.payment_started == "True" ) {
+            $('input[id="delete_button"]').attr('disabled', true);
+            $('div[id="cant_delete_message"]').prop('hidden', false);
+            if (result.make_payment_recurring == "no")
+            {
+            $("select, input, textarea").each(function(){
+            if (this.attr("name") != 'make_payment_recurring' || this.attr("name") != 'recurring_payment_frequency' || this.attr("name") != 'recurring_payment_start_date')
+            {
+            this.attr('disabled', true);
+            }
+             });
+            }
+            else if (result.pause_payment == "no")
+            {
+            $("select, input, textarea").each(function(){
+            if (this.attr("name") != 'pause_payment' || this.attr("name") != 'paused_payment_resumption_date')
+            {
+            this.attr('disabled', true);
+            }
+             });
+            }
+            else
+            {
+            $('div[id="cant_modify_message"]').prop('hidden', false);
+            $('input[id="modify_transaction_button"]').attr('disabled', true);
+            }
 
-                $('div[id="cant_modify_or_delete_message"]').prop('hidden', false);
-                $('input[id="modify_transaction_button"]').attr('disabled', true);
-                $('input[id="delete_button"]').attr('disabled', true);
-
-                // document.getElementById("cant_modify_or_delete_message").hidden=false;
+                // document.getElementById("cant_modify_message").hidden=false;
             }
             else {
-                $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
+                $('div[id="cant_modify_message"]').prop('hidden', true);
                 $('input[id="modify_transaction_button"]').attr('disabled', false);
                 $('input[id="delete_button"]').attr('disabled', false);
-                //document.getElementById("cant_modify_or_delete_message").hidden=true;
+                //document.getElementById("cant_modify_message").hidden=true;
             }
 
             if (result.installment_details) {
@@ -568,10 +589,17 @@
 
                             <br><br>
 
-                            <div class="col-sm" id="cant_modify_or_delete_message" name="cant_modify_or_delete_message"
+                            <div class="col-sm" id="cant_modify_message" name="cant_modify_message"
                                 hidden>
-                                <span class="badge badge-danger">You can't modify or delete a payment that has
-                                    started.</span>
+                                <span class="badge badge-danger">You can't modify this payment</span>
+
+                            </div>
+
+                            <br><br>
+
+                            <div class="col-sm" id="cant_delete_message" name="cant_delete_message"
+                                hidden>
+                                <span class="badge badge-danger">You can't delete this payment</span>
 
                             </div>
 
@@ -1194,7 +1222,7 @@
                         </div>
                     </div><br>
 
-<div id="pause_payment_wrap_around_div" name="pause_payment_wrap_around_div" hidden>
+<div id="pause_payment_wrap_around_div" name="pause_payment_wrap_around_div">
                     <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
 
                     <div class="d-block my-3">

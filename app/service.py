@@ -193,9 +193,23 @@ class StripeInstance():
             elif chosen_mode_of_payment == 'full-payment-ach':
                 if existing_customer:
                     logger.debug('Full payment ACH for existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
-                    amount = stripe_info['transaction_total']
                     payment_date = datetime.datetime.today() + datetime.timedelta(days=1)
-                    transaction_total = int(stripe_info['transaction_total']) #this is ach; dont multiply by 3 percent
+
+                else:
+                    logger.debug('Full payment ACH for new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
+                    payment_date = datetime.datetime.today()
+
+                amount = stripe_info['transaction_total']
+                transaction_total = int(stripe_info['transaction_total'])
+
+                if stripe_info['pause_payment'] == 'yes':
+                    if stripe_info['paused_payment_resumption_date']:
+                        if stripe_info['paused_payment_resumption_date'] > payment_date:
+                            payment_date = stripe_info['paused_payment_resumption_date']
+                    else:
+                        logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
+                        payment_date = stripe_info['paused_payment_resumption_date']
+                        # return {'status': 'success'}
 
                     stripe.InvoiceItem.create(
                         customer=stripe_info['stripe_customer_id'],
@@ -289,8 +303,6 @@ class StripeInstance():
                 invoice_settings={'default_payment_method':payment_id},
             )
 
-            #logger.debug('Value of existing_customer is: ' + str(existing_customer))
-
             if existing_customer:
                 logger.debug('Existing customer: ' + str(stripe_info['transaction_id']) + str(stripe_info['stripe_customer_id'])+' '+ str(stripe_info['name']))
 
@@ -303,6 +315,17 @@ class StripeInstance():
                         payment_date = datetime.datetime.fromtimestamp(stripe_info['date_'+str(k)]) + datetime.timedelta(days=1)
                     else:
                         payment_date = datetime.datetime.fromtimestamp(stripe_info['date_' + str(k)])
+
+                    # if stripe_info['pause_payment'] == 'yes':
+                    #     if stripe_info['paused_payment_resumption_date']:
+                    #         if stripe_info['paused_payment_resumption_date'] > payment_date:
+                    #             payment_date =  stripe_info['paused_payment_resumption_date']
+                    #     else:
+                    #         logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
+                    #         return {'status': 'success'}
+
+                    # if stripe_info['pause_payment'] == 'yes':
+                    #     pauseInstallmentPayment(transaction_id, pause_payment, paused_payment_resumption_date)
 
                     amount = stripe_info['amount_'+str(k)]
 
@@ -329,16 +352,32 @@ class StripeInstance():
                 if existing_customer:
                     logger.debug('Full payment credit card existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
                     # ensures that you always keep 48? hours to change method of payment promise to exisiting clients
-                    amount = stripe_info['transaction_total']
                     payment_date = datetime.datetime.today() + datetime.timedelta(days=1)
-                    #(client_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics
 
-                    transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
+                else:
+                    logger.debug('Full payment credit card new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
+                    payment_date = datetime.datetime.today()
+
+                transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
+                amount = str(transaction_total)
+
+                #(client_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics
+
+                if stripe_info['pause_payment'] == 'yes':
+                    if stripe_info['paused_payment_resumption_date']:
+                        if stripe_info['paused_payment_resumption_date'] > payment_date:
+                            payment_date =  stripe_info['paused_payment_resumption_date']
+                    else:
+                        logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
+                        payment_date = stripe_info['paused_payment_resumption_date']
+                        #return {'status': 'success'}
+
                     stripe.InvoiceItem.create(
                         customer=stripe_info['stripe_customer_id'],
                         quantity=transaction_total,
                         price=os.environ.get('price'),
                     )
+
                     stripe_invoice_object = stripe.Invoice.create(
                         customer=stripe_info['stripe_customer_id'],
                         default_payment_method=payment_id,
@@ -349,11 +388,8 @@ class StripeInstance():
                                                             phone_number=stripe_info['phone_number'], email=stripe_info['email'],
                                                             transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
                                                             payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
-                else:
-                    logger.debug('Full payment credit card new customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
-                    # (client_info['diag_total'] * 0.03) is added to stop charging extra 3% for diagnostics
 
-                    transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
+                else:
                     stripe.InvoiceItem.create(
                         customer=stripe_info['stripe_customer_id'],
                         quantity=transaction_total,
@@ -366,6 +402,48 @@ class StripeInstance():
                     )
                     stripe.Invoice.pay(invoice.id)
 
+
+
+
+                    # if stripe_info['pause_payment'] == 'yes':
+                    #     if stripe_info['paused_payment_resumption_date']:
+                    #         if stripe_info['paused_payment_resumption_date'] > payment_date:
+                    #             payment_date = stripe_info['paused_payment_resumption_date']
+                    #     else:
+                    #         logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
+                    #         payment_date = stripe_info['paused_payment_resumption_date']
+                    #
+                    #     stripe.InvoiceItem.create(
+                    #         customer=stripe_info['stripe_customer_id'],
+                    #         quantity=transaction_total,
+                    #         price=os.environ.get('price'),
+                    #     )
+                    #
+                    #     stripe_invoice_object = stripe.Invoice.create(
+                    #         customer=stripe_info['stripe_customer_id'],
+                    #         default_payment_method=payment_id,
+                    #         auto_advance=False,
+                    #         metadata={'transaction_id': stripe_info['transaction_id']},
+                    #     )
+                    #     AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
+                    #                                             phone_number=stripe_info['phone_number'], email=stripe_info['email'],
+                    #                                             transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
+                    #                                             payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
+                    #
+                    #
+                    # else:
+                    #     stripe.InvoiceItem.create(
+                    #         customer=stripe_info['stripe_customer_id'],
+                    #         quantity=transaction_total,
+                    #         price=os.environ.get('price'),
+                    #     )
+                    #     invoice = stripe.Invoice.create(
+                    #         customer=stripe_info['stripe_customer_id'],
+                    #         default_payment_method=payment_id,
+                    #         metadata={'transaction_id': stripe_info['transaction_id']},
+                    #     )
+                    #     stripe.Invoice.pay(invoice.id)
+
             elif chosen_mode_of_payment == 'recurring-payment-credit-card':
                 logger.debug('Recurring payment credit card: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
 
@@ -375,6 +453,15 @@ class StripeInstance():
                     payment_date = stripe_info['recurring_payment_start_date'] + datetime.timedelta(days=1)
                 else:
                     payment_date = stripe_info['recurring_payment_start_date']
+
+                # if stripe_info['pause_payment'] == 'yes':
+                #     if stripe_info['paused_payment_resumption_date']:
+                #         if stripe_info['paused_payment_resumption_date'] > payment_date:
+                #             payment_date = stripe_info['paused_payment_resumption_date']
+                #     else:
+                #         logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
+                #         return {'status': 'success'}
+
 
                 transaction_total = math.ceil(client_info['transaction_total'] * 1.03)
 
@@ -393,7 +480,6 @@ class StripeInstance():
                                                         phone_number=stripe_info['phone_number'], email=stripe_info['email'],
                                                         transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
                                                         payment_date=payment_date, payment_amount=transaction_total, stripe_invoice_id=stripe_invoice_object['id'])
-
 
 
             return {'status': 'success'}

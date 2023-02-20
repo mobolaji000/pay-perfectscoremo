@@ -103,6 +103,7 @@ class AppDBUtil():
         does_customer_payment_info_exist = 'yes' if clientData.get('does_customer_payment_info_exist',None) else 'no'
 
 
+
         number_of_rows_modified = None
         if action=='create':
 
@@ -138,7 +139,21 @@ class AppDBUtil():
 
         cls.createOrModifyInstallmentPlan(clientData=clientData, transaction_id=transaction_id)
 
+        cls.modifyTransactionBasedOnPauseUnpauseStatus(clientData=clientData, transaction_id=transaction_id)
+
         return transaction_id,number_of_rows_modified
+
+
+    @classmethod
+    def modifyTransactionBasedOnPauseUnpauseStatus(cls,clientData,transaction_id):
+        pause_payment = clientData.get('pause_payment')
+        paused_payment_resumption_date = None if clientData.get('paused_payment_resumption_date', '') == '' else clientData.get('paused_payment_resumption_date')
+        recurring_payment_start_date = None if clientData.get('recurring_payment_start_date', '') == '' else clientData.get('recurring_payment_start_date')
+
+        if (int(clientData['installment_counter']) > 1):
+            cls.pauseInstallmentPaymentInvoices(transaction_id, pause_payment, paused_payment_resumption_date)
+        elif (clientData['recurring_payment_start_date']):
+            cls.pauseRecurringPayment(transaction_id, pause_payment, paused_payment_resumption_date, recurring_payment_start_date)
 
     @classmethod
     def createOrModifyInvoiceToBePaid(cls, first_name=None, last_name=None, phone_number=None, email=None, transaction_id=None, stripe_customer_id=None, stripe_invoice_id=None, payment_date=None, payment_amount=None):
@@ -154,6 +169,7 @@ class AppDBUtil():
 
     @classmethod
     def createOrModifyInstallmentPlan(cls, clientData={}, transaction_id=None):
+
         existing_installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id).first()
         if existing_installment_plan:
             db.session.delete(existing_installment_plan)
@@ -168,17 +184,37 @@ class AppDBUtil():
 
             installments = {}
             logger.info(f"number of installments is {int(clientData['installment_counter']) - 1}")
-
-            logger.debug(f"type of clientData is {type(clientData)}")
-            logger.debug(f"clientData is {clientData}")
+            logger.info(f"clientData is {clientData}")
 
 
-            date_and_amount_index = 1
-            for k in range(1, 13):
-                print("current installment being updated is " + str(k))
-                if 'date_' + str(k) in clientData:
-                    installments.update({'date_' + str(date_and_amount_index): clientData[f'date_{k}'], 'amount_' + str(date_and_amount_index): clientData[f'amount_{k}']})
-                    date_and_amount_index = date_and_amount_index + 1
+            if clientData['pause_payment'] == 'yes':
+                if clientData['paused_payment_resumption_date']:
+
+                    installment_dates_to_update = []
+
+                    for k in range(1, 13):
+                        if f'date_{k}' in clientData:
+                            if k == 1:
+                                installment_dates_to_update[k] = clientData['paused_payment_resumption_date']
+                            else:
+                                difference_between_this_installment_date_and_previous_installment_date = (clientData[f'date_{k}'] - clientData[f'date_{k-1}']).date().days
+                                installment_dates_to_update[k] = installment_dates_to_update[k - 1] + timedelta(days=difference_between_this_installment_date_and_previous_installment_date)
+
+                    for k in range(1, 13):
+                        if f'date_{k}' in clientData:
+                            installments.update({f'date_{k}': installment_dates_to_update[k],f'amount_{k}': clientData[f'amount_{k}']})
+            else:
+                for k in range(1, int(clientData['installment_counter'])):
+                    print("current installment being updated is " + str(k))
+                    installments.update({'date_' + str(k): clientData['date_' + str(k)], 'amount_' + str(k): clientData['amount_' + str(k)]})
+
+
+            # date_and_amount_index = 1
+            # for k in range(1, 13):
+            #     print("current installment being updated is " + str(k))
+            #     if 'date_' + str(k) in clientData:
+            #         installments.update({'date_' + str(date_and_amount_index): clientData[f'date_{k}'] + timedelta(days=difference_in_installment_dates_due_to_pause), 'amount_' + str(date_and_amount_index): clientData[f'amount_{k}']})
+            #         date_and_amount_index = date_and_amount_index + 1
 
             installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id)
             number_of_rows_modified = installment_plan.update(installments)
@@ -480,6 +516,70 @@ class AppDBUtil():
         transaction.payment_started = True
         cls.executeDBQuery()
 
+    @classmethod
+    def isTransactionPaymentStarted(cls, transaction_id):
+        transaction = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
+        return transaction.payment_started
+
+    # @classmethod
+    # def pauseOneTimePayment(cls, transaction_id, pause_payment, paused_payment_resumption_date):
+    #     transaction = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
+    #     transaction.pause_payment = pause_payment
+    #     transaction.paused_payment_resumption_date = paused_payment_resumption_date
+    #
+    #     cls.executeDBQuery()
+
+    @classmethod
+    def pauseRecurringPayment(cls, transaction_id, pause_payment, paused_payment_resumption_date, recurring_payment_start_date):
+        transaction = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
+        if pause_payment == 'yes':
+            payment_date = recurring_payment_start_date
+            if paused_payment_resumption_date:
+                if paused_payment_resumption_date > payment_date:
+                    payment_date = paused_payment_resumption_date
+
+            transaction.recurring_payment_start_date = payment_date
+            cls.executeDBQuery()
+
+    @classmethod
+    def pauseInstallmentPaymentInvoices(cls, transaction_id, pause_payment, paused_payment_resumption_date):
+
+        if pause_payment == 'yes':
+            existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=transaction_id).order_by(InvoiceToBePaid.payment_date.asc()).all()#.filter_by(payment_made=False)
+            if existing_invoices:
+                logger.info(f'Running pauseInstallmentPaymentInvoices for {transaction_id} for which invoices have been created for customer.')
+                if paused_payment_resumption_date:
+                    index_of_earliest_unpaid_invoice = 0
+                    invoice_dates_to_update = [] * len(existing_invoices)
+
+                    for i,e in enumerate(existing_invoices):
+                        if not e.payment_made:
+                            index_of_earliest_unpaid_invoice = i if index_of_earliest_unpaid_invoice == 0 else index_of_earliest_unpaid_invoice
+                            if index_of_earliest_unpaid_invoice == i:
+                                invoice_dates_to_update[i] = paused_payment_resumption_date
+                            else:
+                                difference_between_this_payment_date_and_previous_payment_date = (existing_invoices[i].payment_date - existing_invoices[i-1].payment_date).date().days
+                                invoice_dates_to_update[i] = invoice_dates_to_update[i-1] + timedelta(days=difference_between_this_payment_date_and_previous_payment_date)
+                        else:
+                            invoice_dates_to_update[i] = e.payment_date
+
+                    installment_dates_to_update_as_dict = {}
+                    for i,e in enumerate(existing_invoices):
+                        e.payment_date = invoice_dates_to_update[i]
+                        #installment_dates_to_update_as_dict.update({'date_' + str(int(i+1)): installment_dates_to_update[i]})
+
+                    # existing_installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id).first()
+                    # number_of_rows_modified = existing_installment_plan.update(installment_dates_to_update_as_dict)
+                    # logger.info(f"number of installment rows with pause status modified is: {number_of_rows_modified}")
+
+                else:
+                    for i,e in enumerate(existing_invoices):
+                        e.payment_date = paused_payment_resumption_date
+            else:
+                logger.info(f'Ran pauseInstallmentPaymentInvoices for {transaction_id} for which NO invoices have been created for customer.')
+
+
+            cls.executeDBQuery()
     @classmethod
     def createStudentData(cls, studentData):
         try:
