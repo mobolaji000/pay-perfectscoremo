@@ -190,7 +190,7 @@ class AppDBUtil():
             if clientData['pause_payment'] == 'yes':
                 if clientData['paused_payment_resumption_date']:
 
-                    installment_dates_to_update = []
+                    installment_dates_to_update = [] * 12
 
                     for k in range(1, 13):
                         if f'date_{k}' in clientData:
