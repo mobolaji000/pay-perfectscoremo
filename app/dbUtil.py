@@ -190,7 +190,7 @@ class AppDBUtil():
             if clientData['pause_payment'] == 'yes':
                 if clientData['paused_payment_resumption_date']:
 
-                    installment_dates_to_update = [] * 12
+                    installment_dates_to_update = [None] * 12
 
                     for k in range(1, 13):
                         if f'date_{k}' in clientData:
@@ -550,7 +550,7 @@ class AppDBUtil():
                 logger.info(f'Running pauseInstallmentPaymentInvoices for {transaction_id} for which invoices have been created for customer.')
                 if paused_payment_resumption_date:
                     index_of_earliest_unpaid_invoice = 0
-                    invoice_dates_to_update = [] * len(existing_invoices)
+                    invoice_dates_to_update = [None] * len(existing_invoices)
 
                     for i,e in enumerate(existing_invoices):
                         if not e.payment_made:
