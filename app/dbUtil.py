@@ -179,7 +179,7 @@ class AppDBUtil():
             installment_plan = InstallmentPlan(transaction_id=transaction_id, stripe_customer_id=clientData['stripe_customer_id'], first_name=clientData['first_name'], last_name=clientData['last_name'], phone_number=clientData['phone_number'],
                                                email=clientData['email'])
             db.session.add(installment_plan)
-            print("installment plan created is: ", installment_plan)
+            logger.info(f"Installment plan created is: {installment_plan}")
             cls.executeDBQuery()
 
             installments = {}
@@ -217,10 +217,11 @@ class AppDBUtil():
             #         installments.update({'date_' + str(date_and_amount_index): clientData[f'date_{k}'] + timedelta(days=difference_in_installment_dates_due_to_pause), 'amount_' + str(date_and_amount_index): clientData[f'amount_{k}']})
             #         date_and_amount_index = date_and_amount_index + 1
 
-            installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id)
-            number_of_rows_modified = installment_plan.update(installments)
-            logger.info(f"number of installment rows added or modified is: {number_of_rows_modified}")
-            cls.executeDBQuery()
+            if installments:
+                installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id)
+                number_of_rows_modified = installment_plan.update(installments)
+                logger.info(f"number of installment rows added or modified is: {number_of_rows_modified}")
+                cls.executeDBQuery()
 
         else:
             logger.info("No installment dates created/modified")
