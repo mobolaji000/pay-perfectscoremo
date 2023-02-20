@@ -198,11 +198,11 @@ class AppDBUtil():
                                 installment_dates_to_update[k-1] = clientData['paused_payment_resumption_date']
                             else:
                                 difference_between_this_installment_date_and_previous_installment_date = (datetime.strptime(clientData[f'date_{k}'],'%Y-%m-%d') - datetime.strptime(clientData[f'date_{k-1}'],'%Y-%m-%d')).days
-                                installment_dates_to_update[k-1] = installment_dates_to_update[k - 2] + timedelta(days=difference_between_this_installment_date_and_previous_installment_date)
+                                installment_dates_to_update[k-1] = datetime.strptime(installment_dates_to_update[k - 2],'%Y-%m-%d') + timedelta(days=difference_between_this_installment_date_and_previous_installment_date)
 
                     for k in range(1, 13):
                         if f'date_{k}' in clientData:
-                            installments.update({f'date_{k}': installment_dates_to_update[k-1],f'amount_{k}': clientData[f'amount_{k}']})
+                            installments.update({f'date_{k}': installment_dates_to_update[k-1].strftime('%Y-%m-%d'),f'amount_{k}': clientData[f'amount_{k}']})
             else:
                 for k in range(1, int(clientData['installment_counter'])):
                     print("current installment being updated is " + str(k))
