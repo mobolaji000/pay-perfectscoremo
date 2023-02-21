@@ -39,13 +39,13 @@ $(document).ready(function() {
 
 
 
-   document.getElementById('terms_and_conditions').onclick = function() {
-      var client_info = $("#client_info").attr("data-client_info");
-
-  alert(client_info);
-  console.log(client_info);
-
-  };
+//   document.getElementById('terms_and_conditions').onclick = function() {
+//      var client_info = $("#client_info").attr("data-client_info");
+//
+//  alert(client_info);
+//  console.log(client_info);
+//
+//  };
 
 
     if (show_ach_override === 'True')
