@@ -402,7 +402,7 @@
 			{% if client_info.pause_payment == 'yes' %}
 
 			{% if client_info.paused_payment_resumption_date is none %}
-					{% set paused_payment_resumption_date = "###Error: Don't make a payment. Contact Mo###" %}
+						<div class="py-3"><span class="badge badge-danger">This payment is paused indefinitely</span></div>
 								{% else %}
 								{% set paused_payment_resumption_date = client_info.paused_payment_resumption_date %}
 			<div class="py-3"><span class="badge badge-danger">This payment is paused and will restart on {{client_info.paused_payment_resumption_date}}</span></div>
