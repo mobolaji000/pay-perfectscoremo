@@ -62,8 +62,7 @@
 
     }
 
-  alert(client_info);
-  console.log(client_info);
+
 
 	</script>
 
@@ -662,7 +661,7 @@
 	</div>
 
 			{% endif %}
-
+				<input id="client_info" type="hidden"  data-client_info="{{ client_info }}">
 				<input id="stripe_info" type="hidden"  data-stripe_info="{{ stripe_info }}">
 			<input id="ask_for_student_info" name="ask_for_student_info" type="hidden"  data-ask_for_student_info="{{ askForStudentInfo }}">
 			<input id="ask_for_student_availability" name="ask_for_student_availability" type="hidden"  data-ask_for_student_availability="{{ askForStudentAvailability }}">

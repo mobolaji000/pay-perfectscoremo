@@ -36,6 +36,13 @@ $(document).ready(function() {
 
     var show_ach_override = $("#show_ach_override").attr("data-show_ach_override");
 
+
+     var client_info = $("#client_info").attr("data-client_info");
+
+  alert(client_info);
+  console.log(client_info);
+
+
     if (show_ach_override === 'True')
     {
     $('#selectorToHideACHInstallment').attr('style', 'display: block !important');
