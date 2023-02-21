@@ -63,7 +63,7 @@
         var client_info = $("#client_info").attr("data-client_info");
 
   //alert(client_info);
-  console.log(client_info);
+ // console.log(client_info);
 
     }
 
@@ -426,7 +426,7 @@
 
 
 
-							<div class="py-3"><span class="badge badge-danger">This payment starts on {{client_info.recurring_payment_start_date}} and repeats every {{recurring_payment_frequency}} day(s).</span></div>
+							<div class="py-3"><span class="badge badge-danger">This payment has been setup to start on {{client_info.recurring_payment_start_date}} and repeats every {{recurring_payment_frequency}} day(s).</span></div>
 
 									<div id="recurring-payment-div" class="d-block my-3" >
 					<div container>
@@ -679,7 +679,7 @@
 
 							<input id="terms_and_conditions" name="terms_and_conditions" value="" type="checkbox" onclick="showPayButton();"
 								   class="custom-control-input">
-							<label class="custom-control-label" for="terms_and_conditions">You must accept terms and conditions and privacy policy to proceed. By clicking above, you agree to the <a href="/terms_and_conditions" target="_blank",> terms and conditions</a> and <a href="/privacy_policy" target="_blank",> privacy policy.</a></label>
+							<label class="custom-control-label" for="terms_and_conditions">You must accept terms and conditions and privacy policy to proceed. By clicking the button below to pay, you agree to the <a href="/terms_and_conditions" target="_blank",> terms and conditions</a> and <a href="/privacy_policy" target="_blank",> privacy policy.</a></label>
 							<br><br><br>
 						</div>
 
