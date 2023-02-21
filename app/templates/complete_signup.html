@@ -62,7 +62,7 @@
 
         var client_info = $("#client_info").attr("data-client_info");
 
-  alert(client_info);
+  //alert(client_info);
   console.log(client_info);
 
     }
@@ -401,7 +401,7 @@
 
 			{% if client_info.pause_payment == 'yes' %}
 
-			{% if client_info.paused_payment_resumption_date == 'null' %}
+			{% if client_info.paused_payment_resumption_date is none %}
 					{% set paused_payment_resumption_date = "###Error: Don't make a payment. Contact Mo###" %}
 								{% else %}
 								{% set paused_payment_resumption_date = client_info.paused_payment_resumption_date %}
