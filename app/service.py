@@ -567,7 +567,7 @@ class StripeInstance():
             paused_payment_resumption_date = client_info['paused_payment_resumption_date']
 
 
-            if (pause_payment == 'yes' and paused_payment_resumption_date <= datetime.datetime.today()):
+            if (pause_payment == 'yes' and paused_payment_resumption_date and paused_payment_resumption_date <= datetime.datetime.today()):
                 AppDBUtil.updatePausePaymentStatus('no',paused_payment_resumption_date)
 
     def setupAutoPaymentForExistingCustomer(self, stripe_info):
