@@ -392,7 +392,7 @@
             if ($(this).attr("name") == 'make_payment_recurring' || $(this).attr("name") == 'recurring_payment_frequency' || $(this).attr("name") == 'recurring_payment_start_date')
             {
             $(this).attr('disabled', false);
-            $('div[id="cant_modify_message"]').prop('hidden', false);
+            $('div[id="cant_modify_message"]').prop('hidden', true);
             $('input[id="modify_transaction_button"]').attr('disabled', false);
             }
              });
@@ -403,7 +403,7 @@
             if ($(this).attr("name") == 'pause_payment' || $(this).attr("name") == 'paused_payment_resumption_date')
             {
             $(this).attr('disabled', false);
-            $('div[id="cant_modify_message"]').prop('hidden', false);
+            $('div[id="cant_modify_message"]').prop('hidden', true);
             $('input[id="modify_transaction_button"]').attr('disabled', false);
             }
              });
