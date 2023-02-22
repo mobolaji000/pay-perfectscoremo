@@ -364,7 +364,29 @@
             $('input[name="transaction_total"]').val(result.transaction_total);
 
             //
+            if (result.installment_details) {
+                //alert(result.installment_counter);
+                var addRowButton = document.getElementById("addrow");
 
+                for (let k = 1; k < result.installment_counter; k++) {
+                    date = 'date_'.concat(k)
+                    amount = 'amount_'.concat(k)
+
+                    addRowButton.click();
+
+                    var someDate = new Date(result.installment_details[date]);
+                    someDate.setDate(someDate.getDate() - 1);
+                    var dd = (someDate.getDate() + 1 < 10) ? "0" + (someDate.getDate() + 1) : someDate.getDate() + 1
+                    var mm = (someDate.getMonth() + 1 < 10) ? "0" + (someDate.getMonth() + 1) : someDate.getMonth() + 1
+                    var yy = someDate.getFullYear();
+                    var someFormattedDate = yy + '-' + mm + '-' + dd;
+
+                    $("input[name=" + date + "]").val(someFormattedDate);
+                    $("input[name=" + amount + "]").val(result.installment_details[amount]);
+                }
+
+                $('input[name="installment_counter"]').val(result.installment_counter);
+            }
 
             //idea is it should not be easy to modify or delete a payment that has started
             //this is consistent with Stripe where an transaction that is paid cant be deleted
@@ -415,31 +437,6 @@
                 $('input[id="modify_transaction_button"]').attr('disabled', false);
                 $('input[id="delete_button"]').attr('disabled', false);
                 //document.getElementById("cant_modify_message").hidden=true;
-            }
-
-            if (result.installment_details) {
-                //alert(result.installment_counter);
-                var addRowButton = document.getElementById("addrow");
-
-                for (let k = 1; k < result.installment_counter; k++) {
-                    date = 'date_'.concat(k)
-                    amount = 'amount_'.concat(k)
-
-                    addRowButton.click();
-
-                    var someDate = new Date(result.installment_details[date]);
-                    someDate.setDate(someDate.getDate() - 1);
-                    var dd = (someDate.getDate() + 1 < 10) ? "0" + (someDate.getDate() + 1) : someDate.getDate() + 1
-                    var mm = (someDate.getMonth() + 1 < 10) ? "0" + (someDate.getMonth() + 1) : someDate.getMonth() + 1
-                    var yy = someDate.getFullYear();
-                    var someFormattedDate = yy + '-' + mm + '-' + dd;
-
-                    $("input[name=" + date + "]").val(someFormattedDate);
-                    $("input[name=" + amount + "]").val(result.installment_details[amount]);
-                }
-
-                $('input[name="installment_counter"]').val(result.installment_counter);
-
             }
 
         }
