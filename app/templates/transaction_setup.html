@@ -172,7 +172,11 @@
 
             for (let k = 1; k < counter; k++) {
                 var deleteRowButton = document.getElementById("ibtnDel");
+                if(deleteRowButton)
+                {
                 deleteRowButton.click();
+                }
+
             }
 
             //console.log("search result is: "+JSON.stringify(result));
@@ -391,7 +395,8 @@
             //idea is it should not be easy to modify or delete a payment that has started
             //this is consistent with Stripe where an transaction that is paid cant be deleted
             //if push comes to shove, make the necessary changes in stripe and after that go manually delete in the DB
-            console.log(result);
+            //console.log(result);
+
             if (result.payment_started == "True" ) {
             $('input[id="delete_button"]').attr('disabled', true);
             $('div[id="cant_delete_message"]').prop('hidden', false);
