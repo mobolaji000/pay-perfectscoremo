@@ -373,40 +373,41 @@
             if (result.payment_started == "True" ) {
             $('input[id="delete_button"]').attr('disabled', true);
             $('div[id="cant_delete_message"]').prop('hidden', false);
-            if (result.make_payment_recurring == "no")
-            {
-            $("select, input, textarea").each(function(){
-            if ($(this).attr("name") != 'create_transaction_button' || $(this).attr("name") != 'make_payment_recurring' || $(this).attr("name") != 'recurring_payment_frequency' || $(this).attr("name") != 'recurring_payment_start_date')
-            {
-            $(this).attr('disabled', false);
-            }
-            else 
-            {
-                $(this).attr('disabled', true);
-            }
 
-
-             });
-            }
-            if (result.pause_payment == "no")
-            {
-            $("select, input, textarea").each(function(){
-            if ($(this).attr("name") != 'create_transaction_button' || $(this).attr("name") != 'pause_payment' || $(this).attr("name") != 'paused_payment_resumption_date')
-            {
-            $(this).attr('disabled', false);
-            }
-            else
-            {
-                $(this).attr('disabled', true);
-            }
-             });
-            }
-            else
-            {
             $('div[id="cant_modify_message"]').prop('hidden', false);
             $('input[id="modify_transaction_button"]').attr('disabled', true);
-            }
 
+
+            $("select, input, textarea").each(function(){
+            if ($(this).attr("name") != 'create_transaction_button')
+            {
+            $(this).attr('disabled', true);
+            }
+                });
+
+
+            if (result.make_payment_recurring == "yes")
+            {
+            $("select, input, textarea").each(function(){
+            if ($(this).attr("name") == 'make_payment_recurring' || $(this).attr("name") == 'recurring_payment_frequency' || $(this).attr("name") == 'recurring_payment_start_date')
+            {
+            $(this).attr('disabled', false);
+            $('div[id="cant_modify_message"]').prop('hidden', false);
+            $('input[id="modify_transaction_button"]').attr('disabled', false);
+            }
+             });
+            }
+            if (result.pause_payment == "yes")
+            {
+            $("select, input, textarea").each(function(){
+            if ($(this).attr("name") == 'pause_payment' || $(this).attr("name") == 'paused_payment_resumption_date')
+            {
+            $(this).attr('disabled', false);
+            $('div[id="cant_modify_message"]').prop('hidden', false);
+            $('input[id="modify_transaction_button"]').attr('disabled', false);
+            }
+             });
+            }
                 // document.getElementById("cant_modify_message").hidden=false;
             }
             else {
