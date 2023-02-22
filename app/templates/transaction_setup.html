@@ -375,18 +375,18 @@
             if (result.make_payment_recurring == "no")
             {
             $("select, input, textarea").each(function(){
-            if (this.attr("name") != 'make_payment_recurring' || this.attr("name") != 'recurring_payment_frequency' || this.attr("name") != 'recurring_payment_start_date')
+            if ($(this).attr("name") != 'make_payment_recurring' || $(this).attr("name") != 'recurring_payment_frequency' || $(this).attr("name") != 'recurring_payment_start_date')
             {
-            this.attr('disabled', true);
+            $(this).attr('disabled', true);
             }
              });
             }
             else if (result.pause_payment == "no")
             {
             $("select, input, textarea").each(function(){
-            if (this.attr("name") != 'pause_payment' || this.attr("name") != 'paused_payment_resumption_date')
+            if ($(this).attr("name") != 'pause_payment' || $(this).attr("name") != 'paused_payment_resumption_date')
             {
-            this.attr('disabled', true);
+            $(this).attr('disabled', true);
             }
              });
             }
