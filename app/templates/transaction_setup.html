@@ -95,6 +95,18 @@
 
         function finalCheckBeforeSubmit(event) {
 
+        	//$("select, input, textarea").each(function(){
+            //$(this).attr('disabled', false);
+            // });
+
+            var names_of_enabled_elements = $("#names_of_enabled_elements").attr("data-names_of_enabled_elements");
+
+             names_of_enabled_elements.split(',').forEach(function(name) {
+    				console.log(name);
+    				$('input[name="'+name+'"]').attr('disabled', false);
+				});
+
+
             //alert("finalCheckBeforeSubmit");
 
             var tp = $('input[name="tp_product"]:checked').attr("id");
@@ -398,6 +410,19 @@
             //console.log(result);
 
             if (result.payment_started == "True" ) {
+            const names_of_enabled_elements = [];
+
+            $("select, input, textarea").each(function(){
+            console.log($(this).attr("name")+" is "+$(this).attr("disabled"));
+            if (!$(this).is('[disabled=disabled]'))
+            {
+            names_of_enabled_elements.push($(this).attr("name"));
+            }
+                });
+
+                console.log("names_of_enabled_elements is: "+names_of_enabled_elements);
+                $("#names_of_enabled_elements").attr("data-names_of_enabled_elements",names_of_enabled_elements);
+
             $('input[id="delete_button"]').attr('disabled', true);
             $('div[id="cant_delete_message"]').prop('hidden', false);
 
@@ -1283,6 +1308,9 @@
 
 
 				<input id="leads" name="leads" hidden data-leads="{{ leads }}">
+				<input id="names_of_enabled_elements" name="names_of_enabled_elements" hidden data-names_of_enabled_elements="">
+
+
 
 				<div class="row justify-content-center"><input id="create_transaction_button"
 															   name="create_transaction_button" class="btn btn-primary btn-lg btn-block w-50 p-3"

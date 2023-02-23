@@ -3,695 +3,511 @@
 <head>
 	<meta charset="utf-8">
 	<title>Complete Signup</title>
-
 	<!-- Bootstrap core CSS -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-				<script type="text/javascript" src="static/complete_signup.js"></script>
-	  <link href="static/page_style.css" rel="stylesheet" >
-
+		integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+	<script type="text/javascript" src="static/complete_signup.js"></script>
+	<link href="static/page_style.css" rel="stylesheet">
 	<!-- Custom styles for this template -->
 	<style>
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-      }
-
-      @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-          font-size: 3.5rem;
-        }
-      }
-
+		.bd-placeholder-img {
+			font-size: 1.125rem;
+			text-anchor: middle;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+		@media (min-width: 768px) {
+			.bd-placeholder-img-lg {
+				font-size: 3.5rem;
+			}
+		}
 	</style>
-
-
-		<script>
-
-
-		 function turnOffRequired()
-    {
-    {% if not client_info.turn_on_installments %}
-      $('input[name="installment-payment"]').prop('required', false);
-        $('input[name="full-payment"]').prop('required', false);
-        {% endif %}
-
-        var ask_for_student_info = $("#ask_for_student_info").attr("data-ask_for_student_info");
-		$('input[name="ask_for_student_info"]').val(ask_for_student_info);
-
-		var ask_for_student_availability = $("#ask_for_student_availability").attr("data-ask_for_student_availability");
-		$('input[name="ask_for_student_availability"]').val(ask_for_student_availability);
-
-		 var prospect_id = $("#prospect_id").attr("data-prospect_id");
-		$('input[name="prospect_id"]').val(prospect_id);
-    }
-
-    	 function showPayButton()
-    {
-
-    if (document.getElementById('terms_and_conditions').checked) {
-            $('input[name="proceed_to_payment"]').prop('hidden', false);
-        } else {
-            $('input[name="proceed_to_payment"]').prop('hidden', true);
-        }
-
-        var client_info = $("#client_info").attr("data-client_info");
-
-  //alert(client_info);
- // console.log(client_info);
-
-    }
-
-
-
+	<script>
+		function turnOffRequired() {
+			{% if not client_info.turn_on_installments %}
+			$('input[name="installment-payment"]').prop('required', false);
+			$('input[name="full-payment"]').prop('required', false);
+			{% endif %}
+			var ask_for_student_info = $("#ask_for_student_info").attr("data-ask_for_student_info");
+			$('input[name="ask_for_student_info"]').val(ask_for_student_info);
+			var ask_for_student_availability = $("#ask_for_student_availability").attr("data-ask_for_student_availability");
+			$('input[name="ask_for_student_availability"]').val(ask_for_student_availability);
+			var prospect_id = $("#prospect_id").attr("data-prospect_id");
+			$('input[name="prospect_id"]').val(prospect_id);
+		}
+		function showPayButton() {
+			if (document.getElementById('terms_and_conditions').checked) {
+				$('input[name="proceed_to_payment"]').prop('hidden', false);
+			} else {
+				$('input[name="proceed_to_payment"]').prop('hidden', true);
+			}
+			var client_info = $("#client_info").attr("data-client_info");
+			//alert(client_info);
+			// console.log(client_info);
+		}
 	</script>
-
 </head>
-
-
 <body class="bg-light">
-<div class="container">
-	<div class="py-3 text-center">
-		<img class="d-block mx-auto my-4" src="/static/logo.png" alt="" width="528" height="201">
-		<h2><u>Complete Signup</u></h2>
-	</div>
-			<form id="complete_signup_form" class="needs-validation" data-toggle="validator" action="{{ url_for('post_signup_checkout') }}" accept-charset="UTF-8" method="post" >
-
-				 {% if askForStudentInfo == 'yes' %}
-					<div class="container">
-<h3><u>Onboarding Information</u></h3>
-		<div class="col-md-8 order-md-1">
-			<br><br>
+	<div class="container">
+		<div class="py-3 text-center">
+			<img class="d-block mx-auto my-4" src="/static/logo.png" alt="" width="528" height="201">
+			<h2><u>Complete Signup</u></h2>
+		</div>
+		<form id="complete_signup_form" class="needs-validation" data-toggle="validator"
+			action="{{ url_for('post_signup_checkout') }}" accept-charset="UTF-8" method="post">
+			{% if askForStudentInfo == 'yes' %}
+			<div class="container">
+				<h3><u>Onboarding Information</u></h3>
+				<div class="col-md-8 order-md-1">
+					<br><br>
 					<h4 class="mb-3"><u>Student Information</u></h4>
-				<div class="row">
-					<div class="col-md-6 mb-3">
-						<label for="student_first_name">First name</label>
-						<input type="text" class="form-control" id="student_first_name" name="student_first_name" placeholder="" value="" required>
-					</div>
-					<div class="col-md-6 mb-3">
-						<label for="student_last_name">Last name</label>
-						<input type="text" class="form-control" id="student_last_name" name="student_last_name" placeholder="" value="" required>
-					</div>
-				</div>
-
-				<div class="mb-3">
-					<label for="student_email">Email</label>
-					<input type="email" class="form-control" id="student_email" name="student_email" placeholder="you@example.com" required>
-				</div>
-
-				<div class="mb-3">
-					<label for="student_phone_number">Phone number</label>
-					<input type="number" min="1000000000" max="9999999999" class="form-control" id="student_phone_number" name="student_phone_number" placeholder="1111111111" required>
-				</div>
-
-			<div class="mb-3" >
-							<label for="grade_level">Grade Level</label>
-							<select  id="grade_level"  name="grade_level" class="form-control">
-								<option value="" selected disabled hidden></option>
-								<option value='Middle School'>Middle School</option>
-								<option value='9th Grade'>9th Grade</option>
-								<option value='10th Grade'>10th Grade</option>
-								<option value='11th Grade'>11th Grade</option>
-								<option value='12th Grade'>12th Grade</option>
-								<option value='Other'>Other</option>
-							</select>
-						</div>
-
-					<div class="mb-3">
-							<label for="recent_test_score">SAT/ACT/P-SAT/P-ACT Score (if taken within the last 1 year)</label>
-							<input type="number" class="form-control" id="recent_test_score" name="recent_test_score" placeholder="" value="">
-							<div class="invalid-feedback">
-								Valid  number is required.
-							</div>
-					</div>
-
-			<br>
-			<div id="student_info_error_message" hidden>
-							You must enter name, email, and phone number for the student.
-						</div>
-
-				<br><br><br>
-
-				<h4 class="mb-3"><u>Parent 1 Information</u></h4>
-
-				<div class="row">
-
-				<div class="col-md-4 mb-3">
-					<label for="parent_1_salutation">Salutation</label>
-					<div>
-				<select id="parent_1_salutation" name="parent_1_salutation" class="custom-select col-md-12 mb-3" >
-					<option value=""></option>
-  <option value="Mr.">Mr.</option>
-  <option value="Ms.">Ms.</option>
-</select>
-					</div>
-					</div>
-
-					<div class="col-md-4 mb-3">
-						<label for="parent_1_first_name">First name</label>
-						<input type="text" class="form-control" id="parent_1_first_name" name="parent_1_first_name" placeholder="" value="">
-					</div>
-					<div class="col-md-4 mb-3">
-						<label for="parent_1_last_name">Last name</label>
-						<input type="text" class="form-control" id="parent_1_last_name" name="parent_1_last_name" placeholder="" value="">
-
-					</div>
-
-					</div>
-
-				<div class="mb-3">
-					<label for="parent_1_email">Email</label>
-					<input type="parent_1_email" class="form-control" id="parent_1_email" name="parent_1_email" placeholder="you@example.com">
-				</div>
-
-				<div class="mb-3">
-					<label for="parent_1_phone_number">Phone number </label>
-					<input type="number" min="1000000000" max="9999999999" class="form-control" id="parent_1_phone_number" name="parent_1_phone_number"
-						   placeholder="1111111111">
-				</div>
-
-			<br>
-			<div id="parent_1_info_error_message" style="color:red !important" hidden>Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.</div>
-				<br><br><br>
-
-				<h4 class="mb-3"><u>Parent 2 Information</u></h4>
-				<div class="row">
-
-				<div class="col-md-4 mb-3">
-					<label for="parent_2_salutation">Salutation</label>
-					<div>
-				<select id="parent_2_salutation" name="parent_2_salutation" class="custom-select col-md-12 mb-3" >
-  <option value=""></option>
-  <option value="Mr.">Mr.</option>
-  <option value="Ms.">Ms.</option>
-</select>
-					</div>
-					</div>
-
-
-
-					<div class="col-md-4 mb-3">
-						<label for="parent_2_first_name">First name</label>
-						<input type="text" class="form-control" id="parent_2_first_name" name="parent_2_first_name" placeholder="" value="">
-					</div>
-					<div class="col-md-4 mb-3">
-						<label for="parent_2_last_name">Last name</label>
-						<input type="text" class="form-control" id="parent_2_last_name" name="parent_2_last_name" placeholder="" value="">
-					</div>
-
-					</div>
-
-				<div class="mb-3">
-					<label for="parent_2_email">Email</label>
-					<input type="parent_2_email" class="form-control" id="parent_2_email" name="parent_2_email" placeholder="you@example.com">
-				</div>
-
-				<div class="mb-3">
-					<label for="parent_2_phone_number">Phone number</label>
-					<input type="number" min="1000000000" max="9999999999" class="form-control" id="parent_2_phone_number" name="parent_2_phone_number"
-						   placeholder="1111111111">
-				</div>
-			<br>
-			<div id="parent_2_info_error_message" hidden>Enter phone number without country code or dashes. Don't use the same phone number among parent(s) and child.</div>
-
-				<br><br><br>
-
-				<input id="prospect_id" name="prospect_id" hidden  data-prospect_id="{{ prospect_id }}">
-
-		</div>
-	</div>
-
-				{% endif %}
-
-				 {% if askForStudentAvailability == 'yes' %}
-
-
-				<div class="container">
-
-					<h4><u>Select Day for One-on-One</u></h4><br>
-
-					<div id="day_for_one_on_one_info_and_error" style="color:green">
-						Select as many options as work for you by clicking the cards.
-					</div><br>
-
-					<div class="card-columns">
-
-						<div name="day_for_one_on_one" class="card text-center p-3 ">
-      <p>Monday (5pm)<br><br></p>
-  </div><br>
-
-					<div name="day_for_one_on_one" class="card text-center p-3 ">
-      <p>Tuesday (5pm)<br><br></p>
-  </div><br>
-
-					<div name="day_for_one_on_one" class="card text-center p-3 ">
-      <p>Wednesday (5pm)<br><br></p>
-  </div><br>
-
-						<div name="day_for_one_on_one" class="card text-center p-3 ">
-      <p>Thursday (5pm)<br><br></p>
-  </div><br>
-
-						<div name="day_for_one_on_one" class="card text-center p-3">
-      <p>Friday (5pm)<br><br></p>
-  </div><br>
-
-					<div name="day_for_one_on_one" class="card text-center p-3 ">
-      <p>Monday (6pm)<br><br></p>
-  </div><br>
-
-					<div name="day_for_one_on_one" class="card text-center p-3 ">
-      <p>Tuesday (6pm)<br><br></p>
-  </div><br>
-
-					<div name="day_for_one_on_one" class="card text-center p-3 ">
-      <p>Wednesday (6pm)<br><br></p>
-  </div><br>
-
-						<div name="day_for_one_on_one" class="card text-center p-3 ">
-      <p>Thursday (6pm)<br><br></p>
-  </div><br>
-
-						<div name="day_for_one_on_one" class="card text-center p-3">
-      <p>Friday (6pm)<br><br></p>
-  </div><br>
-
-											<div name="day_for_one_on_one" class="card text-center p-3 ">
-      <p>Monday (7pm)<br><br></p>
-  </div><br>
-
-					<div name="day_for_one_on_one" class="card text-center p-3 ">
-      <p>Tuesday (7pm)<br><br></p>
-  </div><br>
-
-					<div name="day_for_one_on_one" class="card text-center p-3 ">
-      <p>Wednesday (7pm)<br><br></p>
-  </div><br>
-
-						<div name="day_for_one_on_one" class="card text-center p-3 ">
-      <p>Thursday (7pm)<br><br></p>
-  </div><br>
-
-						<div name="day_for_one_on_one" class="card text-center p-3">
-      <p>Friday (7pm)<br><br></p>
-  </div><br>
-
-						</div>
-
-						</div>
-
-
-  {% endif %}
-
-	<div class="row">
-		<div class="col-md-8 order-md-1">
-			<br><br>
-			<h3 class="mb-3"><u>Transaction Information</u></h3>
-
-				<div class="row">
-					<div class="col-md-6 mb-3">
-						<label for="first_name" class="font-weight-bold">First name</label>
-						<p class="mb-1" id="first_name">{{client_info.first_name}}</p>
-					</div>
-					<div class="col-md-6 mb-3">
-						<label for="last_name" class="font-weight-bold">Last name</label>
-						<p class="mb-1" id="last_name">{{client_info.last_name}}</p>
-					</div>
-				</div>
-
-				<div class="mb-3">
-					<label for="email" class="font-weight-bold">Email</label>
-						<p class="mb-1" id="email">{{client_info.email}}</p>
-				</div>
-
-				<div class="mb-3">
-					<label for="phone_number" class="font-weight-bold">Phone number</label>
-						<p class="mb-1" id="phone_number">{{client_info.phone_number}}</p>
-				</div>
-
-        <br>
-
-
-
-
-				<h4 class="mb-3">Product Information</h4>
-
-				<table class="table">
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Description</th>
-      <th scope="col"># of Units</th>
-      <th scope="col">Per Product Cost</th>
-		<th scope="col">Total Cost</th>
-    </tr>
-  </thead>
-  <tbody>
-
-
-  {% set count = namespace(value=0) %}
-
-  {% for product in products_info %}
-  {% set count.value = count.value + 1 %}
-    <tr>
-      <th scope="row">{{ count.value }}</th>
-      <td>{{product.product_description}}</td>
-      <td>{{product.number_of_product_units}}</td>
-      <td>{{product.per_product_cost}}</td>
-		<td>{{product.total_product_cost}}</td>
-    </tr>
-    {% endfor %}
-
-   {% if client_info.adjust_total %} <!--evaluates to false when adjust_total is 0.0-->
-  <tr>
-	  {% set count.value = count.value + 1 %}
-      <th scope="row">{{ count.value }}</th>
-	  <td>{{client_info.adjustment_explanation}}</td>
-      <td>1</td>
-      <td>{{client_info.adjust_total}}</td>
-		<td>{{client_info.adjust_total}}</td>
-    </tr>
-
-  {% endif %}
-
-  <tr>
-
-  </tr>
-
-  <tr>
-      <th scope="row"></th>
-	  <td>Transaction Total</td>
-      <td></td>
-      <td></td>
-		<td>{{client_info.transaction_total}}</td>
-    </tr>
-
-  </tbody>
-</table>
-
-
-				<br>
-
-
-
-			{% if client_info.pause_payment == 'yes' %}
-
-			{% if client_info.paused_payment_resumption_date is none %}
-						<div class="py-3"><span class="badge badge-danger">This payment is paused indefinitely</span></div>
-								{% else %}
-								{% set paused_payment_resumption_date = client_info.paused_payment_resumption_date %}
-			<div class="py-3"><span class="badge badge-danger">This payment is paused and will restart on {{client_info.paused_payment_resumption_date}}</span></div>
-					{% endif %}
-			{% endif %}
-
-
-
-
-				{% if client_info.payment_started %}
-				<div class="py-3"><span class="badge badge-danger">You previously started a payment for this transaction code. Contact Mo for a different transaction code.</span></div>
-				{% else %}
-
-			{% if client_info.make_payment_recurring == 'yes' %}
-
-			{% if client_info.recurring_payment_frequency == 'null' %}
-					{% set recurring_payment_frequency = "###Error: Don't make a payment. Contact Mo###" %}
-								{% else %}
-								{% set recurring_payment_frequency = client_info.recurring_payment_frequency %}
-					{% endif %}
-
-
-
-							<div class="py-3"><span class="badge badge-danger">This payment has been setup to start on {{client_info.recurring_payment_start_date}} and repeats every {{recurring_payment_frequency}} day(s).</span></div>
-
-									<div id="recurring-payment-div" class="d-block my-3" >
-					<div container>
-
-						<h4 class="mb-3">Options</h4>
-
-<div class="row">
-
-							<div class="col-sm">
-
-								<div class="custom-control custom-radio">
-									<input id="recurring-payment-credit-card" value="recurring-payment-credit-card" name="payment-options" type="radio"
-										   class="custom-control-input"
-										   required>
-									<label class="custom-control-label" for="recurring-payment-credit-card">Credit/Debit (Regular Card Fees, 1-3%)</label>
-								</div>
-
-							</div>
-
-							<div class="col-sm">
-
-								<div class="custom-control custom-radio">
-									<input id="recurring-payment-ach" value="recurring-payment-ach" name="payment-options" type="radio"
-										   class="custom-control-input"
-										   required>
-									<label class="custom-control-label" for="recurring-payment-ach">ACH (Free)</label>
-								</div>
-
-							</div>
-
-				</div>
-
-		</div>
-
-
-	</div>
-
-			{% else %}
-
-
-
 					<div class="row">
-
-						{% if client_info.turn_on_installments %}
-
-							<div class="col-sm">
-
-								<div class="custom-control custom-radio">
-									<input id="full-payment-options" name="payment-options" type="radio" value="full-payment-options"
-										   class="custom-control-input" required>
-									<label class="custom-control-label" for="full-payment-options">Pay in full</label>
-								</div>
-
-							</div>
-
-
-
- 			<div class="col-sm">
-
-								<div class="custom-control custom-radio">
-									<input id="installment-payment-options" name="payment-options" type="radio" value="installment-payment-options"
-										   class="custom-control-input" required>
-									<label class="custom-control-label" for="installment-payment-options">Pay in installments</label>
-								</div>
-
-							</div>
-
-
-						{% else %}
-
-							<div class="col-sm">
-
-								<div class="custom-control custom-radio">
-									<input id="no-installment-credit-card" value="no-installment-credit-card" name="payment-options" type="radio"
-										   class="custom-control-input"
-										   required>
-									<label class="custom-control-label" for="no-installment-credit-card">Credit/Debit (Regular Card Fees, 1-3%)</label>
-								</div>
-
-							</div>
-
-							<div class="col-sm">
-
-								<div class="custom-control custom-radio">
-									<input id="no-installment-ach" value="no-installment-ach" name="payment-options" type="radio"
-										   class="custom-control-input"
-										   required>
-									<label class="custom-control-label" for="no-installment-ach">ACH (Free)</label>
-								</div>
-
-							</div>
-
-{% endif %}
-
-
+						<div class="col-md-6 mb-3">
+							<label for="student_first_name">First name</label>
+							<input type="text" class="form-control" id="student_first_name" name="student_first_name"
+								placeholder="" value="" required>
 						</div>
-
-				<br>
-
-
-				<div id="holding-div"></div>
-
-
-				<div id="installment-payment-div" class="d-block my-3" >
-					<div container>
-
-						<h4 class="mb-3">Options</h4>
-
-						  {% if client_info.turn_on_installments %}
-
-				<table class="table">
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">Date</th>
-      <th scope="col">Installment</th>
-    </tr>
-  </thead>
-  <tbody>
-
-  {% set count = namespace(value=0) %}
-
-  {% for installment in client_info.installments %}
-  {% set count.value = count.value + 1 %}
-    <tr>
-      <th scope="row">{{ count.value }}</th>
-      <td>{{installment.date}}</td>
-      <td>{{installment.amount}}</td>
-    </tr>
-    {% endfor %}
-
-
-  </tbody>
-</table>
-
-						<div class="container">
-
-     <!-- <div class="col-sm">
-<span class="badge badge-danger">Debit cards are not accepted for installments. Only credit cards are accepted for installments. </span>
-
-    </div>-->
-							<br>
-							      <div class="col-sm py-3">
-<span class="badge badge-danger"> Installments are withdrawn automatically.</span>
-
-    </div>
-
-  </div>
-						<br>
-
-
-						{% endif %}
-
-
-						<div container>
-
-<div class="row">
-
-							<div class="col-sm">
-
-								<div class="custom-control custom-radio">
-									<input id="installment-payment-credit-card" value="installment-payment-credit-card" name="installment-payment" type="radio"
-										   class="custom-control-input"
-										   required>
-									<label class="custom-control-label" for="installment-payment-credit-card">Credit/Debit (Regular Card Fees, 1-3%)</label>
-								</div>
-
+						<div class="col-md-6 mb-3">
+							<label for="student_last_name">Last name</label>
+							<input type="text" class="form-control" id="student_last_name" name="student_last_name"
+								placeholder="" value="" required>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label for="student_email">Email</label>
+						<input type="email" class="form-control" id="student_email" name="student_email"
+							placeholder="you@example.com" required>
+					</div>
+					<div class="mb-3">
+						<label for="student_phone_number">Phone number</label>
+						<input type="number" min="1000000000" max="9999999999" class="form-control"
+							id="student_phone_number" name="student_phone_number" placeholder="1111111111" required>
+					</div>
+					<div class="mb-3">
+						<label for="grade_level">Grade Level</label>
+						<select id="grade_level" name="grade_level" class="form-control">
+							<option value="" selected disabled hidden></option>
+							<option value='Middle School'>Middle School</option>
+							<option value='9th Grade'>9th Grade</option>
+							<option value='10th Grade'>10th Grade</option>
+							<option value='11th Grade'>11th Grade</option>
+							<option value='12th Grade'>12th Grade</option>
+							<option value='Other'>Other</option>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label for="recent_test_score">SAT/ACT/P-SAT/P-ACT Score (if taken within the last 1
+							year)</label>
+						<input type="number" class="form-control" id="recent_test_score" name="recent_test_score"
+							placeholder="" value="">
+						<div class="invalid-feedback">
+							Valid number is required.
+						</div>
+					</div>
+					<br>
+					<div id="student_info_error_message" hidden>
+						You must enter name, email, and phone number for the student.
+					</div>
+					<br><br><br>
+					<h4 class="mb-3"><u>Parent 1 Information</u></h4>
+					<div class="row">
+						<div class="col-md-4 mb-3">
+							<label for="parent_1_salutation">Salutation</label>
+							<div>
+								<select id="parent_1_salutation" name="parent_1_salutation"
+									class="custom-select col-md-12 mb-3">
+									<option value=""></option>
+									<option value="Mr.">Mr.</option>
+									<option value="Ms.">Ms.</option>
+								</select>
 							</div>
-
-	<div class="col-sm">
-
-								<div id="selectorToHideACHInstallment" class="custom-control custom-radio">
-									<input id="installment-payment-ach" value="installment-payment-ach" name="installment-payment" type="radio"
-										   class="custom-control-input"
-										   required>
-									<label class="custom-control-label" for="installment-payment-ach">ACH (Free)</label>
-								</div>
-
+						</div>
+						<div class="col-md-4 mb-3">
+							<label for="parent_1_first_name">First name</label>
+							<input type="text" class="form-control" id="parent_1_first_name" name="parent_1_first_name"
+								placeholder="" value="">
+						</div>
+						<div class="col-md-4 mb-3">
+							<label for="parent_1_last_name">Last name</label>
+							<input type="text" class="form-control" id="parent_1_last_name" name="parent_1_last_name"
+								placeholder="" value="">
+						</div>
+					</div>
+					<div class="mb-3">
+						<label for="parent_1_email">Email</label>
+						<input type="parent_1_email" class="form-control" id="parent_1_email" name="parent_1_email"
+							placeholder="you@example.com">
+					</div>
+					<div class="mb-3">
+						<label for="parent_1_phone_number">Phone number </label>
+						<input type="number" min="1000000000" max="9999999999" class="form-control"
+							id="parent_1_phone_number" name="parent_1_phone_number" placeholder="1111111111">
+					</div>
+					<br>
+					<div id="parent_1_info_error_message" style="color:red !important" hidden>Enter phone number without
+						country code or dashes. Don't use the same phone number among parent(s) and child.</div>
+					<br><br><br>
+					<h4 class="mb-3"><u>Parent 2 Information</u></h4>
+					<div class="row">
+						<div class="col-md-4 mb-3">
+							<label for="parent_2_salutation">Salutation</label>
+							<div>
+								<select id="parent_2_salutation" name="parent_2_salutation"
+									class="custom-select col-md-12 mb-3">
+									<option value=""></option>
+									<option value="Mr.">Mr.</option>
+									<option value="Ms.">Ms.</option>
+								</select>
 							</div>
-
-
-
-
+						</div>
+						<div class="col-md-4 mb-3">
+							<label for="parent_2_first_name">First name</label>
+							<input type="text" class="form-control" id="parent_2_first_name" name="parent_2_first_name"
+								placeholder="" value="">
+						</div>
+						<div class="col-md-4 mb-3">
+							<label for="parent_2_last_name">Last name</label>
+							<input type="text" class="form-control" id="parent_2_last_name" name="parent_2_last_name"
+								placeholder="" value="">
+						</div>
+					</div>
+					<div class="mb-3">
+						<label for="parent_2_email">Email</label>
+						<input type="parent_2_email" class="form-control" id="parent_2_email" name="parent_2_email"
+							placeholder="you@example.com">
+					</div>
+					<div class="mb-3">
+						<label for="parent_2_phone_number">Phone number</label>
+						<input type="number" min="1000000000" max="9999999999" class="form-control"
+							id="parent_2_phone_number" name="parent_2_phone_number" placeholder="1111111111">
+					</div>
+					<br>
+					<div id="parent_2_info_error_message" hidden>Enter phone number without country code or dashes.
+						Don't use the same phone number among parent(s) and child.</div>
+					<br><br><br>
+					<input id="prospect_id" name="prospect_id" hidden data-prospect_id="{{ prospect_id }}">
 				</div>
-
-		</div>
-
-
-
-
-
-
-		</div>
-
-
-
-
-
-	</div>
-
-
-
-						<div id="full-payment-div" class="d-block my-3" >
-					<div container>
-
-						<h4 class="mb-3">Options</h4>
-
-<div class="row">
-
-							<div class="col-sm">
-
-								<div class="custom-control custom-radio">
-									<input id="full-payment-credit-card" value="full-payment-credit-card" name="full-payment" type="radio"
-										   class="custom-control-input"
-										   required>
-									<label class="custom-control-label" for="full-payment-credit-card">Credit/Debit (Regular Card Fees, 1-3%)</label>
-								</div>
-
-							</div>
-
-							<div class="col-sm">
-
-								<div class="custom-control custom-radio">
-									<input id="full-payment-ach" value="full-payment-ach" name="full-payment" type="radio"
-										   class="custom-control-input"
-										   required>
-									<label class="custom-control-label" for="full-payment-ach">ACH (Free)</label>
-								</div>
-
-							</div>
-
-				</div>
-
-		</div>
-
-
-	</div>
-
+			</div>
 			{% endif %}
-				<input id="client_info" type="hidden"  data-client_info="{{ client_info }}">
-				<input id="stripe_info" type="hidden"  data-stripe_info="{{ stripe_info }}">
-			<input id="ask_for_student_info" name="ask_for_student_info" type="hidden"  data-ask_for_student_info="{{ askForStudentInfo }}">
-			<input id="ask_for_student_availability" name="ask_for_student_availability" type="hidden"  data-ask_for_student_availability="{{ askForStudentAvailability }}">
-				<input id="show_ach_override" name="show_ach_override" type="hidden"  data-show_ach_override="{{ showACHOverride }}">
-
-
-	<div class="checkbox mb-3" style="text-align:center;">
-												<div class="py-3"><span class="badge badge-danger"></span></div>
-
-
-							<input id="terms_and_conditions" name="terms_and_conditions" value="" type="checkbox" onclick="showPayButton();"
-								   class="custom-control-input">
-							<label class="custom-control-label" for="terms_and_conditions">You must accept terms and conditions and privacy policy to proceed. By clicking the button below to pay, you agree to the <a href="/terms_and_conditions" target="_blank",> terms and conditions</a> and <a href="/privacy_policy" target="_blank",> privacy policy.</a></label>
-							<br><br><br>
+			{% if askForStudentAvailability == 'yes' %}
+			<div class="container">
+				<h4><u>Select Day for One-on-One</u></h4><br>
+				<div id="day_for_one_on_one_info_and_error" style="color:green">
+					Select as many options as work for you by clicking the cards.
+				</div><br>
+				<div class="card-columns">
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+						<p>Monday (5pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+						<p>Tuesday (5pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+						<p>Wednesday (5pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+						<p>Thursday (5pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3">
+						<p>Friday (5pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+						<p>Monday (6pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+						<p>Tuesday (6pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+						<p>Wednesday (6pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+						<p>Thursday (6pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3">
+						<p>Friday (6pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+						<p>Monday (7pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+						<p>Tuesday (7pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+						<p>Wednesday (7pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3 ">
+						<p>Thursday (7pm)<br><br></p>
+					</div><br>
+					<div name="day_for_one_on_one" class="card text-center p-3">
+						<p>Friday (7pm)<br><br></p>
+					</div><br>
+				</div>
+			</div>
+			{% endif %}
+			<div class="row">
+				<div class="col-md-8 order-md-1">
+					<br><br>
+					<h3 class="mb-3"><u>Transaction Information</u></h3>
+					<div class="row">
+						<div class="col-md-6 mb-3">
+							<label for="first_name" class="font-weight-bold">First name</label>
+							<p class="mb-1" id="first_name">{{client_info.first_name}}</p>
 						</div>
-
-				<div class="row justify-content-center"><input id="proceed_to_payment" name="proceed_to_payment" class="btn btn-primary btn-lg btn-block w-50 p-3" type="submit" hidden value="Pay To Complete Registration" onclick="turnOffRequired();"></div>
-{% endif %}
-</div>
+						<div class="col-md-6 mb-3">
+							<label for="last_name" class="font-weight-bold">Last name</label>
+							<p class="mb-1" id="last_name">{{client_info.last_name}}</p>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label for="email" class="font-weight-bold">Email</label>
+						<p class="mb-1" id="email">{{client_info.email}}</p>
+					</div>
+					<div class="mb-3">
+						<label for="phone_number" class="font-weight-bold">Phone number</label>
+						<p class="mb-1" id="phone_number">{{client_info.phone_number}}</p>
+					</div>
+					<br>
+					<h4 class="mb-3">Product Information</h4>
+					<table class="table">
+						<thead class="thead-dark">
+							<tr>
+								<th scope="col">#</th>
+								<th scope="col">Description</th>
+								<th scope="col"># of Units</th>
+								<th scope="col">Per Product Cost</th>
+								<th scope="col">Total Cost</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% set count = namespace(value=0) %}
+							{% for product in products_info %}
+							{% set count.value = count.value + 1 %}
+							<tr>
+								<th scope="row">{{ count.value }}</th>
+								<td>{{product.product_description}}</td>
+								<td>{{product.number_of_product_units}}</td>
+								<td>{{product.per_product_cost}}</td>
+								<td>{{product.total_product_cost}}</td>
+							</tr>
+							{% endfor %}
+							{% if client_info.adjust_total %} <!--evaluates to false when adjust_total is 0.0-->
+							<tr>
+								{% set count.value = count.value + 1 %}
+								<th scope="row">{{ count.value }}</th>
+								<td>{{client_info.adjustment_explanation}}</td>
+								<td>1</td>
+								<td>{{client_info.adjust_total}}</td>
+								<td>{{client_info.adjust_total}}</td>
+							</tr>
+							{% endif %}
+							<tr>
+							</tr>
+							<tr>
+								<th scope="row"></th>
+								<td>Transaction Total</td>
+								<td></td>
+								<td></td>
+								<td>{{client_info.transaction_total}}</td>
+							</tr>
+						</tbody>
+					</table>
+					<br>
+					{% if client_info.pause_payment == 'yes' %}
+					{% if client_info.paused_payment_resumption_date is none %}
+					<div class="py-3"><span class="badge badge-danger">This payment is paused indefinitely</span></div>
+					{% else %}
+					{% set paused_payment_resumption_date = client_info.paused_payment_resumption_date %}
+					<div class="py-3"><span class="badge badge-danger">This payment is paused and will restart on
+							{{client_info.paused_payment_resumption_date}}</span></div>
+					{% endif %}
+					{% endif %}
+					{% if client_info.payment_started %}
+					<div class="py-3"><span class="badge badge-danger">You previously started a payment for this
+							transaction code. Contact Mo for a different transaction code.</span></div>
+					{% else %}
+					{% if client_info.make_payment_recurring == 'yes' %}
+					{% if client_info.recurring_payment_frequency == 'null' %}
+					{% set recurring_payment_frequency = "###Error: Don't make a payment. Contact Mo###" %}
+					{% else %}
+					{% set recurring_payment_frequency = client_info.recurring_payment_frequency %}
+					{% endif %}
+					<div class="py-3"><span class="badge badge-danger">This payment has been setup to start on
+							{{client_info.recurring_payment_start_date}} and repeats every
+							{{recurring_payment_frequency}} day(s).</span></div>
+					<div id="recurring-payment-div" class="d-block my-3">
+						<div container>
+							<h4 class="mb-3">Options</h4>
+							<div class="row">
+								<div class="col-sm">
+									<div class="custom-control custom-radio">
+										<input id="recurring-payment-credit-card" value="recurring-payment-credit-card"
+											name="payment-options" type="radio" class="custom-control-input" required>
+										<label class="custom-control-label"
+											for="recurring-payment-credit-card">Credit/Debit (Regular Card Fees,
+											1-3%)</label>
+									</div>
+								</div>
+								<div class="col-sm">
+									<div class="custom-control custom-radio">
+										<input id="recurring-payment-ach" value="recurring-payment-ach"
+											name="payment-options" type="radio" class="custom-control-input" required>
+										<label class="custom-control-label" for="recurring-payment-ach">ACH
+											(Free)</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{% else %}
+					<div class="row">
+						{% if client_info.turn_on_installments %}
+						<div class="col-sm">
+							<div class="custom-control custom-radio">
+								<input id="full-payment-options" name="payment-options" type="radio"
+									value="full-payment-options" class="custom-control-input" required>
+								<label class="custom-control-label" for="full-payment-options">Pay in full</label>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="custom-control custom-radio">
+								<input id="installment-payment-options" name="payment-options" type="radio"
+									value="installment-payment-options" class="custom-control-input" required>
+								<label class="custom-control-label" for="installment-payment-options">Pay in
+									installments</label>
+							</div>
+						</div>
+						{% else %}
+						<div class="col-sm">
+							<div class="custom-control custom-radio">
+								<input id="no-installment-credit-card" value="no-installment-credit-card"
+									name="payment-options" type="radio" class="custom-control-input" required>
+								<label class="custom-control-label" for="no-installment-credit-card">Credit/Debit
+									(Regular Card Fees, 1-3%)</label>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="custom-control custom-radio">
+								<input id="no-installment-ach" value="no-installment-ach" name="payment-options"
+									type="radio" class="custom-control-input" required>
+								<label class="custom-control-label" for="no-installment-ach">ACH (Free)</label>
+							</div>
+						</div>
+						{% endif %}
+					</div>
+					<br>
+					<div id="holding-div"></div>
+					<div id="installment-payment-div" class="d-block my-3">
+						<div container>
+							<h4 class="mb-3">Options</h4>
+							{% if client_info.turn_on_installments %}
+							<table class="table">
+								<thead class="thead-dark">
+									<tr>
+										<th scope="col">#</th>
+										<th scope="col">Date</th>
+										<th scope="col">Installment</th>
+									</tr>
+								</thead>
+								<tbody>
+									{% set count = namespace(value=0) %}
+									{% for installment in client_info.installments %}
+									{% set count.value = count.value + 1 %}
+									<tr>
+										<th scope="row">{{ count.value }}</th>
+										<td>{{installment.date}}</td>
+										<td>{{installment.amount}}</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+							<div class="container">
+								<!-- <div class="col-sm">
+<span class="badge badge-danger">Debit cards are not accepted for installments. Only credit cards are accepted for installments. </span>
+    </div>-->
+								<br>
+								<div class="col-sm py-3">
+									<span class="badge badge-danger"> Installments are withdrawn automatically.</span>
+								</div>
+							</div>
+							<br>
+							{% endif %}
+							<div container>
+								<div class="row">
+									<div class="col-sm">
+										<div class="custom-control custom-radio">
+											<input id="installment-payment-credit-card"
+												value="installment-payment-credit-card" name="installment-payment"
+												type="radio" class="custom-control-input" required>
+											<label class="custom-control-label"
+												for="installment-payment-credit-card">Credit/Debit (Regular Card Fees,
+												1-3%)</label>
+										</div>
+									</div>
+									<div class="col-sm">
+										<div id="selectorToHideACHInstallment" class="custom-control custom-radio">
+											<input id="installment-payment-ach" value="installment-payment-ach"
+												name="installment-payment" type="radio" class="custom-control-input"
+												required>
+											<label class="custom-control-label" for="installment-payment-ach">ACH
+												(Free)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="full-payment-div" class="d-block my-3">
+						<div container>
+							<h4 class="mb-3">Options</h4>
+							<div class="row">
+								<div class="col-sm">
+									<div class="custom-control custom-radio">
+										<input id="full-payment-credit-card" value="full-payment-credit-card"
+											name="full-payment" type="radio" class="custom-control-input" required>
+										<label class="custom-control-label" for="full-payment-credit-card">Credit/Debit
+											(Regular Card Fees, 1-3%)</label>
+									</div>
+								</div>
+								<div class="col-sm">
+									<div class="custom-control custom-radio">
+										<input id="full-payment-ach" value="full-payment-ach" name="full-payment"
+											type="radio" class="custom-control-input" required>
+										<label class="custom-control-label" for="full-payment-ach">ACH (Free)</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{% endif %}
+					<input id="client_info" type="hidden" data-client_info="{{ client_info }}">
+					<input id="stripe_info" type="hidden" data-stripe_info="{{ stripe_info }}">
+					<input id="ask_for_student_info" name="ask_for_student_info" type="hidden"
+						data-ask_for_student_info="{{ askForStudentInfo }}">
+					<input id="ask_for_student_availability" name="ask_for_student_availability" type="hidden"
+						data-ask_for_student_availability="{{ askForStudentAvailability }}">
+					<input id="show_ach_override" name="show_ach_override" type="hidden"
+						data-show_ach_override="{{ showACHOverride }}">
+					<div class="checkbox mb-3" style="text-align:center;">
+						<div class="py-3"><span class="badge badge-danger"></span></div>
+						<input id="terms_and_conditions" name="terms_and_conditions" value="" type="checkbox"
+							onclick="showPayButton();" class="custom-control-input">
+						<label class="custom-control-label" for="terms_and_conditions">You must accept terms and
+							conditions and privacy policy to proceed. By clicking the button below to pay, you agree to
+							the <a href="/terms_and_conditions" target="_blank" ,> terms and conditions</a> and <a
+								href="/privacy_policy" target="_blank" ,> privacy policy.</a></label>
+						<br><br><br>
+					</div>
+					<div class="row justify-content-center"><input id="proceed_to_payment" name="proceed_to_payment"
+							class="btn btn-primary btn-lg btn-block w-50 p-3" type="submit" hidden
+							value="Pay To Complete Registration" onclick="turnOffRequired();"></div>
+					{% endif %}
+				</div>
+			</div>
+		</form>
 	</div>
-
-			</form>
-
-	</div>
-
 	<footer class="my-5 pt-5 text-muted text-center text-small">
 		<p class="mb-1">&copy; 2017-2021 Perfect Score Mo</p>
 		<ul class="list-inline">
@@ -700,6 +516,5 @@
 			<li class="list-inline-item"><a href="#">Support</a></li>
 		</ul>
 	</footer>
-
 </body>
 </html>

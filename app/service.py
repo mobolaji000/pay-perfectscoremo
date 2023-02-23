@@ -16,10 +16,10 @@ import os
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-# handler = logging.StreamHandler()
-# formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-# handler.setFormatter(formatter)
-# logger.addHandler(handler)
+handler = logging.StreamHandler()
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 import ssl
 ssl._create_default_https_context =  ssl._create_unverified_context
@@ -281,6 +281,7 @@ class StripeInstance():
 
     def chargeCustomerViaCard(self, stripe_info, chosen_mode_of_payment, payment_id,existing_customer=None):
         try:
+            logger.debug(f'in chargeCustomerViaCard with chosen_mode_of_payment {chosen_mode_of_payment}')
             client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
 
             # deleting exisiting invoices seems to account for a situation where we have created an invoice for exsiting customer
@@ -567,7 +568,7 @@ class StripeInstance():
             paused_payment_resumption_date = client_info['paused_payment_resumption_date']
 
 
-            if (pause_payment == 'yes' and paused_payment_resumption_date and paused_payment_resumption_date <= datetime.datetime.today()):
+            if (pause_payment == 'yes' and paused_payment_resumption_date and paused_payment_resumption_date <= datetime.datetime.today().date()):
                 AppDBUtil.updatePausePaymentStatus('no',paused_payment_resumption_date)
 
     def setupAutoPaymentForExistingCustomer(self, stripe_info):

@@ -615,8 +615,9 @@ def execute_card_payment():
             #return redirect(url_for('error', error_message="Details were changed. Conact Mo."))
             logger.info("Details were changed on the front end.")
             return jsonify({'status':'error','message':'Details were changed. Conact Mo.'})
-
+        print('xxx')
         result = stripeInstance.chargeCustomerViaCard(stripe_info=stripe_info, chosen_mode_of_payment=chosen_mode_of_payment, payment_id=payment_id,existing_customer=does_customer_payment_info_exist)
+        print('yyy')
         if result['status'] != 'success':
             logger.error("Stripe card payment failed")
             flash('Payment failed. Enter a valid credit/debit card number or check why your bank is blocking your card. Or contact Mo.')
@@ -635,7 +636,7 @@ def execute_card_payment():
                     logger.error('Attempt to notify one-on-one info failed. Contact Mo.')
                     return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
 
-        logger.debug("Result from execute_card_payment is {}".format(jsonify(result)))
+        logger.debug(f"Result from execute_card_payment is {jsonify(result)}")
         return jsonify(result)
     except Exception as e:
         logger.exception("Error  in /execute_card_payment")
@@ -962,12 +963,12 @@ def start_background_jobs_before_first_request():
     scheduler = BackgroundScheduler(timezone='US/Central')
 
     if os.environ['DEPLOY_REGION'] == 'local':
-        scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55', start_date=datetime.datetime.strftime(datetime.datetime.now() + datetime.timedelta(days=1), '%Y-%m-%d'))
-        scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
-        scheduler.add_job(restart_paused_payments_background_job, 'cron', hour='13', minute='55')
-        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'cron', hour='14', minute='55')
-        scheduler.add_job(pay_invoice_background_job, 'cron', hour='15', minute='55')
-        scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'interval', hours=1)
+        #scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55', start_date=datetime.datetime.strftime(datetime.datetime.now() + datetime.timedelta(days=1), '%Y-%m-%d'))
+        #scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
+        scheduler.add_job(restart_paused_payments_background_job, 'cron', hour='11', minute='0')
+        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'cron', hour='11', minute='1')
+        scheduler.add_job(pay_invoice_background_job, 'cron', hour='11', minute='2')
+        #scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'interval', hours=1)
         logger.info("all local background jobs added")
 
     elif os.environ['DEPLOY_REGION'] == 'dev':

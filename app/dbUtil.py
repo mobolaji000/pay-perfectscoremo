@@ -666,7 +666,7 @@ class AppDBUtil():
             #added to get data fro not charging clients for credit card payment for diagnostics
             client_info['diag_total'] = admin_transaction_details.diag_total
 
-            print("client_info_installment_counter is "+str(admin_transaction_details.installment_counter))
+            logger.info(f"client_info_installment_counter is {admin_transaction_details.installment_counter}")
 
             if admin_transaction_details.was_diagnostic_purchased:
                 next_product = {}
