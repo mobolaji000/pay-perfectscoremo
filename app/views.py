@@ -963,9 +963,9 @@ def start_background_jobs_before_first_request():
     if os.environ['DEPLOY_REGION'] == 'local':
         #scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55', start_date=datetime.datetime.strftime(datetime.datetime.now() + datetime.timedelta(days=1), '%Y-%m-%d'))
         #scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
-        scheduler.add_job(restart_paused_payments_background_job, 'cron', hour='19', minute='35')
-        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'cron', hour='19', minute='36')
-        scheduler.add_job(pay_invoice_background_job, 'cron', hour='19', minute='37')
+        scheduler.add_job(restart_paused_payments_background_job, 'cron', hour='19', minute='45')
+        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'cron', hour='19', minute='46')
+        scheduler.add_job(pay_invoice_background_job, 'cron', hour='19', minute='47')
         #scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'interval', hours=1)
         logger.info("all local background jobs added")
 

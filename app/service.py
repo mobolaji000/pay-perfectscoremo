@@ -69,8 +69,8 @@ class StripeInstance():
 
 
         if existing_customer:
-            logger.debug("existing customer is: {}".format(existing_customer.first_name + ' ' + existing_customer.last_name))
-            logger.debug("existing customer total is: {}".format(existing_customer_total_payment_so_far))
+            logger.info("Existing customer is: {}".format(existing_customer.first_name + ' ' + existing_customer.last_name))
+            logger.info("Existing customer total is: {}".format(existing_customer_total_payment_so_far))
             customer = stripe.Customer.retrieve(existing_customer.stripe_customer_id)
             does_customer_payment_info_exist = False
             if int(existing_customer_total_payment_so_far) > 4000:
@@ -83,7 +83,7 @@ class StripeInstance():
                     does_customer_payment_info_exist = True
         else:
             customer = stripe.Customer.create(email=clientSetupData['email'], name=clientSetupData['first_name'] + " " + clientSetupData['last_name'], phone=clientSetupData['phone_number'])
-            logger.debug("new customer is: {}".format(clientSetupData['first_name'] + ' ' + clientSetupData['last_name']))
+            logger.info("New customer is: {}".format(clientSetupData['first_name'] + ' ' + clientSetupData['last_name']))
             does_customer_payment_info_exist = False
         return customer,does_customer_payment_info_exist
 
@@ -92,7 +92,7 @@ class StripeInstance():
         return intent.client_secret
 
     def markCustomerAsChargedOutsideofStripe(self, stripe_info, action=None):
-        logger.debug('Entering method to mark customer as charged outside of Stripe: '+str(stripe_info['transaction_id']))
+        logger.info('Entering method to mark customer as charged outside of Stripe: '+str(stripe_info['transaction_id']))
 
         if action == 'modify':
             existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=stripe_info['transaction_id']).all()
@@ -128,7 +128,7 @@ class StripeInstance():
             )
             # paid_out_of_band updates in stripe invoice but does not update in stripe dashboard
             stripe.Invoice.pay(stripe_invoice.id, paid_out_of_band=True)
-            logger.debug('Leaving method to mark customer as charged outside of Stripe: ' + str(stripe_info['transaction_id']))
+            logger.info('Leaving method to mark customer as charged outside of Stripe: ' + str(stripe_info['transaction_id']))
 
             return {'status': 'success'}
 
@@ -160,10 +160,10 @@ class StripeInstance():
                 raise Exception('Customer has neither existing nor new ACH details.')
 
             if existing_customer:
-                logger.debug('Exisiting customer: ' + str(stripe_info['stripe_customer_id'])+' '+ str(stripe_info['name']))
+                logger.info('Exisiting customer: ' + str(stripe_info['stripe_customer_id'])+' '+ str(stripe_info['name']))
 
             if chosen_mode_of_payment == 'installment-payment-ach':
-                logger.debug('Installment payment ACH: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
+                logger.info('Installment payment ACH: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
                 for k in range(1, int(stripe_info['installment_counter'])):
                     if existing_customer:
                         # ensures that you always keep 72 hours to change method of payment promise to exisiting clients
@@ -194,11 +194,11 @@ class StripeInstance():
 
             elif chosen_mode_of_payment == 'full-payment-ach':
                 if existing_customer:
-                    logger.debug('Full payment ACH for existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
+                    logger.info('Full payment ACH for existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
                     payment_date = date_today + datetime.timedelta(days=1)
 
                 else:
-                    logger.debug('Full payment ACH for new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
+                    logger.info('Full payment ACH for new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
                     payment_date = date_today
 
                 amount = stripe_info['transaction_total']
@@ -208,10 +208,10 @@ class StripeInstance():
                     if stripe_info['paused_payment_resumption_date']:
                         if datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'],'%Y-%m-%d').date() > payment_date:
                             payment_date = stripe_info['paused_payment_resumption_date']
+                            logger.info(f"Payment {stripe_info['transaction_id']} is paused until {payment_date}.")
                     else:
-                        logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
                         payment_date = stripe_info['paused_payment_resumption_date']
-                        # return {'status': 'success'}
+                        logger.info(f"Payment {stripe_info['transaction_id']} is paused indefinitely.")
 
                     stripe.InvoiceItem.create(
                         customer=stripe_info['stripe_customer_id'],
@@ -248,7 +248,7 @@ class StripeInstance():
                     stripe.Invoice.pay(transaction.id)
 
             elif chosen_mode_of_payment == 'recurring-payment-ach':
-                logger.debug('Recurring payment ach: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
+                logger.info('Recurring payment ach: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
 
 
                 if existing_customer:
@@ -305,10 +305,10 @@ class StripeInstance():
             )
 
             if existing_customer:
-                logger.debug('Existing customer: ' + str(stripe_info['transaction_id']) + str(stripe_info['stripe_customer_id'])+' '+ str(stripe_info['name']))
+                logger.info('Existing customer: ' + str(stripe_info['transaction_id']) + str(stripe_info['stripe_customer_id'])+' '+ str(stripe_info['name']))
 
             if chosen_mode_of_payment == 'installment-payment-credit-card':
-                logger.debug('Installment payment credit card: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
+                logger.info('Installment payment credit card: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
 
                 for k in range(1, int(stripe_info['installment_counter'])):
                     if existing_customer:
@@ -322,7 +322,7 @@ class StripeInstance():
                     #         if datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'],'%Y-%m-%d').date() > payment_date:
                     #             payment_date =  stripe_info['paused_payment_resumption_date']
                     #     else:
-                    #         logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
+                    #         logger.info(f"Payment {stripe_info['transaction_id']} is paused indefinitely.")
                     #         return {'status': 'success'}
 
                     # if stripe_info['pause_payment'] == 'yes':
@@ -351,12 +351,12 @@ class StripeInstance():
 
             elif chosen_mode_of_payment == 'full-payment-credit-card':
                 if existing_customer:
-                    logger.debug('Full payment credit card existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
+                    logger.info('Full payment credit card existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
                     # ensures that you always keep 48? hours to change method of payment promise to exisiting clients
                     payment_date = date_today + datetime.timedelta(days=1)
 
                 else:
-                    logger.debug('Full payment credit card new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
+                    logger.info('Full payment credit card new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
                     payment_date = date_today
 
                 transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
@@ -368,10 +368,10 @@ class StripeInstance():
                     if stripe_info['paused_payment_resumption_date']:
                         if datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'],'%Y-%m-%d').date() > payment_date:
                             payment_date =  stripe_info['paused_payment_resumption_date']
+                            logger.info(f"Payment {stripe_info['transaction_id']} is paused until {payment_date}.")
                     else:
-                        logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
                         payment_date = stripe_info['paused_payment_resumption_date']
-                        #return {'status': 'success'}
+                        logger.info(f"Payment {stripe_info['transaction_id']} is paused indefinitely.")
 
                     stripe.InvoiceItem.create(
                         customer=stripe_info['stripe_customer_id'],
@@ -411,7 +411,7 @@ class StripeInstance():
                     #         if datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'],'%Y-%m-%d').date() > payment_date:
                     #             payment_date = stripe_info['paused_payment_resumption_date']
                     #     else:
-                    #         logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
+                    #         logger.info(f"Payment {stripe_info['transaction_id']} is paused indefinitely.")
                     #         payment_date = stripe_info['paused_payment_resumption_date']
                     #
                     #     stripe.InvoiceItem.create(
@@ -446,7 +446,7 @@ class StripeInstance():
                     #     stripe.Invoice.pay(invoice.id)
 
             elif chosen_mode_of_payment == 'recurring-payment-credit-card':
-                logger.debug('Recurring payment credit card: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
+                logger.info('Recurring payment credit card: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
 
 
                 if existing_customer:
@@ -460,7 +460,7 @@ class StripeInstance():
                 #         if datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'],'%Y-%m-%d').date() > payment_date:
                 #             payment_date = stripe_info['paused_payment_resumption_date']
                 #     else:
-                #         logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
+                #         logger.info(f"Payment {stripe_info['transaction_id']} is paused indefinitely.")
                 #         return {'status': 'success'}
 
 
@@ -511,7 +511,7 @@ class StripeInstance():
                     default_ach = customer.default_source
 
                     if default_card:
-                        logger.debug('Recurring payment credit card: ' + str(client_info['transaction_id']) + ' ' + str(client_info['first_name'])+ " " + str(client_info['last_name']))
+                        logger.info('Recurring payment credit card: ' + str(client_info['transaction_id']) + ' ' + str(client_info['first_name'])+ " " + str(client_info['last_name']))
 
                         transaction_total = math.ceil(client_info['transaction_total'] * 1.03)
 
@@ -532,7 +532,7 @@ class StripeInstance():
                                                                 payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
 
                     elif default_ach:
-                        logger.debug('Recurring payment ACH: ' + str(client_info['transaction_id']) + ' ' + str(client_info['first_name']) + " " + str(client_info['last_name']))
+                        logger.info('Recurring payment ACH: ' + str(client_info['transaction_id']) + ' ' + str(client_info['first_name']) + " " + str(client_info['last_name']))
 
                         transaction_total = math.ceil(client_info['transaction_total'])
 
@@ -568,10 +568,10 @@ class StripeInstance():
 
             if (pause_payment == 'yes' and paused_payment_resumption_date and paused_payment_resumption_date <= date_today):
                 AppDBUtil.updatePausePaymentStatus(transaction_id,'no',paused_payment_resumption_date)
-                logger.info(f"Transaction {transaction_id} unpaused")
+                logger.info(f"Transaction {transaction_id} slated to be unpaused on {paused_payment_resumption_date} and actually unpaused {date_today}")
 
     def setupAutoPaymentForExistingCustomer(self, stripe_info):
-        logger.debug('Inside setupAutoPaymentForExistingCustomer() for ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
+        logger.info('Inside setupAutoPaymentForExistingCustomer() for ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
 
         customer = stripe.Customer.retrieve(stripe_info['stripe_customer_id'])
         default_card = customer.invoice_settings.default_payment_method
@@ -697,11 +697,11 @@ class SendMessagesToClients():
             to='+1' + to_numbers
             )
 
-            logger.debug("text sent!")
-            logger.debug(sent_message.sid)
-            logger.debug(text_message)
+            logger.info("text sent!")
+            logger.info(sent_message.sid)
+            logger.info(text_message)
         elif type(to_numbers) is list:
-            logger.debug("Multiple Recipient SMS!")
+            logger.info("Multiple Recipient SMS!")
             conversations = cls.twilioClient.conversations.conversations.list(limit=50)
             for record in conversations:
                 print(record.sid)
@@ -728,7 +728,7 @@ class SendMessagesToClients():
                     messaging_binding_address='+19725039573')
 
             cls.twilioClient.conversations.conversations(conversation.sid).messages.create(body=text_message,author='+19564771274')
-            logger.debug("group chat created!")
+            logger.info("group chat created!")
         else:
             raise Exception("Neither string not list was sent to sendSMS method!")
 
@@ -746,12 +746,12 @@ class MiscellaneousUtils():
 
         hour_as_24 = date_and_time[start:end].split()[0].split(':')[0]
         hour_as_24 = '0' + str(int(hour_as_24) % 12) if int(hour_as_24) % 12 < 10 else str(int(hour_as_24) % 12)
-        # logger.debug("2. " + hour_as_24)
+        # logger.info("2. " + hour_as_24)
         date_and_time = date_and_time[:start] + ' ' + hour_as_24 + ':' + date_and_time[start + 4:]
         date_and_time = date_and_time[:16] + " " + date_and_time[24:] + ' CST'
         date_and_time = date_and_time.replace("00:00", "00:00")
 
-        # logger.debug("3. " + date_and_time[:15])
-        # logger.debug("4. " + date_and_time[24:])
+        # logger.info("3. " + date_and_time[:15])
+        # logger.info("4. " + date_and_time[24:])
 
         return date_and_time
