@@ -24,6 +24,8 @@ logger.addHandler(handler)
 import ssl
 ssl._create_default_https_context =  ssl._create_unverified_context
 
+date_today = datetime.datetime.now(pytz.timezone('US/Central')).date()
+
 
 class ValidateLogin():
     def __init__(self, username, password):
@@ -193,18 +195,18 @@ class StripeInstance():
             elif chosen_mode_of_payment == 'full-payment-ach':
                 if existing_customer:
                     logger.debug('Full payment ACH for existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
-                    payment_date = datetime.datetime.today() + datetime.timedelta(days=1)
+                    payment_date = date_today + datetime.timedelta(days=1)
 
                 else:
                     logger.debug('Full payment ACH for new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
-                    payment_date = datetime.datetime.today()
+                    payment_date = date_today
 
                 amount = stripe_info['transaction_total']
                 transaction_total = int(stripe_info['transaction_total'])
 
                 if stripe_info['pause_payment'] == 'yes':
                     if stripe_info['paused_payment_resumption_date']:
-                        if stripe_info['paused_payment_resumption_date'] > payment_date:
+                        if datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'],'%Y-%m-%d').date() > payment_date:
                             payment_date = stripe_info['paused_payment_resumption_date']
                     else:
                         logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
@@ -230,7 +232,6 @@ class StripeInstance():
                                                             payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
 
                 else:
-                    logger.debug('Full payment ACH for new customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
                     transaction_total = int(stripe_info['transaction_total'])
 
                     stripe.InvoiceItem.create(
@@ -281,7 +282,6 @@ class StripeInstance():
 
     def chargeCustomerViaCard(self, stripe_info, chosen_mode_of_payment, payment_id,existing_customer=None):
         try:
-            logger.debug(f'in chargeCustomerViaCard with chosen_mode_of_payment {chosen_mode_of_payment}')
             client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(stripe_info['transaction_id'])
 
             # deleting exisiting invoices seems to account for a situation where we have created an invoice for exsiting customer
@@ -319,7 +319,7 @@ class StripeInstance():
 
                     # if stripe_info['pause_payment'] == 'yes':
                     #     if stripe_info['paused_payment_resumption_date']:
-                    #         if stripe_info['paused_payment_resumption_date'] > payment_date:
+                    #         if datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'],'%Y-%m-%d').date() > payment_date:
                     #             payment_date =  stripe_info['paused_payment_resumption_date']
                     #     else:
                     #         logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
@@ -353,11 +353,11 @@ class StripeInstance():
                 if existing_customer:
                     logger.debug('Full payment credit card existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
                     # ensures that you always keep 48? hours to change method of payment promise to exisiting clients
-                    payment_date = datetime.datetime.today() + datetime.timedelta(days=1)
+                    payment_date = date_today + datetime.timedelta(days=1)
 
                 else:
                     logger.debug('Full payment credit card new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
-                    payment_date = datetime.datetime.today()
+                    payment_date = date_today
 
                 transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
                 amount = str(transaction_total)
@@ -366,7 +366,7 @@ class StripeInstance():
 
                 if stripe_info['pause_payment'] == 'yes':
                     if stripe_info['paused_payment_resumption_date']:
-                        if stripe_info['paused_payment_resumption_date'] > payment_date:
+                        if datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'],'%Y-%m-%d').date() > payment_date:
                             payment_date =  stripe_info['paused_payment_resumption_date']
                     else:
                         logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
@@ -408,7 +408,7 @@ class StripeInstance():
 
                     # if stripe_info['pause_payment'] == 'yes':
                     #     if stripe_info['paused_payment_resumption_date']:
-                    #         if stripe_info['paused_payment_resumption_date'] > payment_date:
+                    #         if datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'],'%Y-%m-%d').date() > payment_date:
                     #             payment_date = stripe_info['paused_payment_resumption_date']
                     #     else:
                     #         logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
@@ -457,7 +457,7 @@ class StripeInstance():
 
                 # if stripe_info['pause_payment'] == 'yes':
                 #     if stripe_info['paused_payment_resumption_date']:
-                #         if stripe_info['paused_payment_resumption_date'] > payment_date:
+                #         if datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'],'%Y-%m-%d').date() > payment_date:
                 #             payment_date = stripe_info['paused_payment_resumption_date']
                 #     else:
                 #         logger.info(f"Payment {stripe_info['transaction_id']} is indefinitely paused.")
@@ -492,7 +492,6 @@ class StripeInstance():
         all_transaction_ids = AppDBUtil.getAllTransactionIds()
         for transaction_id in all_transaction_ids:
             client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
-            logger.debug("client_info is: {}".format(client_info))
 
             amount = client_info['transaction_total']
             make_payment_recurring = client_info['make_payment_recurring']
@@ -503,7 +502,7 @@ class StripeInstance():
 
                 payment_date = client_info['recurring_payment_start_date']
                 recurring_payment_frequency = client_info['recurring_payment_frequency']
-                number_of_days_from_start_of_recurring_payment = (payment_date - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
+                number_of_days_from_start_of_recurring_payment = (payment_date - date_today).days
 
                 if number_of_days_from_start_of_recurring_payment % recurring_payment_frequency == 0:
 
@@ -562,14 +561,14 @@ class StripeInstance():
         all_transaction_ids = AppDBUtil.getAllTransactionIds()
         for transaction_id in all_transaction_ids:
             client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
-            logger.debug("client_info is: {}".format(client_info))
 
             pause_payment = client_info['pause_payment']
             paused_payment_resumption_date = client_info['paused_payment_resumption_date']
 
 
-            if (pause_payment == 'yes' and paused_payment_resumption_date and paused_payment_resumption_date <= datetime.datetime.today().date()):
-                AppDBUtil.updatePausePaymentStatus('no',paused_payment_resumption_date)
+            if (pause_payment == 'yes' and paused_payment_resumption_date and paused_payment_resumption_date <= date_today):
+                AppDBUtil.updatePausePaymentStatus(transaction_id,'no',paused_payment_resumption_date)
+                logger.info(f"Transaction {transaction_id} unpaused")
 
     def setupAutoPaymentForExistingCustomer(self, stripe_info):
         logger.debug('Inside setupAutoPaymentForExistingCustomer() for ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
