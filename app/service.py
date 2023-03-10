@@ -76,7 +76,7 @@ class StripeInstance():
             logger.info("Existing customer total is: {}".format(existing_customer_total_payment_so_far))
             customer = stripe.Customer.retrieve(existing_customer.stripe_customer_id)
             does_customer_payment_info_exist = False
-            if int(existing_customer_total_payment_so_far) > 4000:
+            if int(existing_customer_total_payment_so_far) > 40000:
                 default_card = customer.invoice_settings.default_payment_method
                 default_ach = customer.default_source
                 print("payment options are: ")
