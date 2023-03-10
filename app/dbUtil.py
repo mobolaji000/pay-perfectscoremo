@@ -15,7 +15,8 @@ from sqlalchemy.dialects.postgresql import insert
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+#formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter =  logging.Formatter("%(asctime)s - %(levelname)s - %(filename)s - %(funcName)20s() - %(lineno)s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
@@ -67,7 +68,7 @@ class AppDBUtil():
         else:
             transaction_id = "t-"+str(uuid.uuid4().int>>64)[:6]
             while transaction_id in  existing_transaction_ids:
-                logger.debug("Transaction id {} already exists".format(transaction_id))
+                logger.info("Transaction id {} already exists".format(transaction_id))
                 transaction_id = "t-" + str(uuid.uuid4().int >> 64)[:6]
 
         prospect_id = clientData.get('prospect_id','')
@@ -131,15 +132,12 @@ class AppDBUtil():
                   "ask_for_student_info":ask_for_student_info,"ask_for_student_availability":ask_for_student_availability,"make_payment_recurring":make_payment_recurring,"recurring_payment_frequency":recurring_payment_frequency,
                   "recurring_payment_start_date":recurring_payment_start_date,"pause_payment":pause_payment,"paused_payment_resumption_date":paused_payment_resumption_date})
 
-            print("number of transaction rows modified is: ",number_of_rows_modified) #printing of rows modified to logs to help with auditing
-
-
+            logger.info(f"Number of transaction rows modified is: {number_of_rows_modified}") #printing of rows modified to logs to help with auditing
 
         cls.executeDBQuery()
 
-        cls.createOrModifyInstallmentPlan(clientData=clientData, transaction_id=transaction_id)
-
-        cls.modifyTransactionBasedOnPauseUnpauseStatus(clientData=clientData, transaction_id=transaction_id)
+        if not cls.isTransactionPaymentStarted(transaction_id):
+            cls.createOrModifyInstallmentPlan(clientData=clientData, transaction_id=transaction_id)
 
         return transaction_id,number_of_rows_modified
 
@@ -150,10 +148,12 @@ class AppDBUtil():
         paused_payment_resumption_date = None if clientData.get('paused_payment_resumption_date', '') == '' else clientData.get('paused_payment_resumption_date')
         recurring_payment_start_date = None if clientData.get('recurring_payment_start_date', '') == '' else clientData.get('recurring_payment_start_date')
 
-        if (int(clientData['installment_counter']) > 1):
-            cls.pauseInstallmentPaymentInvoices(transaction_id, pause_payment, paused_payment_resumption_date)
+        if (int(clientData['installment_counter']) > 1) and cls.isTransactionPaymentStarted(transaction_id):
+            cls.modifyPauseStatusOnInvoicesToBePaid(transaction_id, pause_payment, paused_payment_resumption_date)
+            #cls.pauseInstallmentPaymentInvoices(transaction_id, pause_payment, paused_payment_resumption_date)
         elif (clientData.get('recurring_payment_start_date')):
-            cls.pauseRecurringPayment(transaction_id, pause_payment, paused_payment_resumption_date, recurring_payment_start_date)
+            pass
+            #cls.pauseRecurringPayment(transaction_id, pause_payment, paused_payment_resumption_date, recurring_payment_start_date)
 
     @classmethod
     def createOrModifyInvoiceToBePaid(cls, first_name=None, last_name=None, phone_number=None, email=None, transaction_id=None, stripe_customer_id=None, stripe_invoice_id=None, payment_date=None, payment_amount=None):
@@ -168,6 +168,44 @@ class AppDBUtil():
         cls.executeDBQuery()
 
     @classmethod
+    def modifyPauseStatusOnInvoicesToBePaid(cls, transaction_id=None, pause_payment=None, paused_payment_resumption_date=None):
+        try:
+            if pause_payment == 'yes':
+                invoices_to_pause = cls.findInvoicesToPause(transaction_id)
+
+                if invoices_to_pause:
+                    logger.info(f'Running pauseInstallmentPaymentInvoices on {invoices_to_pause[0].transaction_id} for which invoices have been created for customer.')
+                    if paused_payment_resumption_date:
+                        invoice_payment_dates_to_update = []
+
+                        for k, invoice in enumerate(invoices_to_pause):
+                            if k == 0:
+                                invoice_payment_dates_to_update.append(datetime.strptime(paused_payment_resumption_date, '%Y-%m-%d').date())
+                            else:
+                                difference_between_this_invoice_date_and_previous_invoice_date = (invoices_to_pause[k].payment_date - invoices_to_pause[k - 1].payment_date).days
+                                invoice_payment_dates_to_update.append(invoice_payment_dates_to_update[k-1] + timedelta(days=difference_between_this_invoice_date_and_previous_invoice_date))
+
+
+                        for k, invoice in enumerate(invoices_to_pause):
+                            logger.info(f'Modifying payment date on {invoice.id}.')
+                            invoice.payment_date = invoice_payment_dates_to_update[k]
+                            db.session.add(invoice)
+
+                    else:
+                        for invoice in invoices_to_pause:
+                            logger.info(f'Modifying payment date on {invoice.id}.')
+                            invoice.payment_date = datetime.strptime(paused_payment_resumption_date, '%Y-%m-%d').date()
+                            db.session.add(invoice)
+
+                    cls.executeDBQuery()
+        except Exception as e:
+            # if any kind of exception occurs, rollback transaction
+            db.session.rollback()
+            traceback.print_exc()
+        finally:
+            db.session.close()
+
+    @classmethod
     def createOrModifyInstallmentPlan(cls, clientData={}, transaction_id=None):
 
         existing_installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id).first()
@@ -179,41 +217,23 @@ class AppDBUtil():
             installment_plan = InstallmentPlan(transaction_id=transaction_id, stripe_customer_id=clientData['stripe_customer_id'], first_name=clientData['first_name'], last_name=clientData['last_name'], phone_number=clientData['phone_number'],
                                                email=clientData['email'])
             db.session.add(installment_plan)
-            logger.info(f"Installment plan created is: {installment_plan}")
+            print("installment plan created is: ", installment_plan)
             cls.executeDBQuery()
 
             installments = {}
-            logger.info(f"number of installments is {int(clientData['installment_counter']) - 1}")
-            logger.info(f"clientData is {clientData}")
+            print("number of installments is " + str(int(clientData['installment_counter']) - 1))
 
+            for k in range(1, int(clientData['installment_counter'])):
+                print("current installment being updated is " + str(k))
+                installments.update({'date_' + str(k): clientData['date_' + str(k)], 'amount_' + str(k): clientData['amount_' + str(k)]})
 
-            if clientData.get('pause_payment') == 'yes':
-                if clientData.get('paused_payment_resumption_date'):
+            installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id)
+            number_of_rows_modified = installment_plan.update(installments)
+            print("number of installment rows added or modified is: ", number_of_rows_modified)
+            cls.executeDBQuery()
 
-                    installment_dates_to_update = [None] * 12
-
-                    for k in range(1, 13):
-                        if f'date_{k}' in clientData:
-                            if k == 1:
-                                installment_dates_to_update[k-1] = datetime.strptime(clientData['paused_payment_resumption_date'],'%Y-%m-%d')
-                            else:
-                                difference_between_this_installment_date_and_previous_installment_date = (datetime.strptime(clientData[f'date_{k}'],'%Y-%m-%d') - datetime.strptime(clientData[f'date_{k-1}'],'%Y-%m-%d')).days
-                                current_installment_date = datetime.strptime(installment_dates_to_update[k - 2],'%Y-%m-%d') if type(installment_dates_to_update[k - 2]) is str else installment_dates_to_update[k - 2]
-                                installment_dates_to_update[k-1] = current_installment_date + timedelta(days=difference_between_this_installment_date_and_previous_installment_date)
-
-                    for k in range(1, 13):
-                        if f'date_{k}' in clientData:
-                            installments.update({f'date_{k}': datetime.strftime(installment_dates_to_update[k-1],'%Y-%m-%d'),f'amount_{k}': clientData[f'amount_{k}']})
-
-                else:
-                    for k in range(1, int(clientData['installment_counter'])):
-                        print("current installment being updated is " + str(k))
-                        installments.update({f'date_{k}': clientData[f'date_{k}'], f'amount_{k}': clientData[f'amount_{k}']})
-            else:
-                for k in range(1, int(clientData['installment_counter'])):
-                    print("current installment being updated is " + str(k))
-                    installments.update({f'date_{k}': clientData[f'date_{k}'], f'amount_{k}': clientData[f'amount_{k}']})
-
+        else:
+            print("No installment dates created/modified")
 
             # date_and_amount_index = 1
             # for k in range(1, 13):
@@ -222,14 +242,7 @@ class AppDBUtil():
             #         installments.update({'date_' + str(date_and_amount_index): clientData[f'date_{k}'] + timedelta(days=difference_in_installment_dates_due_to_pause), 'amount_' + str(date_and_amount_index): clientData[f'amount_{k}']})
             #         date_and_amount_index = date_and_amount_index + 1
 
-            #if installments:
-            installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id)
-            number_of_rows_modified = installment_plan.update(installments)
-            logger.info(f"number of installment rows added or modified is: {number_of_rows_modified}")
-            cls.executeDBQuery()
 
-        else:
-            logger.info("No installment dates created/modified")
 
     @classmethod
     def is_date(cls,string_date, fuzzy=False):
@@ -312,7 +325,7 @@ class AppDBUtil():
             #invoices_to_pay = db.session.query(InvoiceToBePaid).filter((InvoiceToBePaid.payment_made == False) & (InvoiceToBePaid.payment_date <= datetime.today())).all()
 
             # for transaction in result:
-            #     logger.debug("results are: {}".format(result))
+            #     logger.info("results are: {}".format(result))
             #     logger.info("eligible transactions for automatic invoice payment are: {}".format(transaction))
             # for invoices_to_pay in result:
             logger.info("invoices_to_pay are: {}".format(invoices_to_pay))
@@ -336,11 +349,33 @@ class AppDBUtil():
             db.session.close()
 
     @classmethod
+    def findInvoicesToPause(cls,transaction_id):
+        try:
+            invoices_to_pause = db.session.query(
+                InvoiceToBePaid
+            ).join(
+                Transaction, InvoiceToBePaid.transaction_id == Transaction.transaction_id
+            ).filter(
+                ((Transaction.pause_payment == "yes") & (InvoiceToBePaid.payment_made == False) & (Transaction.transaction_id == transaction_id))
+
+            ).order_by(InvoiceToBePaid.payment_date).all()
+
+            return invoices_to_pause
+        except Exception as e:
+            # if any kind of exception occurs, rollback transaction
+            db.session.rollback()
+            traceback.print_exc()
+        finally:
+            db.session.close()
+
+
+
+    @classmethod
     def findLeadsToReceiveReminders(cls):
         try:
             leadsToReceiveReminders = Lead.query.filter((Lead.appointment_completed != 'yes') & (Lead.appointment_date_and_time != None)).all()
 
-            logger.debug("Leads to receive reminders are: {}".format(leadsToReceiveReminders))
+            logger.info("Leads to receive reminders are: {}".format(leadsToReceiveReminders))
             search_results = []
             for lead in leadsToReceiveReminders:
                 lead_details = {}
@@ -353,8 +388,8 @@ class AppDBUtil():
                 search_results.append(lead_details)
 
 
-                # logger.debug("Time before conversion is: {}".format(lead.appointment_date_and_time))
-                # logger.debug("Time after conversion is: {}".format(lead.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))))
+                # logger.info("Time before conversion is: {}".format(lead.appointment_date_and_time))
+                # logger.info("Time after conversion is: {}".format(lead.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))))
 
             return search_results
         except Exception as e:
@@ -368,13 +403,13 @@ class AppDBUtil():
     def findLeadsWithAppointmentsInTheLastHour(cls):
         try:
             searchEndDate = datetime.now()#datetime.now(pytz.timezone('US/Central'))
-            logger.debug("searchEndDate: {}".format(searchEndDate.strftime('%Y-%m-%dT%H:%M:%S')))
+            logger.info("searchEndDate: {}".format(searchEndDate.strftime('%Y-%m-%dT%H:%M:%S')))
             searchStartDate = datetime.now() - timedelta(hours=1)#datetime.now(pytz.timezone('US/Central')) - timedelta(hours=1)
-            logger.debug("searchStartDate: {}".format(searchStartDate.strftime('%Y-%m-%dT%H:%M:%S')))
+            logger.info("searchStartDate: {}".format(searchStartDate.strftime('%Y-%m-%dT%H:%M:%S')))
             leadsWithAppointmentsInTheLastHour = Lead.query.filter(Lead.appointment_completed != 'yes').filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
 
 
-            logger.debug("Leads with appointments in the last hour are: {}".format(leadsWithAppointmentsInTheLastHour))
+            logger.info("Leads with appointments in the last hour are: {}".format(leadsWithAppointmentsInTheLastHour))
             search_results = []
             for lead in leadsWithAppointmentsInTheLastHour:
                 lead_details = {}
@@ -383,7 +418,7 @@ class AppDBUtil():
                 lead_details['lead_name'] = lead.lead_name
                 lead_details['appointment_date_and_time'] = lead.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))
                 search_results.append(lead_details)
-                logger.debug("Individual lead is: {}".format(lead_details))
+                logger.info("Individual lead is: {}".format(lead_details))
 
             return search_results
         except Exception as e:
@@ -444,6 +479,7 @@ class AppDBUtil():
         search_results = []
         for transaction in transaction_details:
             client = {}
+            client['salutation'] = transaction.salutation
             client['first_name'] = transaction.first_name
             client['last_name'] = transaction.last_name
             client['salutation'] = transaction.salutation
@@ -490,7 +526,7 @@ class AppDBUtil():
             installment_details = InstallmentPlan.query.filter_by(transaction_id=transaction.transaction_id).first()
 
             if installment_details:
-                logger.debug(f"installment_details.__dict__ is {installment_details.__dict__}")
+                logger.info(f"installment_details is {installment_details.__dict__}")
                 installments = {}
                 for k in range(1, int(transaction.installment_counter)):
                     installments.update({'date_' + str(k): installment_details.__dict__['date_' + str(k)].strftime("%m/%d/%Y"), 'amount_' + str(k): installment_details.__dict__['amount_' + str(k)]})
@@ -499,7 +535,7 @@ class AppDBUtil():
 
 
             search_results.append(client)
-        print("search results are ",search_results)
+        logger.info(f"Search results are {search_results}")
         return search_results
 
     @classmethod
@@ -509,9 +545,6 @@ class AppDBUtil():
         if 'ach' in transaction_id:
             showACHOverride = True
             transaction_id = transaction_id.split('ach')[0]
-
-        logger.debug("transaction id is: {}".format(transaction_id))
-        logger.debug("showACHOverride is: {}".format(showACHOverride))
 
         admin_transaction_details = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
         admin_transaction_details.turn_on_installments = True if admin_transaction_details.installment_counter > 1 else False
@@ -554,7 +587,7 @@ class AppDBUtil():
         if pause_payment == 'yes':
             existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=transaction_id).order_by(InvoiceToBePaid.payment_date.asc()).all()#.filter_by(payment_made=False)
             if existing_invoices:
-                logger.info(f'Running pauseInstallmentPaymentInvoices for {transaction_id} for which invoices have been created for customer.')
+                logger.info(f'Running pauseInstallmentPaymentInvoices on {transaction_id} for which invoices have been created for customer.')
                 if paused_payment_resumption_date:
                     index_of_earliest_unpaid_invoice = 0
                     invoice_dates_to_update = [None] * len(existing_invoices)
@@ -666,7 +699,7 @@ class AppDBUtil():
             #added to get data fro not charging clients for credit card payment for diagnostics
             client_info['diag_total'] = admin_transaction_details.diag_total
 
-            logger.info(f"client_info_installment_counter is {admin_transaction_details.installment_counter}")
+            logger.info(f"transaction id {admin_transaction_details.transaction_id} with showACHOverride value {showACHOverride} has {int(admin_transaction_details.installment_counter)-1} installments")
 
             if admin_transaction_details.was_diagnostic_purchased:
                 next_product = {}
@@ -797,7 +830,7 @@ class AppDBUtil():
                 #'appointment_completed':lead_info_contents.get('appointment_completed','no'),
 
                 search_results.append(lead)
-            logger.info("search results are {}".format(search_results))
+            logger.info(f"Search results are {search_results}")
             return search_results
         except Exception as e:
             raise e
@@ -813,13 +846,13 @@ class AppDBUtil():
 
         hour_as_24 = date_and_time[start:end].split()[0].split(':')[0]
         hour_as_24 = '0' + str(int(hour_as_24) % 12) if int(hour_as_24) % 12 < 10 else str(int(hour_as_24) % 12)
-        # logger.debug("2. " + hour_as_24)
+        # logger.info("2. " + hour_as_24)
         date_and_time = date_and_time[:start] + ' ' + hour_as_24 + ':' + date_and_time[start + 4:]
         date_and_time = date_and_time[:16] + " " + date_and_time[24:] + ' CST'
         date_and_time = date_and_time.replace("00:00", "00:00")
 
-        # logger.debug("3. " + date_and_time[:15])
-        # logger.debug("4. " + date_and_time[24:])
+        # logger.info("3. " + date_and_time[:15])
+        # logger.info("4. " + date_and_time[24:])
 
         return date_and_time
 

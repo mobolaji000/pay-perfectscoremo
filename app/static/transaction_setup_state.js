@@ -257,6 +257,9 @@ $(document).ready(function() {
              $('input[name="recurring_payment_start_date"]').prop('required', false);
              $('input[name="recurring_payment_frequency"]').prop('required', false);
 
+             $('input[name="pause_payment"]').attr('disabled', true);
+            $('input[name="paused_payment_resumption_date"]').attr('disabled', true);
+
             $(this).val("yes");
         } else {
 
@@ -269,6 +272,9 @@ $(document).ready(function() {
              $('input[name="recurring_payment_frequency"]').attr('disabled', false);
              $('input[name="recurring_payment_start_date"]').prop('required', true);
              $('input[name="recurring_payment_frequency"]').prop('required', true);
+
+             $('input[name="pause_payment"]').attr('disabled', false);
+            $('input[name="paused_payment_resumption_date"]').attr('disabled', false);
 
             $(this).val("");
         }
@@ -533,5 +539,8 @@ document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
              //$('input[name="paused_payment_resumption_date"]').prop('required', false);
         }
     });
+
+       var today = new Date().toISOString().split('T')[0];
+        document.getElementsByName("paused_payment_resumption_date")[0].setAttribute('min', today);
 
 });

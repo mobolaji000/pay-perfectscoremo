@@ -29,7 +29,9 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+#formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter =  logging.Formatter("%(asctime)s - %(levelname)s - %(filename)s - %(funcName)20s() - %(lineno)s - %(message)s")
+
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
@@ -57,8 +59,6 @@ miscellaneousUtilsInstance = MiscellaneousUtils()
 
 @server.route("/")
 def hello():
-    #server.logger.debug('Processing default request')
-    #AppDBUtil.test()
     return ("You have landed on the wrong page")
 
 @server.route("/usercode.html")
@@ -176,8 +176,8 @@ def lead_info_by_lead(lead_id,is_admin):
     if request.method == 'GET':
         try:
             lead_info_contents = AppDBUtil.getLeadInfo(lead_id)[0]
-            logger.debug("lead_info_contents in get is: {}".format(lead_info_contents))
-            logger.debug("lead_id in get is: {}".format(lead_id))
+            logger.info("lead_info_contents in get is: {}".format(lead_info_contents))
+            logger.info("lead_id in get is: {}".format(lead_id))
 
             if is_admin == 'mo':
                 what_services_are_you_interested_in=lead_info_contents['what_services_are_they_interested_in']
@@ -255,7 +255,7 @@ def lead_info_by_mo():
         return render_template('lead_info_by_mo.html',current_time=datetime.datetime.now(pytz.timezone('US/Central')))
     elif request.method == 'POST':
         lead_info_contents = request.form.to_dict()
-        logger.debug("lead_info_contents are: {}".format(lead_info_contents))
+        logger.info("lead_info_contents are: {}".format(lead_info_contents))
         action = lead_info_contents['action']
 
         if action == 'Create':
@@ -263,7 +263,7 @@ def lead_info_by_mo():
                 leadInfo = {}
                 #appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else pytz.timezone('US/Central').localize(datetime.datetime.strptime(lead_info_contents.get('appointment_date_and_time'),'%Y-%m-%dT%H:%M'))#lead_info_contents.get('appointment_date_and_time')
                 appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
-                logger.debug(appointment_date_and_time)
+                logger.info(appointment_date_and_time)
                 recent_test_score = -1 if lead_info_contents.get('recent_test_score','') == '' else lead_info_contents.get('recent_test_score')
                 lead_id = "l-" + str(uuid.uuid4().int >> 64)[:6]
                 leadInfo.update({'lead_id': lead_id,'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
@@ -310,7 +310,7 @@ def lead_info_by_mo():
                 number_of_rows_modified = AppDBUtil.modifyLeadInfo(lead_info_contents.get('lead_id', ''),leadInfo)
 
                 if number_of_rows_modified > 1:
-                    logger.debug("Somehow ended up with and modified duplicate lead ids")
+                    logger.info("Somehow ended up with and modified duplicate lead ids")
                     flash('Somehow ended up with and modified duplicate lead ids')
 
                 if lead_info_contents.get('send_confirmation_to_lead', '') == 'yes':
@@ -351,59 +351,76 @@ def lead_info_by_mo():
 @server.route('/create_transaction',methods=['POST'])
 @login_required
 def create_transaction():
-    try:
 
-        transaction_setup_data = request.form.to_dict()
-        logger.debug("transaction_setup_data is {}".format(transaction_setup_data))
-        prospect = AppDBUtil.createProspect(transaction_setup_data)
+    transaction_setup_data = request.form.to_dict()
+    logger.info("transaction_setup_data is {}".format(transaction_setup_data))
 
-        customer,does_customer_payment_info_exist = stripeInstance.createCustomer(transaction_setup_data)
-        transaction_setup_data.update({"stripe_customer_id":customer["id"],'prospect_id':prospect.prospect_id,'does_customer_payment_info_exist':does_customer_payment_info_exist})
-        transaction_id,number_of_rows_modified = AppDBUtil.createOrModifyClientTransaction(transaction_setup_data, action='create')
+    if transaction_setup_data.get('modify_pause_status'):
+        try:
+            transaction_id_to_pause = transaction_setup_data['transaction_id_to_pause']
+            pause_payment = transaction_setup_data.get('pause_payment')
+            paused_payment_resumption_date = transaction_setup_data.get('paused_payment_resumption_date')
+            AppDBUtil.updatePausePaymentStatus( transaction_id_to_pause, pause_payment, paused_payment_resumption_date)
+            #installment_counter = 0 if transaction_setup_data.get('installment_counter', '') == '' else int(transaction_setup_data.get('installment_counter', ''))
+            #if installment_counter > 1:
+            AppDBUtil.modifyPauseStatusOnInvoicesToBePaid(transaction_id_to_pause, pause_payment, paused_payment_resumption_date)
+            flash('Transaction pause status successfully updated')
+            return redirect(url_for('transaction_setup'))
+        except Exception as e:
+            logger.exception(e)
+            flash('An error occurred while updating the transaction pause status')
+            return redirect(url_for('transaction_setup'))
+    else:
+        try:
 
-        client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
-        logger.debug('Transaction details (client_info) are: ' + str(client_info))
-        logger.debug('Transaction details (products_info) are: ' + str(products_info))
-        logger.debug('Transaction details (showACHOverride) are: ' + str(showACHOverride))
+            prospect = AppDBUtil.createProspect(transaction_setup_data)
 
-        stripe_info = parseDataForStripe(client_info)
-        logger.debug('stripe_info is: ' + str(stripe_info))
+            customer,does_customer_payment_info_exist = stripeInstance.createCustomer(transaction_setup_data)
+            transaction_setup_data.update({"stripe_customer_id":customer["id"],'prospect_id':prospect.prospect_id,'does_customer_payment_info_exist':does_customer_payment_info_exist})
+            transaction_id,number_of_rows_modified = AppDBUtil.createOrModifyClientTransaction(transaction_setup_data, action='create')
+
+            client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
+            logger.info('Transaction details (client_info) are: ' + str(client_info))
+            logger.info('Transaction details (products_info) are: ' + str(products_info))
+            logger.info('Transaction details (showACHOverride) are: ' + str(showACHOverride))
+
+            stripe_info = parseDataForStripe(client_info)
+            logger.info('stripe_info is: ' + str(stripe_info))
 
 
-
-        if transaction_setup_data.get('mark_as_paid','') == 'yes':
-            stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info,action='create')
-            AppDBUtil.updateTransactionPaymentStarted(transaction_id)
-            logger.debug('Mark transaction as paid: '+str(stripe_info['transaction_id']))
-        else:
-            message_type = ''
-            if does_customer_payment_info_exist:
-                message_type = 'create_transaction_existing_client'
-                logger.debug('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
-                stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
+            if transaction_setup_data.get('mark_as_paid','') == 'yes':
+                stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info,action='create')
+                AppDBUtil.updateTransactionPaymentStarted(transaction_id)
+                logger.info('Mark transaction as paid: '+str(stripe_info['transaction_id']))
             else:
-                message_type = 'create_transaction_new_client'
+                message_type = ''
+                if does_customer_payment_info_exist:
+                    message_type = 'create_transaction_existing_client'
+                    logger.info('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
+                    stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
+                else:
+                    message_type = 'create_transaction_new_client'
 
-            if transaction_setup_data.get('send_text_and_email', '') == 'yes':
-                logger.debug('Send transaction text and email notification: ' + str(stripe_info['transaction_id']))
-                try:
-                    SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
-                    if message_type == 'create_transaction_existing_client':
-                        SendMessagesToClients.sendSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
-                        time.sleep(5)
-                        SendMessagesToClients.sendSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, message_type='questions')
-                    else:
-                        SendMessagesToClients.sendSMS(to_numbers=transaction_setup_data['phone_number'], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
-                    flash('Transaction created and email/sms sent to client.')
-                except Exception as e:
-                    traceback.print_exc()
-                    flash('An error occured while sending an email/sms to the client after creating the transaction.')
-        logger.debug('Created transaction: ' + str(stripe_info['transaction_id']))
-        return render_template('generate_transaction_id.html',transaction_id=transaction_id,input_transaction_id_url=os.environ.get("url_to_start_reminder")+"input_transaction_id")
-    except Exception as e:
-        logger.exception(e)
-        flash('An error occured while creating the transaction.')
-        return redirect(url_for('transaction_setup'))
+                if transaction_setup_data.get('send_text_and_email', '') == 'yes':
+                    logger.info('Send transaction text and email notification: ' + str(stripe_info['transaction_id']))
+                    try:
+                        SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
+                        if message_type == 'create_transaction_existing_client':
+                            SendMessagesToClients.sendSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
+                            time.sleep(5)
+                            SendMessagesToClients.sendSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, message_type='questions')
+                        else:
+                            SendMessagesToClients.sendSMS(to_numbers=transaction_setup_data['phone_number'], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
+                        flash('Transaction created and email/sms sent to client.')
+                    except Exception as e:
+                        traceback.print_exc()
+                        flash('An error occured while sending an email/sms to the client after creating the transaction.')
+            logger.info('Created transaction: ' + str(stripe_info['transaction_id']))
+            return render_template('generate_transaction_id.html',transaction_id=transaction_id,input_transaction_id_url=os.environ.get("url_to_start_reminder")+"input_transaction_id")
+        except Exception as e:
+            logger.exception(e)
+            flash('An error occured while creating the transaction.')
+            return redirect(url_for('transaction_setup'))
 
 @server.route('/search_transaction',methods=['POST'])
 @login_required
@@ -431,7 +448,7 @@ def search_transaction():
         flash('No transaction has the detail you searched for.')
         return redirect(url_for('transaction_setup'))
 
-    logger.debug('Searched for: ' + str(search_query))
+    logger.info('Searched for: ' + str(search_query))
     #return redirect(url_for('transaction_setup',search_results=search_results))
     return render_template('transaction_setup.html',search_results=search_results,leads=json.dumps(processed_leads))
 
@@ -439,9 +456,8 @@ def search_transaction():
 @login_required
 def modify_transaction():
     try:
-        #logger.debug(request.form['data_to_modify'])
         data_to_modify = ast.literal_eval(request.form['data_to_modify'])
-        logger.debug("data_to_modify is {}".format(data_to_modify))
+        logger.info("data_to_modify is {}".format(data_to_modify))
         transaction_id = data_to_modify['transaction_id']
         transaction_id_again,number_of_rows_modified=AppDBUtil.modifyTransactionDetails(data_to_modify)
 
@@ -455,7 +471,11 @@ def modify_transaction():
             flash('Somehow ended up with and modified duplicate transaction codes')
             #return render_template('transaction_setup.html',leads=json.dumps(processed_leads))
             return redirect(url_for('transaction_setup'))
-        if not AppDBUtil.isTransactionPaymentStarted(transaction_id):
+
+        if AppDBUtil.isTransactionPaymentStarted(transaction_id):
+            logger.info(f"{transaction_id} is a started transaction, so modifying the pause status and dates of its unpaid invoices")
+            AppDBUtil.modifyTransactionBasedOnPauseUnpauseStatus(clientData=data_to_modify, transaction_id=transaction_id)
+        else:
             if data_to_modify.get('mark_as_paid', '') == 'yes':
                 client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
                 stripe_info = parseDataForStripe(client_info)
@@ -469,13 +489,14 @@ def modify_transaction():
                 message_type = ''
                 if does_customer_payment_info_exist:
                     message_type = 'modify_transaction_existing_client'
-                    logger.debug('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
+                    logger.info('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
                     stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
                 else:
                     message_type = 'modify_transaction_new_client'
 
+
         if data_to_modify.get('send_text_and_email','') == 'yes':
-            logger.debug('Send modified transaction text and email notification: ' + str(stripe_info['transaction_id']))
+            logger.info('Send modified transaction text and email notification: ' + str(stripe_info['transaction_id']))
             try:
                 SendMessagesToClients.sendEmail(to_address=data_to_modify['email'], message=transaction_id, message_type=message_type)
                 if message_type == 'modify_transaction_existing_client':
@@ -491,7 +512,7 @@ def modify_transaction():
                 flash('An error occured while sending an email/sms to the client after modifying the transaction.')
         else:
             flash('Transaction sucessfully modified.')
-        logger.info('Modified transaction: ' + str(stripe_info['transaction_id']))
+        logger.info(f'Modified transaction: {transaction_id}')
         #return render_template('transaction_setup.html',leads=json.dumps(processed_leads))
         return redirect(url_for('transaction_setup'))
     except Exception as e:
@@ -508,7 +529,7 @@ def modify_transaction():
 def delete_transaction():
     try:
         transaction_id_to_delete = str(request.form['transaction_id_to_delete'])
-        logger.debug(transaction_id_to_delete)
+        logger.info(transaction_id_to_delete)
         AppDBUtil.deleteTransactionAndInstallmentPlan(transaction_id_to_delete)
         flash('Transaction sucessfully deleted.')
         return redirect(url_for('transaction_setup'))
@@ -559,7 +580,7 @@ def parseDataForStripe(client_info):
 
     if client_info.get('installments','') != '':
         for index,installment in enumerate(client_info.get('installments','')):
-            logger.debug(f"index {index} and installment {installment}")
+            #logger.info(f"index {index} and installment {installment}")
             stripe_info["date"+"_"+str(index+1)] = int(time.mktime(installment["date"].timetuple()))
             stripe_info["amount" + "_" + str(index+1)] = installment["amount"]
 
@@ -634,7 +655,7 @@ def execute_card_payment():
                     logger.error('Attempt to notify one-on-one info failed. Contact Mo.')
                     return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
 
-        logger.debug(f"Result from execute_card_payment is {jsonify(result)}")
+        logger.info(f"Result from execute_card_payment is {jsonify(result)}")
         return jsonify(result)
     except Exception as e:
         logger.exception("Error  in /execute_card_payment")
@@ -673,7 +694,7 @@ def exchange_plaid_for_stripe():
         result = stripeInstance.chargeCustomerViaACH(stripe_info=stripe_info,bank_account_token=bank_account_token,chosen_mode_of_payment=chosen_mode_of_payment,existing_customer=does_customer_payment_info_exist)
 
         if result['status'] != 'success':
-            logger.debug("Attempt to pay via ACH failed. Try again, check with your bank on any errors, or contact Mo.")
+            logger.info("Attempt to pay via ACH failed. Try again, check with your bank on any errors, or contact Mo.")
             flash('Attempt to pay via ACH failed. Try again, check with your bank on any errors, or contact Mo.')
         else:
             AppDBUtil.updateTransactionPaymentStarted(stripe_info['transaction_id'])
@@ -725,8 +746,8 @@ def enterClientInfo(payment_and_signup_data={}):
 
 @server.route("/stripe_webhook", methods=['POST'])
 def stripe_webhook():
-    if os.environ['DEPLOY_REGION'] != 'prod':
-        return json.dumps({'success': True,'message':'dummy success for non-prod environment'}), 200, {'ContentType': 'application/json'}
+    # if os.environ['DEPLOY_REGION'] != 'prod':
+    #     return json.dumps({'success': True,'message':'dummy success for non-prod environment'}), 200, {'ContentType': 'application/json'}
 
 
     payload = json.dumps(request.json)
@@ -736,15 +757,12 @@ def stripe_webhook():
         event = stripe.Event.construct_from(
             json.loads(payload), stripe.api_key
         )
-        #logger.debug("Event is: {}".format(event))
-        #print(event)
     except ValueError as e:
         # Invalid payload
         logger.error("400 error from calling webhook. Check code and logs")
         logger.error(e)
         traceback.print_exc()
         return json.dumps({'success':False}), 400, {'ContentType':'application/json'}
-        #return jsonify({'status': 400})
     try:
         #using this for successful card payments
         if event.type == 'invoice.paid':
@@ -773,10 +791,9 @@ def stripe_webhook():
                 AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id, amount_paid)
                 AppDBUtil.updateTransactionPaymentStarted(transaction_id)
 
-                logger.info("Stripe invoice id of paid invoice is {}".format(paid_invoice.id) )
-                logger.info("Transaction id of paid invice is {}".format( transaction_id))
-            else:
-                raise Exception(f"Why is payment type not card for {transaction_id} ?")
+                logger.info(f"Transaction {transaction_id} with stripe invoice id {paid_invoice.id} is paid (VIA Card)")
+            # else:
+            #     raise Exception(f"Why is payment type not card for {transaction_id} ?")
 
         # using this for failed card payments and future failed ACH payments
         elif event.type == 'invoice.payment_failed':
@@ -794,7 +811,7 @@ def stripe_webhook():
 
             payment_intent = stripe.PaymentIntent.retrieve(finalized_invoice.payment_intent, ) if finalized_invoice.payment_intent else None
             payment_attempt_status = payment_intent['charges']['data'][0]['outcome']['network_status'] if payment_intent and payment_intent['charges']['data'][0]['outcome'] else None
-            logger.debug("Payment intent for {} is {} and payment status is {}".format(transaction_id,payment_intent,payment_attempt_status))
+            logger.info(f"Payment status is {payment_attempt_status} for {transaction_id}")
             #payment_method_details = payment_intent['charges']['data'][0]['payment_method_details']['type'] if payment_intent['charges']['data'][0]['payment_method_details'] else None
             #TODO consider reverting to the above if the below fails
             payment_method_details = payment_intent['charges']['data'][0]['payment_method_details']['type'] if payment_intent['charges']['data'] else None
@@ -812,8 +829,7 @@ def stripe_webhook():
                     AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id,amount_paid)
                     AppDBUtil.updateTransactionPaymentStarted(transaction_id)
 
-                    logger.debug("paid transaction (VIA ACH) is {}".format(finalized_invoice))
-                    logger.debug("transaction id is ".format(transaction_id))
+                    logger.info(f"Transaction {transaction_id} with stripe invoice id {finalized_invoice.id} is paid (VIA ACH)")
 
                 # using this for failed ach payments
                 else:
@@ -824,16 +840,17 @@ def stripe_webhook():
                     except Exception as e:
                         logger.exception(e)
             else:
-                logger.warning("Why is payment method detail not ach_debit for {} ? Probably because there this is an instance of a credit card payment, which was already handled under invoice.paid and is now being sent to be finalized, which I do not care for since it has already been updated as paid the under invoice.paid i.e. I only care about updating ach payments through invoice.finalized.".format(transaction_id))
+                pass
+                #logger.warning(f"Why is payment method detail not ach_debit for {transaction_id} ? Probably because there this is an instance of a credit card payment, which was already handled under invoice.paid and is now being sent to be finalized, which I do not care for since it has already been updated as paid the under invoice.paid i.e. I only care about updating ach payments through invoice.finalized.")
                 #raise Exception("Why is payment method detail not ach_debit for {} ? Probably because there this is an instance of a credit card payment, which was already handled under invoice.paid and is now being sent to be finalized, which I do not care for since it has already been updated as paid the under invoice.paid i.e. I only care about updating ach payments through invoice.finalized.".format(transaction_id))
 
 
         elif event.type == 'invoice.created':
             created_invoice = event.data.object
             transaction_id = created_invoice.metadata['transaction_id']
-            logger.info('Transaction {} created in Stripe'.format(transaction_id))
+            logger.info(f'Transaction {transaction_id} created in Stripe')
         else:
-            logger.info('Unhandled event type {}'.format(event.type))
+            logger.info(f'Unhandled event type {event.type}')
 
 
     except Exception as e:
@@ -851,7 +868,7 @@ def start_background_jobs_before_first_request():
             logger.info("remind_lead_about_appointment_background_job started")
             reminder_last_names = 'The following leads were sent reminders about an upcoming appointment: '
             leadsToReceiveReminders = AppDBUtil.findLeadsToReceiveReminders()
-            logger.debug("leadsToReceiveReminders are: {}".format(leadsToReceiveReminders))
+            logger.info("leadsToReceiveReminders are: {}".format(leadsToReceiveReminders))
             leads_eligible_for_reminders = False
             for lead in leadsToReceiveReminders:
                 number_of_days_until_appointment = (lead.get('appointment_date_and_time').astimezone(pytz.timezone('US/Central')).date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
@@ -924,6 +941,8 @@ def start_background_jobs_before_first_request():
 
                     stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
                     if stripe_invoice_object.paid or stripe_invoice_object.finalized:
+                        # if os.environ['DEPLOY_REGION'] == 'local':
+                        #     os.system("stripe trigger invoice.paid")
                         #added finalized because ach payments finalize immediately but do not send 'paid' events for 14 days
                         logger.info("Invoice payment succeeded: {}".format(invoice['last_name']))
                         #might need to come back and handle this via webhook
@@ -963,9 +982,23 @@ def start_background_jobs_before_first_request():
     if os.environ['DEPLOY_REGION'] == 'local':
         #scheduler.add_job(remind_client_about_invoice_background_job, 'cron', day_of_week='0-6/2', hour='16-16', minute='55-55', start_date=datetime.datetime.strftime(datetime.datetime.now() + datetime.timedelta(days=1), '%Y-%m-%d'))
         #scheduler.add_job(remind_lead_about_appointment_background_job, 'cron', hour='22', minute='5')
-        scheduler.add_job(restart_paused_payments_background_job, 'cron', hour='19', minute='45')
-        scheduler.add_job(setup_recurring_payments_due_today_background_job, 'cron', hour='19', minute='46')
-        scheduler.add_job(pay_invoice_background_job, 'cron', hour='19', minute='47')
+
+        rpp_minute = datetime.datetime.now().minute+2
+        srp_minute = rpp_minute + 1
+        pi_minute = srp_minute + 1
+        for i in range(1,5):
+            rpp_hour = datetime.datetime.now().hour if rpp_minute < 60 else datetime.datetime.now().hour + 1
+            srp_hour = datetime.datetime.now().hour if srp_minute < 60 else datetime.datetime.now().hour + 1
+            pi_hour = datetime.datetime.now().hour if pi_minute < 60 else datetime.datetime.now().hour + 1
+            logger.info(f"dummy background job times are rpp_minute - {rpp_hour}:{rpp_minute%60}, srp_minute - {srp_hour}:{srp_minute%60}, pi_minute - {pi_hour}:{pi_minute%60}" )
+            scheduler.add_job(restart_paused_payments_background_job, 'cron', hour=rpp_hour, minute=rpp_minute%60)
+            scheduler.add_job(setup_recurring_payments_due_today_background_job, 'cron', hour=srp_hour, minute=srp_minute%60)
+            scheduler.add_job(pay_invoice_background_job, 'cron', hour=pi_hour, minute=pi_minute%60)
+            rpp_minute = pi_minute + 1
+            srp_minute = rpp_minute + 1
+            srp_minute = rpp_minute + 1
+            pi_minute = srp_minute + 1
+
         #scheduler.add_job(notify_mo_to_modify_lead_appointment_completion_status_background_job, 'interval', hours=1)
         logger.info("all local background jobs added")
 
@@ -998,13 +1031,13 @@ def start_background_jobs_before_first_request():
     # logger.info("remind_lead_about_appointment_background_job added")
     # logger.info("pay_invoice_background_job added")
 
-    # logger.debug('Current time with timezone is: {}'.format(datetime.datetime.now().astimezone()))
+    # logger.info('Current time with timezone is: {}'.format(datetime.datetime.now().astimezone()))
     # day1 = datetime.datetime.now(pytz.timezone('US/Central'))
     # day2 = datetime.datetime.now(pytz.timezone('US/Central')).date()
     # day3 = pytz.timezone('US/Central').localize(datetime.datetime.now()).strftime('%Y-%m-%d---%H-%M')
-    # logger.debug('day1 is: {}'.format(day1))
-    # logger.debug('day2 is: {}'.format(day2))
-    # logger.debug('day3 is: {}'.format(day3))
+    # logger.info('day1 is: {}'.format(day1))
+    # logger.info('day2 is: {}'.format(day2))
+    # logger.info('day3 is: {}'.format(day3))
 
 
     #THE KEY TO GETTING TIMEZONE RIGHT IS SETTING IT AS AN ENVIRONMENT VARIABLE ON DIGITAL OCEAN SERVER
@@ -1024,7 +1057,7 @@ def post_signup_checkout():
     payment_and_signup_data = request.form.to_dict()
 
     chosen_mode_of_payment = payment_and_signup_data.get('installment-payment', '') if payment_and_signup_data.get('installment-payment', '') != '' else payment_and_signup_data.get('full-payment', '') if payment_and_signup_data.get('full-payment', '') != '' else payment_and_signup_data.get('payment-options', '') if payment_and_signup_data.get('payment-options', '') != '' else ''
-    logger.debug("payment_and_signup_data[stripe_info] is {}".format(payment_and_signup_data['stripe_info']))
+    logger.info("payment_and_signup_data[stripe_info] is {}".format(payment_and_signup_data['stripe_info']))
     stripe_info = ast.literal_eval(payment_and_signup_data['stripe_info'])
     stripe_pk = os.environ.get('stripe_pk')
     if chosen_mode_of_payment.__contains__('ach'):

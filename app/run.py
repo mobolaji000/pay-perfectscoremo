@@ -2,6 +2,8 @@ import requests
 import threading
 import time
 import os
+import datetime
+import pytz
 
 import logging
 logger = logging.getLogger(__name__)
@@ -38,6 +40,8 @@ def start_runner():
 url_to_start_reminder = os.environ.get("url_to_start_reminder")
 start_runner()
 logger.info("deploy region is: {}".format(os.environ.get("DEPLOY_REGION")))
+logger.info(f"Deploy time in CST is {datetime.datetime.now(pytz.timezone('US/Central'))}")
+
 from app import server
 
 

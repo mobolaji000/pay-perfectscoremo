@@ -38,7 +38,7 @@ class Transaction(db.Model):
 
 
     def __repr__(self):
-        return '<Transaction {}>'.format(self.transaction_id)
+        return f'<Transaction {self.transaction_id}>'
 
 
 class InstallmentPlan(db.Model):
@@ -79,7 +79,7 @@ class InstallmentPlan(db.Model):
 
 
     def __repr__(self):
-        return '<InstallmentPlan created for {}>'.format(self.transaction_id)
+        return f'<InstallmentPlan created for {self.transaction_id}>'
 
 #invoices created for installments and for returning client autopay
 class InvoiceToBePaid(db.Model):
@@ -99,7 +99,7 @@ class InvoiceToBePaid(db.Model):
     date_created = db.Column(db.DateTime(timezone=True), index=True, server_default=db.func.now())
 
     def __repr__(self):
-        return '<InvoiceToBePaid created for {}>'.format(self.transaction_id)
+        return f'<InvoiceToBePaid created for {self.transaction_id}>'
 
 class Prospect(db.Model):
     prospect_id = db.Column(db.String(8), unique=True, index=True, nullable=False, default='')
@@ -118,7 +118,7 @@ class Prospect(db.Model):
     #TODO add prospect salutation column
 
     def __repr__(self):
-        return '<Prospect {} created with prospect_id {}>'.format(self.last_name, self.prospect_id)
+        return f'<Prospect {self.last_name} created with prospect_id {self.prospect_id}>'
 
 class Lead(db.Model):
     lead_id = db.Column(db.String(8), primary_key=True, unique=True, index=True, nullable=False, default='')
@@ -142,7 +142,7 @@ class Lead(db.Model):
 
 
     def __repr__(self):
-        return '<Lead created with lead_id {}>'.format(self.lead_id)
+        return f'<Lead created with lead_id {self.lead_id}>'
 
 class Student(db.Model):
     prospect_id = db.Column(db.String(8), db.ForeignKey('prospect.prospect_id'), index=True, nullable=False, default='')
@@ -168,7 +168,7 @@ class Student(db.Model):
 
 
     def __repr__(self):
-        return '<Student {} created with student_id {}>'.format(self.parent_1_last_name, self.student_id)
+        return f'<Student {self.parent_1_last_name} created with student_id {self.student_id}>'
 
 db.create_all()
 try:
