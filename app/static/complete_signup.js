@@ -36,6 +36,18 @@ $(document).ready(function() {
 
     var show_ach_override = $("#show_ach_override").attr("data-show_ach_override");
 
+
+
+
+//   document.getElementById('terms_and_conditions').onclick = function() {
+//      var client_info = $("#client_info").attr("data-client_info");
+//
+//  alert(client_info);
+//  console.log(client_info);
+//
+//  };
+
+
     if (show_ach_override === 'True')
     {
     $('#selectorToHideACHInstallment').attr('style', 'display: block !important');
@@ -94,28 +106,22 @@ $(document).ready(function() {
         var one_on_one_info_present = false;
 
         var ask_for_student_info = $("#ask_for_student_info").attr("data-ask_for_student_info");
-        if (ask_for_student_info == 'yes')
-        {
-        var student_first_name = $("#student_first_name").val();
-        var student_last_name = $("#student_last_name").val();
-        var student_email = $("#student_email").val();
-        var student_phone_number = $("#student_phone_number").val();
-        var parent_1_phone_number = $("#parent_1_phone_number").val();
-        var parent_2_phone_number = $("#parent_2_phone_number").val();
-
-        var cards = document.getElementsByName('day_for_one_on_one');
+        var ask_for_student_availability = $("#ask_for_student_availability").attr("data-ask_for_student_availability");
 
 
 
 //check if onboarding info was selected
-
-for(var key in selected_cards) {
+        if (ask_for_student_availability == 'yes')
+        {
+            for(var key in selected_cards) {
     if(selected_cards[key] != "")
     {
          one_on_one_info_present = true;
          break;
     }
  }
+
+
  if(one_on_one_info_present)
  {
   document.getElementById('day_for_one_on_one_info_and_error').style.color="green";
@@ -126,6 +132,18 @@ for(var key in selected_cards) {
          document.getElementById('day_for_one_on_one_info_and_error').innerHTML="You must select at least one option for your one-on-one session.";
          document.getElementById('day_for_one_on_one_info_and_error').style.color="red";
  }
+        }
+
+        if (ask_for_student_info == 'yes')
+        {
+        var student_first_name = $("#student_first_name").val();
+        var student_last_name = $("#student_last_name").val();
+        var student_email = $("#student_email").val();
+        var student_phone_number = $("#student_phone_number").val();
+        var parent_1_phone_number = $("#parent_1_phone_number").val();
+        var parent_2_phone_number = $("#parent_2_phone_number").val();
+
+        //var cards = document.getElementsByName('day_for_one_on_one');
 
  //check if parent info duplicates student info
 

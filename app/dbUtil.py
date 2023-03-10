@@ -1,9 +1,9 @@
 from app.models import Transaction,InstallmentPlan,InvoiceToBePaid,Prospect,Student,Lead
 from app import db
 from app.config import stripe
-from datetime import datetime
+from datetime import datetime,timedelta
 import re
-import math
+import pytz
 import uuid
 from dateutil.parser import parse
 import logging
@@ -12,12 +12,19 @@ from sqlalchemy.dialects.postgresql import insert
 
 #from app.service import SendMessagesToClients
 
-
-
 logger = logging.getLogger(__name__)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-logger.addHandler(ch)
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+#formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter =  logging.Formatter("%(asctime)s - %(levelname)s - %(filename)s - %(funcName)20s() - %(lineno)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+#ADDED TO TURN DOUBLE FLASK LOGGING OFF FLASK LOCAL
+from app import server
+from flask.logging import default_handler
+server.logger.removeHandler(default_handler)
+server.logger.handlers.clear()
 
 
 class AppDBUtil():
@@ -48,8 +55,8 @@ class AppDBUtil():
             db.session.add(prospect)
             cls.executeDBQuery()
 
-        if lead_id != '':
-            cls.modifyLeadInfo(lead_id, {'completed_appointment': True})
+        # if lead_id != '':
+        #     cls.modifyLeadInfo(lead_id, {'appointment_completed': 'yes'})
 
         return prospect
 
@@ -61,7 +68,7 @@ class AppDBUtil():
         else:
             transaction_id = "t-"+str(uuid.uuid4().int>>64)[:6]
             while transaction_id in  existing_transaction_ids:
-                logger.debug("Transaction id {} already exists".format(transaction_id))
+                logger.info("Transaction id {} already exists".format(transaction_id))
                 transaction_id = "t-" + str(uuid.uuid4().int >> 64)[:6]
 
         prospect_id = clientData.get('prospect_id','')
@@ -86,9 +93,15 @@ class AppDBUtil():
         adjustment_explanation = clientData.get('adjustment_explanation','')
         transaction_total = 0 if clientData.get('transaction_total','') == '' else clientData.get('transaction_total','')
         installment_counter = 0 if clientData.get('installment_counter','') == '' else int(clientData.get('installment_counter',''))#-1
-        ask_for_student_info = clientData.get('ask_for_student_info','')
-        does_customer_payment_info_exist = 'yes' if clientData.get('does_customer_payment_info_exist',None) else 'no'
         # client-side counter is always one more; get the actual number here
+        ask_for_student_info = clientData.get('ask_for_student_info','')
+        ask_for_student_availability = clientData.get('ask_for_student_availability', '')
+        make_payment_recurring = clientData.get('make_payment_recurring')
+        recurring_payment_frequency = 0 if clientData.get('recurring_payment_frequency','') == '' else clientData.get('recurring_payment_frequency','')
+        recurring_payment_start_date = None if clientData.get('recurring_payment_start_date', '') == '' else clientData.get('recurring_payment_start_date')
+        pause_payment = clientData.get('pause_payment')
+        paused_payment_resumption_date = None if clientData.get('paused_payment_resumption_date', '') == '' else clientData.get('paused_payment_resumption_date')
+        does_customer_payment_info_exist = 'yes' if clientData.get('does_customer_payment_info_exist',None) else 'no'
 
 
 
@@ -100,7 +113,9 @@ class AppDBUtil():
                                   diag_total=diag_total, was_test_prep_purchased=was_test_prep_purchased, tp_product=tp_product, tp_units=tp_units,
                                   tp_total=tp_total, was_college_apps_purchased=was_college_apps_purchased, college_apps_product=college_apps_product,
                                   college_apps_units=college_apps_units, college_apps_total=college_apps_total,adjust_total=adjust_total, adjustment_explanation=adjustment_explanation,
-                                transaction_total=transaction_total, installment_counter=installment_counter,ask_for_student_info=ask_for_student_info,does_customer_payment_info_exist=does_customer_payment_info_exist)
+                                transaction_total=transaction_total, installment_counter=installment_counter,ask_for_student_info=ask_for_student_info,ask_for_student_availability=ask_for_student_availability,
+                                      does_customer_payment_info_exist=does_customer_payment_info_exist,make_payment_recurring=make_payment_recurring,recurring_payment_frequency=recurring_payment_frequency,
+                                      recurring_payment_start_date=recurring_payment_start_date,pause_payment=pause_payment,paused_payment_resumption_date=paused_payment_resumption_date)
 
 
             db.session.add(transaction)
@@ -113,17 +128,32 @@ class AppDBUtil():
                         "was_test_prep_purchased": was_test_prep_purchased,"tp_product": tp_product,"tp_units": tp_units,"tp_total": tp_total,
                         "was_college_apps_purchased": was_college_apps_purchased,"college_apps_product": college_apps_product,"college_apps_units": college_apps_units,
                         "college_apps_total": college_apps_total,"adjust_total": adjust_total,"adjustment_explanation": adjustment_explanation,
-                  "transaction_total": transaction_total, "installment_counter":installment_counter, "does_customer_payment_info_exist":does_customer_payment_info_exist,"ask_for_student_info":ask_for_student_info})
+                  "transaction_total": transaction_total, "installment_counter":installment_counter, "does_customer_payment_info_exist":does_customer_payment_info_exist,
+                  "ask_for_student_info":ask_for_student_info,"ask_for_student_availability":ask_for_student_availability,"make_payment_recurring":make_payment_recurring,"recurring_payment_frequency":recurring_payment_frequency,
+                  "recurring_payment_start_date":recurring_payment_start_date,"pause_payment":pause_payment,"paused_payment_resumption_date":paused_payment_resumption_date})
 
-            print("number of transaction rows modified is: ",number_of_rows_modified) #printing of rows modified to logs to help with auditing
-
-
+            logger.info(f"Number of transaction rows modified is: {number_of_rows_modified}") #printing of rows modified to logs to help with auditing
 
         cls.executeDBQuery()
 
-        cls.createOrModifyInstallmentPlan(clientData=clientData, transaction_id=transaction_id)
+        if not cls.isTransactionPaymentStarted(transaction_id):
+            cls.createOrModifyInstallmentPlan(clientData=clientData, transaction_id=transaction_id)
 
         return transaction_id,number_of_rows_modified
+
+
+    @classmethod
+    def modifyTransactionBasedOnPauseUnpauseStatus(cls,clientData,transaction_id):
+        pause_payment = clientData.get('pause_payment')
+        paused_payment_resumption_date = None if clientData.get('paused_payment_resumption_date', '') == '' else clientData.get('paused_payment_resumption_date')
+        recurring_payment_start_date = None if clientData.get('recurring_payment_start_date', '') == '' else clientData.get('recurring_payment_start_date')
+
+        if (int(clientData['installment_counter']) > 1) and cls.isTransactionPaymentStarted(transaction_id):
+            cls.modifyPauseStatusOnInvoicesToBePaid(transaction_id, pause_payment, paused_payment_resumption_date)
+            #cls.pauseInstallmentPaymentInvoices(transaction_id, pause_payment, paused_payment_resumption_date)
+        elif (clientData.get('recurring_payment_start_date')):
+            pass
+            #cls.pauseRecurringPayment(transaction_id, pause_payment, paused_payment_resumption_date, recurring_payment_start_date)
 
     @classmethod
     def createOrModifyInvoiceToBePaid(cls, first_name=None, last_name=None, phone_number=None, email=None, transaction_id=None, stripe_customer_id=None, stripe_invoice_id=None, payment_date=None, payment_amount=None):
@@ -138,7 +168,46 @@ class AppDBUtil():
         cls.executeDBQuery()
 
     @classmethod
+    def modifyPauseStatusOnInvoicesToBePaid(cls, transaction_id=None, pause_payment=None, paused_payment_resumption_date=None):
+        try:
+            if pause_payment == 'yes':
+                invoices_to_pause = cls.findInvoicesToPause(transaction_id)
+
+                if invoices_to_pause:
+                    logger.info(f'Running pauseInstallmentPaymentInvoices on {invoices_to_pause[0].transaction_id} for which invoices have been created for customer.')
+                    if paused_payment_resumption_date:
+                        invoice_payment_dates_to_update = []
+
+                        for k, invoice in enumerate(invoices_to_pause):
+                            if k == 0:
+                                invoice_payment_dates_to_update.append(datetime.strptime(paused_payment_resumption_date, '%Y-%m-%d').date())
+                            else:
+                                difference_between_this_invoice_date_and_previous_invoice_date = (invoices_to_pause[k].payment_date - invoices_to_pause[k - 1].payment_date).days
+                                invoice_payment_dates_to_update.append(invoice_payment_dates_to_update[k-1] + timedelta(days=difference_between_this_invoice_date_and_previous_invoice_date))
+
+
+                        for k, invoice in enumerate(invoices_to_pause):
+                            logger.info(f'Modifying payment date on {invoice.id}.')
+                            invoice.payment_date = invoice_payment_dates_to_update[k]
+                            db.session.add(invoice)
+
+                    else:
+                        for invoice in invoices_to_pause:
+                            logger.info(f'Modifying payment date on {invoice.id}.')
+                            invoice.payment_date = datetime.strptime(paused_payment_resumption_date, '%Y-%m-%d').date()
+                            db.session.add(invoice)
+
+                    cls.executeDBQuery()
+        except Exception as e:
+            # if any kind of exception occurs, rollback transaction
+            db.session.rollback()
+            traceback.print_exc()
+        finally:
+            db.session.close()
+
+    @classmethod
     def createOrModifyInstallmentPlan(cls, clientData={}, transaction_id=None):
+
         existing_installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id).first()
         if existing_installment_plan:
             db.session.delete(existing_installment_plan)
@@ -166,6 +235,15 @@ class AppDBUtil():
         else:
             print("No installment dates created/modified")
 
+            # date_and_amount_index = 1
+            # for k in range(1, 13):
+            #     print("current installment being updated is " + str(k))
+            #     if 'date_' + str(k) in clientData:
+            #         installments.update({'date_' + str(date_and_amount_index): clientData[f'date_{k}'] + timedelta(days=difference_in_installment_dates_due_to_pause), 'amount_' + str(date_and_amount_index): clientData[f'amount_{k}']})
+            #         date_and_amount_index = date_and_amount_index + 1
+
+
+
     @classmethod
     def is_date(cls,string_date, fuzzy=False):
         """
@@ -178,11 +256,7 @@ class AppDBUtil():
             parse(string_date, fuzzy=fuzzy)
             return True
 
-        # except Exception as e:
-        #     return False
         except ValueError as v:
-            #logger.error(v)
-            #traceback.print_exc()
             return False
 
     @classmethod
@@ -222,6 +296,14 @@ class AppDBUtil():
         return transaction
 
     @classmethod
+    def updatePausePaymentStatus(cls, transaction_id, pause_payment, paused_payment_resumption_date):
+        transaction = Transaction.query.filter_by(transaction_id=transaction_id).first()
+        transaction.pause_payment = pause_payment
+        transaction. paused_payment_resumption_date =  paused_payment_resumption_date
+        cls.executeDBQuery()
+        return transaction
+
+    @classmethod
     def updateInvoiceAsPaid(cls, stripe_invoice_id=None):
         invoice = InvoiceToBePaid.query.filter_by(stripe_invoice_id=stripe_invoice_id).first()
         if invoice:
@@ -231,18 +313,33 @@ class AppDBUtil():
     @classmethod
     def findInvoicesToPay(cls):
         try:
-            invoices_to_pay = db.session.query(InvoiceToBePaid).filter((InvoiceToBePaid.payment_made == False) & (InvoiceToBePaid.payment_date <= datetime.today())).all()
-            print("invoices_to_pay are: ",invoices_to_pay)
+
+            invoices_to_pay = db.session.query(
+                InvoiceToBePaid
+            ).join(
+                Transaction, InvoiceToBePaid.transaction_id == Transaction.transaction_id
+            ).filter(
+                ((Transaction.pause_payment == "no" ) & (InvoiceToBePaid.payment_made == False) & (InvoiceToBePaid.payment_date <= datetime.today()))
+            ).all()
+
+            #invoices_to_pay = db.session.query(InvoiceToBePaid).filter((InvoiceToBePaid.payment_made == False) & (InvoiceToBePaid.payment_date <= datetime.today())).all()
+
+            # for transaction in result:
+            #     logger.info("results are: {}".format(result))
+            #     logger.info("eligible transactions for automatic invoice payment are: {}".format(transaction))
+            # for invoices_to_pay in result:
+            logger.info("invoices_to_pay are: {}".format(invoices_to_pay))
             search_results = []
-            for invoice in invoices_to_pay:
-                invoice_details = {}
-                invoice_details['first_name'] = invoice.first_name
-                invoice_details['last_name'] = invoice.last_name
-                invoice_details['payment_amount'] = invoice.payment_amount
-                invoice_details['stripe_invoice_id'] = invoice.stripe_invoice_id
-                print(invoice_details)
-                print(" ")
-                search_results.append(invoice_details)
+            if invoices_to_pay:
+                for invoice in invoices_to_pay:
+                    invoice_details = {}
+                    invoice_details['first_name'] = invoice.first_name
+                    invoice_details['last_name'] = invoice.last_name
+                    invoice_details['payment_amount'] = invoice.payment_amount
+                    invoice_details['stripe_invoice_id'] = invoice.stripe_invoice_id
+                    print(invoice_details)
+                    print(" ")
+                    search_results.append(invoice_details)
             return search_results
         except Exception as e:
             # if any kind of exception occurs, rollback transaction
@@ -252,28 +349,82 @@ class AppDBUtil():
             db.session.close()
 
     @classmethod
+    def findInvoicesToPause(cls,transaction_id):
+        try:
+            invoices_to_pause = db.session.query(
+                InvoiceToBePaid
+            ).join(
+                Transaction, InvoiceToBePaid.transaction_id == Transaction.transaction_id
+            ).filter(
+                ((Transaction.pause_payment == "yes") & (InvoiceToBePaid.payment_made == False) & (Transaction.transaction_id == transaction_id))
+
+            ).order_by(InvoiceToBePaid.payment_date).all()
+
+            return invoices_to_pause
+        except Exception as e:
+            # if any kind of exception occurs, rollback transaction
+            db.session.rollback()
+            traceback.print_exc()
+        finally:
+            db.session.close()
+
+
+
+    @classmethod
     def findLeadsToReceiveReminders(cls):
         try:
-            leadsToReceiveReminders = Lead.query.filter((Lead.completed_appointment == False) & (Lead.appointment_date_and_time != None)).all()
+            leadsToReceiveReminders = Lead.query.filter((Lead.appointment_completed != 'yes') & (Lead.appointment_date_and_time != None)).all()
 
-            logger.debug("Leads to receive reminders are: {}".format(leadsToReceiveReminders))
+            logger.info("Leads to receive reminders are: {}".format(leadsToReceiveReminders))
             search_results = []
             for lead in leadsToReceiveReminders:
-                logger.debug("Individual lead is: {}".format(lead))
                 lead_details = {}
                 lead_details['lead_id'] = lead.lead_id
                 lead_details['lead_salutation'] = lead.lead_salutation
                 lead_details['lead_name'] = lead.lead_name
                 lead_details['lead_phone_number'] = lead.lead_phone_number
                 lead_details['lead_email'] = lead.lead_email
-                lead_details['appointment_date_and_time'] = lead.appointment_date_and_time
+                lead_details['appointment_date_and_time'] = lead.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))
                 search_results.append(lead_details)
+
+
+                # logger.info("Time before conversion is: {}".format(lead.appointment_date_and_time))
+                # logger.info("Time after conversion is: {}".format(lead.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))))
 
             return search_results
         except Exception as e:
             # if any kind of exception occurs, rollback lead
             db.session.rollback()
             traceback.print_exc()
+        finally:
+            db.session.close()
+
+    @classmethod
+    def findLeadsWithAppointmentsInTheLastHour(cls):
+        try:
+            searchEndDate = datetime.now()#datetime.now(pytz.timezone('US/Central'))
+            logger.info("searchEndDate: {}".format(searchEndDate.strftime('%Y-%m-%dT%H:%M:%S')))
+            searchStartDate = datetime.now() - timedelta(hours=1)#datetime.now(pytz.timezone('US/Central')) - timedelta(hours=1)
+            logger.info("searchStartDate: {}".format(searchStartDate.strftime('%Y-%m-%dT%H:%M:%S')))
+            leadsWithAppointmentsInTheLastHour = Lead.query.filter(Lead.appointment_completed != 'yes').filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
+
+
+            logger.info("Leads with appointments in the last hour are: {}".format(leadsWithAppointmentsInTheLastHour))
+            search_results = []
+            for lead in leadsWithAppointmentsInTheLastHour:
+                lead_details = {}
+                lead_details['lead_id'] = lead.lead_id
+                lead_details['lead_salutation'] = lead.lead_salutation
+                lead_details['lead_name'] = lead.lead_name
+                lead_details['appointment_date_and_time'] = lead.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))
+                search_results.append(lead_details)
+                logger.info("Individual lead is: {}".format(lead_details))
+
+            return search_results
+        except Exception as e:
+            # if any kind of exception occurs, rollback lead
+            db.session.rollback()
+            logger.exception(e)
         finally:
             db.session.close()
 
@@ -328,6 +479,7 @@ class AppDBUtil():
         search_results = []
         for transaction in transaction_details:
             client = {}
+            client['salutation'] = transaction.salutation
             client['first_name'] = transaction.first_name
             client['last_name'] = transaction.last_name
             client['salutation'] = transaction.salutation
@@ -355,6 +507,13 @@ class AppDBUtil():
             client['payment_started'] = str(transaction.payment_started)
             client['prospect_id'] = str(transaction.prospect_id)
             client['ask_for_student_info'] = transaction.ask_for_student_info
+            client['ask_for_student_availability'] = transaction.ask_for_student_availability
+
+            client['make_payment_recurring'] = transaction.make_payment_recurring
+            client['recurring_payment_frequency'] = transaction.recurring_payment_frequency
+            client['recurring_payment_start_date'] = transaction.recurring_payment_start_date.strftime("%Y-%m-%d") if transaction.recurring_payment_start_date else ''
+            client['pause_payment'] = transaction.pause_payment
+            client['paused_payment_resumption_date'] = transaction.paused_payment_resumption_date.strftime("%Y-%m-%d") if transaction.paused_payment_resumption_date else ''
 
             prospect_details = Prospect.query.filter_by(prospect_id=transaction.prospect_id).first()
             client['how_did_they_hear_about_us'] = prospect_details.how_did_they_hear_about_us
@@ -367,6 +526,7 @@ class AppDBUtil():
             installment_details = InstallmentPlan.query.filter_by(transaction_id=transaction.transaction_id).first()
 
             if installment_details:
+                logger.info(f"installment_details is {installment_details.__dict__}")
                 installments = {}
                 for k in range(1, int(transaction.installment_counter)):
                     installments.update({'date_' + str(k): installment_details.__dict__['date_' + str(k)].strftime("%m/%d/%Y"), 'amount_' + str(k): installment_details.__dict__['amount_' + str(k)]})
@@ -375,7 +535,7 @@ class AppDBUtil():
 
 
             search_results.append(client)
-        print("search results are ",search_results)
+        logger.info(f"Search results are {search_results}")
         return search_results
 
     @classmethod
@@ -385,9 +545,6 @@ class AppDBUtil():
         if 'ach' in transaction_id:
             showACHOverride = True
             transaction_id = transaction_id.split('ach')[0]
-
-        logger.debug("transaction id is: {}".format(transaction_id))
-        logger.debug("showACHOverride is: {}".format(showACHOverride))
 
         admin_transaction_details = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
         admin_transaction_details.turn_on_installments = True if admin_transaction_details.installment_counter > 1 else False
@@ -399,6 +556,70 @@ class AppDBUtil():
         transaction.payment_started = True
         cls.executeDBQuery()
 
+    @classmethod
+    def isTransactionPaymentStarted(cls, transaction_id):
+        transaction = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
+        return transaction.payment_started
+
+    # @classmethod
+    # def pauseOneTimePayment(cls, transaction_id, pause_payment, paused_payment_resumption_date):
+    #     transaction = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
+    #     transaction.pause_payment = pause_payment
+    #     transaction.paused_payment_resumption_date = paused_payment_resumption_date
+    #
+    #     cls.executeDBQuery()
+
+    @classmethod
+    def pauseRecurringPayment(cls, transaction_id, pause_payment, paused_payment_resumption_date, recurring_payment_start_date):
+        transaction = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
+        if pause_payment == 'yes':
+            payment_date = recurring_payment_start_date
+            if paused_payment_resumption_date:
+                if paused_payment_resumption_date > payment_date:
+                    payment_date = paused_payment_resumption_date
+
+            transaction.recurring_payment_start_date = payment_date
+            cls.executeDBQuery()
+
+    @classmethod
+    def pauseInstallmentPaymentInvoices(cls, transaction_id, pause_payment, paused_payment_resumption_date):
+
+        if pause_payment == 'yes':
+            existing_invoices = InvoiceToBePaid.query.filter_by(transaction_id=transaction_id).order_by(InvoiceToBePaid.payment_date.asc()).all()#.filter_by(payment_made=False)
+            if existing_invoices:
+                logger.info(f'Running pauseInstallmentPaymentInvoices on {transaction_id} for which invoices have been created for customer.')
+                if paused_payment_resumption_date:
+                    index_of_earliest_unpaid_invoice = 0
+                    invoice_dates_to_update = [None] * len(existing_invoices)
+
+                    for i,e in enumerate(existing_invoices):
+                        if not e.payment_made:
+                            index_of_earliest_unpaid_invoice = i if index_of_earliest_unpaid_invoice == 0 else index_of_earliest_unpaid_invoice
+                            if index_of_earliest_unpaid_invoice == i:
+                                invoice_dates_to_update[i] = paused_payment_resumption_date
+                            else:
+                                difference_between_this_payment_date_and_previous_payment_date = (existing_invoices[i].payment_date - existing_invoices[i-1].payment_date).days
+                                invoice_dates_to_update[i] = invoice_dates_to_update[i-1] + timedelta(days=difference_between_this_payment_date_and_previous_payment_date)
+                        else:
+                            invoice_dates_to_update[i] = e.payment_date
+
+                    installment_dates_to_update_as_dict = {}
+                    for i,e in enumerate(existing_invoices):
+                        e.payment_date = invoice_dates_to_update[i]
+                        #installment_dates_to_update_as_dict.update({'date_' + str(int(i+1)): installment_dates_to_update[i]})
+
+                    # existing_installment_plan = db.session.query(InstallmentPlan).filter_by(transaction_id=transaction_id).first()
+                    # number_of_rows_modified = existing_installment_plan.update(installment_dates_to_update_as_dict)
+                    # logger.info(f"number of installment rows with pause status modified is: {number_of_rows_modified}")
+
+                else:
+                    for i,e in enumerate(existing_invoices):
+                        e.payment_date = paused_payment_resumption_date
+            else:
+                logger.info(f'Ran pauseInstallmentPaymentInvoices for {transaction_id} for which NO invoices have been created for customer.')
+
+
+            cls.executeDBQuery()
     @classmethod
     def createStudentData(cls, studentData):
         try:
@@ -464,13 +685,21 @@ class AppDBUtil():
             client_info['payment_started'] = admin_transaction_details.payment_started
             client_info['installment_counter'] = admin_transaction_details.installment_counter
             client_info['ask_for_student_info'] = admin_transaction_details.ask_for_student_info
+            client_info['ask_for_student_availability'] = admin_transaction_details.ask_for_student_availability
             client_info['showACHOverride'] = str(showACHOverride)
             client_info['does_customer_payment_info_exist'] = admin_transaction_details.does_customer_payment_info_exist
+
+            client_info['make_payment_recurring'] = admin_transaction_details.make_payment_recurring
+            client_info['recurring_payment_frequency'] = admin_transaction_details.recurring_payment_frequency
+            client_info['recurring_payment_start_date'] = admin_transaction_details.recurring_payment_start_date
+            client_info['pause_payment'] = admin_transaction_details.pause_payment
+            client_info['paused_payment_resumption_date'] = admin_transaction_details.paused_payment_resumption_date
+
 
             #added to get data fro not charging clients for credit card payment for diagnostics
             client_info['diag_total'] = admin_transaction_details.diag_total
 
-            print("client_info_installment_counter is "+str(admin_transaction_details.installment_counter))
+            logger.info(f"transaction id {admin_transaction_details.transaction_id} with showACHOverride value {showACHOverride} has {int(admin_transaction_details.installment_counter)-1} installments")
 
             if admin_transaction_details.was_diagnostic_purchased:
                 next_product = {}
@@ -546,7 +775,7 @@ class AppDBUtil():
         try:
             lead_info_by_mo = Lead(lead_id=leadInfo['lead_id'], lead_salutation=leadInfo['lead_salutation'],lead_name=leadInfo['lead_name'], lead_email=leadInfo['lead_email'], lead_phone_number=leadInfo['lead_phone_number'],appointment_date_and_time=leadInfo['appointment_date_and_time'],
                              what_services_are_they_interested_in=leadInfo['what_services_are_they_interested_in'], details_on_what_service_they_are_interested_in=leadInfo['details_on_what_service_they_are_interested_in'],send_confirmation_to_lead=leadInfo['send_confirmation_to_lead'],
-                             miscellaneous_notes=leadInfo['miscellaneous_notes'], how_did_they_hear_about_us=leadInfo['how_did_they_hear_about_us'],details_on_how_they_heard_about_us=leadInfo['details_on_how_they_heard_about_us'])
+                             miscellaneous_notes=leadInfo['miscellaneous_notes'], how_did_they_hear_about_us=leadInfo['how_did_they_hear_about_us'],details_on_how_they_heard_about_us=leadInfo['details_on_how_they_heard_about_us'],appointment_completed=leadInfo['appointment_completed'])
 
             db.session.add(lead_info_by_mo)
             cls.executeDBQuery()
@@ -591,15 +820,17 @@ class AppDBUtil():
                 lead['miscellaneous_notes'] = info.miscellaneous_notes
                 lead['how_did_they_hear_about_us'] = info.how_did_they_hear_about_us
                 lead['details_on_how_they_heard_about_us'] = info.details_on_how_they_heard_about_us
-                lead['appointment_date_and_time'] = cls.clean_up_date_and_time(info.appointment_date_and_time) if info.appointment_date_and_time else 'null' #info.appointment_date_and_time.strftime("%Y-%m-%dT%H:%M:%S")
+                lead['appointment_date_and_time'] = cls.clean_up_date_and_time(info.appointment_date_and_time.astimezone(pytz.timezone('US/Central'))) if info.appointment_date_and_time else 'null'
                 lead['send_confirmation_to_lead'] = info.send_confirmation_to_lead
                 lead['date_created'] = info.date_created.strftime("%m/%d/%Y")
-                lead['completed_appointment'] = 'true' if info.completed_appointment else 'false'
+                #lead['completed_appointment'] = 'true' if info.completed_appointment else 'false'
+                lead['appointment_completed'] = info.appointment_completed
                 lead['grade_level'] = info.grade_level
                 lead['recent_test_score'] = '' if info.recent_test_score == -1 else info.recent_test_score
+                #'appointment_completed':lead_info_contents.get('appointment_completed','no'),
 
                 search_results.append(lead)
-            logger.info("search results are {}".format(search_results))
+            logger.info(f"Search results are {search_results}")
             return search_results
         except Exception as e:
             raise e
@@ -615,12 +846,13 @@ class AppDBUtil():
 
         hour_as_24 = date_and_time[start:end].split()[0].split(':')[0]
         hour_as_24 = '0' + str(int(hour_as_24) % 12) if int(hour_as_24) % 12 < 10 else str(int(hour_as_24) % 12)
-        # logger.debug("2. " + hour_as_24)
+        # logger.info("2. " + hour_as_24)
         date_and_time = date_and_time[:start] + ' ' + hour_as_24 + ':' + date_and_time[start + 4:]
         date_and_time = date_and_time[:16] + " " + date_and_time[24:] + ' CST'
+        date_and_time = date_and_time.replace("00:00", "00:00")
 
-        # logger.debug("3. " + date_and_time[:15])
-        # logger.debug("4. " + date_and_time[24:])
+        # logger.info("3. " + date_and_time[:15])
+        # logger.info("4. " + date_and_time[24:])
 
         return date_and_time
 

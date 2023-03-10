@@ -2,22 +2,22 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <title>Transaction Setup</title>
+	<meta charset="utf-8">
+	<title>Transaction Setup</title>
 
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.5.3/dist/fuse.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.5.3/dist/fuse.min.js"></script>
 
-    <!-- Bootstrap core CSS -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <link href="static/page_style.css" rel="stylesheet">
-    <script type="text/javascript" src="static/transaction_setup_state.js"></script>
+	<!-- Bootstrap core CSS -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		  integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+	<link href="static/page_style.css" rel="stylesheet">
+	<script type="text/javascript" src="static/transaction_setup_state.js"></script>
 
-    <!-- Custom styles for this template -->
-    <style>
+	<!-- Custom styles for this template -->
+	<style>
         .bd-placeholder-img {
             font-size: 1.125rem;
             text-anchor: middle;
@@ -32,9 +32,9 @@
                 font-size: 3.5rem;
             }
         }
-    </style>
+	</style>
 
-    <script type="text/javascript">
+	<script type="text/javascript">
         function miscellanousValidation() {
             //alert("miscellanousValidation");
             var installment_total = 0;
@@ -45,10 +45,15 @@
             var installmentValid = true;
             var adjustmentValid = false;
 
-            for (let k = 1; k < counter; k++) {
+            for (let k = 1; k < Number(counter) + 1; k++) {
 
                 amount = 'amount_'.concat(k);
-                installment_total = Number(installment_total) + Number($("input[name=" + amount + "]").val());
+                amount_val = $("input[name=" + amount + "]").val();
+
+                if (typeof amount_val !== 'undefined') {
+                    installment_total = Number(installment_total) + Number(amount_val);
+                }
+
             }
             if (Number(counter) > 1) {
 
@@ -61,8 +66,7 @@
                     if (document.getElementById("installment_not_equal_total_message_modify")) {
                         document.getElementById("installment_not_equal_total_message_modify").hidden = false;
                     }
-                }
-                else {
+                } else {
                     installmentValid = true;
                     if (document.getElementById("installment_not_equal_total_message_create")) {
                         document.getElementById("installment_not_equal_total_message_create").hidden = true;
@@ -77,8 +81,7 @@
             var adjust_total = $('input[name="adjust_total"]').toString().trim();
             if ((adjust_total == '' && adjustment_explanation == '') || (adjust_total != '' && adjustment_explanation != '')) {
                 adjustmentValid = true;
-            }
-            else {
+            } else {
                 adjustmentValid = false;
             }
 
@@ -89,13 +92,24 @@
 
         function finalCheckBeforeSubmit(event) {
 
+            //$("select, input, textarea").each(function(){
+            //$(this).attr('disabled', false);
+            // });
+
+            var names_of_enabled_elements = $("#names_of_enabled_elements").attr("data-names_of_enabled_elements");
+
+            names_of_enabled_elements.split(',').forEach(function (name) {
+                console.log(name);
+                $('input[name="' + name + '"]').attr('disabled', false);
+            });
+
+
             //alert("finalCheckBeforeSubmit");
 
             var tp = $('input[name="tp_product"]:checked').attr("id");
             $('input[name="was_test_prep_purchased"]').val(tp);
             var ca = $('input[name="college_apps_product"]:checked').attr("id");
             $('input[name="was_college_apps_purchased"]').val(ca);
-
 
 
             $('input[name="tp_total"]').attr('disabled', false);
@@ -144,14 +158,30 @@
             $('select[name="how_did_they_hear_about_us"]').val('');
             $('textarea[name="details_on_how_they_heard_about_us"]').val('');
             $('input[name="ask_for_student_info"]').prop('checked', false);
+            $('input[name="ask_for_student_info"]').val('');
+            $('input[name="ask_for_student_availability"]').prop('checked', false);
+            $('input[name="ask_for_student_availability"]').val('');
 
+            $('input[name="recurring_payment_frequency"]').val('');
+            $('input[name="recurring_payment_frequency"]').attr('disabled', true);
+            $('input[name="make_payment_recurring"]').prop('checked', false);
+            $('input[name="make_payment_recurring"]').val('no');
+            $('input[name="pause_payment"]').prop('checked', false);
+            $('input[name="pause_payment"]').val('no');
+            $('input[name="paused_payment_resumption_date"]').val('');
+            $('input[name="recurring_payment_start_date"]').attr('disabled', true);
+            $('input[name="recurring_payment_start_date"]').val('');
+            $('input[name="recurring_payment_start_date"]').attr('disabled', true);
 
 
             var counter = $('input[name="installment_counter"]').val();
 
             for (let k = 1; k < counter; k++) {
                 var deleteRowButton = document.getElementById("ibtnDel");
-                deleteRowButton.click();
+                if (deleteRowButton) {
+                    deleteRowButton.click();
+                }
+
             }
 
             //console.log("search result is: "+JSON.stringify(result));
@@ -166,6 +196,7 @@
             $('input[name="transaction_id_to_show"]').prop('hidden', false);
             $('input[name="transaction_id_to_show"]').attr('disabled', true);
             $('input[name="transaction_id_to_show"]').val(result.transaction_id);
+            $('input[name="transaction_id_to_pause"]').val(result.transaction_id);
             $('input[name="stripe_customer_id"]').val(result.stripe_customer_id);
 
             $('select[name="how_did_they_hear_about_us"]').val(result.how_did_they_hear_about_us);
@@ -178,12 +209,37 @@
             $('input[name="leadSearchInput"]').val(result.lead_id);
             $('input[name="leadSearchInput"]').trigger('input');
 
+
+            if (result.make_payment_recurring == "yes") {
+                $('input[name="make_payment_recurring"]').prop('checked', true);
+                $('input[name="make_payment_recurring"]').val("yes");
+
+                $('input[name="recurring_payment_start_date"]').attr('disabled', false);
+                $('input[name="recurring_payment_frequency"]').attr('disabled', false);
+
+                $('input[name="recurring_payment_frequency"]').val(result.recurring_payment_frequency);
+                $('input[name="recurring_payment_start_date"]').val(result.recurring_payment_start_date);
+
+
+            }
+
+
+            if (result.pause_payment == "yes") {
+                //document.getElementById("pause_payment_wrap_around_div").hidden=false;
+                $('input[name="pause_payment"]').prop('checked', true);
+                $('input[name="pause_payment"]').val("yes");
+                $('input[name="paused_payment_resumption_date"]').attr('disabled', false);
+                $('input[name="paused_payment_resumption_date"]').val(result.paused_payment_resumption_date);
+
+            }
+
+
             //console.log("result is: "+JSON.stringify(result));
 
             if (result.ask_for_student_info == "yes") {
                 //document.getElementById("ask_for_student_info").click();
-                //document.getElementById("ask_for_student_info").checked = true;
-                //$('input[name="ask_for_student_info"]').prop('checked', true);
+                $('input[name="ask_for_student_info"]').val("yes");
+                $('input[name="ask_for_student_info"]').prop('checked', true);
 
 
                 //while it is good to have this here, I dont beleive I need it because
@@ -191,8 +247,17 @@
                 //besides, dont want a situation where I edit an exisitng invoice and by default
                 //ask for the student info again
 
+                //or maybe not?
+
                 //$('input[name="ask_for_student_info"]').attr('checked', true);
                 //$('input[name="ask_for_student_info"]').val("yes");
+            }
+
+            if (result.ask_for_student_availability == "yes") {
+                //document.getElementById("ask_for_student_availability").click();
+                $('input[name="ask_for_student_availability"]').val("yes");
+                $('input[name="ask_for_student_availability"]').prop('checked', true);
+
             }
 
             //
@@ -206,8 +271,7 @@
 
                 $('input[name="diag_units"]').val(result.diag_units);
                 $('input[name="diag_total"]').val(result.diag_total);
-            }
-            else {
+            } else {
                 $('input[name="was_diagnostic_purchased"]').prop('checked', false);
                 $('input[name="was_diagnostic_purchased"]').val("");
 
@@ -298,8 +362,7 @@
 
             if (result.adjust_total == 0) {
                 $('input[name="adjust_total"]').val('');
-            }
-            else {
+            } else {
                 $('input[name="adjust_total"]').val(result.adjust_total);
             }
 
@@ -307,26 +370,6 @@
             $('input[name="transaction_total"]').val(result.transaction_total);
 
             //
-
-
-            //idea is it should not be easy to modify or delete a payment that has started
-            //this is consistent with Stripe where an transaction that is paid cant be deleted
-            //if push comes to shove, make the necessary changes in stripe and after that go manually delete in the DB
-            if (result.payment_started == "True") {
-
-                $('div[id="cant_modify_or_delete_message"]').prop('hidden', false);
-                $('input[id="modify_transaction_button"]').attr('disabled', true);
-                $('input[id="delete_button"]').attr('disabled', true);
-
-                // document.getElementById("cant_modify_or_delete_message").hidden=false;
-            }
-            else {
-                $('div[id="cant_modify_or_delete_message"]').prop('hidden', true);
-                $('input[id="modify_transaction_button"]').attr('disabled', false);
-                $('input[id="delete_button"]').attr('disabled', false);
-                //document.getElementById("cant_modify_or_delete_message").hidden=true;
-            }
-
             if (result.installment_details) {
                 //alert(result.installment_counter);
                 var addRowButton = document.getElementById("addrow");
@@ -349,7 +392,33 @@
                 }
 
                 $('input[name="installment_counter"]').val(result.installment_counter);
+            }
 
+            //idea is it should not be easy to modify or delete a payment that has started
+            //this is consistent with Stripe where an transaction that is paid cant be deleted
+            //if push comes to shove, make the necessary changes in stripe and after that go manually delete in the DB
+            //console.log(result);
+
+            if (result.payment_started == "True") {
+
+                $('div[id="cant_modify_message"]').prop('hidden', false);
+                $('div[id="cant_delete_message"]').prop('hidden', false);
+                $('input[id="modify_transaction_button"]').attr('disabled', true);
+                $('input[id="delete_button"]').attr('disabled', true);
+
+                if (result.installment_counter > 1 || result.make_payment_recurring == 'yes') {
+                     document.getElementById("modify_pause_status_div").hidden=false;
+                $('div[id="modify_pause_status_div"]').attr('disabled', true);
+                }
+
+            } else {
+                $('div[id="cant_modify_message"]').prop('hidden', true);
+                $('div[id="cant_delete_message"]').prop('hidden', true);
+                $('input[id="modify_transaction_button"]').attr('disabled', false);
+                $('input[id="delete_button"]').attr('disabled', false);
+
+                document.getElementById("modify_pause_status_div").hidden=true;
+                $('div[id="modify_pause_status_div"]').attr('disabled', false);
             }
 
         }
@@ -380,6 +449,7 @@
             dataToModify['mark_as_paid'] = $('input[name="mark_as_paid"]').val();
             dataToModify['installment_counter'] = $('input[name="installment_counter"]').val();
             dataToModify['ask_for_student_info'] = $('input[name="ask_for_student_info"]').val();
+            dataToModify['ask_for_student_availability'] = $('input[name="ask_for_student_availability"]').val();
             dataToModify['how_did_they_hear_about_us'] = $('select[name="how_did_they_hear_about_us"]').val();
             dataToModify['salutation'] = $('select[name="salutation"]').val();
             dataToModify['details_on_how_they_heard_about_us'] = $('textarea[name="details_on_how_they_heard_about_us"]').val();
@@ -388,6 +458,11 @@
             dataToModify['grade_level'] = $('select[name="grade_level"]').val();
             dataToModify['recent_test_score'] = $('input[name="recent_test_score"]').val();
 
+            dataToModify['recurring_payment_frequency'] = $('input[name="recurring_payment_frequency"]').val();
+            dataToModify['make_payment_recurring'] = $('input[name="make_payment_recurring"]').val();
+            dataToModify['recurring_payment_start_date'] = $('input[name="recurring_payment_start_date"]').val();
+            dataToModify['pause_payment'] = $('input[name="pause_payment"]').val();
+            dataToModify['paused_payment_resumption_date'] = $('input[name="paused_payment_resumption_date"]').val();
 
 
             for (let k = 1; k < dataToModify['installment_counter'] + 1; k++) {
@@ -408,8 +483,7 @@
             if ($('input[name="transaction_id_to_show"]').val() != '') {
                 //alert("id given");
                 $('input[id="transaction_id_to_delete"]').val($('input[name="transaction_id_to_show"]').val());
-            }
-            else {
+            } else {
                 //alert("no id");
                 event.preventDefault();
             }
@@ -417,774 +491,815 @@
         }
 
 
-    </script>
+	</script>
 </head>
 
 
 <body class="bg-light">
-    <div class="container">
-        <div class="py-5 text-center">
-            <img class="d-block mx-auto mb-4" src="/static/logo.png" alt="" width="528" height="201">
-            <h2><u>Transaction Creation</u></h2>
-        </div>
+<div class="container">
+	<div class="py-5 text-center">
+		<img class="d-block mx-auto my-4" src="/static/logo.png" alt="" width="528" height="201">
+		<h2><u>Transaction Creation</u></h2>
+	</div>
 
-        <br>
-        <br>
-
-
-        <div class="row">
-            <div class="col-5 mb- order-2">
-                <form class="card p-2" action="{{ url_for('search_transaction') }}" method="post">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Enter search query" id="search_query"
-                            name="search_query">
-                        <div class="input-group-append">
-                            <input class="btn btn-secondary" type="submit" value="Search"></input>
-                        </div>
-                    </div>
-                </form>
-
-                <div>
-                    <br><br>
-
-                    {% if search_results %}
-                    <h4 class="mb-3">Search Results</h4>
-                    {% endif %}
+	<br>
+	<br>
 
 
-                    <div>
+	<div class="row">
+		<div class="col-5 mb- order-2">
+			<form class="card p-2" action="{{ url_for('search_transaction') }}" method="post">
+				<div class="input-group">
+					<input type="text" class="form-control" placeholder="Enter search query" id="search_query"
+						   name="search_query">
+					<div class="input-group-append">
+						<input class="btn btn-secondary" type="submit" value="Search"></input>
+					</div>
+				</div>
+			</form>
 
-                        <div class="col-md-12 mb-3">
+			<div>
+				<br><br>
 
-                            {% for result in search_results %}
-                            <a href="javascript:populateFieldsFromSearch({{ result }});">
-
-                                {{ result.salutation+" "+result.first_name+" "+result.last_name+"
-                                "+result.transaction_id+" "+result.date_created }}
-                            </a>
-                            <br><br><br>
-                            {% endfor %}
-                            <input id="result" name="result" value="" hidden>
-                            {% if search_results %}
-                            <div style="display: flex; justify-content: space-around;margin-right:50px">
-
-
-                                <div style="margin-left:50px">
-                                    <form id="modify_transaction_setup_form" name="modify_transaction_setup_form"
-                                        action="{{ url_for('modify_transaction') }}" method="post">
-
-                                        <input id="modify_transaction_button" name="modify_transaction_button"
-                                            class="btn btn-primary btn-lg btn-block" type="submit" value="Modify"
-                                            onclick="finalCheckBeforeModify(event);">
-                                        <input id="data_to_modify" name="data_to_modify" hidden>
-                                        <input id="prospect_id" name="prospect_id" hidden>
-
-                                    </form>
-                                </div>
+				{% if search_results %}
+					<h4 class="mb-3">Search Results</h4>
+				{% endif %}
 
 
-                                <div style="margin-left:50px">
-                                    <form action="{{ url_for('delete_transaction') }}" method="post">
-                                        <input id="delete_button" name="delete_button"
-                                            class="btn btn-primary btn-lg btn-block" type="submit" value="Delete"
-                                            onclick="finalCheckBeforeDelete(event);">
-                                        <input id="transaction_id_to_delete" name="transaction_id_to_delete" hidden>
-                                    </form>
-                                </div>
+				<div>
 
-                                <div style="margin-left:50px">
-                                    <input class="btn btn-primary btn-lg btn-block"
-                                        style="border:none; background-color:red; color:black !important"
-                                        id="transaction_id_to_show" name="transaction_id_to_show" type="button" hidden>
-                                    <input id="stripe_customer_id" name="stripe_customer_id" hidden>
+					<div class="col-md-12 mb-3">
 
-                                </div>
+						{% for result in search_results %}
+							<a href="javascript:populateFieldsFromSearch({{ result }});">
 
-                            </div>
+								{{ result.salutation+" "+result.first_name+" "+result.last_name+"
+							"+result.transaction_id+" "+result.date_created }}
+							</a>
+							<br><br><br>
+						{% endfor %}
+						<input id="result" name="result" value="" hidden>
+						{% if search_results %}
+							<div style="display: flex; justify-content: space-around;margin-right:50px">
 
-                            <br><br>
 
-                            <div class="col-sm" id="cant_modify_or_delete_message" name="cant_modify_or_delete_message"
-                                hidden>
-                                <span class="badge badge-danger">You can't modify or delete a payment that has
-                                    started.</span>
+								<div style="margin-left:50px">
+									<form id="modify_transaction_setup_form" name="modify_transaction_setup_form"
+										  action="{{ url_for('modify_transaction') }}" method="post">
 
-                            </div>
+										<input id="modify_transaction_button" name="modify_transaction_button"
+											   class="btn btn-primary btn-lg btn-block" type="submit" value="Modify"
+											   onclick="finalCheckBeforeModify(event);">
+										<input id="data_to_modify" name="data_to_modify" hidden>
+										<input id="prospect_id" name="prospect_id" hidden>
 
-                            <div class="col-sm" id="installment_not_equal_total_message_modify"
-                                name="installment_not_equal_total_message_modify" hidden>
+									</form>
+								</div>
+
+
+								<div style="margin-left:50px">
+									<form action="{{ url_for('delete_transaction') }}" method="post">
+										<input id="delete_button" name="delete_button"
+											   class="btn btn-primary btn-lg btn-block" type="submit" value="Delete"
+											   onclick="finalCheckBeforeDelete(event);">
+										<input id="transaction_id_to_delete" name="transaction_id_to_delete" hidden>
+									</form>
+								</div>
+
+								<div style="margin-left:50px">
+									<input class="btn btn-primary btn-lg btn-block"
+										   style="border:none; background-color:red; color:black !important"
+										   id="transaction_id_to_show" name="transaction_id_to_show" type="button"
+										   hidden>
+									<input id="stripe_customer_id" name="stripe_customer_id" hidden>
+
+								</div>
+
+							</div>
+
+							<br><br>
+
+							<div class="col-sm" id="cant_modify_message" name="cant_modify_message"
+								 hidden>
+								<span class="badge badge-danger">You can't modify this payment</span>
+
+							</div>
+
+							<br><br>
+
+							<div class="col-sm" id="cant_delete_message" name="cant_delete_message"
+								 hidden>
+								<span class="badge badge-danger">You can't delete this payment</span>
+
+							</div>
+
+							<div class="col-sm" id="installment_not_equal_total_message_modify"
+								 name="installment_not_equal_total_message_modify" hidden>
                                 <span class="badge badge-danger">The installment payments must equal the transaction
                                     total.</span>
 
-                            </div>
-
-                            {% endif %}
-
-
-                        </div>
-
-                        <div>
-                            {% for message in get_flashed_messages() %}
-                            <div class="alert alert-warning">
-                                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                                {{ message }}
-                            </div>
-                            {% endfor %}
-                        </div>
-
-                    </div>
-
-
-                </div>
-
-            </div>
-
-
-            <div class="col-7 order-1">
-                <br><br><br><br><br>
-                <h4 class="mb-3">Transaction Information</h4>
-                <form id="create_transaction_setup_form" name="create_transaction_setup_form" class="needs-validation"
-                    action="{{ url_for('create_transaction') }}" method="post" data-toggle="validator">
-                    <div class="row">
-                        <div class="col-md-2 mb-3">
-                            <label for="salutation">Salutation</label>
-                            <select id="salutation" name="salutation" class="form-control" required>
-                                <option value="" selected disabled hidden></option>
-                                <option value='Mr.'>Mr.</option>
-                                <option value='Ms.'>Ms.</option>
-                            </select>
-                            <div class="invalid-feedback">
-                                Valid salutation is required.
-                            </div>
-                        </div>
-                        <div class="col-md-5 mb-3">
-                            <label for="first_name">First name</label>
-                            <input type="text" class="form-control" id="first_name" name="first_name" placeholder=""
-                                value="" required>
-                            <div class="invalid-feedback">
-                                Valid first name is required.
-                            </div>
-                        </div>
-                        <div class="col-md-5 mb-3">
-                            <label for="last_name">Last name</label>
-                            <input type="text" class="form-control" id="last_name" name="last_name" placeholder=""
-                                value="" required>
-                            <div class="invalid-feedback">
-                                Valid last name is required.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" name="email"
-                                placeholder="you@example.com" required>
-                            <div class="invalid-feedback">
-                                Please enter a valid email address.
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="phone_number">Phone number</label>
-                            <input type="tel" class="form-control" id="phone_number" name="phone_number"
-                                placeholder="111-111-1111" required>
-                            <div class="invalid-feedback">
-                                Please enter a valid phone number.
-                            </div>
-                        </div>
-                    </div><br><br><br><br>
-
-                    <div class="mb-3">
-                        <div class="row  col-md-9 ">
-                            <label for="how_did_they_hear_about_us">How did they hear about us?</label>
-                            <select id="how_did_they_hear_about_us" name="how_did_they_hear_about_us"
-                                class="form-control">
-                                <option value="" selected disabled hidden></option>
-                                <option value='Southwest: Garland'>Southwest: Garland</option>
-                                <option value='Southwest: Arlington'>Southwest: Arlington</option>
-                                <option value='Returning Client'>Returning Client</option>
-                                <option value='USPS Mailer'>USPS Mailer</option>
-                                <option value='Gidi Lounge'>Gidi Lounge</option>
-                                <option value='Referral'>Referral</option>
-                                <option value='Other'>Other</option>
-                            </select>
-                        </div>
-                    </div><br>
-
-                    <div class="mb-3">
-                        <div class="row  col-md-9 ">
-                            <label for="details_on_how_they_heard_about_us">How did they hear about us
-                                (details)?</label>
-                            <textarea id="details_on_how_they_heard_about_us" name="details_on_how_they_heard_about_us"
-                                class="form-control" rows="2" placeholder=""></textarea>
-                        </div><br>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="grade_level">Grade Level</label>
-                                <select id="grade_level" name="grade_level" class="form-control">
-                                    <option value="" selected disabled hidden></option>
-                                    <option value='Middle School'>Middle School</option>
-                                    <option value='9th Grade'>9th Grade</option>
-                                    <option value='10th Grade'>10th Grade</option>
-                                    <option value='11th Grade'>11th Grade</option>
-                                    <option value='12th Grade'>12th Grade</option>
-                                    <option value='Other'>Other</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-
-                                <label for="recent_test_score">SAT/ACT/P-SAT/P-ACT Score</label>
-                                <input type="number" class="form-control" id="recent_test_score"
-                                    name="recent_test_score" placeholder="" value="">
-                                <div class="invalid-feedback">
-                                    Valid number is required.
-                                </div><br>
-                            </div>
-                        </div>
-                    </div><br>
-
-                    <div class="row input-group mb-3">
-                        <div class="col-md-9 ">
-                            <label for="leadSearchInput">Search for lead to connect</label>
-                            <input id="leadSearchInput" name="leadSearchInput" type="text" class="form-control"
-                                placeholder="Input search term">
-                        </div>
-                    </div><br>
-
-                    <div class=" mb-3 form-group">
-                        <label for="leadSearchResults">Search Results</label>
-                        <select class="form-control" id="leadSearchResults" name="leadSearchResults" size="5"></select>
-                    </div><br>
-
-
-                    <h4 class="mb-3">Product Information</h4>
-
-                    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-
-                    <div class="d-block my-3">
-                        <div container>
-                            <p>Initial Diagnostic/Consultation</p>
-
-                            <div class="checkbox mb-3" style="text-align:center;">
-
-                                <input id="was_diagnostic_purchased" name="was_diagnostic_purchased" value=""
-                                    type="checkbox" class="custom-control-input">
-                                <label class="custom-control-label"
-                                    for="was_diagnostic_purchased">Diagnostic/Consultation</label>
-                                <br><br><br>
-                            </div>
-
-                        </div>
-                    </div>
-
-
-                    <div class="d-block my-3">
-                        <div container>
-
-                            <div class="row">
-
-                                <div class="col-sm">
-                                    <div class="mb-3">
-                                        <input id="diag_units" name="diag_units" type="number" min="1"
-                                            class="form-control" required>
-                                        <label for="diag_units"># of Units</label>
-                                    </div>
-                                </div>
-                                <div class="col-sm">
-                                    <div class="mb-3">
-                                        <input id="diag_total" name="diag_total" type="number" class="form-control"
-                                            required readonly>
-                                        <label for="diag_total">Diagnostic/Consultation Total</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-
-                    <div class="d-block my-3">
-                        <div container>
-                            <p>Test Prep</p>
-
-                            <div class="checkbox mb-3">
-                                <label>
-                                    <input type="checkbox" value="" id="was_test_prep_purchased"
-                                        name="was_test_prep_purchased"> Turn on test prep info
-                                </label>
-                            </div>
-
-                            <div class="row">
-
-
-                                <div class="col-sm">
-                                    <div class="custom-control custom-radio">
-                                        <input id="tp-home-12wks" name="tp_product" value="4699" type="radio"
-                                            class="custom-control-input" required>
-                                        <label class="custom-control-label" for="tp-home-12wks">12 Weeks Prep
-                                            (Home)</label>
-                                    </div>
-                                    <div class="custom-control custom-radio">
-                                        <input id="tp-home-08wks" name="tp_product" value="3379" type="radio"
-                                            class="custom-control-input" required>
-                                        <label class="custom-control-label" for="tp-home-08wks">8 Weeks Prep
-                                            (Home)</label>
-                                    </div>
-                                    <div class="custom-control custom-radio">
-                                        <input id="tp-home-01wk" name="tp_product" value="375" type="radio"
-                                            class="custom-control-input" required>
-                                        <label class="custom-control-label" for="tp-home-01wk">1 Week Prep
-                                            (Home)</label>
-                                    </div>
-
-                                </div>
-                                <div class="col-sm">
-
-                                    <div class="custom-control custom-radio">
-                                        <input id="tp-vensti-center-12wks" value="3999" name="tp_product" type="radio"
-                                            class="custom-control-input" required>
-                                        <label class="custom-control-label" for="tp-vensti-center-12wks">12 Weeks Prep
-                                            (Vensti)</label>
-                                    </div>
-                                    <div class="custom-control custom-radio">
-                                        <input id="tp-vensti-center-08wks" value="2749" name="tp_product" type="radio"
-                                            class="custom-control-input" required>
-                                        <label class="custom-control-label" for="tp-vensti-center-08wks">8 Weeks Prep
-                                            (Vensti)</label>
-                                    </div>
-                                    <div class="custom-control custom-radio">
-                                        <input id="tp-vensti-center-01wk" value="300" name="tp_product" type="radio"
-                                            class="custom-control-input" required>
-                                        <label class="custom-control-label" for="tp-vensti-center-01wk">1 Week Prep
-                                            (Vensti)</label>
-                                    </div>
-
-                                </div>
-
-                                <div class="col-sm">
-
-                                    <div class="custom-control custom-radio">
-                                        <input id="tp-tech-12wks" value="3999" name="tp_product" type="radio"
-                                            class="custom-control-input" required>
-                                        <label class="custom-control-label" for="tp-tech-12wks">12 Weeks Prep
-                                            (Tech)</label>
-                                    </div>
-                                    <div class="custom-control custom-radio">
-                                        <input id="tp-tech-08wks" value="2749" name="tp_product" type="radio"
-                                            class="custom-control-input" required>
-                                        <label class="custom-control-label" for="tp-tech-08wks">8 Weeks Prep
-                                            (Tech)</label>
-                                    </div>
-                                    <div class="custom-control custom-radio">
-                                        <input id="tp-tech-01wk" value="300" name="tp_product" type="radio"
-                                            class="custom-control-input" required>
-                                        <label class="custom-control-label" for="tp-tech-01wk">1 Week Prep
-                                            (Tech)</label>
-                                    </div>
-
-                                </div>
-
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <br><br>
-
-                    <div class="d-block my-3">
-                        <div container>
-
-                            <div class="row">
-
-
-                                <div class="col-sm">
-                                    <div class="mb-3">
-                                        <input id="tp_units" name="tp_units" type="number" min="1" class="form-control"
-                                            required>
-                                        <label for="tp_units"># of Units</label>
-                                    </div>
-                                </div>
-                                <div class="col-sm">
-                                    <div class="mb-3">
-                                        <input id="tp_total" name="tp_total" type="number" class="form-control" required
-                                            readonly>
-                                        <label for="tp_total">Test Prep Total</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-
-                    <div class="d-block my-3">
-                        <div container>
-                            <p>Essays</p>
-
-                            <div class="checkbox mb-3">
-                                <label>
-                                    <input type="checkbox" name="was_college_apps_purchased"
-                                        id="was_college_apps_purchased" value=""> Turn on essays info
-                                </label>
-                            </div>
-
-                            <div class="custom-control custom-radio" style="text-align:center;">
-
-                                <input id="college_consultation" name="college_consultation" value="275" type="radio"
-                                    class="custom-control-input">
-                                <label class="custom-control-label" for="college_consultation">Consultation/Advisory
-                                    Services</label>
-                                <br><br><br>
-                            </div>
-
-                            <div class="row">
-
-
-                                <div class="col-sm">
-                                    <div class="custom-control custom-radio">
-                                        <input id="apps-1" value="375" name="college_apps_product" type="radio"
-                                            class="custom-control-input" required>
-                                        <label class="custom-control-label" for="apps-1">Per Essay</label>
-                                    </div>
-                                </div>
-                                <div class="col-sm">
-
-                                    <div class="custom-control custom-radio">
-                                        <input id="apps-2" value="1600" name="college_apps_product" type="radio"
-                                            class="custom-control-input" required>
-                                        <label class="custom-control-label" for="apps-2">1-3 Colleges</label>
-                                    </div>
-
-                                </div>
-
-                                <div class="col-sm">
-
-                                    <div class="custom-control custom-radio">
-                                        <input id="apps-3" value="1950" name="college_apps_product" type="radio"
-                                            class="custom-control-input" required>
-                                        <label class="custom-control-label" for="apps-3">More Than 3 Colleges</label>
-                                    </div>
-
-                                </div>
-
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <br><br>
-
-
-                    <div class="d-block my-3">
-                        <div container>
-
-                            <div class="row">
-
-
-                                <div class="col-sm">
-                                    <div class="mb-3">
-                                        <input id="college_apps_units" name="college_apps_units" type="number" min="1"
-                                            class="form-control" required>
-                                        <label for="college_apps_units"># of Units</label>
-                                    </div>
-                                </div>
-                                <div class="col-sm">
-                                    <div class="mb-3">
-                                        <input id="college_apps_total" name="college_apps_total" type="number"
-                                            class="form-control" required readonly>
-                                        <label for="college_apps_total">College Apps Total</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-
-                    <div class="d-block my-3">
-                        <div container>
-                            <p>Transaction Adjustments</p>
-                            <br>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="d-block my-3">
-                        <div container>
-
-                            <div class="row">
-
-
-                                <div class="col-sm">
-                                    <div class="mb-3">
-                                        <input id="adjust_total" name="adjust_total" type="number" value=""
-                                            class="form-control">
-                                        <label for="adjust_total">Adjust Total(+/-)</label>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <br>
-
-                            <div class="row">
-
-
-                                <div class="col-sm">
-                                    <div class="mb-3">
-                                        <input id="adjustment_explanation" name="adjustment_explanation" type="text"
-                                            value="" class="form-control">
-                                        <label for="adjustment_explanation">Adjustment Explanation</label>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <div class="row">
-
-
-                                <div class="col-sm">
-                                    <div class="mb-3">
-                                        <input id="transaction_total" name="transaction_total" type="number"
-                                            class="form-control" required readonly>
-                                        <label for="transaction_total">Transaction Total</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <br>
-
-                            <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-
-                            <div class="container">
-
-                                <p>Installments</p>
-                                <br>
-
-                                <input id="installment_counter" name="installment_counter" value="1" hidden>
-                                <table id="myTable" class="table order-list">
-                                    <thead>
-                                        <tr>
-                                            <td style="text-align: center;">Installment Date</td>
-                                            <td style="text-align: center;">Installment Amount</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="5" style="text-align: center;">
-                                                <input type="button" class="btn btn-md btn-secondary " id="addrow"
-                                                    value="Add" />
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            </div>
-
-
-                            <br>
-
-                        </div>
-
-                    </div>
-
-
-                    <br><br>
-
-                    <div class="col-sm" id="installment_not_equal_total_message_create"
-                        name="installment_not_equal_total_message_create" hidden>
+							</div>
+
+						{% endif %}
+
+
+					</div>
+
+					<div>
+						{% for message in get_flashed_messages() %}
+							<div class="alert alert-warning">
+								<button type="button" class="close" data-dismiss="alert">&times;</button>
+								{{ message }}
+							</div>
+						{% endfor %}
+					</div>
+
+				</div>
+
+
+			</div>
+
+		</div>
+
+
+		<div class="col-7 order-1">
+			<br><br><br><br><br>
+			<h4 class="mb-3">Transaction Information</h4>
+			<form id="create_transaction_setup_form" name="create_transaction_setup_form" class="needs-validation"
+				  action="{{ url_for('create_transaction') }}" method="post" data-toggle="validator">
+				<div class="row">
+					<div class="col-md-2 mb-3">
+						<label for="salutation">Salutation</label>
+						<select id="salutation" name="salutation" class="form-control" required>
+							<option value="" selected disabled hidden></option>
+							<option value='Mr.'>Mr.</option>
+							<option value='Ms.'>Ms.</option>
+						</select>
+						<div class="invalid-feedback">
+							Valid salutation is required.
+						</div>
+					</div>
+					<div class="col-md-5 mb-3">
+						<label for="first_name">First name</label>
+						<input type="text" class="form-control" id="first_name" name="first_name" placeholder=""
+							   value="" required>
+						<div class="invalid-feedback">
+							Valid first name is required.
+						</div>
+					</div>
+					<div class="col-md-5 mb-3">
+						<label for="last_name">Last name</label>
+						<input type="text" class="form-control" id="last_name" name="last_name" placeholder=""
+							   value="" required>
+						<div class="invalid-feedback">
+							Valid last name is required.
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-6 mb-3">
+						<label for="email">Email</label>
+						<input type="email" class="form-control" id="email" name="email"
+							   placeholder="you@example.com" required>
+						<div class="invalid-feedback">
+							Please enter a valid email address.
+						</div>
+					</div>
+					<div class="col-md-6 mb-3">
+						<label for="phone_number">Phone number</label>
+						<input type="tel" class="form-control" id="phone_number" name="phone_number"
+							   placeholder="111-111-1111" required>
+						<div class="invalid-feedback">
+							Please enter a valid phone number.
+						</div>
+					</div>
+				</div>
+				<br><br><br><br>
+
+				<div class="mb-3">
+					<div class="row  col-md-9 ">
+						<label for="how_did_they_hear_about_us">How did they hear about us?</label>
+						<select id="how_did_they_hear_about_us" name="how_did_they_hear_about_us"
+								class="form-control">
+							<option value="" selected disabled hidden></option>
+							<option value='Southwest: Garland'>Southwest: Garland</option>
+							<option value='Southwest: Arlington'>Southwest: Arlington</option>
+							<option value='Returning Client'>Returning Client</option>
+							<option value='USPS Mailer'>USPS Mailer</option>
+							<option value='Gidi Lounge'>Gidi Lounge</option>
+							<option value='Referral'>Referral</option>
+							<option value='Other'>Other</option>
+						</select>
+					</div>
+				</div>
+				<br>
+
+				<div class="mb-3">
+					<div class="row  col-md-9 ">
+						<label for="details_on_how_they_heard_about_us">How did they hear about us
+							(details)?</label>
+						<textarea id="details_on_how_they_heard_about_us" name="details_on_how_they_heard_about_us"
+								  class="form-control" rows="2" placeholder=""></textarea>
+					</div>
+					<br>
+
+					<div class="row">
+						<div class="col-md-6 mb-3">
+							<label for="grade_level">Grade Level</label>
+							<select id="grade_level" name="grade_level" class="form-control">
+								<option value="" selected disabled hidden></option>
+								<option value='Middle School'>Middle School</option>
+								<option value='9th Grade'>9th Grade</option>
+								<option value='10th Grade'>10th Grade</option>
+								<option value='11th Grade'>11th Grade</option>
+								<option value='12th Grade'>12th Grade</option>
+								<option value='Other'>Other</option>
+							</select>
+						</div>
+						<div class="col-md-6 mb-3">
+
+							<label for="recent_test_score">SAT/ACT/P-SAT/P-ACT Score</label>
+							<input type="number" class="form-control" id="recent_test_score"
+								   name="recent_test_score" placeholder="" value="">
+							<div class="invalid-feedback">
+								Valid number is required.
+							</div>
+							<br>
+						</div>
+					</div>
+				</div>
+				<br>
+
+				<div class="row input-group mb-3">
+					<div class="col-md-9 ">
+						<label for="leadSearchInput">Search for lead to connect</label>
+						<input id="leadSearchInput" name="leadSearchInput" type="text" class="form-control"
+							   placeholder="Input search term">
+					</div>
+				</div>
+				<br>
+
+				<div class=" mb-3 form-group">
+					<label for="leadSearchResults">Search Results</label>
+					<select class="form-control" id="leadSearchResults" name="leadSearchResults" size="5"></select>
+				</div>
+				<br>
+
+
+				<h4 class="mb-3">Product Information</h4>
+
+				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+
+				<div class="d-block my-3">
+					<div container>
+						<p>Initial Diagnostic/Consultation</p>
+
+						<div class="checkbox mb-3" style="text-align:center;">
+
+							<input id="was_diagnostic_purchased" name="was_diagnostic_purchased" value=""
+								   type="checkbox" class="custom-control-input">
+							<label class="custom-control-label"
+								   for="was_diagnostic_purchased">Diagnostic/Consultation</label>
+							<br><br><br>
+						</div>
+
+					</div>
+				</div>
+
+
+				<div class="d-block my-3">
+					<div container>
+
+						<div class="row">
+
+							<div class="col-sm">
+								<div class="mb-3">
+									<input id="diag_units" name="diag_units" type="number" min="1"
+										   class="form-control" required>
+									<label for="diag_units"># of Units</label>
+								</div>
+							</div>
+							<div class="col-sm">
+								<div class="mb-3">
+									<input id="diag_total" name="diag_total" type="number" class="form-control"
+										   required readonly>
+									<label for="diag_total">Diagnostic/Consultation Total</label>
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+
+
+				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+
+				<div class="d-block my-3">
+					<div container>
+						<p>Test Prep</p>
+
+						<div class="checkbox mb-3">
+							<label>
+								<input type="checkbox" value="" id="was_test_prep_purchased"
+									   name="was_test_prep_purchased"> Turn on test prep info
+							</label>
+						</div>
+
+						<div class="row">
+
+
+							<div class="col-sm">
+								<div class="custom-control custom-radio">
+									<input id="tp-home-12wks" name="tp_product" value="4699" type="radio"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="tp-home-12wks">12 Weeks Prep
+										(Home)</label>
+								</div>
+								<div class="custom-control custom-radio">
+									<input id="tp-home-08wks" name="tp_product" value="3379" type="radio"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="tp-home-08wks">8 Weeks Prep
+										(Home)</label>
+								</div>
+								<div class="custom-control custom-radio">
+									<input id="tp-home-01wk" name="tp_product" value="375" type="radio"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="tp-home-01wk">1 Week Prep
+										(Home)</label>
+								</div>
+
+							</div>
+							<div class="col-sm">
+
+								<div class="custom-control custom-radio">
+									<input id="tp-vensti-center-12wks" value="3999" name="tp_product" type="radio"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="tp-vensti-center-12wks">12 Weeks Prep
+										(Vensti)</label>
+								</div>
+								<div class="custom-control custom-radio">
+									<input id="tp-vensti-center-08wks" value="2749" name="tp_product" type="radio"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="tp-vensti-center-08wks">8 Weeks Prep
+										(Vensti)</label>
+								</div>
+								<div class="custom-control custom-radio">
+									<input id="tp-vensti-center-01wk" value="300" name="tp_product" type="radio"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="tp-vensti-center-01wk">1 Week Prep
+										(Vensti)</label>
+								</div>
+
+							</div>
+
+							<div class="col-sm">
+
+								<div class="custom-control custom-radio">
+									<input id="tp-tech-12wks" value="3999" name="tp_product" type="radio"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="tp-tech-12wks">12 Weeks Prep
+										(Tech)</label>
+								</div>
+								<div class="custom-control custom-radio">
+									<input id="tp-tech-08wks" value="2749" name="tp_product" type="radio"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="tp-tech-08wks">8 Weeks Prep
+										(Tech)</label>
+								</div>
+								<div class="custom-control custom-radio">
+									<input id="tp-tech-01wk" value="300" name="tp_product" type="radio"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="tp-tech-01wk">1 Week Prep
+										(Tech)</label>
+								</div>
+
+							</div>
+
+
+						</div>
+
+					</div>
+
+				</div>
+
+
+				<br><br>
+
+				<div class="d-block my-3">
+					<div container>
+
+						<div class="row">
+
+
+							<div class="col-sm">
+								<div class="mb-3">
+									<input id="tp_units" name="tp_units" type="number" min="1" class="form-control"
+										   required>
+									<label for="tp_units"># of Units</label>
+								</div>
+							</div>
+							<div class="col-sm">
+								<div class="mb-3">
+									<input id="tp_total" name="tp_total" type="number" class="form-control" required
+										   readonly>
+									<label for="tp_total">Test Prep Total</label>
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+
+				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+
+				<div class="d-block my-3">
+					<div container>
+						<p>Essays</p>
+
+						<div class="checkbox mb-3">
+							<label>
+								<input type="checkbox" name="was_college_apps_purchased"
+									   id="was_college_apps_purchased" value=""> Turn on essays info
+							</label>
+						</div>
+
+						<div class="custom-control custom-radio" style="text-align:center;">
+
+							<input id="college_consultation" name="college_consultation" value="275" type="radio"
+								   class="custom-control-input">
+							<label class="custom-control-label" for="college_consultation">Consultation/Advisory
+								Services</label>
+							<br><br><br>
+						</div>
+
+						<div class="row">
+
+
+							<div class="col-sm">
+								<div class="custom-control custom-radio">
+									<input id="apps-1" value="375" name="college_apps_product" type="radio"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="apps-1">Per Essay</label>
+								</div>
+							</div>
+							<div class="col-sm">
+
+								<div class="custom-control custom-radio">
+									<input id="apps-2" value="1600" name="college_apps_product" type="radio"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="apps-2">1-3 Colleges</label>
+								</div>
+
+							</div>
+
+							<div class="col-sm">
+
+								<div class="custom-control custom-radio">
+									<input id="apps-3" value="1950" name="college_apps_product" type="radio"
+										   class="custom-control-input" required>
+									<label class="custom-control-label" for="apps-3">More Than 3 Colleges</label>
+								</div>
+
+							</div>
+
+
+						</div>
+
+					</div>
+
+				</div>
+
+
+				<br><br>
+
+
+				<div class="d-block my-3">
+					<div container>
+
+						<div class="row">
+
+
+							<div class="col-sm">
+								<div class="mb-3">
+									<input id="college_apps_units" name="college_apps_units" type="number" min="1"
+										   class="form-control" required>
+									<label for="college_apps_units"># of Units</label>
+								</div>
+							</div>
+							<div class="col-sm">
+								<div class="mb-3">
+									<input id="college_apps_total" name="college_apps_total" type="number"
+										   class="form-control" required readonly>
+									<label for="college_apps_total">College Apps Total</label>
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+
+
+				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+
+				<div class="d-block my-3">
+					<div container>
+						<p>Transaction Adjustments</p>
+						<br>
+
+					</div>
+
+				</div>
+
+
+				<div class="d-block my-3">
+					<div container>
+
+						<div class="row">
+
+
+							<div class="col-sm">
+								<div class="mb-3">
+									<input id="adjust_total" name="adjust_total" type="number" value=""
+										   class="form-control">
+									<label for="adjust_total">Adjust Total(+/-)</label>
+								</div>
+							</div>
+
+						</div>
+
+						<br>
+
+						<div class="row">
+
+
+							<div class="col-sm">
+								<div class="mb-3">
+									<input id="adjustment_explanation" name="adjustment_explanation" type="text"
+										   value="" class="form-control">
+									<label for="adjustment_explanation">Adjustment Explanation</label>
+								</div>
+							</div>
+
+						</div>
+
+						<div class="row">
+
+
+							<div class="col-sm">
+								<div class="mb-3">
+									<input id="transaction_total" name="transaction_total" type="number"
+										   class="form-control" required readonly>
+									<label for="transaction_total">Transaction Total</label>
+								</div>
+							</div>
+						</div>
+
+						<br>
+
+						<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+
+						<div class="container">
+
+							<p>Installments</p>
+							<br>
+
+							<input id="installment_counter" name="installment_counter" value="1" hidden>
+							<table id="myTable" class="table order-list">
+								<thead>
+								<tr>
+									<td style="text-align: center;">Installment Date</td>
+									<td style="text-align: center;">Installment Amount</td>
+								</tr>
+								</thead>
+								<tbody>
+
+								</tbody>
+								<tfoot>
+								<tr>
+									<td colspan="5" style="text-align: center;">
+										<input type="button" class="btn btn-md btn-secondary " id="addrow"
+											   value="Add"/>
+									</td>
+								</tr>
+								<tr>
+								</tr>
+								</tfoot>
+							</table>
+						</div>
+
+
+						<br>
+
+					</div>
+
+				</div>
+
+
+				<br><br>
+
+				<div class="col-sm" id="installment_not_equal_total_message_create"
+					 name="installment_not_equal_total_message_create" hidden>
                         <span class="badge badge-danger">The installment payments must equal the transaction
                             total.</span>
 
-                    </div>
+				</div>
 
-                    <div class="col-sm" id="more_than_12_installments_message" name="more_than_12_installments_message"
-                        hidden>
-                        <span class="badge badge-danger">The number of installment payments must be 12 or less.</span>
+				<div class="col-sm" id="more_than_12_installments_message" name="more_than_12_installments_message"
+					 hidden>
+					<span class="badge badge-danger">The number of installment payments must be 12 or less.</span>
 
-                    </div>
+				</div>
 
-                    <br>
+				<br>
 
-                    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-                    <div class="d-block my-3">
-                        <div container>
-                            <p>Extra Tags on Transaction</p>
-                            <br>
+				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+				<div class="d-block my-3">
+					<div container>
+						<p>Extra Tags on Transaction</p>
+						<br>
 
-                        </div>
+					</div>
 
-                    </div>
+				</div>
 
-                    <div class="d-block my-3">
-                        <div container>
-                            <div class="row">
-                                <div class="col-md-4 checkbox mb-3">
-                                    <label>
-                                        <input type="checkbox" id="mark_as_paid" name="mark_as_paid" value=""> Mark as
-                                        paid
-                                    </label>
-                                    <br>
-                                </div>
-                                <div class="col-md-4 checkbox mb-3">
-                                    <label>
-                                        <input type="checkbox" id="send_text_and_email" name="send_text_and_email"
-                                            value=""> Send text and
-                                        email
-                                    </label>
-                                    <br>
-                                </div>
-                            </div>
-                    </div><br>
+				<div class="d-block my-3">
+					<div container>
+						<div class="row">
 
-                    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-                    <div class="d-block my-3">
-                        <div container>
-                            <p>Extra Information</p>
-                            <br>
+							<div id="mark_as_paid_wrap_around_div" name="mark_as_paid_wrap_around_div"
+								 class="col-md-4 checkbox mb-3">
+								<label>
+									<input type="checkbox" id="mark_as_paid" name="mark_as_paid" value=""> Mark as
+									paid
+								</label>
+								<br>
+							</div>
+							<div class="col-md-4 checkbox mb-3">
+								<label>
+									<input type="checkbox" id="send_text_and_email" name="send_text_and_email"
+										   value=""> Send text and
+									email
+								</label>
+								<br>
+							</div>
+						</div>
+					</div>
+					<br>
 
-                        </div>
+					<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+					<div class="d-block my-3">
+						<div container>
+							<p>Extra Information</p>
+							<br>
 
-                    </div>
+						</div>
 
-                    <div class="d-block my-3">
-                        <div container>
-                            <div class="row">
-                                <div class="col-md-4 checkbox mb-3">
-                                    <label>
-                                        <input type="checkbox" id="ask_for_student_info" name="ask_for_student_info"
-                                            value=""> Ask for
-                                        student info
-                                    </label>
-                                    <br>
-                                </div>
-                                <div class="col-md-4 checkbox mb-3">
-                                    <label>
-                                        <input type="checkbox" id="ask_for_student_availability" name="ask_for_student_availability"
-                                            value=""> Ask for student availability
-                                    </label>
-                                    <br>
-                                </div>
-                            </div>
-                            </div>
-                        </div>
-                    </div><br>
+					</div>
 
-                    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-                    <div class="d-block my-3">
-                        <div container>
-                            <p>Recurring Payments</p>
-                            <br>
+					<div class="d-block my-3">
+						<div container>
+							<div class="row">
+								<div class="col-md-4 checkbox mb-3">
+									<label>
+										<input type="checkbox" id="ask_for_student_info" name="ask_for_student_info"
+											   value=""> Ask for
+										student info
+									</label>
+									<br>
+								</div>
+								<div class="col-md-4 checkbox mb-3">
+									<label>
+										<input type="checkbox" id="ask_for_student_availability"
+											   name="ask_for_student_availability"
+											   value=""> Ask for student availability
+									</label>
+									<br>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<br>
 
-                        </div>
+				<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
+				<div class="d-block my-3">
+					<div container>
+						<p>Recurring Payments</p>
+						<br>
 
-                    </div>
+					</div>
 
-                    <div class="d-block my-3">
-                        <div container>
+				</div>
 
-                            <div class="row">
-                                <div class="col-md-2 mb-3">
-                                    <label>
-                                        <input type="checkbox" id="make_payment_recurring" name="make_payment_recurring" value="no"> Make
-                                        recurring
-                                    </label>
-                                    <br>
-                                </div>
-                                <div class="col-md-5 mb-3">
-                                    <label for="recurring_payment_start_date">Recurring payment start date</label>
-                                    <input id="recurring_payment_start_date" name="recurring_payment_start_date"
-                                        type="date" class="form-control" disabled>
-                                    <br>
-                                </div>
-                                <div class="col-md-5 mb-3">
-                                    <label for="recurring_payment_frequency">Recurring payment frequency</label>
-                                    <input id="recurring_payment_frequency" name="recurring_payment_frequency"
-                                        type="number" class="form-control" min="1" disabled>
-                                    <br>
-                                </div>
+				<div class="d-block my-3">
+					<div container>
 
-                            </div>
-                        </div>
-                    </div><br>
+						<div class="row">
+							<div class="col-md-2 mb-3">
+								<label>
+									<input type="checkbox" id="make_payment_recurring" name="make_payment_recurring"
+										   value="no"> Make
+									recurring
+								</label>
+								<br>
+							</div>
+							<div class="col-md-5 mb-3">
+								<label for="recurring_payment_start_date">Recurring payment start date</label>
+								<input id="recurring_payment_start_date" name="recurring_payment_start_date"
+									   type="date" class="form-control" disabled>
+								<br>
+							</div>
+							<div class="col-md-5 mb-3">
+								<label for="recurring_payment_frequency">Recurring payment frequency</label>
+								<input id="recurring_payment_frequency" name="recurring_payment_frequency"
+									   type="number" class="form-control" min="0" disabled>
+								<br>
+							</div>
 
+						</div>
+					</div>
+				</div>
+				<br>
 
-                    <hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
-                    <div class="d-block my-3">
-                        <div container>
-                            <p>Pause Transaction</p>
-                            <br>
+				<div id="pause_payment_wrap_around_div" name="pause_payment_wrap_around_div">
+					<hr class="mb-4" style="height:1px;border:none;color:#333;background-color:#333;">
 
-                        </div>
+					<div class="d-block my-3">
+						<div container>
+							<p>Pause Payment</p>
+							<br>
 
-                    </div>
+						</div>
 
-                    <div class="d-block my-3">
-                        <div container>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label>
-                                        <input type="checkbox" id="pause_payment" name="pause_payment" value="no"> Pause
-                                        payment
-                                    </label>
-                                    <br>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="paused_payment_resumption_date">Paused payment resumption date</label>
-                                    <input id="paused_payment_resumption_date" name="paused_payment_resumption_date"
-                                        type="date" class="form-control" disabled>
-                                    <br>
-                                </div>
-                            </div>
-                        </div>
-                    </div><br>
+					</div>
 
+					<div class="d-block my-3">
 
-                    <input id="leads" name="leads" hidden data-leads="{{ leads }}">
+						<div container>
+							<div class="row">
+								<div id="pause_payment_checkbox_div" name="pause_payment_checkbox_div" class="col-md-6 mb-3">
+										<input type="checkbox" id="pause_payment" name="pause_payment" value="no"> Pause
+										payment
+									<br>
+								</div>
 
-                    <div class="row justify-content-center"><input id="create_transaction_button"
-                            name="create_transaction_button" class="btn btn-primary btn-lg btn-block w-50 p-3"
-                            type="submit" value="Create Transaction" onclick="finalCheckBeforeSubmit(event)"></input>
-                    </div>
+								<div class="col-md-6 mb-3">
+									<label for="paused_payment_resumption_date">Paused payment resumption date</label>
+									<input id="paused_payment_resumption_date" name="paused_payment_resumption_date"
+										   type="date" class="form-control" disabled>
+									<br>
+								</div>
 
+							</div>
 
 
-                </form>
-            </div>
-        </div>
+							<div class="row justify-content-center">
+								<div id="modify_pause_status_div" name="modify_pause_status_div" class="col-md-6 mb-3 " hidden>
+										<input type="submit" id="modify_pause_status" name="modify_pause_status" value="Pause/Unpause Started Payment"  class="btn btn-warning btn-sm btn-block"   onclick="finalCheckBeforeModify(event);"/>
+									<br>
+								</div>
+							</div>
 
-        <hr>
+									<input id="transaction_id_to_pause" name="transaction_id_to_pause" type="text" value="" hidden>
 
-        <footer class="my-5 pt-5 text-muted text-center text-small">
-            <p class="mb-1">&copy; 2017-2021 Perfect Score Mo</p>
-            <ul class="list-inline">
-                <li class="list-inline-item"><a href="#">Privacy</a></li>
-                <li class="list-inline-item"><a href="#">Terms</a></li>
-                <li class="list-inline-item"><a href="#">Support</a></li>
-            </ul>
-        </footer>
-    </div>
+						</div>
+					</div>
+					<br>
+				</div>
+
+
+				<input id="leads" name="leads" hidden data-leads="{{ leads }}">
+				<input id="names_of_enabled_elements" name="names_of_enabled_elements" hidden
+					   data-names_of_enabled_elements="">
+
+
+				<div class="row justify-content-center"><input id="create_transaction_button"
+															   name="create_transaction_button"
+															   class="btn btn-primary btn-lg btn-block w-50 p-3"
+															   type="submit" value="Create Transaction"
+															   onclick="finalCheckBeforeSubmit(event)"></input>
+				</div>
+
+
+			</form>
+		</div>
+	</div>
+
+	<hr>
+
+	<footer class="my-5 pt-5 text-muted text-center text-small">
+		<p class="mb-1">&copy; 2017-2021 PrepWithMo</p>
+		<ul class="list-inline">
+			<li class="list-inline-item"><a href="#">Privacy</a></li>
+			<li class="list-inline-item"><a href="#">Terms</a></li>
+			<li class="list-inline-item"><a href="#">Support</a></li>
+		</ul>
+	</footer>
+</div>
 
 </body>
 
