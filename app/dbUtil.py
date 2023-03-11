@@ -102,6 +102,7 @@ class AppDBUtil():
         pause_payment = clientData.get('pause_payment')
         paused_payment_resumption_date = None if clientData.get('paused_payment_resumption_date', '') == '' else clientData.get('paused_payment_resumption_date')
         does_customer_payment_info_exist = 'yes' if clientData.get('does_customer_payment_info_exist',None) else 'no'
+        pay_automatically = 'yes' if clientData.get('pay_automatically', None) else 'no'
 
 
 
@@ -115,7 +116,7 @@ class AppDBUtil():
                                   college_apps_units=college_apps_units, college_apps_total=college_apps_total,adjust_total=adjust_total, adjustment_explanation=adjustment_explanation,
                                 transaction_total=transaction_total, installment_counter=installment_counter,ask_for_student_info=ask_for_student_info,ask_for_student_availability=ask_for_student_availability,
                                       does_customer_payment_info_exist=does_customer_payment_info_exist,make_payment_recurring=make_payment_recurring,recurring_payment_frequency=recurring_payment_frequency,
-                                      recurring_payment_start_date=recurring_payment_start_date,pause_payment=pause_payment,paused_payment_resumption_date=paused_payment_resumption_date)
+                                      recurring_payment_start_date=recurring_payment_start_date,pause_payment=pause_payment,paused_payment_resumption_date=paused_payment_resumption_date,pay_automatically=pay_automatically)
 
 
             db.session.add(transaction)
@@ -130,7 +131,7 @@ class AppDBUtil():
                         "college_apps_total": college_apps_total,"adjust_total": adjust_total,"adjustment_explanation": adjustment_explanation,
                   "transaction_total": transaction_total, "installment_counter":installment_counter, "does_customer_payment_info_exist":does_customer_payment_info_exist,
                   "ask_for_student_info":ask_for_student_info,"ask_for_student_availability":ask_for_student_availability,"make_payment_recurring":make_payment_recurring,"recurring_payment_frequency":recurring_payment_frequency,
-                  "recurring_payment_start_date":recurring_payment_start_date,"pause_payment":pause_payment,"paused_payment_resumption_date":paused_payment_resumption_date})
+                  "recurring_payment_start_date":recurring_payment_start_date,"pause_payment":pause_payment,"paused_payment_resumption_date":paused_payment_resumption_date,"pay_automatically":pay_automatically})
 
             logger.info(f"Number of transaction rows modified is: {number_of_rows_modified}") #printing of rows modified to logs to help with auditing
 
@@ -299,7 +300,7 @@ class AppDBUtil():
     def updatePausePaymentStatus(cls, transaction_id, pause_payment, paused_payment_resumption_date):
         transaction = Transaction.query.filter_by(transaction_id=transaction_id).first()
         transaction.pause_payment = pause_payment
-        transaction. paused_payment_resumption_date =  paused_payment_resumption_date
+        transaction.paused_payment_resumption_date =  paused_payment_resumption_date
         cls.executeDBQuery()
         return transaction
 
@@ -432,10 +433,7 @@ class AppDBUtil():
     @classmethod
     def findClientsToReceiveReminders(cls):
         try:
-            transaction_details = Transaction.query.filter_by(payment_started=False).all()
-
-            #send reminders only to new customers who have not started paying
-            #transaction_details = db.session.query(Transaction).filter((Transaction.payment_started == False) & (Transaction.does_customer_payment_info_exist == 'no')).all()
+            transaction_details = Transaction.query.filter((Transaction.pause_payment == "no") & (Transaction.payment_started == False)).all()
 
             search_results = []
             for transaction in transaction_details:
@@ -500,14 +498,13 @@ class AppDBUtil():
             client['was_college_apps_purchased'] = transaction.was_college_apps_purchased
             client['college_apps_units'] = transaction.college_apps_units
             client['college_apps_total'] = transaction.college_apps_total
-            client['adjust_total'] = transaction.adjust_total
             client['installment_counter'] = transaction.installment_counter
-            client['adjustment_explanation'] = transaction.adjustment_explanation
-            client['transaction_total'] = transaction.transaction_total
             client['payment_started'] = str(transaction.payment_started)
             client['prospect_id'] = str(transaction.prospect_id)
             client['ask_for_student_info'] = transaction.ask_for_student_info
             client['ask_for_student_availability'] = transaction.ask_for_student_availability
+            client['does_customer_payment_info_exist'] = transaction.does_customer_payment_info_exist
+            client['pay_automatically'] = transaction.pay_automatically
 
             client['make_payment_recurring'] = transaction.make_payment_recurring
             client['recurring_payment_frequency'] = transaction.recurring_payment_frequency
@@ -554,6 +551,12 @@ class AppDBUtil():
     def updateTransactionPaymentStarted(cls, transaction_id):
         transaction = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
         transaction.payment_started = True
+        cls.executeDBQuery()
+
+    @classmethod
+    def updateTransactionDoesCustomerPaymentInfoExist(cls, transaction_id):
+        transaction = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
+        transaction.does_customer_payment_info_exist = 'yes'
         cls.executeDBQuery()
 
     @classmethod
@@ -792,17 +795,17 @@ class AppDBUtil():
         try:
             if search_query:
                 if search_query.isdigit():
-                    lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
+                    lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.appointment_date_and_time.desc()).all()
                 elif search_query.startswith("l-"):
-                    lead_info = Lead.query.filter_by(lead_id=search_query).order_by(Lead.date_created.desc()).all()
+                    lead_info = Lead.query.filter_by(lead_id=search_query).order_by(Lead.appointment_date_and_time.desc()).all()
                 elif "@" in search_query:
-                    lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
+                    lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.appointment_date_and_time.desc()).all()
                 else:
                     search = "%{}%".format(search_query)
-                    lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
+                    lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.appointment_date_and_time.desc()).all()
 
             elif searchStartDate and searchEndDate:
-                lead_info = Lead.query.filter(Lead.date_created <= searchEndDate).filter(Lead.date_created >= searchStartDate).order_by(Lead.date_created.desc()).all()
+                lead_info = Lead.query.filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
                 #changed way of searching lead_info because previous one was neither inclusive of start/end dates nor intuitive
                 #lead_info = Lead.query.filter(Lead.date_created.between(searchStartDate, searchEndDate)).order_by(Lead.date_created.desc()).all()
 

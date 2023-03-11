@@ -76,7 +76,8 @@ class StripeInstance():
             logger.info("Existing customer total is: {}".format(existing_customer_total_payment_so_far))
             customer = stripe.Customer.retrieve(existing_customer.stripe_customer_id)
             does_customer_payment_info_exist = False
-            if int(existing_customer_total_payment_so_far) > 40000:
+            if existing_customer.does_customer_payment_info_exist == 'yes':
+            #if int(existing_customer_total_payment_so_far) > 40000:
                 default_card = customer.invoice_settings.default_payment_method
                 default_ach = customer.default_source
                 print("payment options are: ")
@@ -186,11 +187,7 @@ class StripeInstance():
                             invoice_dates_and_amounts_to_update_due_to_pausing.append((datetime.datetime.fromtimestamp(stripe_info[f'date_{k}']), stripe_info[f'amount_{k}']))
 
                 for invoice_date, amount in invoice_dates_and_amounts_to_update_due_to_pausing:
-                    if existing_customer:
-                        # ensures that you always keep 72 hours to change method of payment promise to exisiting clients
-                        payment_date = invoice_date + datetime.timedelta(days=1)
-                    else:
-                        payment_date = invoice_date
+                    payment_date = invoice_date
 
                     installment_amount = int(math.ceil(int(amount) * 1.00))
                     # switched this from 1.03 to 1.00 because this is ACH and you should not multiply by 1.03
@@ -212,13 +209,8 @@ class StripeInstance():
                                                             payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
 
             elif chosen_mode_of_payment == 'full-payment-ach':
-                if existing_customer:
-                    logger.info('Full payment ACH for existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
-                    payment_date = date_today + datetime.timedelta(days=1)
-
-                else:
-                    logger.info('Full payment ACH for new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
-                    payment_date = date_today
+                logger.info('Full payment ACH for new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
+                payment_date = date_today
 
                 amount = stripe_info['transaction_total']
                 transaction_total = int(stripe_info['transaction_total'])
@@ -260,12 +252,12 @@ class StripeInstance():
                         price=os.environ.get('price'),
                     )
 
-                    transaction = stripe.Invoice.create(
+                    invoice = stripe.Invoice.create(
                         customer=stripe_info['stripe_customer_id'],
                         default_source=customer_default_source,
                         metadata={'transaction_id': stripe_info['transaction_id']},
                     )
-                    stripe.Invoice.pay(transaction.id)
+                    stripe.Invoice.pay(invoice.id)
 
             elif chosen_mode_of_payment == 'recurring-payment-ach':
                 logger.info('Recurring payment ach: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
@@ -273,11 +265,7 @@ class StripeInstance():
                 recurring_payment_start_date =  stripe_info['paused_payment_resumption_date'] if  stripe_info['paused_payment_resumption_date'] and datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'], '%Y-%m-%d').date() >=  datetime.datetime.strptime(stripe_info['recurring_payment_start_date'], '%Y-%m-%d').date() else stripe_info['recurring_payment_start_date']
                 #logger.debug(f"type of recurring_payment_start_date {type(recurring_payment_start_date)}")
 
-                if existing_customer:
-                    # ensures that you always keep 24 hours to change method of payment promise to existing clients
-                    payment_date = recurring_payment_start_date + datetime.timedelta(days=1)
-                else:
-                    payment_date = recurring_payment_start_date
+                payment_date = recurring_payment_start_date
 
                 transaction_total = int(stripe_info['transaction_total'])
 
@@ -300,6 +288,8 @@ class StripeInstance():
             return {'status': 'success'}
         except Exception as e:
             logger.exception(e)
+            transaction_name = stripe_info['name'].split()[0] + " " + stripe_info['name'].split()[1]
+            SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Transaction setup/payment failed for {transaction_name} of transaction_id {stripe_info['transaction_id']} with error {e}. Go check the logs!", message_type='to_mo')
             return {'status': 'error'}
 
     def chargeCustomerViaCard(self, stripe_info, chosen_mode_of_payment, payment_id,existing_customer=None):
@@ -350,11 +340,7 @@ class StripeInstance():
                                 invoice_dates_and_amounts_to_update_due_to_pausing.append((datetime.datetime.fromtimestamp(stripe_info[f'date_{k}']),stripe_info[f'amount_{k}']))
 
                 for invoice_date,amount in invoice_dates_and_amounts_to_update_due_to_pausing:
-                    if existing_customer:
-                        #ensures that you always keep 72 hours to change method of payment promise to exisiting clients
-                        payment_date = invoice_date + datetime.timedelta(days=1)
-                    else:
-                        payment_date = invoice_date
+                    payment_date = invoice_date
 
                     # if stripe_info['pause_payment'] == 'yes':
                     #     if stripe_info.get('paused_payment_resumption_date'):
@@ -389,14 +375,8 @@ class StripeInstance():
                                                             payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
 
             elif chosen_mode_of_payment == 'full-payment-credit-card':
-                if existing_customer:
-                    logger.info('Full payment credit card existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
-                    # ensures that you always keep 48? hours to change method of payment promise to exisiting clients
-                    payment_date = date_today + datetime.timedelta(days=1)
-
-                else:
-                    logger.info('Full payment credit card new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
-                    payment_date = date_today
+                logger.info('Full payment credit card new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
+                payment_date = date_today
 
                 transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
                 amount = str(transaction_total)
@@ -490,11 +470,7 @@ class StripeInstance():
 
                 recurring_payment_start_date =  stripe_info['paused_payment_resumption_date'] if  stripe_info['paused_payment_resumption_date'] and datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'], '%Y-%m-%d').date() >=  datetime.datetime.strptime(stripe_info['recurring_payment_start_date'], '%Y-%m-%d').date() else stripe_info['recurring_payment_start_date']
 
-                if existing_customer:
-                    # ensures that you always keep 24 hours to change method of payment promise to exisiting clients
-                    payment_date = recurring_payment_start_date + datetime.timedelta(days=1)
-                else:
-                    payment_date = recurring_payment_start_date
+                payment_date = recurring_payment_start_date
 
                 # if stripe_info['pause_payment'] == 'yes':
                 #     if stripe_info.get('paused_payment_resumption_date'):
@@ -527,6 +503,8 @@ class StripeInstance():
             return {'status': 'success'}
         except Exception as e:
             logger.exception(e)
+            transaction_name = stripe_info['name'].split()[0] + " " + stripe_info['name'].split()[1]
+            SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Transaction setup/payment failed for {transaction_name} of transaction_id {stripe_info['transaction_id']} with error {e}. Go check the logs!", message_type='to_mo')
             return {'status': 'error'}
 
     def setupRecurringPaymentsDueToday(self):
@@ -621,6 +599,8 @@ class StripeInstance():
         if default_card:
             if stripe_info['installment_counter'] > 1:
                 chosen_mode_of_payment = 'installment-payment-credit-card'
+            elif stripe_info['make_payment_recurring'] == 'yes':
+                chosen_mode_of_payment = 'recurring-payment-credit-card'
             else:
                 chosen_mode_of_payment = 'full-payment-credit-card'
 
@@ -629,6 +609,8 @@ class StripeInstance():
         elif default_ach:
             if stripe_info['installment_counter'] > 1:
                 chosen_mode_of_payment = 'installment-payment-ach'
+            elif stripe_info['make_payment_recurring'] == 'yes':
+                chosen_mode_of_payment = 'recurring-payment-ach'
             else:
                 chosen_mode_of_payment = 'full-payment-ach'
 
@@ -685,14 +667,14 @@ class SendMessagesToClients():
     @classmethod
     def sendSMS(cls, to_numbers=None, message_type='', message='perfectscoremo', recipient_name=''):
 
-        if message_type == 'create_transaction_new_client':
+        if message_type == 'create_transaction_without_auto_pay':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been created. Here are the payment/signup instructions/options (also sent to your email address):".format(recipient_name)
-        elif message_type == 'modify_transaction_new_client':
+        elif message_type == 'modify_transaction_without_auto_pay':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified. Here are the payment/signup instructions/options (also sent to your email address):".format(recipient_name)
-        elif message_type == 'create_transaction_existing_client':
-            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
-        elif message_type == 'modify_transaction_existing_client':
-            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
+        elif message_type == 'create_transaction_with_auto_pay':
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created and paid using your method of payment on file.\n\nHappy to answer any questions!\n\nRegards,\n\nMo".format(recipient_name)
+        elif message_type == 'modify_transaction_with_auto_pay':
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified and paid using your method of payment on file.\n\nHappy to answer any questions!\n\nRegards,\n\nMo".format(recipient_name)
         elif message_type == 'ask_for_student_info':
             link_url = os.environ["url_to_start_reminder"]+"client_info/"+message
             created_or_modified_span = "Dear {},\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. \n\n This will be used to setup text message and email updates on your student's regular progress.".format(recipient_name)
@@ -716,7 +698,7 @@ class SendMessagesToClients():
             text_message = message
         elif message_type in ['ask_for_student_info', 'welcome_new_student', 'questions', 'referral_request', 'confirm_lead_appointment', 'reminder_about_appointment', 'reminder_to_make_payment']:
             text_message = created_or_modified_span
-        elif message_type in ['create_transaction_new_client', 'modify_transaction_new_client', 'create_transaction_existing_client', 'modify_transaction_existing_client']:
+        elif message_type in ['create_transaction_without_auto_pay', 'modify_transaction_without_auto_pay']:
             text_message = "\n" + created_or_modified_span + "\n\n" \
                            + """1. Go to prepwithmo.com\n\n""" \
                            + """2. Choose ‘Make A Payment’ from the menu\n\n""" \

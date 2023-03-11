@@ -289,7 +289,7 @@ def lead_info_by_mo():
                 return render_template('lead_info_by_mo.html', action=action,current_time=datetime.datetime.now(pytz.timezone('US/Central')))
             except Exception as e:
                 logger.exception(e)
-                flash('An error has occured during the creation.')
+                flash('An error has occurred during the creation.')
                 return render_template('lead_info_by_mo.html', action=action,current_time=datetime.datetime.now(pytz.timezone('US/Central')))
 
         if action == 'Modify':
@@ -328,7 +328,7 @@ def lead_info_by_mo():
                 return render_template('lead_info_by_mo.html', action=action,current_time=datetime.datetime.now(pytz.timezone('US/Central')))
             except Exception as e:
                 logger.exception(e)
-                flash('An error occured while modifying the lead.')
+                flash('An error occurred while modifying the lead.')
                 return render_template('lead_info_by_mo.html', action=action,current_time=datetime.datetime.now(pytz.timezone('US/Central')))
 
         if action == 'Search':
@@ -337,7 +337,7 @@ def lead_info_by_mo():
                 search_results = AppDBUtil.getLeadInfo(lead_info_contents.get('search_query', None), lead_info_contents.get('start_date', None), lead_info_contents.get('end_date', None))
             except Exception as e:
                 logger.exception(e)
-                flash('An error has occured during the search.')
+                flash('An error has occurred during the search.')
                 render_template('lead_info_by_mo.html', action=action)
 
             if not search_results:
@@ -387,39 +387,46 @@ def create_transaction():
             stripe_info = parseDataForStripe(client_info)
             logger.info('stripe_info is: ' + str(stripe_info))
 
+            flash_message = ''
+
 
             if transaction_setup_data.get('mark_as_paid','') == 'yes':
                 stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info,action='create')
                 AppDBUtil.updateTransactionPaymentStarted(transaction_id)
                 logger.info('Mark transaction as paid: '+str(stripe_info['transaction_id']))
+                flash_message = 'Transaction created and marked as paid.'
             else:
                 message_type = ''
-                if does_customer_payment_info_exist:
-                    message_type = 'create_transaction_existing_client'
+                if transaction_setup_data.get('pay_automatically', '') == 'yes':
+                #if does_customer_payment_info_exist:
+                    message_type = 'create_transaction_with_auto_pay'
                     logger.info('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
                     stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
+                    flash_message = 'Transaction created and paid automatically.'
                 else:
-                    message_type = 'create_transaction_new_client'
+                    message_type = 'create_transaction_without_auto_pay'
+                    flash_message = 'Transaction created.'
 
                 if transaction_setup_data.get('send_text_and_email', '') == 'yes':
                     logger.info('Send transaction text and email notification: ' + str(stripe_info['transaction_id']))
                     try:
                         SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
-                        if message_type == 'create_transaction_existing_client':
+                        if message_type == 'create_transaction_with_auto_pay':
                             SendMessagesToClients.sendSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
                             time.sleep(5)
                             SendMessagesToClients.sendSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, message_type='questions')
                         else:
                             SendMessagesToClients.sendSMS(to_numbers=transaction_setup_data['phone_number'], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
-                        flash('Transaction created and email/sms sent to client.')
+                        flash_message = flash_message+ ' ' + 'Also, email/sms sent to client.'
                     except Exception as e:
                         traceback.print_exc()
-                        flash('An error occured while sending an email/sms to the client after creating the transaction.')
+                        flash_message = flash_message + ' ' + 'But an error occurred while sending an email/sms to the client after creating the transaction.'
             logger.info('Created transaction: ' + str(stripe_info['transaction_id']))
+            flash(flash_message)
             return render_template('generate_transaction_id.html',transaction_id=transaction_id,input_transaction_id_url=os.environ.get("url_to_start_reminder")+"input_transaction_id")
         except Exception as e:
             logger.exception(e)
-            flash('An error occured while creating the transaction.')
+            flash('An error occurred while creating the transaction.')
             return redirect(url_for('transaction_setup'))
 
 @server.route('/search_transaction',methods=['POST'])
@@ -441,7 +448,7 @@ def search_transaction():
     except Exception as e:
         print(e)
         traceback.print_exc()
-        flash('An error has occured during the search.')
+        flash('An error has occurred during the search.')
         return redirect(url_for('transaction_setup'))
 
     if not search_results:
@@ -472,9 +479,12 @@ def modify_transaction():
             #return render_template('transaction_setup.html',leads=json.dumps(processed_leads))
             return redirect(url_for('transaction_setup'))
 
+        flash_message = ''
+
         if AppDBUtil.isTransactionPaymentStarted(transaction_id):
             logger.info(f"{transaction_id} is a started transaction, so modifying the pause status and dates of its unpaid invoices")
             AppDBUtil.modifyTransactionBasedOnPauseUnpauseStatus(clientData=data_to_modify, transaction_id=transaction_id)
+            flash_message = 'Pause status and dates of unpaid invoices updated for already started transaction updated.'
         else:
             if data_to_modify.get('mark_as_paid', '') == 'yes':
                 client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
@@ -482,42 +492,48 @@ def modify_transaction():
                 stripeInstance.markCustomerAsChargedOutsideofStripe(stripe_info,action='modify')
                 AppDBUtil.updateTransactionPaymentStarted(transaction_id)
                 logger.info("marked transaction as paid")
+                flash_message = 'Transaction modified and marked as paid.'
             else:
                 customer, does_customer_payment_info_exist = stripeInstance.createCustomer(data_to_modify)
                 client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
                 stripe_info = parseDataForStripe(client_info)
                 message_type = ''
-                if does_customer_payment_info_exist:
-                    message_type = 'modify_transaction_existing_client'
+
+                
+                if data_to_modify.get('pay_automatically', '') == 'yes':
+                #if does_customer_payment_info_exist:
+                    message_type = 'modify_transaction_with_auto_pay'
                     logger.info('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
                     stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
+                    flash_message = 'Transaction modified and paid automatically.'
                 else:
-                    message_type = 'modify_transaction_new_client'
+                    message_type = 'modify_transaction_without_auto_pay'
+                    flash_message = 'Transaction modified.'
 
 
         if data_to_modify.get('send_text_and_email','') == 'yes':
             logger.info('Send modified transaction text and email notification: ' + str(stripe_info['transaction_id']))
             try:
                 SendMessagesToClients.sendEmail(to_address=data_to_modify['email'], message=transaction_id, message_type=message_type)
-                if message_type == 'modify_transaction_existing_client':
+                if message_type == 'modify_transaction_with_auto_pay':
                     SendMessagesToClients.sendSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, message_type=message_type)
                     time.sleep(5)#
                     SendMessagesToClients.sendSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, message_type='questions')
                 else:
                     SendMessagesToClients.sendSMS(to_numbers=data_to_modify['phone_number'], message=transaction_id, message_type=message_type)
 
-                flash('Transaction modified and email/sms sent to client.')
+                flash_message = flash_message+ ' ' + 'Also, email/sms sent to client.'
             except Exception as e:
                 logger.exception(e)
-                flash('An error occured while sending an email/sms to the client after modifying the transaction.')
-        else:
-            flash('Transaction sucessfully modified.')
+                flash_message = flash_message + ' ' + 'But an error occurred while sending an email/sms to the client after modifying the transaction.'
+
         logger.info(f'Modified transaction: {transaction_id}')
+        flash(flash_message)
         #return render_template('transaction_setup.html',leads=json.dumps(processed_leads))
         return redirect(url_for('transaction_setup'))
     except Exception as e:
         logger.exception(e)
-        flash('An error occured while modifying the transaction.')
+        flash('An error occurred while modifying the transaction.')
         #return render_template('transaction_setup.html',leads=json.dumps(processed_leads))
         return redirect(url_for('transaction_setup'))
 
@@ -535,7 +551,7 @@ def delete_transaction():
         return redirect(url_for('transaction_setup'))
     except Exception as e:
         logger.exception(e)
-        flash('An error occured while deleting the transaction.')
+        flash('An error occurred while deleting the transaction.')
         return redirect(url_for('transaction_setup'))
 
     #return render_template('transaction_setup.html')
@@ -790,6 +806,7 @@ def stripe_webhook():
                 AppDBUtil.updateInvoiceAsPaid(paid_invoice.id)
                 AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id, amount_paid)
                 AppDBUtil.updateTransactionPaymentStarted(transaction_id)
+                AppDBUtil.updateTransactionDoesCustomerPaymentInfoExist(transaction_id)
 
                 logger.info(f"Transaction {transaction_id} with stripe invoice id {paid_invoice.id} is paid (VIA Card)")
             # else:
@@ -828,6 +845,7 @@ def stripe_webhook():
                     AppDBUtil.updateInvoiceAsPaid(finalized_invoice.id)
                     AppDBUtil.updateAmountPaidAgainstTransaction(transaction_id,amount_paid)
                     AppDBUtil.updateTransactionPaymentStarted(transaction_id)
+                    AppDBUtil.updateTransactionDoesCustomerPaymentInfoExist(transaction_id)
 
                     logger.info(f"Transaction {transaction_id} with stripe invoice id {finalized_invoice.id} is paid (VIA ACH)")
 
@@ -952,7 +970,7 @@ def start_background_jobs_before_first_request():
                 except Exception as e:
                     invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
                     logger.exception("Invoice payment failed for: ".format(invoice_name))
-                    #SendMessagesToClients.sendSMS(to_numbers='9725847364', message="Exception: Invoice payments failed for: " + invoice_name + '. Go check the logs!', message_type='to_mo')
+                    SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Exception: Invoice payments failed for {invoice_name} with error {e}. Go check the logs!", message_type='to_mo')
                 finally:
                     if invoice_payment_failed:
                         pass
@@ -1072,7 +1090,7 @@ def complete_signup():
         client_info,products_info,showACHOverride = AppDBUtil.getTransactionDetails(request.form.to_dict()['transaction_id'])
     except Exception as e:
         print(e)
-        flash('An error has occured. Contact Mo.')
+        flash('An error has occurred. Contact Mo.')
         return redirect(url_for('input_transaction_id'))
     if not client_info and not products_info:
         flash('You might have put in the wrong code. Try again or contact Mo.')

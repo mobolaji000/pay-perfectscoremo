@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html"
+	  xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
 
 <head>
 	<meta charset="utf-8">
@@ -281,6 +282,30 @@
 
             //
 
+			if (result.does_customer_payment_info_exist == "yes") {
+                document.getElementById("pay_automatically_wrap_around_div").hidden=false;
+            } else {
+                document.getElementById("pay_automatically_wrap_around_div").hidden=true;
+            }
+
+            if (result.pay_automatically == "yes") {
+                 $('input[name="pay_automatically"]').prop('checked', true);
+                 $('input[name="mark_as_paid"]').val('yes');
+                 $( "#mark_as_paid" ).click();
+                 {#$('input[name="mark_as_paid"]').prop('checked', false);#}
+                 {#$('input[name="mark_as_paid"]').val('');#}
+                  document.getElementById("mark_as_paid_wrap_around_div").hidden=true;
+            } else {
+                 $('input[name="pay_automatically"]').prop('checked', false);
+                 $('input[name="mark_as_paid"]').val('');
+                 $( "#mark_as_paid" ).click();
+                 {#$('input[name="mark_as_paid"]').prop('checked', true);#}
+                 {# $('input[name="mark_as_paid"]').val('yes');#}
+                  document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
+            }
+
+			//
+
             if (result.was_test_prep_purchased != "") {
                 $('input[name="was_test_prep_purchased"]').val("yes");
                 $('input[name="was_test_prep_purchased"]').prop('checked', true);
@@ -463,6 +488,7 @@
             dataToModify['recurring_payment_start_date'] = $('input[name="recurring_payment_start_date"]').val();
             dataToModify['pause_payment'] = $('input[name="pause_payment"]').val();
             dataToModify['paused_payment_resumption_date'] = $('input[name="paused_payment_resumption_date"]').val();
+            dataToModify['pay_automatically'] = $('input[name="pay_automatically"]').val();
 
 
             for (let k = 1; k < dataToModify['installment_counter'] + 1; k++) {
@@ -1132,18 +1158,22 @@
 
 							<div id="mark_as_paid_wrap_around_div" name="mark_as_paid_wrap_around_div"
 								 class="col-md-4 checkbox mb-3">
-								<label>
 									<input type="checkbox" id="mark_as_paid" name="mark_as_paid" value=""> Mark as
 									paid
-								</label>
+								</input>
 								<br>
 							</div>
 							<div class="col-md-4 checkbox mb-3">
-								<label>
 									<input type="checkbox" id="send_text_and_email" name="send_text_and_email"
 										   value=""> Send text and
 									email
-								</label>
+								</input>
+								<br>
+							</div>
+							<div class="col-md-4 checkbox mb-3" id="pay_automatically_wrap_around_div" name="pay_automatically_wrap_around_div" hidden="hidden">
+									<input type="checkbox" id="pay_automatically" name="pay_automatically"
+										   value=""> Pay automatically
+								</input>
 								<br>
 							</div>
 						</div>
@@ -1164,19 +1194,17 @@
 						<div container>
 							<div class="row">
 								<div class="col-md-4 checkbox mb-3">
-									<label>
 										<input type="checkbox" id="ask_for_student_info" name="ask_for_student_info"
 											   value=""> Ask for
 										student info
-									</label>
+									</input>
 									<br>
 								</div>
 								<div class="col-md-4 checkbox mb-3">
-									<label>
 										<input type="checkbox" id="ask_for_student_availability"
 											   name="ask_for_student_availability"
 											   value=""> Ask for student availability
-									</label>
+									</input>
 									<br>
 								</div>
 							</div>
@@ -1200,11 +1228,10 @@
 
 						<div class="row">
 							<div class="col-md-2 mb-3">
-								<label>
 									<input type="checkbox" id="make_payment_recurring" name="make_payment_recurring"
 										   value="no"> Make
 									recurring
-								</label>
+								</input>
 								<br>
 							</div>
 							<div class="col-md-5 mb-3">
