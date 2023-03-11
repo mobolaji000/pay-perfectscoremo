@@ -792,17 +792,17 @@ class AppDBUtil():
         try:
             if search_query:
                 if search_query.isdigit():
-                    lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.date_created.desc()).all()
+                    lead_info = Lead.query.filter_by(lead_phone_number=search_query).order_by(Lead.appointment_date_and_time.desc()).all()
                 elif search_query.startswith("l-"):
-                    lead_info = Lead.query.filter_by(lead_id=search_query).order_by(Lead.date_created.desc()).all()
+                    lead_info = Lead.query.filter_by(lead_id=search_query).order_by(Lead.appointment_date_and_time.desc()).all()
                 elif "@" in search_query:
-                    lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.date_created.desc()).all()
+                    lead_info = Lead.query.filter_by(lead_email=search_query).order_by(Lead.appointment_date_and_time.desc()).all()
                 else:
                     search = "%{}%".format(search_query)
-                    lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.date_created.desc()).all()
+                    lead_info = Lead.query.filter(Lead.lead_name.ilike(search)).order_by(Lead.appointment_date_and_time.desc()).all()
 
             elif searchStartDate and searchEndDate:
-                lead_info = Lead.query.filter(Lead.date_created <= searchEndDate).filter(Lead.date_created >= searchStartDate).order_by(Lead.date_created.desc()).all()
+                lead_info = Lead.query.filter(Lead.appointment_date_and_time <= searchEndDate).filter(Lead.appointment_date_and_time >= searchStartDate).order_by(Lead.appointment_date_and_time.desc()).all()
                 #changed way of searching lead_info because previous one was neither inclusive of start/end dates nor intuitive
                 #lead_info = Lead.query.filter(Lead.date_created.between(searchStartDate, searchEndDate)).order_by(Lead.date_created.desc()).all()
 

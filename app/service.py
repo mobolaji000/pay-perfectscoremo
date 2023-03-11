@@ -260,12 +260,12 @@ class StripeInstance():
                         price=os.environ.get('price'),
                     )
 
-                    transaction = stripe.Invoice.create(
+                    invoice = stripe.Invoice.create(
                         customer=stripe_info['stripe_customer_id'],
                         default_source=customer_default_source,
                         metadata={'transaction_id': stripe_info['transaction_id']},
                     )
-                    stripe.Invoice.pay(transaction.id)
+                    stripe.Invoice.pay(invoice.id)
 
             elif chosen_mode_of_payment == 'recurring-payment-ach':
                 logger.info('Recurring payment ach: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
@@ -300,6 +300,8 @@ class StripeInstance():
             return {'status': 'success'}
         except Exception as e:
             logger.exception(e)
+            transaction_name = stripe_info['name'].split()[0] + " " + stripe_info['name'].split()[1]
+            SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Transaction setup/payment failed for: {transaction_name} with transaction_id {stripe_info['transaction_id']}. Go check the logs!", message_type='to_mo')
             return {'status': 'error'}
 
     def chargeCustomerViaCard(self, stripe_info, chosen_mode_of_payment, payment_id,existing_customer=None):
@@ -527,6 +529,8 @@ class StripeInstance():
             return {'status': 'success'}
         except Exception as e:
             logger.exception(e)
+            transaction_name = stripe_info['name'].split()[0] + " " + stripe_info['name'].split()[1]
+            SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Transaction setup/payment failed for: {transaction_name} with transaction_id {stripe_info['transaction_id']}. Go check the logs!", message_type='to_mo')
             return {'status': 'error'}
 
     def setupRecurringPaymentsDueToday(self):
