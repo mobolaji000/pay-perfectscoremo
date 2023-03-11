@@ -394,18 +394,19 @@ def create_transaction():
                 logger.info('Mark transaction as paid: '+str(stripe_info['transaction_id']))
             else:
                 message_type = ''
-                if does_customer_payment_info_exist:
-                    message_type = 'create_transaction_existing_client'
+                if transaction_setup_data.get('pay_automatically', '') == 'yes':
+                #if does_customer_payment_info_exist:
+                    message_type = 'create_transaction_with_auto_pay'
                     logger.info('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
                     stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
                 else:
-                    message_type = 'create_transaction_new_client'
+                    message_type = 'create_transaction_without_auto_pay'
 
                 if transaction_setup_data.get('send_text_and_email', '') == 'yes':
                     logger.info('Send transaction text and email notification: ' + str(stripe_info['transaction_id']))
                     try:
                         SendMessagesToClients.sendEmail(to_address=transaction_setup_data['email'], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
-                        if message_type == 'create_transaction_existing_client':
+                        if message_type == 'create_transaction_with_auto_pay':
                             SendMessagesToClients.sendSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, message_type=message_type, recipient_name=transaction_setup_data['salutation'] + ' ' + transaction_setup_data['first_name'] + ' ' + transaction_setup_data['last_name'])
                             time.sleep(5)
                             SendMessagesToClients.sendSMS(to_numbers=[transaction_setup_data['phone_number']], message=transaction_id, message_type='questions')
@@ -487,19 +488,21 @@ def modify_transaction():
                 client_info, products_info, showACHOverride = AppDBUtil.getTransactionDetails(transaction_id)
                 stripe_info = parseDataForStripe(client_info)
                 message_type = ''
-                if does_customer_payment_info_exist:
-                    message_type = 'modify_transaction_existing_client'
+                
+                if data_to_modify.get('pay_automatically', '') == 'yes':
+                #if does_customer_payment_info_exist:
+                    message_type = 'modify_transaction_with_auto_pay'
                     logger.info('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
                     stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
                 else:
-                    message_type = 'modify_transaction_new_client'
+                    message_type = 'modify_transaction_without_auto_pay'
 
 
         if data_to_modify.get('send_text_and_email','') == 'yes':
             logger.info('Send modified transaction text and email notification: ' + str(stripe_info['transaction_id']))
             try:
                 SendMessagesToClients.sendEmail(to_address=data_to_modify['email'], message=transaction_id, message_type=message_type)
-                if message_type == 'modify_transaction_existing_client':
+                if message_type == 'modify_transaction_with_auto_pay':
                     SendMessagesToClients.sendSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, message_type=message_type)
                     time.sleep(5)#
                     SendMessagesToClients.sendSMS(to_numbers=[data_to_modify['phone_number']], message=transaction_id, message_type='questions')

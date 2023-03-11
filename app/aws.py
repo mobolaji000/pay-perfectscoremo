@@ -75,15 +75,15 @@ class AWSInstance():
 
     def send_email(self, to_address='mo@prepwithmo.com', message='PrepWithMo', subject='PrepWithMo', message_type='', recipient_name=''):
 
-        if message_type == 'create_transaction_new_client':
+        if message_type == 'create_transaction_without_auto_pay':
             created_or_modified_span = "<span>Your transaction has just been <strong>created</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
-        elif message_type == 'modify_transaction_new_client':
+        elif message_type == 'modify_transaction_without_auto_pay':
             created_or_modified_span = "<span>Your transaction has just been <strong>modified</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
         elif message_type == 'reminder_to_make_payment':
             created_or_modified_span = "<span>This is an automated reminder that your transaction <strong>is due</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
-        elif message_type == 'create_transaction_existing_client':
+        elif message_type == 'create_transaction_with_auto_pay':
             created_or_modified_span = "<span>Your new transaction has been created using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
-        elif message_type == 'modify_transaction_existing_client':
+        elif message_type == 'modify_transaction_with_auto_pay':
             created_or_modified_span = "<span>Your transaction has just been modified using your method of payment on file, but there have been <strong>no charges</strong>. You can always change your method of payment between now and the date of your first payment. Here are the payment instructions/options to change your method of payment (also sent to your phone number):</span><br><br>"
         elif message_type == 'reminder_about_appointment':
             link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/lead/" + message[2]
@@ -144,7 +144,7 @@ class AWSInstance():
                 </html>
                             """
 
-        elif message_type in ['create_transaction_new_client', 'modify_transaction_new_client', 'create_transaction_existing_client', 'modify_transaction_existing_client', 'reminder_to_make_payment']:
+        elif message_type in ['create_transaction_without_auto_pay', 'modify_transaction_without_auto_pay', 'create_transaction_with_auto_pay', 'modify_transaction_with_auto_pay', 'reminder_to_make_payment']:
             BODY_HTML = """<html>
                             <head></head>
                             <body>

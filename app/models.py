@@ -30,6 +30,7 @@ class Transaction(db.Model):
     ask_for_student_info = db.Column(db.String(4), index=True,nullable=False, default='')
     ask_for_student_availability = db.Column(db.String(4), index=True, nullable=False, default='')
     does_customer_payment_info_exist = db.Column(db.String(30), index=True, nullable=False, default='')
+    pay_automatically = db.Column(db.String(30), index=True, nullable=False, default='')
     recurring_payment_frequency = db.Column(db.Integer, index=True, nullable=True, default=-1)
     make_payment_recurring = db.Column(db.Enum('yes', 'no',name='yes_no_options'), index=True, nullable=False, default='no')
     pause_payment = db.Column(db.Enum('yes', 'no',name='yes_no_options'), index=True, nullable=False, default='no')

@@ -621,6 +621,8 @@ class StripeInstance():
         if default_card:
             if stripe_info['installment_counter'] > 1:
                 chosen_mode_of_payment = 'installment-payment-credit-card'
+            elif stripe_info['make_payment_recurring'] == 'yes':
+                chosen_mode_of_payment = 'recurring-payment-credit-card'
             else:
                 chosen_mode_of_payment = 'full-payment-credit-card'
 
@@ -629,6 +631,8 @@ class StripeInstance():
         elif default_ach:
             if stripe_info['installment_counter'] > 1:
                 chosen_mode_of_payment = 'installment-payment-ach'
+            elif stripe_info['make_payment_recurring'] == 'yes':
+                chosen_mode_of_payment = 'recurring-payment-ach'
             else:
                 chosen_mode_of_payment = 'full-payment-ach'
 
@@ -685,13 +689,13 @@ class SendMessagesToClients():
     @classmethod
     def sendSMS(cls, to_numbers=None, message_type='', message='perfectscoremo', recipient_name=''):
 
-        if message_type == 'create_transaction_new_client':
+        if message_type == 'create_transaction_without_auto_pay':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been created. Here are the payment/signup instructions/options (also sent to your email address):".format(recipient_name)
-        elif message_type == 'modify_transaction_new_client':
+        elif message_type == 'modify_transaction_without_auto_pay':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified. Here are the payment/signup instructions/options (also sent to your email address):".format(recipient_name)
-        elif message_type == 'create_transaction_existing_client':
+        elif message_type == 'create_transaction_with_auto_pay':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
-        elif message_type == 'modify_transaction_existing_client':
+        elif message_type == 'modify_transaction_with_auto_pay':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
         elif message_type == 'ask_for_student_info':
             link_url = os.environ["url_to_start_reminder"]+"client_info/"+message
@@ -716,7 +720,7 @@ class SendMessagesToClients():
             text_message = message
         elif message_type in ['ask_for_student_info', 'welcome_new_student', 'questions', 'referral_request', 'confirm_lead_appointment', 'reminder_about_appointment', 'reminder_to_make_payment']:
             text_message = created_or_modified_span
-        elif message_type in ['create_transaction_new_client', 'modify_transaction_new_client', 'create_transaction_existing_client', 'modify_transaction_existing_client']:
+        elif message_type in ['create_transaction_without_auto_pay', 'modify_transaction_without_auto_pay', 'create_transaction_with_auto_pay', 'modify_transaction_with_auto_pay']:
             text_message = "\n" + created_or_modified_span + "\n\n" \
                            + """1. Go to prepwithmo.com\n\n""" \
                            + """2. Choose ‘Make A Payment’ from the menu\n\n""" \

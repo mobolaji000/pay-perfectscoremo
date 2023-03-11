@@ -260,6 +260,9 @@ $(document).ready(function() {
              $('input[name="pause_payment"]').attr('disabled', true);
             $('input[name="paused_payment_resumption_date"]').attr('disabled', true);
 
+            $('input[name="ask_for_student_info"]').attr('disabled', true);
+            $('input[name="ask_for_student_availability"]').attr('disabled', true);
+
             $(this).val("yes");
         } else {
 
@@ -275,6 +278,9 @@ $(document).ready(function() {
 
              $('input[name="pause_payment"]').attr('disabled', false);
             $('input[name="paused_payment_resumption_date"]').attr('disabled', false);
+
+            $('input[name="ask_for_student_info"]').attr('disabled', false);
+            $('input[name="ask_for_student_availability"]').attr('disabled', false);
 
             $(this).val("");
         }
@@ -303,6 +309,14 @@ $(document).ready(function() {
     });
 
      $('input[name="ask_for_student_availability"]').on('click', function() {
+        if ($(this).val() == "") {
+            $(this).val("yes");
+        } else {
+            $(this).val("");
+        }
+    });
+
+     $('input[name="pay_automatically"]').on('click', function() {
         if ($(this).val() == "") {
             $(this).val("yes");
         } else {
