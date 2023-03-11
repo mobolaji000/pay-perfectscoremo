@@ -187,11 +187,7 @@ class StripeInstance():
                             invoice_dates_and_amounts_to_update_due_to_pausing.append((datetime.datetime.fromtimestamp(stripe_info[f'date_{k}']), stripe_info[f'amount_{k}']))
 
                 for invoice_date, amount in invoice_dates_and_amounts_to_update_due_to_pausing:
-                    if existing_customer:
-                        # ensures that you always keep 72 hours to change method of payment promise to exisiting clients
-                        payment_date = invoice_date + datetime.timedelta(days=1)
-                    else:
-                        payment_date = invoice_date
+                    payment_date = invoice_date
 
                     installment_amount = int(math.ceil(int(amount) * 1.00))
                     # switched this from 1.03 to 1.00 because this is ACH and you should not multiply by 1.03
@@ -213,13 +209,8 @@ class StripeInstance():
                                                             payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
 
             elif chosen_mode_of_payment == 'full-payment-ach':
-                if existing_customer:
-                    logger.info('Full payment ACH for existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
-                    payment_date = date_today + datetime.timedelta(days=1)
-
-                else:
-                    logger.info('Full payment ACH for new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
-                    payment_date = date_today
+                logger.info('Full payment ACH for new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
+                payment_date = date_today
 
                 amount = stripe_info['transaction_total']
                 transaction_total = int(stripe_info['transaction_total'])
@@ -274,11 +265,7 @@ class StripeInstance():
                 recurring_payment_start_date =  stripe_info['paused_payment_resumption_date'] if  stripe_info['paused_payment_resumption_date'] and datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'], '%Y-%m-%d').date() >=  datetime.datetime.strptime(stripe_info['recurring_payment_start_date'], '%Y-%m-%d').date() else stripe_info['recurring_payment_start_date']
                 #logger.debug(f"type of recurring_payment_start_date {type(recurring_payment_start_date)}")
 
-                if existing_customer:
-                    # ensures that you always keep 24 hours to change method of payment promise to existing clients
-                    payment_date = recurring_payment_start_date + datetime.timedelta(days=1)
-                else:
-                    payment_date = recurring_payment_start_date
+                payment_date = recurring_payment_start_date
 
                 transaction_total = int(stripe_info['transaction_total'])
 
@@ -353,11 +340,7 @@ class StripeInstance():
                                 invoice_dates_and_amounts_to_update_due_to_pausing.append((datetime.datetime.fromtimestamp(stripe_info[f'date_{k}']),stripe_info[f'amount_{k}']))
 
                 for invoice_date,amount in invoice_dates_and_amounts_to_update_due_to_pausing:
-                    if existing_customer:
-                        #ensures that you always keep 72 hours to change method of payment promise to exisiting clients
-                        payment_date = invoice_date + datetime.timedelta(days=1)
-                    else:
-                        payment_date = invoice_date
+                    payment_date = invoice_date
 
                     # if stripe_info['pause_payment'] == 'yes':
                     #     if stripe_info.get('paused_payment_resumption_date'):
@@ -392,14 +375,8 @@ class StripeInstance():
                                                             payment_date=payment_date, payment_amount=amount, stripe_invoice_id=stripe_invoice_object['id'])
 
             elif chosen_mode_of_payment == 'full-payment-credit-card':
-                if existing_customer:
-                    logger.info('Full payment credit card existing customer: ' + str(stripe_info['transaction_id'])+' '+ str(stripe_info['name']))
-                    # ensures that you always keep 48? hours to change method of payment promise to exisiting clients
-                    payment_date = date_today + datetime.timedelta(days=1)
-
-                else:
-                    logger.info('Full payment credit card new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
-                    payment_date = date_today
+                logger.info('Full payment credit card new customer: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
+                payment_date = date_today
 
                 transaction_total = int(math.ceil((stripe_info['transaction_total'] * 1.03) - (client_info['diag_total'] * 0.03)))
                 amount = str(transaction_total)
@@ -493,11 +470,7 @@ class StripeInstance():
 
                 recurring_payment_start_date =  stripe_info['paused_payment_resumption_date'] if  stripe_info['paused_payment_resumption_date'] and datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'], '%Y-%m-%d').date() >=  datetime.datetime.strptime(stripe_info['recurring_payment_start_date'], '%Y-%m-%d').date() else stripe_info['recurring_payment_start_date']
 
-                if existing_customer:
-                    # ensures that you always keep 24 hours to change method of payment promise to exisiting clients
-                    payment_date = recurring_payment_start_date + datetime.timedelta(days=1)
-                else:
-                    payment_date = recurring_payment_start_date
+                payment_date = recurring_payment_start_date
 
                 # if stripe_info['pause_payment'] == 'yes':
                 #     if stripe_info.get('paused_payment_resumption_date'):
@@ -699,9 +672,9 @@ class SendMessagesToClients():
         elif message_type == 'modify_transaction_without_auto_pay':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified. Here are the payment/signup instructions/options (also sent to your email address):".format(recipient_name)
         elif message_type == 'create_transaction_with_auto_pay':
-            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created and paid using your method of payment on file.\n\nHappy to answer any questions!\n\nRegards,\n\nMo".format(recipient_name)
         elif message_type == 'modify_transaction_with_auto_pay':
-            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified using your method of payment on file, but there have been no charges yet. If you choose to change your method of payment, however, you can always do so between now and the date of your first autopayment. Here are the payment instructions/options to change your method of payment (also sent to your email address):".format(recipient_name)
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified and paid using your method of payment on file.\n\nHappy to answer any questions!\n\nRegards,\n\nMo".format(recipient_name)
         elif message_type == 'ask_for_student_info':
             link_url = os.environ["url_to_start_reminder"]+"client_info/"+message
             created_or_modified_span = "Dear {},\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. \n\n This will be used to setup text message and email updates on your student's regular progress.".format(recipient_name)
@@ -725,7 +698,7 @@ class SendMessagesToClients():
             text_message = message
         elif message_type in ['ask_for_student_info', 'welcome_new_student', 'questions', 'referral_request', 'confirm_lead_appointment', 'reminder_about_appointment', 'reminder_to_make_payment']:
             text_message = created_or_modified_span
-        elif message_type in ['create_transaction_without_auto_pay', 'modify_transaction_without_auto_pay', 'create_transaction_with_auto_pay', 'modify_transaction_with_auto_pay']:
+        elif message_type in ['create_transaction_without_auto_pay', 'modify_transaction_without_auto_pay']:
             text_message = "\n" + created_or_modified_span + "\n\n" \
                            + """1. Go to prepwithmo.com\n\n""" \
                            + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
