@@ -300,7 +300,7 @@ class AppDBUtil():
     def updatePausePaymentStatus(cls, transaction_id, pause_payment, paused_payment_resumption_date):
         transaction = Transaction.query.filter_by(transaction_id=transaction_id).first()
         transaction.pause_payment = pause_payment
-        transaction. paused_payment_resumption_date =  paused_payment_resumption_date
+        transaction.paused_payment_resumption_date =  paused_payment_resumption_date
         cls.executeDBQuery()
         return transaction
 
@@ -433,10 +433,7 @@ class AppDBUtil():
     @classmethod
     def findClientsToReceiveReminders(cls):
         try:
-            transaction_details = Transaction.query.filter_by(payment_started=False).all()
-
-            #send reminders only to new customers who have not started paying
-            #transaction_details = db.session.query(Transaction).filter((Transaction.payment_started == False) & (Transaction.does_customer_payment_info_exist == 'no')).all()
+            transaction_details = Transaction.query.filter((Transaction.pause_payment == "no") & (Transaction.payment_started == False)).all()
 
             search_results = []
             for transaction in transaction_details:
