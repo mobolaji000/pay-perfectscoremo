@@ -554,6 +554,12 @@ class AppDBUtil():
         cls.executeDBQuery()
 
     @classmethod
+    def updateTransactionDoesCustomerPaymentInfoExist(cls, transaction_id):
+        transaction = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
+        transaction.does_customer_payment_info_exist = 'yes'
+        cls.executeDBQuery()
+
+    @classmethod
     def isTransactionPaymentStarted(cls, transaction_id):
         transaction = Transaction.query.filter_by(transaction_id=transaction_id).order_by(Transaction.date_created.desc()).first()
         return transaction.payment_started
