@@ -248,14 +248,22 @@ $(document).ready(function() {
 
             // $('input[name="turn_on_installments"]').prop('checked', false);
             document.getElementById("addrow").hidden=true;
-            $('input[name="send_text_and_email"]').prop('checked', false);
-            $('input[name="send_text_and_email"]').val("");
+            document.getElementById("pay_automatically_wrap_around_div").hidden=true;
+
+            // if ($('input[name="pay_automatically"]').val() == ''){
+            //
+            // }
+
+            // $('input[name="send_text_and_email"]').prop('checked', false);
+            // $('input[name="send_text_and_email"]').val("");
+
+            $('input[name="send_text_and_email"]').attr('disabled', true);
 
             $('input[name="make_payment_recurring"]').attr('disabled', true);
             $('input[name="recurring_payment_start_date"]').attr('disabled', true);
              $('input[name="recurring_payment_frequency"]').attr('disabled', true);
-             $('input[name="recurring_payment_start_date"]').prop('required', false);
-             $('input[name="recurring_payment_frequency"]').prop('required', false);
+             // $('input[name="recurring_payment_start_date"]').prop('required', false);
+             // $('input[name="recurring_payment_frequency"]').prop('required', false);
 
              $('input[name="pause_payment"]').attr('disabled', true);
             $('input[name="paused_payment_resumption_date"]').attr('disabled', true);
@@ -269,12 +277,15 @@ $(document).ready(function() {
 
             setDefaultInstallmentDate();
             document.getElementById("addrow").hidden=false;
+            document.getElementById("pay_automatically_wrap_around_div").hidden=false;
+
+             $('input[name="send_text_and_email"]').attr('disabled', false);
 
             $('input[name="make_payment_recurring"]').attr('disabled', false);
             $('input[name="recurring_payment_start_date"]').attr('disabled', false);
              $('input[name="recurring_payment_frequency"]').attr('disabled', false);
-             $('input[name="recurring_payment_start_date"]').prop('required', true);
-             $('input[name="recurring_payment_frequency"]').prop('required', true);
+             // $('input[name="recurring_payment_start_date"]').prop('required', true);
+             // $('input[name="recurring_payment_frequency"]').prop('required', true);
 
              $('input[name="pause_payment"]').attr('disabled', false);
             $('input[name="paused_payment_resumption_date"]').attr('disabled', false);
@@ -291,11 +302,14 @@ $(document).ready(function() {
     $('input[name="send_text_and_email"]').on('click', function() {
         if ($(this).val() == "") {
 
-        $('input[name="mark_as_paid"]').prop('checked', false);
-            $('input[name="mark_as_paid"]').val("");
+        // $('input[name="mark_as_paid"]').prop('checked', false);
+        //     $('input[name="mark_as_paid"]').val("");
+
+             $('input[name="mark_as_paid"]').attr('disabled', true);
 
             $(this).val("yes");
         } else {
+            $('input[name="mark_as_paid"]').attr('disabled', false);
             $(this).val("");
         }
     });
@@ -319,8 +333,10 @@ $(document).ready(function() {
      $('input[name="pay_automatically"]').on('click', function() {
         if ($(this).val() == "") {
             $(this).val("yes");
+            document.getElementById("mark_as_paid_wrap_around_div").hidden=true;
         } else {
             $(this).val("");
+            document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
         }
     });
 
