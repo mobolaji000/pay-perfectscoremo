@@ -507,7 +507,7 @@ class AppDBUtil():
             client['pay_automatically'] = transaction.pay_automatically
 
             client['make_payment_recurring'] = transaction.make_payment_recurring
-            client['recurring_payment_frequency'] = transaction.recurring_payment_frequency
+            client['recurring_payment_frequency'] = transaction.recurring_payment_frequency if transaction.recurring_payment_frequency else 'null'
             client['recurring_payment_start_date'] = transaction.recurring_payment_start_date.strftime("%Y-%m-%d") if transaction.recurring_payment_start_date else ''
             client['pause_payment'] = transaction.pause_payment
             client['paused_payment_resumption_date'] = transaction.paused_payment_resumption_date.strftime("%Y-%m-%d") if transaction.paused_payment_resumption_date else ''
