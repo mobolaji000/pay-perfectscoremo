@@ -250,9 +250,9 @@ $(document).ready(function() {
             document.getElementById("addrow").hidden=true;
 
 
-			if ($('input[name="does_customer_payment_info_exist"]').val() == "yes") {
-                document.getElementById("pay_automatically_wrap_around_div").hidden=true;
-            }
+            document.getElementById("pay_automatically_wrap_around_div").hidden=true;
+
+
 
             // if ($('input[name="pay_automatically"]').val() == ''){
             //
@@ -282,7 +282,9 @@ $(document).ready(function() {
             setDefaultInstallmentDate();
             document.getElementById("addrow").hidden=false;
 
-            document.getElementById("pay_automatically_wrap_around_div").hidden=false;
+           if ($('input[name="does_customer_payment_info_exist"]').val() == "yes") {
+                document.getElementById("pay_automatically_wrap_around_div").hidden=false;
+            }
 
              $('input[name="send_text_and_email"]').attr('disabled', false);
 
