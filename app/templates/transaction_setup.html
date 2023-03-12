@@ -281,7 +281,7 @@
             }
 
             //
-
+				$('input[name="does_customer_payment_info_exist"]').val(result.does_customer_payment_info_exist);
 			if (result.does_customer_payment_info_exist == "yes") {
                 document.getElementById("pay_automatically_wrap_around_div").hidden=false;
             } else {
@@ -1295,6 +1295,7 @@
 							</div>
 
 									<input id="transaction_id_to_pause" name="transaction_id_to_pause" type="text" value="" hidden>
+							<input id="does_customer_payment_info_exist" name="does_customer_payment_info_exist" type="text" value="" hidden>
 
 						</div>
 					</div>
