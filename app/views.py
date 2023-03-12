@@ -970,7 +970,8 @@ def start_background_jobs_before_first_request():
                 except Exception as e:
                     invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
                     logger.exception("Invoice payment failed for: ".format(invoice_name))
-                    SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Exception: Invoice payments failed for {invoice_name} with error {e}. Go check the logs!", message_type='to_mo')
+                    if os.environ.get("DEPLOY_REGION") == 'PROD':
+                        SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Exception: Invoice payments failed for {invoice_name} with error {e}. Go check the logs!", message_type='to_mo')
                 finally:
                     if invoice_payment_failed:
                         pass

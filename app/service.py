@@ -289,7 +289,8 @@ class StripeInstance():
         except Exception as e:
             logger.exception(e)
             transaction_name = stripe_info['name'].split()[0] + " " + stripe_info['name'].split()[1]
-            SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Transaction setup/payment failed for {transaction_name} of transaction_id {stripe_info['transaction_id']} with error {e}. Go check the logs!", message_type='to_mo')
+            if os.environ.get("DEPLOY_REGION") == 'PROD':
+                SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Transaction setup/payment failed for {transaction_name} of transaction_id {stripe_info['transaction_id']} with error {e}. Go check the logs!", message_type='to_mo')
             return {'status': 'error'}
 
     def chargeCustomerViaCard(self, stripe_info, chosen_mode_of_payment, payment_id,existing_customer=None):
@@ -504,7 +505,8 @@ class StripeInstance():
         except Exception as e:
             logger.exception(e)
             transaction_name = stripe_info['name'].split()[0] + " " + stripe_info['name'].split()[1]
-            SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Transaction setup/payment failed for {transaction_name} of transaction_id {stripe_info['transaction_id']} with error {e}. Go check the logs!", message_type='to_mo')
+            if os.environ.get("DEPLOY_REGION") == 'PROD':
+                SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Transaction setup/payment failed for {transaction_name} of transaction_id {stripe_info['transaction_id']} with error {e}. Go check the logs!", message_type='to_mo')
             return {'status': 'error'}
 
     def setupRecurringPaymentsDueToday(self):
