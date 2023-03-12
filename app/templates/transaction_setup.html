@@ -290,15 +290,18 @@
 
             if (result.pay_automatically == "yes") {
                  $('input[name="pay_automatically"]').prop('checked', true);
-                 $('input[name="mark_as_paid"]').val('yes');
-                 $( "#mark_as_paid" ).click();
+                 $('input[name="pay_automatically"]').val("yes");
+                 $('input[name="mark_as_paid"]').val('');
+                 $('input[name="mark_as_paid"]').prop('checked', false);
+                 //$( "#mark_as_paid" ).click();
                  {#$('input[name="mark_as_paid"]').prop('checked', false);#}
                  {#$('input[name="mark_as_paid"]').val('');#}
                   document.getElementById("mark_as_paid_wrap_around_div").hidden=true;
             } else {
                  $('input[name="pay_automatically"]').prop('checked', false);
-                 $('input[name="mark_as_paid"]').val('');
-                 $( "#mark_as_paid" ).click();
+                 {#$('input[name="mark_as_paid"]').val('yes');#}
+                 {#$('input[name="mark_as_paid"]').prop('checked', true);#}
+                 //$( "#mark_as_paid" ).click();
                  {#$('input[name="mark_as_paid"]').prop('checked', true);#}
                  {# $('input[name="mark_as_paid"]').val('yes');#}
                   document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
