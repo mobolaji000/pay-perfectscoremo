@@ -853,7 +853,8 @@ def stripe_webhook():
                 else:
                     try:
                         message = "Invoice " + str(finalized_invoice.id) + " for " + str(finalized_invoice.customer_name) + " failed to pay."
-                        SendMessagesToClients.sendSMS(to_numbers='9725847364', message=message, message_type='to_mo')
+                        if os.environ.get("DEPLOY_REGION") == 'PROD':
+                            SendMessagesToClients.sendSMS(to_numbers='9725847364', message=message, message_type='to_mo')
                         logger.error(message)
                     except Exception as e:
                         logger.exception(e)
@@ -958,20 +959,21 @@ def start_background_jobs_before_first_request():
                             continue
 
                     stripe_invoice_object = stripe.Invoice.pay(invoice['stripe_invoice_id'])
-                    if stripe_invoice_object.paid or stripe_invoice_object.finalized:
-                        # if os.environ['DEPLOY_REGION'] == 'local':
-                        #     os.system("stripe trigger invoice.paid")
-                        #added finalized because ach payments finalize immediately but do not send 'paid' events for 14 days
-                        logger.info("Invoice payment succeeded: {}".format(invoice['last_name']))
-                        #might need to come back and handle this via webhook
-                        AppDBUtil.updateInvoiceAsPaid(stripe_invoice_id=invoice['stripe_invoice_id'])
-                        invoice_payment_failed = False
+                    # logger.debug()
+                    # if stripe_invoice_object.paid or stripe_invoice_object.finalized:
+                    #     # if os.environ['DEPLOY_REGION'] == 'local':
+                    #     #     os.system("stripe trigger invoice.paid")
+                    #     #added finalized because ach payments finalize immediately but do not send 'paid' events for 14 days
+                    #     logger.info("Invoice payment succeeded: {}".format(invoice['last_name']))
+                    #     #might need to come back and handle this via webhook
+                    #     AppDBUtil.updateInvoiceAsPaid(stripe_invoice_id=invoice['stripe_invoice_id'])
+                    #     invoice_payment_failed = False
 
                 except Exception as e:
                     invoice_name = invoice['first_name'] + " " + invoice['last_name'] + ", "
-                    logger.exception("Invoice payment failed for: ".format(invoice_name))
+                    logger.exception("Error in invoice payment failed for: ".format(invoice_name))
                     if os.environ.get("DEPLOY_REGION") == 'PROD':
-                        SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Exception: Invoice payments failed for {invoice_name} with error {e}. Go check the logs!", message_type='to_mo')
+                        SendMessagesToClients.sendSMS(to_numbers='9725847364', message=f"Exception: Exception in invoice payment for {invoice_name} with error {e}. Go check the logs!", message_type='to_mo')
                 finally:
                     if invoice_payment_failed:
                         pass
