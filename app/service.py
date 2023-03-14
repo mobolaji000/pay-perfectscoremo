@@ -727,9 +727,9 @@ class SendMessagesToClients():
         elif message_type == 'modify_transaction_without_auto_pay':
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified. Here are the payment/signup instructions/options (also sent to your email address):".format(recipient_name)
         elif message_type == 'create_transaction_with_auto_pay':
-            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created and paid using your method of payment on file.\n\nHappy to answer any questions!\n\nRegards,\n\nMo".format(recipient_name)
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour new transaction has been created and setup for auto-payment using your method of payment on file. Here are the instructions to view the transaction details.".format(recipient_name)
         elif message_type == 'modify_transaction_with_auto_pay':
-            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has just been modified and paid using your method of payment on file.\n\nHappy to answer any questions!\n\nRegards,\n\nMo".format(recipient_name)
+            created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nYour transaction has been modified and setup for auto-payment using your method of payment on file. Here are the instructions to view the transaction details.".format(recipient_name)
         elif message_type == 'ask_for_student_info':
             link_url = os.environ["url_to_start_reminder"]+"client_info/"+message
             created_or_modified_span = "Dear {},\n\nThank you for signing up with us! Regular communication between us, you, and your student is a big part of our process. To help further that, please go to "+link_url+" (also sent to your email address) to input you and your student's information. \n\n This will be used to setup text message and email updates on your student's regular progress.".format(recipient_name)
@@ -749,10 +749,18 @@ class SendMessagesToClients():
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):".format(recipient_name)
 
 
-        if message_type in ['to_mo','create_transaction_with_auto_pay', 'modify_transaction_with_auto_pay']:
+        if message_type in ['to_mo']:
             text_message = message
         elif message_type in ['ask_for_student_info', 'welcome_new_student', 'questions', 'referral_request', 'confirm_lead_appointment', 'reminder_about_appointment', 'reminder_to_make_payment']:
             text_message = created_or_modified_span
+        elif message_type in ['create_transaction_with_auto_pay', 'modify_transaction_with_auto_pay']:
+            text_message = "\n" + created_or_modified_span + "\n\n" \
+                           + """1. Go to prepwithmo.com\n\n""" \
+                           + """2. Choose ‘Make A Payment’ from the menu\n\n""" \
+                           + """3. Enter your code: """ + message + "\n\n" \
+                           + """### We don't receive messages on this number. If you have any questions, reach out on 972-584-7364 ###\n\n""" \
+                           + """Regards,\n\n""" \
+                           + """Mo\n\n"""
         elif message_type in ['create_transaction_without_auto_pay', 'modify_transaction_without_auto_pay']:
             text_message = "\n" + created_or_modified_span + "\n\n" \
                            + """1. Go to prepwithmo.com\n\n""" \
