@@ -663,8 +663,7 @@ class AppDBUtil():
             cls.executeDBQuery()
 
         except Exception as e:
-            print(e)
-            print(traceback.print_exc())
+            logger.exception(e)
             raise e
 
 

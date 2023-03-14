@@ -149,20 +149,21 @@ def client_info(prospect_id):
     elif request.method == 'POST':
         try:
             student_data = request.form.to_dict()
-            print("prospect_id in post is ", student_data['prospect_id'])
-            print("student data is",student_data)
+            logger.info(f"prospect_id in post is {student_data['prospect_id']}")
+            logger.info(f"student data is {student_data}")
             AppDBUtil.createStudentData(student_data)
             to_numbers = [number for number in [student_data['parent_1_phone_number'],student_data['parent_2_phone_number'],student_data['student_phone_number']] if number != '']
             SendMessagesToClients.sendSMS(to_numbers=to_numbers, message=student_data['student_first_name'], message_type='welcome_new_student')
             time.sleep(5)
             SendMessagesToClients.sendSMS(to_numbers=to_numbers, message_type='referral_request')
+            logger.info(f"Student information submitted successfully and text group message for regular updates created for {student_data['student_last_name']}")
             #hold off on sending group emails until you dedcide there is a value add
             #SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], message_type='welcome_message',subject='Setting Up Group Email')
             #flash("Student information submitted successfully and group messages (email and text) for regular updates created.")
             flash("Student information submitted successfully and text group message for regular updates created.")
         except Exception as e:
-            print(e)
-            traceback.print_exc()
+            logger.exception(e)
+            #traceback.print_exc()
             flash("Error in submitting student information and creating group messages for regular updates created. Please contact Mo.")
         return render_template('client_info.html', prospect_id=student_data['prospect_id'])
 
@@ -723,6 +724,12 @@ def exchange_plaid_for_stripe():
                     return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
                     # flash('Attempt to create family information failed. Contact Mo.')
 
+            if payment_and_signup_data.get('ask_for_student_availability', '') == 'yes':
+                result = notifyOneOnOneInfo(payment_and_signup_data)
+                if result['status'] != 'success':
+                    logger.error('Attempt to notify one-on-one info failed. Contact Mo.')
+                    return jsonify({'status': 'error', 'message': 'Payment successful, but attempt to create family information failed. Contact Mo.'})
+
         return jsonify(result)
     except Exception as e:
         logger.exception("Error  in /exchange_plaid_for_stripe")
@@ -750,9 +757,10 @@ def notifyOneOnOneInfo(payment_and_signup_data={}):
 
 def enterClientInfo(payment_and_signup_data={}):
     try:
-        print("prospect_id in post is ", payment_and_signup_data['prospect_id'])
-        print("student data is", payment_and_signup_data)
+        logger.info(f"prospect_id in post is {payment_and_signup_data['prospect_id']}")
+        logger.info(f"student data is {payment_and_signup_data}")
         AppDBUtil.createStudentData(payment_and_signup_data)
+        logger.info(f"Student information submitted successfully for {payment_and_signup_data['student_last_name']}")
         return {'status': 'success'}
     except Exception as e:
         logger.exception(e)
