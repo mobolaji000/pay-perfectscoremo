@@ -262,28 +262,52 @@ class StripeInstance():
             elif chosen_mode_of_payment == 'recurring-payment-ach':
                 logger.info('Recurring payment ach: ' + str(stripe_info['transaction_id']) + ' ' + str(stripe_info['name']))
 
-                recurring_payment_start_date =  stripe_info['paused_payment_resumption_date'] if  stripe_info['paused_payment_resumption_date'] and datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'], '%Y-%m-%d').date() >=  datetime.datetime.strptime(stripe_info['recurring_payment_start_date'], '%Y-%m-%d').date() else stripe_info['recurring_payment_start_date']
-                #logger.debug(f"type of recurring_payment_start_date {type(recurring_payment_start_date)}")
+                recurring_payment_start_date = stripe_info['paused_payment_resumption_date'] if  stripe_info['paused_payment_resumption_date'] and datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'], '%Y-%m-%d').date() >=  datetime.datetime.strptime(stripe_info['recurring_payment_start_date'], '%Y-%m-%d').date() else stripe_info['recurring_payment_start_date']
 
-                payment_date = recurring_payment_start_date
+                number_of_days_from_start_of_recurring_payment = abs((datetime.datetime.strptime(stripe_info['recurring_payment_start_date'], '%Y-%m-%d').date() - date_today)).days
+                recurring_payment_frequency = stripe_info['recurring_payment_frequency']
 
                 transaction_total = int(stripe_info['transaction_total'])
+                payment_date = recurring_payment_start_date
 
-                stripe.InvoiceItem.create(
-                    customer=stripe_info['stripe_customer_id'],
-                    quantity=transaction_total,
-                    price=os.environ.get('price'),
-                )
-                stripe_invoice_object = stripe.Invoice.create(
-                    customer=stripe_info['stripe_customer_id'],
-                    default_source=customer_default_source,
-                    auto_advance=False,
-                    metadata={'transaction_id': stripe_info['transaction_id']},
-                )
-                AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
-                                                        phone_number=stripe_info['phone_number'], email=stripe_info['email'],
-                                                        transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
-                                                        payment_date=payment_date, payment_amount=transaction_total, stripe_invoice_id=stripe_invoice_object['id'])
+                if datetime.datetime.strptime(stripe_info['recurring_payment_start_date'], '%Y-%m-%d').date() < date_today:
+
+                    for day_index in range(0, number_of_days_from_start_of_recurring_payment):
+                        if day_index % recurring_payment_frequency == 0:
+                            payment_date = datetime.datetime.strptime(payment_date, '%Y-%m-%d').date() + datetime.timedelta(days=day_index) if type(payment_date) is str else payment_date + datetime.timedelta(days=day_index)
+
+                            stripe.InvoiceItem.create(
+                                customer=stripe_info['stripe_customer_id'],
+                                quantity=transaction_total,
+                                price=os.environ.get('price'),
+                            )
+                            stripe_invoice_object = stripe.Invoice.create(
+                                customer=stripe_info['stripe_customer_id'],
+                                default_source=customer_default_source,
+                                auto_advance=False,
+                                metadata={'transaction_id': stripe_info['transaction_id']},
+                            )
+                            AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
+                                                                    phone_number=stripe_info['phone_number'], email=stripe_info['email'],
+                                                                    transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
+                                                                    payment_date=payment_date, payment_amount=transaction_total, stripe_invoice_id=stripe_invoice_object['id'])
+
+                else:
+                    stripe.InvoiceItem.create(
+                        customer=stripe_info['stripe_customer_id'],
+                        quantity=transaction_total,
+                        price=os.environ.get('price'),
+                    )
+                    stripe_invoice_object = stripe.Invoice.create(
+                        customer=stripe_info['stripe_customer_id'],
+                        default_source=customer_default_source,
+                        auto_advance=False,
+                        metadata={'transaction_id': stripe_info['transaction_id']},
+                    )
+                    AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
+                                                            phone_number=stripe_info['phone_number'], email=stripe_info['email'],
+                                                            transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
+                                                            payment_date=payment_date, payment_amount=transaction_total, stripe_invoice_id=stripe_invoice_object['id'])
 
             return {'status': 'success'}
         except Exception as e:
@@ -471,9 +495,53 @@ class StripeInstance():
 
                 recurring_payment_start_date =  stripe_info['paused_payment_resumption_date'] if  stripe_info['paused_payment_resumption_date'] and datetime.datetime.strptime(stripe_info['paused_payment_resumption_date'], '%Y-%m-%d').date() >=  datetime.datetime.strptime(stripe_info['recurring_payment_start_date'], '%Y-%m-%d').date() else stripe_info['recurring_payment_start_date']
 
+                number_of_days_from_start_of_recurring_payment = abs((datetime.datetime.strptime(stripe_info['recurring_payment_start_date'], '%Y-%m-%d').date() - date_today)).days
+                recurring_payment_frequency = stripe_info['recurring_payment_frequency']
+
+                transaction_total = math.ceil(client_info['transaction_total'] * 1.03)
                 payment_date = recurring_payment_start_date
 
-                # if stripe_info['pause_payment'] == 'yes':
+                if datetime.datetime.strptime(stripe_info['recurring_payment_start_date'], '%Y-%m-%d').date() < date_today:
+
+                    for day_index in range(0,number_of_days_from_start_of_recurring_payment):
+                        if day_index % recurring_payment_frequency == 0:
+
+                            payment_date = datetime.datetime.strptime(payment_date, '%Y-%m-%d').date() + datetime.timedelta(days=day_index) if type(payment_date) is str else payment_date + datetime.timedelta(days=day_index)
+
+                            stripe.InvoiceItem.create(
+                                customer=stripe_info['stripe_customer_id'],
+                                quantity=transaction_total,
+                                price=os.environ.get('price'),
+                            )
+                            stripe_invoice_object = stripe.Invoice.create(
+                                customer=stripe_info['stripe_customer_id'],
+                                default_payment_method=payment_id,
+                                auto_advance=False,
+                                metadata={'transaction_id': stripe_info['transaction_id']},
+                            )
+                            AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
+                                                                    phone_number=stripe_info['phone_number'], email=stripe_info['email'],
+                                                                    transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
+                                                                    payment_date=payment_date, payment_amount=transaction_total, stripe_invoice_id=stripe_invoice_object['id'])
+
+                else:
+                    stripe.InvoiceItem.create(
+                        customer=stripe_info['stripe_customer_id'],
+                        quantity=transaction_total,
+                        price=os.environ.get('price'),
+                    )
+                    stripe_invoice_object = stripe.Invoice.create(
+                        customer=stripe_info['stripe_customer_id'],
+                        default_payment_method=payment_id,
+                        auto_advance=False,
+                        metadata={'transaction_id': stripe_info['transaction_id']},
+                    )
+                    AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
+                                                            phone_number=stripe_info['phone_number'], email=stripe_info['email'],
+                                                            transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
+                                                            payment_date=payment_date, payment_amount=transaction_total, stripe_invoice_id=stripe_invoice_object['id'])
+
+            # if stripe_info['pause_payment'] == 'yes':
                 #     if stripe_info.get('paused_payment_resumption_date'):
                 #         if datetime.datetime.strptime(stripe_info.get('paused_payment_resumption_date'),'%Y-%m-%d').date() > payment_date:
                 #             payment_date = stripe_info.get('paused_payment_resumption_date')
@@ -482,23 +550,8 @@ class StripeInstance():
                 #         return {'status': 'success'}
 
 
-                transaction_total = math.ceil(client_info['transaction_total'] * 1.03)
 
-                stripe.InvoiceItem.create(
-                    customer=stripe_info['stripe_customer_id'],
-                    quantity=transaction_total,
-                    price=os.environ.get('price'),
-                )
-                stripe_invoice_object = stripe.Invoice.create(
-                    customer=stripe_info['stripe_customer_id'],
-                    default_payment_method=payment_id,
-                    auto_advance=False,
-                    metadata={'transaction_id': stripe_info['transaction_id']},
-                )
-                AppDBUtil.createOrModifyInvoiceToBePaid(first_name=stripe_info['name'].split()[0], last_name=stripe_info['name'].split()[1],
-                                                        phone_number=stripe_info['phone_number'], email=stripe_info['email'],
-                                                        transaction_id=stripe_info['transaction_id'], stripe_customer_id=stripe_info['stripe_customer_id'],
-                                                        payment_date=payment_date, payment_amount=transaction_total, stripe_invoice_id=stripe_invoice_object['id'])
+
 
 
             return {'status': 'success'}
