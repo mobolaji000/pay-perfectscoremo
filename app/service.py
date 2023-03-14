@@ -696,7 +696,7 @@ class SendMessagesToClients():
             created_or_modified_span = "Dear {},\n\nPLEASE READ CAREFULLY!!!\n\nThis is an automated reminder that your payment is due. Here are the payment instructions/options (also sent to your email address):".format(recipient_name)
 
 
-        if message_type in ['to_mo']:
+        if message_type in ['to_mo','create_transaction_with_auto_pay', 'modify_transaction_with_auto_pay']:
             text_message = message
         elif message_type in ['ask_for_student_info', 'welcome_new_student', 'questions', 'referral_request', 'confirm_lead_appointment', 'reminder_about_appointment', 'reminder_to_make_payment']:
             text_message = created_or_modified_span

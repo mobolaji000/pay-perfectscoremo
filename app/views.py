@@ -401,7 +401,7 @@ def create_transaction():
                 if transaction_setup_data.get('pay_automatically', '') == 'yes':
                 #if does_customer_payment_info_exist:
                     message_type = 'create_transaction_with_auto_pay'
-                    logger.info('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
+                    logger.info('Setup auto-payment: ' + str(stripe_info['transaction_id']))
                     stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
                     flash_message = 'Transaction created and paid automatically.'
                 else:
@@ -504,7 +504,7 @@ def modify_transaction():
                 if data_to_modify.get('pay_automatically', '') == 'yes':
                 #if does_customer_payment_info_exist:
                     message_type = 'modify_transaction_with_auto_pay'
-                    logger.info('Customer info exists so set up autopayment: ' + str(stripe_info['transaction_id']))
+                    logger.info('Set up auto-payment: ' + str(stripe_info['transaction_id']))
                     stripeInstance.setupAutoPaymentForExistingCustomer(stripe_info)
                     flash_message = 'Transaction modified and paid automatically.'
                 else:
