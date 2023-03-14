@@ -82,9 +82,9 @@ class AWSInstance():
         elif message_type == 'reminder_to_make_payment':
             created_or_modified_span = "<span>This is an automated reminder that your transaction <strong>is due</strong>. Here are the payment/signup instructions/options (also sent to your phone number):</span><br><br>"
         elif message_type == 'create_transaction_with_auto_pay':
-            created_or_modified_span = "<span>Your new transaction has been created and paid using your method of payment on file</span><br><br>"
+            created_or_modified_span = "<span>Your new transaction has been created and setup for auto-payment using your method of payment on file. Here are the instructions to view the transaction details.</span><br><br>"
         elif message_type == 'modify_transaction_with_auto_pay':
-            created_or_modified_span = "<span>Your transaction has just been modified and paid using your method of payment on file.</span><br><br>"
+            created_or_modified_span = "<span>Your transaction has been modified and setup for auto-payment using your method of payment on file. Here are the instructions to view the transaction details.</span><br><br>"
         elif message_type == 'reminder_about_appointment':
             link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/lead/" + message[2]
             created_or_modified_span = "<span>Dear {},</span><br><br><span>Thank you for signing up for a diagnostic/consultation at PrepWithMo. This is a reminder that your appointment is on  {}. </span><br><br><span> If you have not already done so, please go to {} (also sent to your phone number) to fill out/confirm some basic information. If you have any questions, please respond to this email or call 972-584-7364.</span><br><br><span>We look forward to meeting you.</span><br><br><span>Regards,</span><br><span>Mo</span><br><br>".format(message[0],message[1],link_url)
@@ -136,7 +136,7 @@ class AWSInstance():
                   <span>Welcome """+message+"""!</span><br><br>""" \
                     + """<span>Regular communication between us all is a big part of our process. </span>""" \
                         + """<span>To help further that, you will receive regular updates on our progress via this group email.</span><br><br>""" \
-                    + """<span>You can also reach me at mo@perfectscoremo.com</span><br>""" \
+                    + """<span>You can also reach me at mo@prepwithmo.com</span><br>""" \
                         + """<br><span>Regards,</span><br>""" \
                         + """<span>Mo</span><br>""" \
                         + """
@@ -151,7 +151,7 @@ class AWSInstance():
                               <span>Dear {}, </span><br><br>""".format(recipient_name) \
                         + """<span><strong>PLEASE READ CAREFULLY!!!</strong></span><br><br>""" \
                         + created_or_modified_span \
-                        + """<span>1. Go to perfectscoremo.com</span><br>""" \
+                        + """<span>1. Go to prepwithmo.com</span><br>""" \
                         + """<span>2. Choose ‘Make A Payment’ from the menu</span><br>""" \
                         + """<span>3. Enter your code: </span>""" + "<strong>" + message + "</strong><br>" \
                         + """<span>4. If required, enter the student's contact information and the days/times that work best for their sessions. This will be used to reserve their slot in our calendar and to setup text message and email updates on their regular progress. </span><br>""" \
@@ -172,7 +172,9 @@ class AWSInstance():
                               <span>Dear {}, </span><br><br>""".format(recipient_name) \
                         + """<span><strong>PLEASE READ CAREFULLY!!!</strong></span><br><br>""" \
                         + created_or_modified_span \
-                        + """<span>Happy to answer any questions!</span><br>""" \
+                        + """<span>1. Go to prepwithmo.com</span><br>""" \
+                        + """<span>2. Choose ‘Make A Payment’ from the menu</span><br>""" \
+                        + """<span>3. Enter your code: </span>""" + "<strong>" + message + "</strong><br>" \
                         + """<br><span>Regards,</span><br>""" \
                         + """<span>Mo</span><br>""" \
                         + """
@@ -214,7 +216,7 @@ class AWSInstance():
                 },
                 Source=SENDER,
                 ReplyToAddresses=[
-                    'mo@perfectscoremo.com',
+                    'mo@prepwithmo.com',
                 ],
             )
         except ClientError as e:
