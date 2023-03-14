@@ -129,7 +129,7 @@ class AWSInstance():
                 </body>
                 </html>
                             """
-        elif message_type == 'welcome_message':
+        elif message_type == 'welcome_new_student':
             BODY_HTML = """<html>
                 <head></head>
                 <body>

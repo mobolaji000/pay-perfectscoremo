@@ -158,7 +158,7 @@ def client_info(prospect_id):
             SendMessagesToClients.sendSMS(to_numbers=to_numbers, message_type='referral_request')
             logger.info(f"Student information submitted successfully and text group message for regular updates created for {student_data['student_last_name']}")
             #hold off on sending group emails until you dedcide there is a value add
-            #SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], message_type='welcome_message',subject='Setting Up Group Email')
+            #SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], message_type='welcome_new_student',subject='Setting Up Group Email')
             #flash("Student information submitted successfully and group messages (email and text) for regular updates created.")
             flash("Student information submitted successfully and text group message for regular updates created.")
         except Exception as e:
@@ -747,7 +747,7 @@ def notifyOneOnOneInfo(payment_and_signup_data={}):
             message = message + " " + k.split('\n')[1].strip() + ","
         SendMessagesToClients.sendEmail(message=message, subject="Suggested one-on-one days for " + str(payment_and_signup_data['student_first_name']) + " " + str(payment_and_signup_data['student_last_name']), message_type='notify_mo_about_suggested_one_on_one_days')
         # hold off on sending group emails until you dedcide there is a value add
-        # SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], message_type='welcome_message',subject='Setting Up Group Email')
+        # SendMessagesToClients.sendEmail(to_address=[student_data['parent_1_email'], student_data['parent_2_email'], student_data['student_email'],'mo@perfectscoremo.com'], message=student_data['student_first_name'], message_type='welcome_new_student',subject='Setting Up Group Email')
         return {'status': 'success'}
     except Exception as e:
         logger.exception(e)

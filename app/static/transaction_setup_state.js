@@ -338,12 +338,12 @@ $(document).ready(function() {
     });
 
      $('input[name="pay_automatically"]').on('click', function() {
-        if ($(this).val() == "") {
+        if ($(this).val() == "yes") {
+             $(this).val("");
+            document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
+        } else {
             $(this).val("yes");
             document.getElementById("mark_as_paid_wrap_around_div").hidden=true;
-        } else {
-            $(this).val("");
-            document.getElementById("mark_as_paid_wrap_around_div").hidden=false;
         }
     });
 
