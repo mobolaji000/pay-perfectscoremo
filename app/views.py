@@ -263,7 +263,7 @@ def lead_info_by_mo():
             try:
                 leadInfo = {}
                 #appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else pytz.timezone('US/Central').localize(datetime.datetime.strptime(lead_info_contents.get('appointment_date_and_time'),'%Y-%m-%dT%H:%M'))#lead_info_contents.get('appointment_date_and_time')
-                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
+                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time').astimezone(pytz.timezone('US/Central'))
                 logger.info(appointment_date_and_time)
                 recent_test_score = -1 if lead_info_contents.get('recent_test_score','') == '' else lead_info_contents.get('recent_test_score')
                 lead_id = "l-" + str(uuid.uuid4().int >> 64)[:6]
@@ -279,7 +279,7 @@ def lead_info_by_mo():
 
                     if appointment_date_and_time:
                         appointment_date_and_time = datetime.datetime.strptime(appointment_date_and_time+':00', '%Y-%m-%dT%H:%M:%S')
-                        appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(appointment_date_and_time)
+                        appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(appointment_date_and_time.astimezone(pytz.timezone('US/Central')))
 
                     if lead_info_contents.get('lead_phone_number'):
                         SendMessagesToClients.sendSMS(to_numbers=lead_info_contents.get('lead_phone_number'), message=[message, appointment_date_and_time,lead_id], message_type='confirm_lead_appointment')
@@ -296,7 +296,7 @@ def lead_info_by_mo():
         if action == 'Modify':
             try:
                 leadInfo = {}
-                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
+                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time').astimezone(pytz.timezone('US/Central'))
                 recent_test_score = -1 if lead_info_contents.get('recent_test_score','') == '' else lead_info_contents.get('recent_test_score')
                 lead_id = lead_info_contents.get('lead_id', '')
 
@@ -319,7 +319,7 @@ def lead_info_by_mo():
 
                     if appointment_date_and_time:
                         appointment_date_and_time = datetime.datetime.strptime(appointment_date_and_time+':00', '%Y-%m-%dT%H:%M:%S')
-                        appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(appointment_date_and_time)
+                        appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(appointment_date_and_time.astimezone(pytz.timezone('US/Central')))
                     if lead_info_contents.get('lead_phone_number'):
                         SendMessagesToClients.sendSMS(to_numbers=lead_info_contents.get('lead_phone_number'),message=[message, appointment_date_and_time, lead_id],message_type='confirm_lead_appointment')
                     if lead_info_contents.get('lead_email'):
@@ -901,7 +901,7 @@ def start_background_jobs_before_first_request():
             leads_eligible_for_reminders = False
             for lead in leadsToReceiveReminders:
                 number_of_days_until_appointment = (lead.get('appointment_date_and_time').astimezone(pytz.timezone('US/Central')).date() - datetime.datetime.now(pytz.timezone('US/Central')).date()).days
-                appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(lead.get('appointment_date_and_time'))
+                appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(lead.get('appointment_date_and_time').astimezone(pytz.timezone('US/Central')))
 
                 if number_of_days_until_appointment in [0,1,3]:
                     leads_eligible_for_reminders = True
@@ -926,7 +926,7 @@ def start_background_jobs_before_first_request():
 
             for lead in leadsWithAppointmentsInTheLastHour:
                 #pass
-                SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com',subject='Update Lead Appointment Completion Status', message=[lead['lead_salutation'],lead['lead_name'],miscellaneousUtilsInstance.clean_up_date_and_time(lead['appointment_date_and_time']),lead['lead_id']],message_type='notify_mo_to_modify_lead_appointment_completion_status')
+                SendMessagesToClients.sendEmail(to_address='mo@prepwithmo.com',subject='Update Lead Appointment Completion Status', message=[lead['lead_salutation'],lead['lead_name'],miscellaneousUtilsInstance.clean_up_date_and_time(lead.get('appointment_date_and_time').astimezone(pytz.timezone('US/Central'))),lead['lead_id']],message_type='notify_mo_to_modify_lead_appointment_completion_status')
                 #link_url = os.environ["url_to_start_reminder"] + "lead_info_by_lead/" + message[2]
                 #reminder_last_names = reminder_last_names+lead['lead_salutation']+' '+lead['lead_name']+' '+lead['appointment_date_and_time']+' '+''+", ".format(lead['lead_id'])
             # if clientsToReceiveReminders:
