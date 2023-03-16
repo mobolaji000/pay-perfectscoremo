@@ -263,8 +263,12 @@ def lead_info_by_mo():
             try:
                 leadInfo = {}
                 #appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else pytz.timezone('US/Central').localize(datetime.datetime.strptime(lead_info_contents.get('appointment_date_and_time'),'%Y-%m-%dT%H:%M'))#lead_info_contents.get('appointment_date_and_time')
-                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time').astimezone(pytz.timezone('US/Central'))
-                logger.info(appointment_date_and_time)
+                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
+
+                if appointment_date_and_time:
+                    appointment_date_and_time = datetime.datetime.strptime(appointment_date_and_time + ':00', '%Y-%m-%dT%H:%M:%S')
+                    appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(appointment_date_and_time.astimezone(pytz.timezone('US/Central')))
+
                 recent_test_score = -1 if lead_info_contents.get('recent_test_score','') == '' else lead_info_contents.get('recent_test_score')
                 lead_id = "l-" + str(uuid.uuid4().int >> 64)[:6]
                 leadInfo.update({'lead_id': lead_id,'lead_salutation': lead_info_contents.get('lead_salutation', ''), 'lead_name': lead_info_contents.get('lead_name', ''), 'lead_email': lead_info_contents.get('lead_email', ''), 'lead_phone_number': lead_info_contents.get('lead_phone_number', ''),
@@ -276,10 +280,6 @@ def lead_info_by_mo():
 
                 if lead_info_contents.get('send_confirmation_to_lead', '') == 'yes':
                     message = lead_info_contents.get('lead_salutation') + ' ' + lead_info_contents.get('lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
-
-                    if appointment_date_and_time:
-                        appointment_date_and_time = datetime.datetime.strptime(appointment_date_and_time+':00', '%Y-%m-%dT%H:%M:%S')
-                        appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(appointment_date_and_time.astimezone(pytz.timezone('US/Central')))
 
                     if lead_info_contents.get('lead_phone_number'):
                         SendMessagesToClients.sendSMS(to_numbers=lead_info_contents.get('lead_phone_number'), message=[message, appointment_date_and_time,lead_id], message_type='confirm_lead_appointment')
@@ -296,7 +296,12 @@ def lead_info_by_mo():
         if action == 'Modify':
             try:
                 leadInfo = {}
-                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time').astimezone(pytz.timezone('US/Central'))
+                appointment_date_and_time = None if lead_info_contents.get('appointment_date_and_time','') == '' else lead_info_contents.get('appointment_date_and_time')
+
+                if appointment_date_and_time:
+                    appointment_date_and_time = datetime.datetime.strptime(appointment_date_and_time + ':00', '%Y-%m-%dT%H:%M:%S')
+                    appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(appointment_date_and_time.astimezone(pytz.timezone('US/Central')))
+
                 recent_test_score = -1 if lead_info_contents.get('recent_test_score','') == '' else lead_info_contents.get('recent_test_score')
                 lead_id = lead_info_contents.get('lead_id', '')
 
@@ -317,10 +322,7 @@ def lead_info_by_mo():
                 if lead_info_contents.get('send_confirmation_to_lead', '') == 'yes':
                     message = lead_info_contents.get('lead_salutation') + ' ' + lead_info_contents.get('lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
 
-                    if appointment_date_and_time:
-                        appointment_date_and_time = datetime.datetime.strptime(appointment_date_and_time+':00', '%Y-%m-%dT%H:%M:%S')
-                        appointment_date_and_time = miscellaneousUtilsInstance.clean_up_date_and_time(appointment_date_and_time.astimezone(pytz.timezone('US/Central')))
-                    if lead_info_contents.get('lead_phone_number'):
+                   if lead_info_contents.get('lead_phone_number'):
                         SendMessagesToClients.sendSMS(to_numbers=lead_info_contents.get('lead_phone_number'),message=[message, appointment_date_and_time, lead_id],message_type='confirm_lead_appointment')
                     if lead_info_contents.get('lead_email'):
                         SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'), 'mo@prepwithmo.com'],message=[message, appointment_date_and_time, lead_id],message_type='confirm_lead_appointment', subject='Confirming Your Appointment')
