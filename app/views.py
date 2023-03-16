@@ -322,7 +322,7 @@ def lead_info_by_mo():
                 if lead_info_contents.get('send_confirmation_to_lead', '') == 'yes':
                     message = lead_info_contents.get('lead_salutation') + ' ' + lead_info_contents.get('lead_name') if lead_info_contents.get('lead_salutation') else 'Parent'
 
-                   if lead_info_contents.get('lead_phone_number'):
+                    if lead_info_contents.get('lead_phone_number'):
                         SendMessagesToClients.sendSMS(to_numbers=lead_info_contents.get('lead_phone_number'),message=[message, appointment_date_and_time, lead_id],message_type='confirm_lead_appointment')
                     if lead_info_contents.get('lead_email'):
                         SendMessagesToClients.sendEmail(to_address=[lead_info_contents.get('lead_email'), 'mo@prepwithmo.com'],message=[message, appointment_date_and_time, lead_id],message_type='confirm_lead_appointment', subject='Confirming Your Appointment')
