@@ -815,6 +815,7 @@ class SendMessagesToClients():
 
             cls.twilioClient.conversations.conversations(conversation.sid).messages.create(body=text_message,author='+19564771274')
             logger.info("group chat created!")
+            logger.info(text_message)
         else:
             raise Exception("Neither string not list was sent to sendSMS method!")
 
