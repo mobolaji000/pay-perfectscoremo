@@ -122,6 +122,7 @@ $(document).ready(function() {
  }
 
 
+
  if(one_on_one_info_present)
  {
   document.getElementById('day_for_one_on_one_info_and_error').style.color="green";
@@ -133,6 +134,10 @@ $(document).ready(function() {
          document.getElementById('day_for_one_on_one_info_and_error').style.color="red";
  }
         }
+          else
+            {
+                one_on_one_info_present = true;
+            }
 
         if (ask_for_student_info == 'yes')
         {
