@@ -201,7 +201,7 @@ $(document).ready(function() {
             student_info_present = false;
    }
 
-    alert(student_info_present+" "+parent_info_distinct+" "+one_on_one_info_present)
+    //alert(student_info_present+" "+parent_info_distinct+" "+one_on_one_info_present)
 
          return student_info_present && parent_info_distinct && one_on_one_info_present;
       }
