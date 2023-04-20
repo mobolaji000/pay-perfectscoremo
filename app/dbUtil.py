@@ -701,7 +701,7 @@ class AppDBUtil():
             #added to get data fro not charging clients for credit card payment for diagnostics
             client_info['diag_total'] = admin_transaction_details.diag_total
 
-            logger.info(f"transaction id {admin_transaction_details.transaction_id} with showACHOverride value {showACHOverride} has {int(admin_transaction_details.installment_counter)-1} installments")
+            #logger.info(f"transaction id {admin_transaction_details.transaction_id} with showACHOverride value {showACHOverride} has {int(admin_transaction_details.installment_counter)-1} installments")
 
             if admin_transaction_details.was_diagnostic_purchased:
                 next_product = {}
